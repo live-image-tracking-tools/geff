@@ -3,7 +3,7 @@ name = "geff"
 version = "0.1.0"
 description = "Reference implementation of the Graph Exchange File Format"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "spatial-graph",
     "zarr<3.0.0",
