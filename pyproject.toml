@@ -1,16 +1,16 @@
 [project]
 name = "geff"
+version = "0.1.0"
 description = "Reference implementation of the Graph Exchange File Format"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT License" }
-dynamic = ["version"]
 dependencies = [
-    "spatial-graph @ https://github.com/funkelab/spatial_graph.git@d02b691e4fa0f184871939a89c6f964bfd0f5e39",
+    "spatial-graph @ git+https://github.com/funkelab/spatial_graph.git@d02b691e4fa0f184871939a89c6f964bfd0f5e39",
     "zarr<3.0.0",
 ]
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "pytest>=8.3.4",
     "pytest-cov",
@@ -22,6 +22,10 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+# Enables installing from git commit
+allow-direct-references = true
 
 # https://github.com/charliermarsh/ruff
 [tool.ruff]
