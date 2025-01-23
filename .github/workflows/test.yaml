@@ -40,4 +40,9 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run tests
-        run: uv run pytest tests
+        run: uv run pytest tests --color=yes --cov --cov-report=xml --cov-report=term-missing
+
+      - name: Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
