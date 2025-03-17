@@ -13,6 +13,8 @@ license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
     "zarr<3.0.0",
+    "pydantic", 
+    "pyyaml",
 ]
 
 [project.optional-dependencies]
