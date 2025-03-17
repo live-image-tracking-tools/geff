@@ -9,10 +9,10 @@ theme:
   #   primary: purple
   #   accent: purple
 
-# extra:
-#   version:
-#     provider: mike
-#     default: latest
+extra:
+  version:
+    provider: mike
+    default: latest
 
 plugins:
 - search
@@ -36,3 +36,4 @@ plugins:
           summary: true
 - api-autonav:
     modules: ['src/geff']
+- include-markdown

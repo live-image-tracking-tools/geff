@@ -39,7 +39,9 @@ spatial-graph = [
 docs = [
     "mkdocs-material",
     "mkdocstrings[python]", 
-    "mkdocs-api-autonav"
+    "mkdocs-api-autonav",
+    "mkdocs-include-markdown-plugin",
+    "mike"
 ]
 
 
