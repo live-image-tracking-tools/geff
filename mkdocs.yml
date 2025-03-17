@@ -1,0 +1,38 @@
+site_name: geff
+
+site_url: https://funkelab.github.io/geff/
+
+theme:
+  name: "material"
+  # palette:
+  #   scheme: slate
+  #   primary: purple
+  #   accent: purple
+
+# extra:
+#   version:
+#     provider: mike
+#     default: latest
+
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        import:
+          - https://docs.python.org/3/objects.inv
+        options:
+          docstring_section_style: list # or "table"
+          docstring_style: "google"
+          filters: ["!^_"]
+          heading_level: 1
+          merge_init_into_class: true
+          parameter_headings: true
+          separate_signature: true
+          show_root_heading: true
+          show_signature_annotations: true
+          show_symbol_type_heading: true
+          show_symbol_type_toc: true
+          summary: true
+- api-autonav:
+    modules: ['src/geff']
