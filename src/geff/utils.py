@@ -4,6 +4,11 @@ import zarr
 
 
 def validate(path: str):
+    """Check that the structure of the zarr conforms to geff specification
+
+    Args:
+        path (str): Path to geff zarr
+    """
     # Check that directory exists
     assert os.path.exists(path), f"Directory {path} does not exist"
 
