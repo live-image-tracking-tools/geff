@@ -24,9 +24,9 @@ def write(
         tuple(graph.roi[1].tolist()),
     )
     if axis_names:
-        graph.attrs["axis_names"] = axis_names
+        group.attrs["axis_names"] = axis_names
     if axis_units:
-        graph.attrs["axis_units"] = axis_units
+        group.attrs["axis_units"] = axis_units
 
     # get node and edge IDs
     nodes = graph.nodes
