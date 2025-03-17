@@ -24,7 +24,8 @@ dev = [
     "mypy",
     "pre-commit",
     "ruff",
-    "ipython"
+    "ipython",
+    "types-PyYAML",
 ]
 spatial-graph = [
     "spatial-graph @ git+https://github.com/funkelab/spatial_graph.git@d02b691e4fa0f184871939a89c6f964bfd0f5e39",
