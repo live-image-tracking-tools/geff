@@ -1,4 +1,4 @@
-# Developer Docs
+# CONTRIBUTING
 
 We recommend using `pixi` for environment management while developing `geff`. See the [pixi docs](https://pixi.sh/dev/) for installation instructions. The following instructions will be focused on pixi-based development, but all of the same tasks can be completed with pip and another environment manager.
 
