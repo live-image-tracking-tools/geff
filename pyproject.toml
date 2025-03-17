@@ -16,6 +16,15 @@ dependencies = [
     "pydantic", 
     "pyyaml",
 ]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -29,6 +38,13 @@ dev = [
 ]
 spatial-graph = [
     "spatial-graph @ git+https://github.com/funkelab/spatial_graph.git@d02b691e4fa0f184871939a89c6f964bfd0f5e39",
+]
+docs = [
+    "mkdocs-material",
+    "mkdocstrings[python]", 
+    "mkdocs-api-autonav",
+    "mkdocs-include-markdown-plugin",
+    "mike"
 ]
 
 
@@ -47,6 +63,7 @@ default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 dev-sg = { features = ["dev", "spatial-graph"], solve-group = "default"}
 build = { features = ["build"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default"}
 
 [tool.pixi.tasks]
 
