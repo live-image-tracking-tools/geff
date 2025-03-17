@@ -60,7 +60,7 @@ class GeffMetadata(BaseModel):
             )
 
 
-def write_schema(outpath: Path):
+def write_metadata_schema(outpath: Path):
     metadata_schema = GeffMetadata.model_json_schema()
     with open(outpath, "w") as f:
         f.write(json.dumps(metadata_schema, indent=2))

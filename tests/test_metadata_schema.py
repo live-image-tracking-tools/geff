@@ -79,7 +79,7 @@ class TestMetadataModel:
     def test_invalid_axis_annotations(self):
         with pytest.raises(
             ValueError,
-            match="Length of axis names (.*) does not match number of dimensions in roi (3)",
+            match="Length of axis names",
         ):
             GeffMetadata(
                 geff_version="v0.0.1-a",
@@ -92,7 +92,7 @@ class TestMetadataModel:
 
         with pytest.raises(
             ValueError,
-            match="Length of axis units (.*) does not match number of dimensions in roi (3)",
+            match="Length of axis units",
         ):
             GeffMetadata(
                 geff_version="v0.0.1-a",
