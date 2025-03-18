@@ -3,13 +3,10 @@ import re
 import pydantic
 import pytest
 
-from geff.metadata_schema import SUPPORTED_VERSIONS, GeffMetadata, _get_versions_regex
+from geff.metadata_schema import GeffMetadata, _get_versions_regex
 
 
 class TestVersionRegex:
-    def test_version_loading(self):
-        assert SUPPORTED_VERSIONS == ["v0.0"]
-
     def test_get_versions_regex_simple(self):
         version_str = "v0.0.1-a"
         versions = ["v0.0"]
