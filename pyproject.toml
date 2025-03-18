@@ -34,7 +34,7 @@ dev = [
     "ipython"
 ]
 spatial-graph = [
-    "spatial-graph @ git+https://github.com/funkelab/spatial_graph.git@d02b691e4fa0f184871939a89c6f964bfd0f5e39",
+    "spatial-graph",
 ]
 docs = [
     "mkdocs-material",
