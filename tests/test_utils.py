@@ -1,5 +1,6 @@
 import re
 
+import pydantic
 import pytest
 import zarr
 
@@ -18,6 +19,14 @@ def test_validate(tmpdir):
     with pytest.raises(AssertionError, match="geff zarr must contain a graph group"):
         validate(zpath)
     z.create_group("graph")
+
+    # Missing metadata
+    with pytest.raises(pydantic.ValidationError):
+        validate(zpath)
+    z["graph"].attrs["geff_version"] = "v0.0.1"
+    z["graph"].attrs["directed"] = True
+    z["graph"].attrs["roi_min"] = [0, 0]
+    z["graph"].attrs["roi_max"] = [100, 100]
 
     # No nodes
     with pytest.raises(AssertionError, match="graph group must contain a nodes group"):

@@ -2,6 +2,8 @@ import os
 
 import zarr
 
+from .metadata_schema import GeffMetadata
+
 
 def validate(path: str):
     """Check that the structure of the zarr conforms to geff specification
@@ -17,7 +19,9 @@ def validate(path: str):
     assert "graph" in z, "geff zarr must contain a graph group"
     graph = z["graph"]
 
-    # TODO: graph attrs validation
+    # graph attrs validation
+    # Raises pydantic.ValidationError or ValueError
+    GeffMetadata(**graph.attrs)
 
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
