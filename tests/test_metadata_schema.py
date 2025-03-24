@@ -99,3 +99,15 @@ class TestMetadataModel:
                 axis_names=["t", "y", "x"],
                 axis_units=["nm", "nm"],
             )
+
+    def test_extra_attrs(self):
+        # Should not fail
+        GeffMetadata(
+            geff_version="v0.0.1",
+            directed=True,
+            roi_min=[0, 0, 0],
+            roi_max=[100, 100, 100],
+            axis_names=["t", "y", "x"],
+            axis_units=["min", "nm", "nm"],
+            extra=True,
+        )
