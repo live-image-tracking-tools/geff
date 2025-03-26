@@ -70,7 +70,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ${{ steps.cache-path.outputs.path }}
-          key: $${{ matrix.platform }} - ${{ matrix.python-version }}
+          key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
   deploy:
     name: Deploy
