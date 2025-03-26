@@ -41,7 +41,15 @@ jobs:
 
       - name: Get witty cache directory
         id: cache-path
-        run: python -c "import Cython.Utils, os; print(\"path=\", os.path.join(Cython.Utils.get_cython_cache_dir(), \"witty\"), sep=\"=\")" >> "$GITHUB-OUTPUT"
+        run: |
+          import Cython.Utils
+          import os
+
+          cache_path = os.path.join(Cython.Utils.get_cython_cache_dir(), "witty")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              print(f"path={cache_path}")
+        shell: python
 
       - name: Check for witty cache
         uses: actions/cache/restore@v4
