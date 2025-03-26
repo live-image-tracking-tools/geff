@@ -39,6 +39,17 @@ jobs:
           python -m pip install -U pip
           python -m pip install -e .[dev,spatial-graph]
 
+      - name: Get witty cache directory
+        id: cache-path
+        run: python -c "import Cython.Utils, os; print(f\"path={os.path.join(Cython.Utils.get_cython_cache_dir(), \"witty\")}\")" >> "$GITHUB-OUTPUT"
+
+      - name: Check for witty cache
+        uses: actions/cache/restore@v4
+        id: witty-cache
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: $${{ matrix.platform }} - ${{ matrix.python-version }}
+
       - name: Test
         run: pytest --color=yes --cov --cov-report=xml --cov-report=term-missing
 
@@ -46,6 +57,12 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Save witty cache
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: $${{ matrix.platform }} - ${{ matrix.python-version }}
 
   deploy:
     name: Deploy
