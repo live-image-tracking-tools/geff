@@ -48,7 +48,7 @@ jobs:
           cache_path = os.path.join(Cython.Utils.get_cython_cache_dir(), "witty")
 
           with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
-              print(f"path={cache_path}")
+              print(f"path={cache_path}", file=fh)
         shell: python
 
       - name: Check for witty cache
