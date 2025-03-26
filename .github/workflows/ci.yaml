@@ -56,7 +56,7 @@ jobs:
         id: witty-cache
         with:
           path: ${{ steps.cache-path.outputs.path }}
-          key: $${{ matrix.platform }} - ${{ matrix.python-version }}
+          key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
       - name: Test
         run: pytest --color=yes --cov --cov-report=xml --cov-report=term-missing
