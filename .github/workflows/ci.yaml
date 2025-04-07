@@ -97,6 +97,8 @@ jobs:
       - name: Generate json 
         run: python scripts/export_json_schema.py --filename $testjson
 
+      - run: cat $testjson
+
       - name: Compare hashes
         if: ${{ hashFiles( env.testjson ) }} != ${{ hashFiles('geff-schema.json') }}
         uses: actions/github-script@v3
