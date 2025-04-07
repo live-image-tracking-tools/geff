@@ -44,7 +44,9 @@ docs = [
     "mkdocstrings[python]", 
     "mkdocs-api-autonav",
     "mkdocs-include-markdown-plugin",
-    "mike"
+    "mike",
+    "json-schema-for-humans",
+    "typing-extensions"  # Required for json-schema-for-humans 
 ]
 
 networkx = [
@@ -73,6 +75,7 @@ dev-nx = { features = ["dev", "networkx"], solve-group = "default"}
 dev-all = { features = ["dev", "networkx", "spatial-graph"], solve-group = "default"}
 
 [tool.pixi.tasks]
+update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "pytest tests"
@@ -82,6 +85,10 @@ build = "*"
 
 [tool.pixi.feature.build.tasks]
 build = "python -m build"
+
+[tool.pixi.feature.docs.tasks]
+preview-docs = {cmd = "mkdocs serve", depends-on = "schema-docs"}
+schema-docs = "generate-schema-doc geff-schema.json docs/schema/schema.html"
 
 [project.urls]
 repository = "https://github.com/funkelab/geff"
