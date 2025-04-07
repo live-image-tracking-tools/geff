@@ -102,7 +102,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-              core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`')
+              core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`. ${{ hashFiles( env.testjson ) }} vs ${{ hashFiles('geff-schema.json') }}')
 
   deploy:
     name: Deploy
