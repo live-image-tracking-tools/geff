@@ -92,6 +92,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
+          pip install .
 
       - name: Generate json 
         run: python scripts/export_json_schema.py $test-json
