@@ -37,9 +37,9 @@ def validate(path: str | Path):
     for attr in nodes["attrs"].keys():
         attr_len = nodes["attrs"][attr].shape[0]
         id_len = nodes["ids"].shape[0]
-        assert (
-            attr_len == id_len
-        ), f"Node attribute {attr} has length {attr_len}, which does not match id length {id_len}"
+        assert attr_len == id_len, (
+            f"Node attribute {attr} has length {attr_len}, which does not match id length {id_len}"
+        )
 
     assert "edges" in graph, "graph group must contain an edge group"
     edges = graph["edges"]
@@ -47,6 +47,6 @@ def validate(path: str | Path):
     # Edges only require ids which contain nodes for each edge
     assert "ids" in edges, "edge group must contain ids array"
     id_shape = edges["ids"].shape
-    assert (
-        id_shape[-1] == 2
-    ), f"edges ids must have a last dimension of size 2, received shape {id_shape}"
+    assert id_shape[-1] == 2, (
+        f"edges ids must have a last dimension of size 2, received shape {id_shape}"
+    )
