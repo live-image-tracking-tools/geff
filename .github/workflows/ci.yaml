@@ -95,7 +95,7 @@ jobs:
           pip install .
 
       - name: Generate json 
-        run: python scripts/export_json_schema.py $testjson
+        run: python scripts/export_json_schema.py --filename $testjson
 
       - name: Compare hashes
         if: ${{ hashFiles( env.testjson ) }} != ${{ hashFiles('geff-schema.json') }}
