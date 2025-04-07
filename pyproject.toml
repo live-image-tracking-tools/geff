@@ -15,6 +15,7 @@ dependencies = [
     "zarr<3.0.0",
     "pydantic", 
     "pyyaml",
+    "numcodecs<0.16" # TODO: remove pin once the 16 release is stable
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
