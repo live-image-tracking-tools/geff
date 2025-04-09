@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          python -m pip install -e .[$${{ inputs.install-extras }}]
+          python -m pip install -e .[${{ inputs.install-extras }}]
 
       - name: Get witty cache directory
         if: ${{ inputs.witty-cache }}
