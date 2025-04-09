@@ -20,7 +20,7 @@ jobs:
   test-agnostic:
     uses: ./.github/workflows/test.yaml
     with:
-      test-target: "tests/*.py"
+      test-target: "tests\\*.py"
       witty-cache: false
       install-extras: "dev"
   
