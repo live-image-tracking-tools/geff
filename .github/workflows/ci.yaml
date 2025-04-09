@@ -19,42 +19,21 @@ env:
 jobs:
   test-agnostic:
     uses: ./.github/workflows/test.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-        platform: [ubuntu-latest, macos-latest, windows-latest]
     with:
-      python-version: ${{ matrix.python-version }}
-      platform: ${{ matrix.platform }}
       test-target: "tests/*.py"
       witty-cache: false
       install-extras: "dev"
   
   test-networkx:
     uses: ./.github/workflows/test.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-        platform: [ubuntu-latest, macos-latest, windows-latest]
     with:
-      python-version: ${{ matrix.python-version }}
-      platform: ${{ matrix.platform }}
       test-target: "tests/test_networkx"
       witty-cache: false
       install-extras: "dev,networkx"
 
   test-spatial-graph:
     uses: ./.github/workflows/test.yaml
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12"]
-        platform: [ubuntu-latest, macos-latest, windows-latest]
     with:
-      python-version: ${{ matrix.python-version }}
-      platform: ${{ matrix.platform }}
       test-target: "tests/test_spatial_graph"
       witty-cache: true
       install-extras: "dev,spatial-graph"
