@@ -11,9 +11,12 @@ on:
         required: true
         type: string
 
+env:
+  SETUPTOOLS_SCM_PRETEND_VERSION: "0.0"
+
 jobs:
   test:
-    name: ${{ inputs.test-target }} ${{ matrix.platform }} ${{ matrix.python-version }}
+    name: ${{ matrix.platform }} ${{ matrix.python-version }}
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
