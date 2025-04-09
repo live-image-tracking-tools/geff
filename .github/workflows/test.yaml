@@ -1,0 +1,76 @@
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      test-target:
+        required: true
+        type: string
+      witty-cache: 
+        required: true
+        type: boolean
+      install-extras:
+        required: true
+        type: string
+
+jobs:
+  test:
+    name: ${{ inputs.test-target }} ${{ inputs.platform }} ${{ inputs.python-version }}
+    runs-on: ${{ inputs.platform }}
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache-dependency-path: "pyproject.toml"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e .[$${{ inputs.install-extras }}]
+
+      - name: Get witty cache directory
+        if: ${{ inputs.witty-cache }}
+        id: cache-path
+        run: |
+          import Cython.Utils
+          import os
+
+          cache_path = os.path.join(Cython.Utils.get_cython_cache_dir(), "witty")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              print(f"path={cache_path}", file=fh)
+        shell: python
+
+      - name: Check for witty cache
+        uses: actions/cache/restore@v4
+        id: witty-cache
+        if: ${{ inputs.witty-cache }}
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: ${{ inputs.platform }} - ${{ inputs.python-version }}
+
+      - name: Test
+        run: pytest --color=yes --cov --cov-report=xml --cov-report=term-missing ${{ inputs.test-target }}
+
+      - name: Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Save witty cache
+        uses: actions/cache/save@v4
+        if: ${{ inputs.witty-cache }}
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: ${{ inputs.platform }} - ${{ inputs.python-version }}
