@@ -13,14 +13,12 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-env:
-  SETUPTOOLS_SCM_PRETEND_VERSION: "0.0"
 
 jobs:
   test-agnostic:
     uses: ./.github/workflows/test.yaml
     with:
-      test-target: "tests\\*.py"
+      test-target: "tests/test_agnostic"
       witty-cache: false
       install-extras: "dev"
   
