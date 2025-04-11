@@ -39,5 +39,10 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git fetch origin gh-pages --depth=1
 
+      - name: Update schema docs
+        run: |
+          mkdir docs/schema
+          generate-schema-doc geff-schema.json docs/schema/schema.html
+
       - name: Push changes to gh-pages branch
         run: mike deploy ${{ steps.get_version.outputs.version }} $TAG -u -p

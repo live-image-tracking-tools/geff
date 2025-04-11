@@ -74,6 +74,38 @@ jobs:
           path: ${{ steps.cache-path.outputs.path }}
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
+  schema:
+    name: Check json schema
+    runs-on: ubuntu-latest
+    env:
+      testjson: check-json.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache-dependency-path: "pyproject.toml"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          pip install .
+
+      - name: Generate json 
+        run: python scripts/export_json_schema.py --filename $testjson
+
+      - run: cat $testjson
+
+      - name: Compare hashes
+        if: ${{ hashFiles( env.testjson ) != hashFiles('geff-schema.json') }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+              core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`. ${{ hashFiles( env.testjson ) }} vs ${{ hashFiles('geff-schema.json') }}')
+
   deploy:
     name: Deploy
     # TODO: Add back successful test requirement once package is more stable
