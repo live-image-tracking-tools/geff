@@ -29,13 +29,6 @@ jobs:
       witty-cache: false
       install-extras: "dev,networkx"
 
-  test-spatial-graph:
-    uses: ./.github/workflows/test.yaml
-    with:
-      test-target: "tests/test_spatial_graph"
-      witty-cache: true
-      install-extras: "dev,spatial-graph"
-
   schema:
     name: Check json schema
     runs-on: ubuntu-latest

@@ -37,9 +37,6 @@ dev = [
     "ipython",
     "types-PyYAML",
 ]
-spatial-graph = [
-    "spatial-graph",
-]
 docs = [
     "mkdocs-material",
     "mkdocstrings[python]", 
@@ -49,7 +46,6 @@ docs = [
     "json-schema-for-humans",
     "typing-extensions"  # Required for json-schema-for-humans 
 ]
-
 networkx = [
     "networkx",
 ]
@@ -68,12 +64,11 @@ python = "3.12.*"
 [tool.pixi.environments]
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
-dev-sg = { features = ["dev", "spatial-graph"], solve-group = "default"}
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default"}
 networkx = {features=["networkx"], solve-group = "default"}
 dev-nx = { features = ["dev", "networkx"], solve-group = "default"}
-dev-all = { features = ["dev", "networkx", "spatial-graph"], solve-group = "default"}
+dev-all = { features = ["dev", "networkx"], solve-group = "default"}
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
