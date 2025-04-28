@@ -15,7 +15,8 @@ dependencies = [
     "zarr<3.0.0",
     "pydantic", 
     "pyyaml",
-    "numcodecs<0.16" # TODO: remove pin once the 16 release is stable
+    "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
+    "networkx"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -46,9 +47,6 @@ docs = [
     "json-schema-for-humans",
     "typing-extensions"  # Required for json-schema-for-humans 
 ]
-networkx = [
-    "networkx",
-]
 
 
 [tool.pixi.project]
@@ -66,9 +64,6 @@ default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default"}
-networkx = {features=["networkx"], solve-group = "default"}
-dev-nx = { features = ["dev", "networkx"], solve-group = "default"}
-dev-all = { features = ["dev", "networkx"], solve-group = "default"}
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
