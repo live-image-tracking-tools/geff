@@ -82,8 +82,8 @@ preview-docs = {cmd = "mkdocs serve", depends-on = "schema-docs"}
 schema-docs = "generate-schema-doc geff-schema.json docs/schema/schema.html"
 
 [project.urls]
-repository = "https://github.com/funkelab/geff"
-homepage = "https://github.com/funkelab/geff"
+repository = "https://github.com/live-image-tracking-tools/geff"
+homepage = "https://github.com/live-image-tracking-tools/geff"
 
 # https://github.com/charliermarsh/ruff
 [tool.ruff]
