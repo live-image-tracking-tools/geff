@@ -21,7 +21,9 @@ edge_attr_dtypes = [
 @pytest.mark.parametrize("node_attr_dtypes", node_attr_dtypes)
 @pytest.mark.parametrize("edge_attr_dtypes", edge_attr_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
-def test_read_write_consistency(tmpdir, node_dtype, node_attr_dtypes, edge_attr_dtypes, directed):
+def test_read_write_consistency(tmp_path, node_dtype, node_attr_dtypes, edge_attr_dtypes, directed):
+    axis_names = ("t", "z", "y", "x")
+    axis_units = ("s", "nm", "nm", "nm")
     graph = nx.DiGraph() if directed else nx.Graph()
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
@@ -52,9 +54,9 @@ def test_read_write_consistency(tmpdir, node_dtype, node_attr_dtypes, edge_attr_
     for edge, score, color in zip(edges, scores, colors):
         graph.add_edge(*edge.tolist(), score=score.item(), color=color.item())
 
-    path = tmpdir / "rw_consistency.zarr/graph"
+    path = tmp_path / "rw_consistency.zarr/graph"
 
-    geff_nx.write(graph, "position", path)
+    geff_nx.write(graph, "position", path, axis_names=axis_names, axis_units=axis_units)
 
     compare = geff_nx.read(path)
 
@@ -66,6 +68,9 @@ def test_read_write_consistency(tmpdir, node_dtype, node_attr_dtypes, edge_attr_
     for edge in edges:
         assert graph.edges[edge.tolist()]["score"] == compare.edges[edge.tolist()]["score"]
         assert graph.edges[edge.tolist()]["color"] == compare.edges[edge.tolist()]["color"]
+
+    assert compare.graph["axis_names"] == axis_names
+    assert compare.graph["axis_units"] == axis_units
 
 
 def test_write_empty_graph():

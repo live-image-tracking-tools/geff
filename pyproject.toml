@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
-    "zarr<3.0.0",
+    "zarr>2,<4",
     "pydantic", 
     "pyyaml",
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
@@ -36,7 +36,7 @@ dev = [
     "pre-commit",
     "ruff",
     "ipython",
-    "types-PyYAML",
+    "types-PyYAML"
 ]
 docs = [
     "mkdocs-material",
@@ -46,6 +46,12 @@ docs = [
     "mike",
     "json-schema-for-humans",
     "typing-extensions"  # Required for json-schema-for-humans 
+]
+bench = [
+    "pytest-benchmark",
+    "tabulate",
+    "pandas",
+    "typer"
 ]
 
 
@@ -64,12 +70,17 @@ default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default"}
+bench = { features = ["dev", "bench"], solve-group = "default" }
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "pytest tests"
+benchmark = { cmd = "pytest tests/bench.py" }
+
+[tool.pixi.feature.bench.tasks]
+benchmark = "pytest tests/bench.py"
 
 [tool.pixi.feature.build.pypi-dependencies]
 build = "*"
@@ -157,12 +168,12 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@overload",
     "except ImportError",
-    "\\.\\.\\.",
     "raise NotImplementedError()",
     "pass",
 ]
 [tool.coverage.run]
 source = ["src/geff"]
+omit = ["*/__init__.py"]
 
 # https://github.com/mgedmin/check-manifest#configuration
 # [tool.check-manifest]

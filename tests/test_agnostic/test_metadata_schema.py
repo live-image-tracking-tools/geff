@@ -2,8 +2,9 @@ import re
 
 import pydantic
 import pytest
+import zarr
 
-from geff.metadata_schema import GeffMetadata, _get_versions_regex
+from geff.metadata_schema import GeffMetadata, _get_versions_regex, write_metadata_schema
 
 
 class TestVersionRegex:
@@ -72,6 +73,13 @@ class TestMetadataModel:
                 roi_min=[1000, 0, 0],
                 roi_max=[100, 100, 100],
             )
+        with pytest.raises(ValueError, match="Roi min .* and roi max .* have different lengths"):
+            GeffMetadata(
+                geff_version="0.0.1-a",
+                directed=False,
+                roi_min=[1000, 0],
+                roi_max=[100, 100, 100],
+            )
 
     def test_invalid_axis_annotations(self):
         with pytest.raises(
@@ -111,3 +119,31 @@ class TestMetadataModel:
             axis_units=["min", "nm", "nm"],
             extra=True,
         )
+
+    def test_read_write(self, tmp_path):
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            roi_min=[0, 0, 0],
+            roi_max=[100, 100, 100],
+            axis_names=["t", "y", "x"],
+            axis_units=["min", "nm", "nm"],
+            extra=True,
+        )
+        zpath = tmp_path / "test.zarr"
+        group = zarr.open(zpath, "a")
+        meta.write(group)
+        compare = GeffMetadata.read(group)
+        assert compare == meta
+
+        meta.directed = False
+        meta.write(zpath)
+        compare = GeffMetadata.read(zpath)
+        assert compare == meta
+
+
+def test_write_schema(tmp_path):
+    schema_path = tmp_path / "schema.json"
+    write_metadata_schema(schema_path)
+    assert schema_path.is_file()
+    assert schema_path.stat().st_size > 0

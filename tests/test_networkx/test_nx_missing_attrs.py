@@ -2,6 +2,7 @@ from pathlib import Path
 
 import networkx as nx
 import numpy as np
+import pytest
 import zarr
 
 from geff.networkx import read, write
@@ -89,3 +90,15 @@ def test_sparse_edge_attrs(tmp_path):
     read_graph = read(zarr_path)
     for u, v, data in graph.edges(data=True):
         assert read_graph.edges[u, v] == data
+
+
+def test_missing_pos_attr(tmp_path):
+    zarr_path = Path(tmp_path) / "test.zarr"
+    graph, _ = graph_sparse_node_attrs()
+    # wrong attribute name
+    with pytest.raises(ValueError, match="Position attribute pos not found in graph"):
+        write(graph, position_attr="pos", path=zarr_path)
+    # missing attribute
+    del graph.nodes[1]["position"]
+    with pytest.raises(ValueError, match="Node 1 does not have position attribute *"):
+        write(graph, position_attr="position", path=zarr_path)

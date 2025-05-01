@@ -1,5 +1,6 @@
 import re
 
+import numpy as np
 import pydantic
 import pytest
 import zarr
@@ -7,12 +8,12 @@ import zarr
 from geff.utils import validate
 
 
-def test_validate(tmpdir):
+def test_validate(tmp_path):
     # Does not exist
     with pytest.raises(AssertionError, match=r"Directory .* does not exist"):
         validate("does-not-exist")
 
-    zpath = tmpdir / "test.zarr"
+    zpath = tmp_path / "test.zarr"
     z = zarr.open(zpath)
 
     # Missing metadata
@@ -32,7 +33,7 @@ def test_validate(tmpdir):
     with pytest.raises(AssertionError, match="nodes group must contain an ids array"):
         validate(zpath)
     n_node = 10
-    z["nodes"].create_dataset("ids", shape=(n_node))
+    z["nodes/ids"] = np.zeros(n_node)
 
     # Nodes missing position attrs
     with pytest.raises(AssertionError, match="nodes group must contain an attrs group"):
@@ -45,17 +46,17 @@ def test_validate(tmpdir):
         AssertionError, match="node attribute group position must have values group"
     ):
         validate(zpath)
-    z["nodes"].create_dataset("attrs/position/values", shape=(n_node))
+    z["nodes/attrs/position/values"] = np.zeros(n_node)
     validate(zpath)
 
     # valid and invalid "missing" arrays for position attribute
-    z["nodes"].create_dataset("attrs/position/missing", shape=(n_node), dtype=bool)
+    z["nodes/attrs/position/missing"] = np.zeros((n_node), dtype=bool)
     with pytest.raises(AssertionError, match="position group cannot have missing values"):
         validate(zpath)
     del z["nodes/attrs/position"]["missing"]
 
     # Attr shape mismatch
-    z["nodes"].create_dataset("attrs/badshape/values", shape=(n_node * 2))
+    z["nodes/attrs/badshape/values"] = np.zeros(n_node * 2)
     with pytest.raises(
         AssertionError,
         match=(
@@ -67,8 +68,8 @@ def test_validate(tmpdir):
 
     del z["nodes/attrs"]["badshape"]
     # Attr missing shape mismatch
-    z["nodes"].create_dataset("attrs/badshape/values", shape=(n_node))
-    z["nodes"].create_dataset("attrs/badshape/missing", shape=(n_node * 2))
+    z["nodes/attrs/badshape/values"] = np.zeros(shape=(n_node))
+    z["nodes/attrs/badshape/missing"] = np.zeros(shape=(n_node * 2))
     with pytest.raises(
         AssertionError,
         match=(
@@ -89,7 +90,7 @@ def test_validate(tmpdir):
     # ids array must have last dim size 2
     n_edges = 5
     badshape = (n_edges, 3)
-    z["edges"].create_dataset("ids", shape=badshape)
+    z["edges/ids"] = np.zeros(badshape)
     with pytest.raises(
         AssertionError,
         match=re.escape(
@@ -98,10 +99,10 @@ def test_validate(tmpdir):
     ):
         validate(zpath)
     del z["edges"]["ids"]
-    z["edges"].create_dataset("ids", shape=(n_edges, 2))
+    z["edges/ids"] = np.zeros((n_edges, 2))
 
     # Attr values shape mismatch
-    z["edges"].create_dataset("attrs/badshape/values", shape=(n_edges * 2, 2))
+    z["edges/attrs/badshape/values"] = np.zeros((n_edges * 2, 2))
     with pytest.raises(
         AssertionError,
         match=(
@@ -110,11 +111,11 @@ def test_validate(tmpdir):
         ),
     ):
         validate(zpath)
-    del z["edges/attrs"]["badshape"]
+    del z["edges/attrs/badshape"]["values"]
 
     # Attr missing shape mismatch
-    z["edges"].create_dataset("attrs/badshape/values", shape=(n_edges, 2))
-    z["edges"].create_dataset("attrs/badshape/missing", shape=(n_edges * 2, 2))
+    z["edges/attrs/badshape/values"] = np.zeros((n_edges, 2))
+    z["edges/attrs/badshape/missing"] = np.zeros((n_edges * 2, 2))
     with pytest.raises(
         AssertionError,
         match=(
@@ -123,7 +124,7 @@ def test_validate(tmpdir):
         ),
     ):
         validate(zpath)
-    del z["edges/attrs"]["badshape"]
+    del z["edges/attrs/badshape"]["missing"]
 
     # everything passes
     validate(zpath)

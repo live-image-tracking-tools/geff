@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import json
 import re
 from importlib.resources import files
 from pathlib import Path
 
 import yaml
+import zarr
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
 
@@ -58,6 +61,31 @@ class GeffMetadata(BaseModel):
                 f"Length of axis units ({len(self.axis_units)}) does not match number of"
                 f" dimensions in roi ({ndim})"
             )
+
+    def write(self, group: zarr.Group | Path):
+        """Helper function to write GeffMetadata into the zarr geff group.
+
+        Args:
+            group (zarr.Group | Path): The geff group to write the metadata to
+        """
+        if isinstance(group, Path):
+            group = zarr.open(group)
+        for key, value in self:
+            group.attrs[key] = value
+
+    @classmethod
+    def read(cls, group: zarr.Group | Path) -> GeffMetadata:
+        """Helper function to read GeffMetadata from a zarr geff group.
+
+        Args:
+            group (zarr.Group | Path): The zarr group containing the geff metadata
+
+        Returns:
+            GeffMetadata: The GeffMetadata object
+        """
+        if isinstance(group, Path):
+            group = zarr.open(group)
+        return cls(**group.attrs)
 
 
 def write_metadata_schema(outpath: Path):

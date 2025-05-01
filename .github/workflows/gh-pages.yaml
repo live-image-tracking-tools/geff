@@ -1,0 +1,86 @@
+name: Push gh-pages updates update
+
+# push to the gh-pages branch whenever there is a new push to main or a new tag
+on:
+  push:
+    branches:
+      - main
+    tags: ["*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  deployments: write
+
+env:
+  TAG: ${{ contains(github.ref, 'tags') && 'latest' || 'dev'}}
+  SETUPTOOLS_SCM_PRETEND_VERSION: "0.0"
+
+jobs:
+  push-docs:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[docs]"
+
+      - id: get_version
+        uses: battila7/get-version-action@v2
+
+      - name: configure git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git fetch origin gh-pages --depth=1
+
+      - name: Update schema docs
+        run: |
+          mkdir docs/schema
+          generate-schema-doc geff-schema.json docs/schema/schema.html
+
+      - name: Push changes to gh-pages branch
+        run: mike deploy ${{ steps.get_version.outputs.version }} $TAG -u -p
+
+  benchmark:
+    name: Report benchmarks on gh-pages
+    runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          cache-dependency-path: "pyproject.toml"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e .[dev,bench]
+
+      - name: Run benchmark
+        run: |
+          pytest tests/bench.py --benchmark-json output.json
+
+      - name: Store benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Python Benchmark with pytest-benchmark
+          tool: 'pytest'
+          output-file-path: output.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          benchmark-data-dir-path: bench/
