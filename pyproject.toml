@@ -69,6 +69,7 @@ default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default"}
+bench = { features = ["dev", "bench"], solve-group = "default" }
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
@@ -76,6 +77,9 @@ update-json = "python scripts/export_json_schema.py"
 [tool.pixi.feature.dev.tasks]
 test = "pytest tests"
 benchmark = { cmd = "pytest tests/bench.py" }
+
+[tool.pixi.feature.bench.tasks]
+benchmark = "pytest tests/bench.py"
 
 [tool.pixi.feature.build.pypi-dependencies]
 build = "*"
