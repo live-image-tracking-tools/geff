@@ -36,7 +36,7 @@ dev = [
     "pre-commit",
     "ruff",
     "ipython",
-    "types-PyYAML",
+    "types-PyYAML"
 ]
 docs = [
     "mkdocs-material",
@@ -50,7 +50,8 @@ docs = [
 bench = [
     "pytest-benchmark",
     "tabulate",
-    "pandas"
+    "pandas",
+    "typer"
 ]
 
 
@@ -76,6 +77,7 @@ update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "pytest tests"
+benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.bench.tasks]
 benchmark = "pytest tests/bench.py"
@@ -166,12 +168,12 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@overload",
     "except ImportError",
-    "\\.\\.\\.",
     "raise NotImplementedError()",
     "pass",
 ]
 [tool.coverage.run]
 source = ["src/geff"]
+omit = ["*/__init__.py"]
 
 # https://github.com/mgedmin/check-manifest#configuration
 # [tool.check-manifest]
