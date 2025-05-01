@@ -50,7 +50,8 @@ docs = [
 bench = [
     "pytest-benchmark",
     "tabulate",
-    "pandas"
+    "pandas",
+    "typer"
 ]
 
 
