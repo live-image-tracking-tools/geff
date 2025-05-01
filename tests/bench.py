@@ -1,4 +1,5 @@
 from itertools import product
+from pathlib import Path
 
 import networkx as nx
 import numpy as np
@@ -34,13 +35,13 @@ def big_graph():
 
 @pytest.fixture(scope="session")
 def big_graph_path(tmpdir_factory, big_graph):
-    tmp_path = tmpdir_factory.mktemp("data").join("test.zarr")
+    tmp_path = Path(tmpdir_factory.mktemp("data").join("test.zarr"))
     geff_nx.write(graph=big_graph, path=tmp_path, position_attr="position")
     return tmp_path
 
 
-def test_write(benchmark, tmpdir, big_graph):
-    path = tmpdir / "test_write.zarr"
+def test_write(benchmark, tmp_path, big_graph):
+    path = tmp_path / "test_write.zarr"
 
     benchmark.pedantic(
         geff_nx.write,
