@@ -63,7 +63,7 @@ python = "3.12.*"
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default"}
+docs = { features = ["docs"], solve-group = "default" }
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"

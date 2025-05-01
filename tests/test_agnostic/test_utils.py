@@ -3,6 +3,7 @@ import re
 import pydantic
 import pytest
 import zarr
+import numpy as np
 
 from geff.utils import validate
 
@@ -32,15 +33,18 @@ def test_validate(tmpdir):
     with pytest.raises(AssertionError, match="nodes group must contain an ids array"):
         validate(zpath)
     n_node = 10
-    z["nodes"].create_array("ids", shape=(n_node), dtype='int')
+    # z["nodes"].create_array("ids", shape=(n_node), dtype='int')
+    z["nodes/ids"] = np.zeros((n_node))
 
     # Nodes missing position attrs
     with pytest.raises(AssertionError, match="nodes group must contain an attrs/position array"):
         validate(zpath)
-    z["nodes"].create_array("attrs/position", shape=(n_node), dtype='float')
+    # z["nodes"].create_array("attrs/position", shape=(n_node), dtype='float')
+    z["nodes/attrs/position"] = np.zeros((n_node))
 
     # Attr shape mismatch
-    z["nodes"].create_array("attrs/badshape", shape=(n_node * 2), dtype='float')
+    # z["nodes"].create_array("attrs/badshape", shape=(n_node * 2), dtype='float')
+    z["nodes/attrs/badshape"] = np.zeros((n_node * 2))
     with pytest.raises(
         AssertionError,
         match=(
@@ -62,7 +66,8 @@ def test_validate(tmpdir):
 
     # ids array must have last dim size 2
     badshape = (5, 3)
-    z["edges"].create_array("ids", shape=(5, 3), dtype='int')
+    # z["edges"].create_array("ids", shape=(5, 3), dtype='int')
+    z["edges/ids"] = np.zeros((5, 3))
     with pytest.raises(
         AssertionError,
         match=re.escape(
@@ -71,7 +76,8 @@ def test_validate(tmpdir):
     ):
         validate(zpath)
     del z["edges"]["ids"]
-    z["edges"].create_array("ids", shape=(5, 2), dtype='int')
+    # z["edges"].create_array("ids", shape=(5, 2), dtype='int')
+    z["edges/ids"] = np.zeros((5,2))
 
     # everything passes
     validate(zpath)
