@@ -68,8 +68,8 @@ def test_validate(tmp_path):
 
     del z["nodes/attrs"]["badshape"]
     # Attr missing shape mismatch
-    z["nodes"].create_dataset("attrs/badshape/values", shape=(n_node))
-    z["nodes"].create_dataset("attrs/badshape/missing", shape=(n_node * 2))
+    z["nodes/attrs/badshape/values"] = np.zeros(shape=(n_node))
+    z["nodes/attrs/badshape/missing"] = np.zeros(shape=(n_node * 2))
     with pytest.raises(
         AssertionError,
         match=(
