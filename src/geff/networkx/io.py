@@ -92,9 +92,6 @@ def write(
         warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
         return
 
-    # zarr python 3 doesn't support Path
-    path = str(path)
-
     # open/create zarr container
     if zarr.__version__.startswith("3"):
         group = zarr.open(path, mode="a", zarr_format=zarr_format)
