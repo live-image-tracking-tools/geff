@@ -112,6 +112,7 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         with:
           body-path: report.md
+          token: ${{ secrets.COMMIT_MESSAGE_TOKEN }}
 
   deploy:
     name: Deploy
