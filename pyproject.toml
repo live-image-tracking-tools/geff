@@ -47,6 +47,11 @@ docs = [
     "json-schema-for-humans",
     "typing-extensions"  # Required for json-schema-for-humans 
 ]
+bench = [
+    "pytest-benchmark",
+    "tabulate",
+    "pandas"
+]
 
 
 [tool.pixi.project]
@@ -63,13 +68,17 @@ python = "3.12.*"
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default"}
+bench = { features = ["dev", "bench"], solve-group = "default" }
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "pytest tests"
+
+[tool.pixi.feature.bench.tasks]
+benchmark = "pytest tests/bench.py"
 
 [tool.pixi.feature.build.pypi-dependencies]
 build = "*"

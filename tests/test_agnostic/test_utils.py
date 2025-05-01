@@ -1,11 +1,12 @@
 import re
 
+import numpy as np
 import pydantic
 import pytest
 import zarr
-import numpy as np
 
 from geff.utils import validate
+
 
 def test_validate(tmp_path):
     # Does not exist
@@ -32,28 +33,54 @@ def test_validate(tmp_path):
     with pytest.raises(AssertionError, match="nodes group must contain an ids array"):
         validate(zpath)
     n_node = 10
-    z["nodes/ids"] = np.zeros((n_node))
+    z["nodes/ids"] = np.zeros(n_node)
 
     # Nodes missing position attrs
-    with pytest.raises(AssertionError, match="nodes group must contain an attrs/position array"):
+    with pytest.raises(AssertionError, match="nodes group must contain an attrs group"):
         validate(zpath)
-    z["nodes/attrs/position"] = np.zeros((n_node))
+    z["nodes"].create_group("attrs")
+    with pytest.raises(AssertionError, match="nodes group must contain an attrs/position group"):
+        validate(zpath)
+    z["nodes"].create_group("attrs/position")
+    with pytest.raises(
+        AssertionError, match="node attribute group position must have values group"
+    ):
+        validate(zpath)
+    z["nodes/attrs/position/values"] = np.zeros(n_node)
+    validate(zpath)
+
+    # valid and invalid "missing" arrays for position attribute
+    z["nodes/attrs/position/missing"] = np.zeros((n_node), dtype=bool)
+    with pytest.raises(AssertionError, match="position group cannot have missing values"):
+        validate(zpath)
+    del z["nodes/attrs/position"]["missing"]
 
     # Attr shape mismatch
-    z["nodes/attrs/badshape"] = np.zeros((n_node * 2))
+    z["nodes/attrs/badshape/values"] = np.zeros(n_node * 2)
     with pytest.raises(
         AssertionError,
         match=(
-            f"Node attribute badshape has length {n_node * 2}, "
+            f"Node attribute badshape values has length {n_node * 2}, "
+            f"which does not match id length {n_node}"
+        ),
+    ):
+        validate(zpath)
+
+    del z["nodes/attrs"]["badshape"]
+    # Attr missing shape mismatch
+    z["nodes"].create_dataset("attrs/badshape/values", shape=(n_node))
+    z["nodes"].create_dataset("attrs/badshape/missing", shape=(n_node * 2))
+    with pytest.raises(
+        AssertionError,
+        match=(
+            f"Node attribute badshape missing mask has length {n_node * 2}, "
             f"which does not match id length {n_node}"
         ),
     ):
         validate(zpath)
     del z["nodes/attrs"]["badshape"]
 
-    # Edges missing
-    with pytest.raises(AssertionError, match="graph group must contain an edge group"):
-        validate(zpath)
+    # No edge group is okay, if the graph has no edges
     z.create_group("edges")
 
     # Missing edge ids
@@ -61,8 +88,9 @@ def test_validate(tmp_path):
         validate(zpath)
 
     # ids array must have last dim size 2
-    badshape = (5, 3)
-    z["edges/ids"] = np.zeros((5, 3))
+    n_edges = 5
+    badshape = (n_edges, 3)
+    z["edges/ids"] = np.zeros(badshape)
     with pytest.raises(
         AssertionError,
         match=re.escape(
@@ -71,7 +99,32 @@ def test_validate(tmp_path):
     ):
         validate(zpath)
     del z["edges"]["ids"]
-    z["edges/ids"] = np.zeros((5,2))
+    z["edges/ids"] = np.zeros((n_edges, 2))
+
+    # Attr values shape mismatch
+    z["edges/attrs/badshape/values"] = np.zeros((n_edges * 2, 2))
+    with pytest.raises(
+        AssertionError,
+        match=(
+            f"Edge attribute badshape values has length {n_edges * 2}, "
+            f"which does not match id length {n_edges}"
+        ),
+    ):
+        validate(zpath)
+    del z["edges/attrs/badshape"]["values"]
+
+    # Attr missing shape mismatch
+    z["edges/attrs/badshape/values"] = np.zeros((n_edges, 2))
+    z["edges/attrs/badshape/missing"] = np.zeros((n_edges * 2, 2))
+    with pytest.raises(
+        AssertionError,
+        match=(
+            f"Edge attribute badshape missing mask has length {n_edges * 2}, "
+            f"which does not match id length {n_edges}"
+        ),
+    ):
+        validate(zpath)
+    del z["edges/attrs/badshape"]["missing"]
 
     # everything passes
     validate(zpath)

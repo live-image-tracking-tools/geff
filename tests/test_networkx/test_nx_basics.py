@@ -15,7 +15,6 @@ edge_attr_dtypes = [
 ]
 
 # TODO: mixed dtypes?
-# TODO: missing values?
 
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
@@ -67,3 +66,9 @@ def test_read_write_consistency(tmpdir, node_dtype, node_attr_dtypes, edge_attr_
     for edge in edges:
         assert graph.edges[edge.tolist()]["score"] == compare.edges[edge.tolist()]["score"]
         assert graph.edges[edge.tolist()]["color"] == compare.edges[edge.tolist()]["color"]
+
+
+def test_write_empty_graph():
+    graph = nx.DiGraph()
+    with pytest.warns(match="Graph is empty - not writing anything "):
+        geff_nx.write(graph, position_attr="pos", path=".")
