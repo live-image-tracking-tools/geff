@@ -105,7 +105,7 @@ jobs:
           pytest tests/bench.py -v --benchmark-json pr.json
 
       - name: Generate report
-        run: python .github/workflows/benchmark-pr.py baseline.json pr.json report.md
+        run: python scripts/benchmark-pr.py baseline.json pr.json report.md
 
       - name: Comment on commit with report for non-forks
         uses: peter-evans/commit-comment@v3
