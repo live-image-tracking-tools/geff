@@ -20,6 +20,9 @@ def validate(path: str | Path):
     # Check that directory exists
     assert os.path.exists(path), f"Directory {path} does not exist"
 
+    # zarr python 3 doesn't support Path
+    path = str(path)
+
     graph = zarr.open(path, mode="r")
 
     # graph attrs validation

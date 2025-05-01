@@ -72,6 +72,7 @@ def write(
     path: str | Path,
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
+    zarr_format: int = 3,
 ):
     """Write a networkx graph to the geff file format
 
@@ -84,14 +85,23 @@ def write(
             represented in position attribute. Defaults to None.
         axis_units (Optional[list[str]], optional): The units of the spatial dims
             represented in position attribute. Defaults to None.
+        zarr_format (Optional[int], optional): The version of zarr to write.
+            Defaults to 3.
     """
     if nx.is_empty(graph):
         warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
         return
-    # open/create zarr container
-    group = zarr.open(path, "a")
 
-    # write meta-datajj
+    # zarr python 3 doesn't support Path
+    path = str(path)
+
+    # open/create zarr container
+    if zarr.__version__.startswith("3"):
+        group = zarr.open(path, "a", zarr_format=zarr_format)
+    else:
+        group = zarr.open(path, "a")
+
+    # write meta-data
     group.attrs["geff_version"] = geff.__version__
     group.attrs["position_attr"] = position_attr
     group.attrs["directed"] = isinstance(graph, nx.DiGraph)
@@ -129,11 +139,14 @@ def read(path: Path | str, validate: bool = True) -> nx.Graph:
     """Read a geff file into a networkx graph.
 
     Args:
-        path (Path): The path to the root of the geff zarr, where the .attrs contains
+        path (Path | str): The path to the root of the geff zarr, where the .attrs contains
             the geff  metadata
     Returns:
         nx.Graph: The graph that was stored in the geff file format
     """
+    # zarr python 3 doesn't support Path
+    path = str(path)
+
     # open zarr container
     if validate:
         geff.utils.validate(path)

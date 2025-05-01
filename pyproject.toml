@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
-    "zarr<3.0.0",
+    "zarr>2,<=3",
     "pydantic", 
     "pyyaml",
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
