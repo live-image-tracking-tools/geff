@@ -97,9 +97,9 @@ def write(
 
     # open/create zarr container
     if zarr.__version__.startswith("3"):
-        group = zarr.open(path, "a", zarr_format=zarr_format)
+        group = zarr.open(path, mode="a", zarr_format=zarr_format)
     else:
-        group = zarr.open(path, "a")
+        group = zarr.open(path, mode="a")
 
     # write meta-data
     group.attrs["geff_version"] = geff.__version__
@@ -151,7 +151,7 @@ def read(path: Path | str, validate: bool = True) -> nx.Graph:
     if validate:
         geff.utils.validate(path)
 
-    group = zarr.open(path, "r")
+    group = zarr.open(path, mode="r")
     metadata = GeffMetadata(**group.attrs)
 
     # read meta-data

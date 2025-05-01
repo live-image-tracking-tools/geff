@@ -32,15 +32,15 @@ def test_validate(tmpdir):
     with pytest.raises(AssertionError, match="nodes group must contain an ids array"):
         validate(zpath)
     n_node = 10
-    z["nodes"].create_dataset("ids", shape=(n_node), dtype='int')
+    z["nodes"].create_array("ids", shape=(n_node), dtype='int')
 
     # Nodes missing position attrs
     with pytest.raises(AssertionError, match="nodes group must contain an attrs/position array"):
         validate(zpath)
-    z["nodes"].create_dataset("attrs/position", shape=(n_node), dtype='float')
+    z["nodes"].create_array("attrs/position", shape=(n_node), dtype='float')
 
     # Attr shape mismatch
-    z["nodes"].create_dataset("attrs/badshape", shape=(n_node * 2), dtype='float')
+    z["nodes"].create_array("attrs/badshape", shape=(n_node * 2), dtype='float')
     with pytest.raises(
         AssertionError,
         match=(
@@ -62,7 +62,7 @@ def test_validate(tmpdir):
 
     # ids array must have last dim size 2
     badshape = (5, 3)
-    z["edges"].create_dataset("ids", shape=(5, 3), dtype='int')
+    z["edges"].create_array("ids", shape=(5, 3), dtype='int')
     with pytest.raises(
         AssertionError,
         match=re.escape(
@@ -71,7 +71,7 @@ def test_validate(tmpdir):
     ):
         validate(zpath)
     del z["edges"]["ids"]
-    z["edges"].create_dataset("ids", shape=(5, 2), dtype='int')
+    z["edges"].create_array("ids", shape=(5, 2), dtype='int')
 
     # everything passes
     validate(zpath)
