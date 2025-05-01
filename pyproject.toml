@@ -36,7 +36,7 @@ dev = [
     "pre-commit",
     "ruff",
     "ipython",
-    "types-PyYAML",
+    "types-PyYAML"
 ]
 docs = [
     "mkdocs-material",
@@ -46,6 +46,11 @@ docs = [
     "mike",
     "json-schema-for-humans",
     "typing-extensions"  # Required for json-schema-for-humans 
+]
+bench = [
+    "pytest-benchmark",
+    "tabulate",
+    "pandas"
 ]
 
 
@@ -70,6 +75,7 @@ update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "pytest tests"
+benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.build.pypi-dependencies]
 build = "*"

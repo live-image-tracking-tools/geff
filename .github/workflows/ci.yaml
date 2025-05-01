@@ -54,6 +54,62 @@ jobs:
           script: |
               core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`. ${{ hashFiles( env.testjson ) }} vs ${{ hashFiles('geff-schema.json') }}')
 
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50 # this is to make sure we obtain the target base commit
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+          cache-dependency-path: "pyproject.toml"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e .[bench,dev]
+
+      - name: Retrieve cached baseline if available
+        uses: actions/cache/restore@v4
+        id: cache_baseline
+        with:
+          path: baseline.json
+          key: ${{ github.event.pull_request.base.sha }}
+
+      - name: Run baseline benchmark if not in cache
+        if: steps.cache_baseline.outputs.cache-hit != 'true'
+        run: |
+          git checkout ${{ github.event.pull_request.base.sha }}
+          pytest tests/bench.py -v --benchmark-json baseline.json
+
+      - name: Cache baseline results
+        uses: actions/cache/save@v4
+        if: steps.cache_baseline.outputs.cache-hit != 'true'
+        with:
+          path: baseline.json
+          key: ${{ github.event.pull_request.base.sha }}
+
+      - name: Run benchmark on PR head commit
+        run: |
+          git checkout ${{ github.event.pull_request.head.sha }}
+          pytest tests/bench.py -v --benchmark-json pr.json
+
+      - name: Generate report
+        run: python .github/workflows/benchmark-pr.py baseline.json pr.json report.md
+
+      - name: Comment on commit with report for non-forks
+        uses: peter-evans/commit-comment@v3
+        if: github.event.pull_request.head.repo.fork == false
+        with:
+          body-path: report.md
+
   deploy:
     name: Deploy
     # TODO: Add back successful test requirement once package is more stable
