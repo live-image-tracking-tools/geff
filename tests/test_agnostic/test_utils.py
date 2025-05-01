@@ -7,13 +7,12 @@ import numpy as np
 
 from geff.utils import validate
 
-
-def test_validate(tmpdir):
+def test_validate(tmp_path):
     # Does not exist
     with pytest.raises(AssertionError, match=r"Directory .* does not exist"):
         validate("does-not-exist")
 
-    zpath = str(tmpdir / "test.zarr")
+    zpath = tmp_path / "test.zarr"
     z = zarr.open(zpath)
 
     # Missing metadata
