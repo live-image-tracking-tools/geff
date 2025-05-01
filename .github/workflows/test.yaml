@@ -24,6 +24,10 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
         platform: [ubuntu-latest, macos-latest, windows-latest]
         zarr-version: ["2.*", "3.*"]
+        exclude:
+          # Zarr 3 doesn't support 3.10
+          - zarr-version: "3.*"
+            python-version: "3.10"
 
     steps:
       - uses: actions/checkout@v4
