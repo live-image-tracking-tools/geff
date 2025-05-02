@@ -146,7 +146,7 @@ jobs:
         run: |
           import re; from geff.metadata_schema import SUPPORTED_VERSIONS_REGEX
 
-          if re.search(SUPPORTED_VERSIONS_REGEX, ${{ github.ref_name }}) is None:
+          if re.search(SUPPORTED_VERSIONS_REGEX, "${{ github.ref_name }}") is None:
               return sys.exit("`supported_versions.yml`  needs to be updated to include new release ${{ github.ref_name }}")
 
       - name: 👷 Build
