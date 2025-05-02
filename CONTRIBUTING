@@ -23,6 +23,9 @@ Alternatively [pre-commit.ci](https://pre-commit.ci/), will run and commit chang
 
 ## Releases
 In order to deploy a new version, tag the commit with a version number and push it to github. This will trigger a github action that will build and deploy to PyPI. (see the "deploy" step in workflows/ci.yml). The version number is determined automatically based on the tag.
+
+Prior to making a release that bumps the major or minor number, the `supported_versions.yml` needs to be updated and the json schema updated by running `pixi run update-json`. 
+
 ```
 git tag -a v0.1.0 -m v0.1.0
 git push --follow-tags
