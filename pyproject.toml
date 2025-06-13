@@ -16,8 +16,7 @@ dependencies = [
     "pydantic", 
     "pyyaml",
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
-    "networkx"
-]
+    "networkx"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: MIT License",
@@ -71,6 +70,8 @@ dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default"}
 bench = { features = ["dev", "bench"], solve-group = "default" }
+zarr2 = { features = ["dev", "zarr2"]}
+zarr3 = { features = ["dev", "zarr3"]}
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
@@ -91,6 +92,13 @@ build = "python -m build"
 [tool.pixi.feature.docs.tasks]
 preview-docs = {cmd = "mkdocs serve", depends-on = "schema-docs"}
 schema-docs = "generate-schema-doc geff-schema.json docs/schema/schema.html"
+
+[tool.pixi.feature.zarr2.dependencies]
+zarr = ">=2,<3"
+
+[tool.pixi.feature.zarr3.dependencies]
+zarr = ">3,<4"
+
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
