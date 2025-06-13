@@ -113,7 +113,9 @@ def write(
                 raise ValueError(f"Position attribute {position_attr} not found in graph")
             for node, data in graph.nodes(data=True):
                 if position_attr not in data:
-                    raise ValueError(f"Node {node} does not have position attribute {position_attr}")
+                    raise ValueError(
+                        f"Node {node} does not have position attribute {position_attr}"
+                    )
 
     # write metadata
     if position_attr is not None:
@@ -210,8 +212,9 @@ def _set_attribute_values(
             # Get either individual item or list instead of setting with np.array
             val = val.tolist() if val.size > 1 else val.item()
             if nodes:
-                if name == "position" and "position_attr" in graph.graph:
-                    graph_attr = graph.graph["position_attr"]
+                # Do subsequent todos needs to be changed with optional position?
+                if name == "position" and "position_attr" in graph.graph:  # TODO
+                    graph_attr = graph.graph["position_attr"]  # TODO
                 else:
                     graph_attr = name
                 graph.nodes[_id.item()][graph_attr] = val
