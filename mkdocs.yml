@@ -2,6 +2,12 @@ site_name: geff
 
 site_url: https://live-image-tracking-tools.github.io/geff/
 
+nav:
+  - index.md
+  - what-is-geff.md
+  - specification.md
+  - api.md
+
 theme:
   name: "material"
   # palette:
