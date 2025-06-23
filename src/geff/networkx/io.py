@@ -226,7 +226,7 @@ def read(path: Path | str, validate: bool = True) -> nx.Graph:
             the geff  metadata
 
     Returns:
-        The graph that was stored in the geff file format
+        A networkx graph containing the graph that was stored in the geff file format
     """
     # zarr python 3 doesn't support Path
     path = str(path)

@@ -28,12 +28,12 @@ plugins:
           - https://docs.python.org/3/objects.inv
           - https://networkx.org/documentation/stable/objects.inv
         options:
-          docstring_section_style: list # or "table"
+          docstring_section_style: table # or "table"
           docstring_style: "google"
     #       filters: ["!^_"]
-          heading_level: 2 # TODO: for legibility header level 2 looks better, but then conflicts with section headers. 3 looks too small
+          heading_level: 3 
           merge_init_into_class: true
-          # parameter_headings: true
+          # parameter_headings: true # makes parameters show up in side TOC
           separate_signature: true
           show_root_heading: true
           show_source: false
