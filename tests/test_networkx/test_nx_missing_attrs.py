@@ -5,8 +5,7 @@ import numpy as np
 import pytest
 import zarr
 
-from geff.networkx.io import read_nx, write_nx
-from geff.utils import validate
+from geff import read_nx, validate, write_nx
 
 
 def graph_sparse_node_attrs():
