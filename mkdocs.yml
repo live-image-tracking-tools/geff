@@ -31,7 +31,7 @@ plugins:
           docstring_section_style: list # or "table"
           docstring_style: "google"
     #       filters: ["!^_"]
-          heading_level: 3
+          heading_level: 2 # TODO: for legibility header level 2 looks better, but then conflicts with section headers. 3 looks too small
           merge_init_into_class: true
           # parameter_headings: true
           separate_signature: true
