@@ -1,6 +1,6 @@
 site_name: geff
 
-site_url: https://funkelab.github.io/geff/
+site_url: https://live-image-tracking-tools.github.io/geff/
 
 theme:
   name: "material"
@@ -26,19 +26,19 @@ plugins:
       python:
         import:
           - https://docs.python.org/3/objects.inv
+          - https://networkx.org/documentation/stable/objects.inv
         options:
           docstring_section_style: list # or "table"
           docstring_style: "google"
-          filters: ["!^_"]
-          heading_level: 1
+    #       filters: ["!^_"]
+          heading_level: 3
           merge_init_into_class: true
-          parameter_headings: true
+          # parameter_headings: true
           separate_signature: true
           show_root_heading: true
+          show_source: false
           show_signature_annotations: true
           show_symbol_type_heading: true
           show_symbol_type_toc: true
-          summary: true
-- api-autonav:
-    modules: ['src/geff']
+          # summary: true
 - include-markdown

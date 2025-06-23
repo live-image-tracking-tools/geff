@@ -224,8 +224,9 @@ def read(path: Path | str, validate: bool = True) -> nx.Graph:
     Args:
         path (Path | str): The path to the root of the geff zarr, where the .attrs contains
             the geff  metadata
+
     Returns:
-        nx.Graph: The graph that was stored in the geff file format
+        The graph that was stored in the geff file format
     """
     # zarr python 3 doesn't support Path
     path = str(path)
