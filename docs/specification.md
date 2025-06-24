@@ -2,6 +2,8 @@
 
 The graph exchange file format is `zarr` based. A graph is stored in a zarr group, which can have any name. This allows storing multiple `geff` graphs inside the same zarr root directory. A `geff` group is identified by the presence of a `geff_version` attribute in the `.zattrs`. Other `geff` metadata is also stored in the `.zattrs` file of the `geff` group. The `geff` group must contain a `nodes` group and an `edges` group.
 
+`geff` graphs have the option to provide position as a special attribute. In this case, a `position_attr` must be specified in the `geff` metadata along with a `roi_min` and `roi_max`. If a `position_attr` is provided, every node must have a position value.
+
 ## Zarr specification
 
 Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html). However, `geff` will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.
@@ -27,7 +29,7 @@ The `nodes\attrs` group will contain one or more `node attribute` groups, each w
 !!! note
     When writing a graph with missing attributes to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the attribute, in order to keep the indices aligned with the node ids.
 
-- The `position` group is a special node attribute group that must be present and does not allow missing attributes.
+- The `position` group is a special node attribute group that must be present if a `position_attr` is set in the `geff` metadata and does not allow missing attributes.
 - The `seg_id` group is an optional, special node attribute group that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` group is not present, it is assumed that the graph is not associated with a segmentation. 
 <!-- Perhaps we just let the user specify the seg id attribute in the metadata instead? Then you can point it to the node ids if you wanted to -->
 
