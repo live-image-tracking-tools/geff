@@ -101,9 +101,9 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_attr_dtypes, edge_attr
 
     path = tmp_path / "rw_consistency.zarr/graph"
 
-    geff_nx.write(graph, path)
+    geff.write_nx(graph, path)
 
-    compare = geff_nx.read(path)
+    compare = geff.read_nx(path)
 
     assert set(graph.nodes) == set(compare.nodes)
     assert set(graph.edges) == set(compare.edges)
