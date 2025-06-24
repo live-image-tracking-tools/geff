@@ -1,6 +1,7 @@
 # What is geff?
 
 `geff` is a graph exchange file format that seeks to fulfill the following needs:
+
 - Provide a storage/exchange format for graphs and optional segmentation
 - Provide a common API with reference implementations for use in other projects
 

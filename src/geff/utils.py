@@ -16,6 +16,9 @@ def validate(path: str | Path):
 
     Args:
         path (str | Path): Path to geff zarr
+
+    Raises:
+        AssertionError: If geff specs are violated
     """
     # Check that directory exists
     assert os.path.exists(path), f"Directory {path} does not exist"
