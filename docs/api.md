@@ -2,12 +2,12 @@
 
 ## Networkx Backend
 
-::: geff.networkx.io.read
+::: geff.read_nx
 
-::: geff.networkx.io.write
+::: geff.write_nx
 
 ## Utilities
 
-::: geff.utils.validate
+::: geff.validate
 
-::: geff.metadata_schema.GeffMetadata
+::: geff.GeffMetadata
