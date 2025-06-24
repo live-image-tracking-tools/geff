@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pytest
 
-import geff.networkx as geff_nx
+import geff
 
 node_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_attr_dtypes = [
@@ -56,9 +56,9 @@ def test_read_write_consistency(tmp_path, node_dtype, node_attr_dtypes, edge_att
 
     path = tmp_path / "rw_consistency.zarr/graph"
 
-    geff_nx.write(graph, path, position_attr="pos", axis_names=axis_names, axis_units=axis_units)
+    geff.write_nx(graph, path, position_attr="pos", axis_names=axis_names, axis_units=axis_units)
 
-    compare = geff_nx.read(path)
+    compare = geff.read_nx(path)
 
     assert set(graph.nodes) == set(compare.nodes)
     assert set(graph.edges) == set(compare.edges)
@@ -118,4 +118,4 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_attr_dtypes, edge_attr
 def test_write_empty_graph():
     graph = nx.DiGraph()
     with pytest.warns(match="Graph is empty - not writing anything "):
-        geff_nx.write(graph, position_attr="pos", path=".")
+        geff.write_nx(graph, position_attr="pos", path=".")

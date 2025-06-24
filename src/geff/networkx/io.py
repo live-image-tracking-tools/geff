@@ -66,13 +66,13 @@ def get_edge_attrs(graph: nx.Graph) -> list[str]:
     return list({k for e in graph.edges for k in graph.edges[e]})
 
 
-def write(
+def write_nx(
     graph: nx.Graph,
     path: str | Path,
     position_attr: str | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
-    zarr_format: int = 3,
+    zarr_format: int = 2,
     validate: bool = True,
 ):
     """Write a networkx graph to the geff file format
@@ -90,7 +90,7 @@ def write(
             represented in position attribute. Defaults to None. Will override value
             in graph attributes if provided.
         zarr_format (Optional[int], optional): The version of zarr to write.
-            Defaults to 3.
+            Defaults to 2.
         validate (bool, optional): Flag indicating whether to perform validation on the
             networkx graph before writing anything to disk. If set to False and there are
             missing attributes, will likely fail with a KeyError, leading to an incomplete
@@ -218,7 +218,7 @@ def _set_attribute_values(
                 graph.edges[source, target][name] = val
 
 
-def read(path: Path | str, validate: bool = True) -> nx.Graph:
+def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     """Read a geff file into a networkx graph. Metadata attributes will be stored in
     the graph attributes, accessed via `G.graph[key]` where G is a networkx graph.
 
