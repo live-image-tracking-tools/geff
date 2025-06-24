@@ -51,7 +51,6 @@ If you do not have any edge attributes, the `edges\attrs` group should still be 
 
 ## Example file structure and metadata
 
-TODO: Example metadata for this file structure
 ``` python
 /path/to.zarr
     /tracking_graph
@@ -77,4 +76,33 @@ TODO: Example metadata for this file structure
     
     # unspecified, but totally okay:
     /raw 
+```
+
+```json
+# /path/to.zarr/tracking_graph/.zattrs
+{
+    "axis_names": [ # optional
+        "z",
+        "y",
+        "x"
+    ],
+    "axis_units": [ # optional
+        "um",
+        "um",
+        "um"
+    ],
+    "directed": true,
+    "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
+    "position_attr": "position",
+    "roi_max": [ # Required if position_attr is specified
+        4398.1,
+        1877.7,
+        2152.3
+    ],
+    "roi_min": [ # Required if position_attr is specified
+        1523.368197,
+        81.667,
+        764.42
+    ]
+}
 ```
