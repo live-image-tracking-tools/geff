@@ -225,6 +225,9 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     Args:
         path (Path | str): The path to the root of the geff zarr, where the .attrs contains
             the geff  metadata
+        validate (bool, optional): Flag indicating whether to perform validation on the
+            geff file before loading into memory. If set to False and there are
+            format issues, will likely fail with a cryptic error. Defaults to True.
 
     Returns:
         A networkx graph containing the graph that was stored in the geff file format

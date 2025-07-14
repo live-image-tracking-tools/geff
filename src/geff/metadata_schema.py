@@ -39,7 +39,7 @@ class GeffMetadata(BaseModel):
     axis_names: tuple[str, ...] | None = None
     axis_units: tuple[str, ...] | None = None
 
-    def model_post_init(self, *args, **kwargs):
+    def model_post_init(self, *args, **kwargs):  # noqa D102
         # Check spatial metadata only if position is provided
         if self.position_attr is not None:
             # Check that rois are there if position provided
@@ -106,6 +106,11 @@ class GeffMetadata(BaseModel):
 
 
 def write_metadata_schema(outpath: Path):
+    """Write the current geff metadata schema to a json file
+
+    Args:
+        outpath (Path): The file to write the schema to
+    """
     metadata_schema = GeffMetadata.model_json_schema()
     with open(outpath, "w") as f:
         f.write(json.dumps(metadata_schema, indent=2))
