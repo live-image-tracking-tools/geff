@@ -50,7 +50,7 @@ The `edges\attrs` group will contain zero or more `edge attribute` groups, each 
 If you do not have any edge attributes, the `edges\attrs` group should still be present, but empty.
 
 ## Example file structure and metadata
-
+Here is a schematic of the expected file structure.
 ``` python
 /path/to.zarr
     /tracking_graph
@@ -77,7 +77,7 @@ If you do not have any edge attributes, the `edges\attrs` group should still be 
     # unspecified, but totally okay:
     /raw 
 ```
-
+This is a geff metadata zattrs file that matches the above example structure.
 ```json
 # /path/to.zarr/tracking_graph/.zattrs
 {
@@ -103,6 +103,7 @@ If you do not have any edge attributes, the `edges\attrs` group should still be 
         1523.368197,
         81.667,
         764.42
-    ]
+    ],
+    ... # custom other things are allowed and ignored by geff
 }
 ```

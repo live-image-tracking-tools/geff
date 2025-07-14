@@ -45,7 +45,7 @@ def get_node_attrs(graph: nx.Graph) -> list[str]:
     that the attributes are present on all nodes.
 
     Args:
-        graph (nx.Graph): a networkx graph
+        graph (nx.Graph): A networkx graph
 
     Returns:
         list[str]: A list of all unique node attribute keys
@@ -58,7 +58,7 @@ def get_edge_attrs(graph: nx.Graph) -> list[str]:
     that the attributes are present on all edges.
 
     Args:
-        graph (nx.Graph): a networkx graph
+        graph (nx.Graph): A networkx graph
 
     Returns:
         list[str]: A list of all unique edge attribute keys
@@ -78,18 +78,18 @@ def write_nx(
     """Write a networkx graph to the geff file format
 
     Args:
-        graph (nx.Graph): a networkx graph where every node has a position attribute
-        path (str | Path): the path to the output zarr. Opens in append mode,
+        graph (nx.Graph): A networkx graph
+        path (str | Path): The path to the output zarr. Opens in append mode,
             so will only overwrite geff-controlled groups.
-        position_attr (Optional[str]): the name of the position attribute present on every node.
-            Defaults to None.
+        position_attr (Optional[str]): The name of the position attribute present on every node,
+            if present. Defaults to None.
         axis_names (Optional[list[str]], optional): The names of the spatial dims
             represented in position attribute. Defaults to None. Will override
             value in graph attributes if provided.
         axis_units (Optional[list[str]], optional): The units of the spatial dims
             represented in position attribute. Defaults to None. Will override value
             in graph attributes if provided.
-        zarr_format (Optional[int], optional): The version of zarr to write.
+        zarr_format (int, optional): The version of zarr to write.
             Defaults to 2.
         validate (bool, optional): Flag indicating whether to perform validation on the
             networkx graph before writing anything to disk. If set to False and there are

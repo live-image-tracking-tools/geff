@@ -47,4 +47,5 @@ plugins:
           show_symbol_type_heading: true
           show_symbol_type_toc: true
           # summary: true
+          line_length: 60
 - include-markdown
