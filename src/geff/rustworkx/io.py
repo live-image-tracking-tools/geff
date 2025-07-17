@@ -109,3 +109,10 @@ def read_rx(
             _set_attribute_values(edge_attrs, group["edges/attrs"])
 
     return graph, to_rx_id_map
+
+
+if __name__ == "__main__":
+    path = "/Users/jordao.bragantini/Data/geff/Fluo-N3DL-DRO.zarr/01/tracks"
+    graph, to_rx_id_map = read_rx(path)
+    print(graph.num_nodes())
+    print(graph.num_edges())
