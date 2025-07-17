@@ -13,10 +13,11 @@ license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
     "zarr>2,<4",
-    "pydantic", 
+    "pydantic",
     "pyyaml",
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
-    "networkx"]
+    "networkx",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: MIT License",
@@ -52,6 +53,9 @@ bench = [
     "tabulate",
     "pandas",
     "typer"
+]
+rustworkx = [
+    "rustworkx>=0.16.0",
 ]
 
 

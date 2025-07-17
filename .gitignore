@@ -25,3 +25,7 @@ docs/schema/*
 
 # Pytest coverage local files
 .coverage*
+
+# uv files
+.uv
+uv.lock
