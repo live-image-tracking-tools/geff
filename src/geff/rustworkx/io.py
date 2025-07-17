@@ -91,17 +91,19 @@ def read_rx(
     rx_node_ids = graph.add_nodes_from(node_attrs)
 
     to_rx_id_map = dict(zip(node_ids, rx_node_ids))
-    from_rx_id_map = dict(zip(rx_node_ids, node_ids))
 
     _set_attribute_values(node_attrs, group["nodes/attrs"])
 
     if "edges" in group.group_keys():
-        edge_ids = group["edges/ids"][...]
-        # converting rx ids (0-indexed) to node ids (arbitrary index)
-        edge_ids = np.vectorize(from_rx_id_map.__getitem__)(edge_ids).tolist()
-        # same as node_attrs, initialize the attributes with empty dicts
+        edge_ids = group["edges/ids"][...].tolist()
+        # and same as node_attrs, initialize the attributes with empty dicts
         edge_attrs: list[dict[str, Any]] = [{} for _ in range(len(edge_ids))]
-        graph.add_edges_from(zip(edge_ids[0], edge_ids[1], edge_attrs))
+
+        # converting node ids (arbitrary index) to rx ids (0-indexed)
+        edges = [
+            (to_rx_id_map[i], to_rx_id_map[j], attr) for (i, j), attr in zip(edge_ids, edge_attrs)
+        ]
+        graph.add_edges_from(edges)
 
         if "edges/attrs" in group:
             _set_attribute_values(edge_attrs, group["edges/attrs"])
