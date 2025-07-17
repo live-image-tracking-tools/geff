@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Sequence
 
 import networkx as nx
 import numpy as np
@@ -10,7 +10,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
-from geff.write_utils import write_geff_attr
+from geff.writer_helper import BaseWriterHelper
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -41,30 +41,39 @@ def get_roi(graph: nx.Graph, position_attr: str) -> tuple[tuple[float, ...], tup
     return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
 
 
-def get_node_attrs(graph: nx.Graph) -> list[str]:
-    """Get the attribute keys present on any node in the networkx graph. Does not imply
-    that the attributes are present on all nodes.
+class NXWriterHelper(BaseWriterHelper):
+    """
+    Helper class for writing node or edge attributes to a zarr group.
 
     Args:
-        graph (nx.Graph): A networkx graph
-
-    Returns:
-        list[str]: A list of all unique node attribute keys
+        group: The zarr group to write the attribute to.
+        iterator: a sequence of (id, data) pairs. For example, graph.nodes(data=True)
+        position_attr: The name of the position attribute. If None, no position attribute
     """
-    return list({k for n in graph.nodes for k in graph.nodes[n]})
 
+    def __init__(
+        self,
+        group: zarr.Group,
+        data_sequence: Sequence[tuple[Any, dict[str, Any]]],
+        position_attr: str | None = None,
+    ):
+        super().__init__(group, position_attr)
+        self._data = data_sequence
+        ids = [idx for idx, _ in data_sequence]
+        if len(ids) > 0:
+            self._group["ids"] = np.asarray(ids)
+        elif self._group.name == "/nodes":
+            self._group["ids"] = np.empty((0,), dtype=np.int64)
+        elif self._group.name == "/edges":
+            self._group["ids"] = np.empty((0, 2), dtype=np.int64)
+        else:
+            raise ValueError(f"Invalid group name: {self._group.name}")
 
-def get_edge_attrs(graph: nx.Graph) -> list[str]:
-    """Get the attribute keys present on any edge in the networkx graph. Does not imply
-    that the attributes are present on all edges.
+    def _data_dict_iterator(self) -> Sequence[tuple[Any, dict[str, Any]]]:
+        return self._data
 
-    Args:
-        graph (nx.Graph): A networkx graph
-
-    Returns:
-        list[str]: A list of all unique edge attribute keys
-    """
-    return list({k for e in graph.edges for k in graph.edges[e]})
+    def _attr_names(self) -> list[str]:
+        return list({k for _, data in self._data for k in data})
 
 
 def write_nx(
@@ -107,22 +116,25 @@ def write_nx(
     else:
         group = zarr.open(path, mode="a")
 
-    node_attrs = get_node_attrs(graph)
-    if validate:
-        if position_attr is not None:
-            if position_attr not in node_attrs:
-                raise ValueError(f"Position attribute {position_attr} not found in graph")
-            for node, data in graph.nodes(data=True):
-                if position_attr not in data:
-                    raise ValueError(
-                        f"Node {node} does not have position attribute {position_attr}"
-                    )
+    node_writer = NXWriterHelper(
+        group.require_group("nodes"),
+        list(graph.nodes(data=True)),
+        position_attr=position_attr,
+    )
+    node_writer.write_attrs()
+
+    edge_writer = NXWriterHelper(
+        group.require_group("edges"),
+        [((u, v), data) for u, v, data in graph.edges(data=True)],
+    )
+    edge_writer.write_attrs()
 
     # write metadata
     if position_attr is not None:
         roi_min, roi_max = get_roi(graph, position_attr=position_attr)
     else:
         roi_min, roi_max = None, None
+
     metadata = GeffMetadata(
         geff_version=geff.__version__,
         directed=isinstance(graph, nx.DiGraph),
@@ -133,52 +145,6 @@ def write_nx(
         axis_units=axis_units if axis_units is not None else graph.graph.get("axis_units", None),
     )
     metadata.write(group)
-
-    # get node and edge IDs
-    nodes_list = list(graph.nodes())
-    nodes_arr = np.array(nodes_list)
-    edges_list = list(graph.edges())
-    edges_arr = np.array(edges_list)
-
-    # write nodes
-    group["nodes/ids"] = nodes_arr
-
-    # write node attributes
-    for name in node_attrs:
-        values = []
-        missing = []
-        for node in nodes_list:
-            if name in graph.nodes[node]:
-                value = graph.nodes[node][name]
-                mask = 0
-            else:
-                value = 0
-                mask = 1
-            values.append(value)
-            missing.append(mask)
-
-        write_geff_attr(group["nodes"], name, values, missing)
-
-    # write edges
-    # Edge group is only created if edges are present on graph
-    if len(edges_list) > 0:
-        group["edges/ids"] = edges_arr
-
-        # write edge attributes
-        for name in get_edge_attrs(graph):
-            values = []
-            missing = []
-            for edge in edges_list:
-                if name in graph.edges[edge]:
-                    value = graph.edges[edge][name]
-                    mask = 0
-                else:
-                    value = 0
-                    mask = 1
-                values.append(value)
-                missing.append(mask)
-
-            write_geff_attr(group["edges"], name, values, missing)
 
 
 def _set_attribute_values(
