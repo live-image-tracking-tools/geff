@@ -10,6 +10,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
+from geff.write_utils import write_geff_attr
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -155,11 +156,8 @@ def write_nx(
                 mask = 1
             values.append(value)
             missing.append(mask)
-        # Missing value are only allowed for non-position attribute
-        if name != position_attr:
-            # Always store missing array even if all values are present
-            group[f"nodes/attrs/{name}/missing"] = np.array(missing, dtype=bool)
-        group[f"nodes/attrs/{name}/values"] = np.array(values)
+
+        write_geff_attr(group["nodes"], name, values, missing)
 
     # write edges
     # Edge group is only created if edges are present on graph
@@ -179,8 +177,8 @@ def write_nx(
                     mask = 1
                 values.append(value)
                 missing.append(mask)
-            group[f"edges/attrs/{name}/missing"] = np.array(missing, dtype=bool)
-            group[f"edges/attrs/{name}/values"] = np.array(values)
+
+            write_geff_attr(group["edges"], name, values, missing)
 
 
 def _set_attribute_values(
