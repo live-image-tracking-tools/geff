@@ -47,7 +47,7 @@ class NXWriterHelper(BaseWriterHelper):
 
     Args:
         group: The zarr group to write the attribute to.
-        iterator: a sequence of (id, data) pairs. For example, graph.nodes(data=True)
+        data_sequence: a sequence of (id, data) pairs. For example, graph.nodes(data=True)
         position_attr: The name of the position attribute. If None, no position attribute
     """
 
