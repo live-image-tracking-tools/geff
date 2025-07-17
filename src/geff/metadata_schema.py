@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 import zarr
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
 import geff
@@ -29,7 +29,7 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(title="geff_metadata")
+    model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
 
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
@@ -39,8 +39,8 @@ class GeffMetadata(BaseModel):
     axis_names: tuple[str, ...] | None = None
     axis_units: tuple[str, ...] | None = None
 
-    def model_post_init(self, *args, **kwargs):  # noqa D102
-        # Check spatial metadata only if position is provided
+    @model_validator(mode="after")
+    def _validate_model(self) -> GeffMetadata:
         if self.position_attr is not None:
             # Check that rois are there if position provided
             if self.roi_min is None or self.roi_max is None:
@@ -72,12 +72,12 @@ class GeffMetadata(BaseModel):
                     f" dimensions in roi ({ndim})"
                 )
         # If no position, check that other spatial metadata is not provided
-        else:
-            if any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
-                raise ValueError(
-                    "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
-                    " position_attr"
-                )
+        elif any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
+            raise ValueError(
+                "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
+                " position_attr"
+            )
+        return self
 
     def write(self, group: zarr.Group | Path):
         """Helper function to write GeffMetadata into the zarr geff group.
