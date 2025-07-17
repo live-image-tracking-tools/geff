@@ -1,7 +1,6 @@
 import re
 
 import numpy as np
-import pydantic
 import pytest
 import zarr
 
@@ -17,7 +16,7 @@ def test_validate(tmp_path):
     z = zarr.open(zpath)
 
     # Missing metadata
-    with pytest.raises(pydantic.ValidationError):
+    with pytest.raises(ValueError, match="No zattrs found in"):
         validate(zpath)
     z.attrs["geff_version"] = "v0.0.1"
     z.attrs["directed"] = True
