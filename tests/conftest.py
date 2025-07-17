@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal, TypedDict, Callable
 
 import networkx as nx
 import numpy as np
@@ -8,7 +8,9 @@ from numpy.typing import NDArray
 
 import geff
 
-DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64"]
+DTypeStr = Literal[
+    "double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64"
+]
 Axes = Literal["t", "z", "y", "x"]
 
 
@@ -76,48 +78,64 @@ def create_dummy_graph_attrs(
     }
 
 
-@pytest.fixture()
-def path_w_expected_graph_attrs(tmp_path) -> tuple[Path, GraphAttrs]:
-    """
-    Fixture to a geff graph path saved on disk with the expected graph attributes.
+@pytest.mark.fixure
+def path_w_expected_graph_attrs(
+    tmp_path,
+) -> Callable[
+    [DTypeStr, ExampleNodeAttrs, ExampleEdgeAttrs, bool], tuple[Path, GraphAttrs]
+]:
+    def func(
+        node_dtype: DTypeStr,
+        node_attr_dtypes: ExampleNodeAttrs,
+        edge_attr_dtypes: ExampleEdgeAttrs,
+        directed: bool,
+    ) -> tuple[Path, GraphAttrs]:
+        """
+        Fixture to a geff graph path saved on disk with the expected graph attributes.
 
-    Returns:
-    Path
-        Path to the example graph.
-    GraphAttrs
-        The expected graph attributes in a dictionary.
-    """
+        Returns:
+        Path
+            Path to the example graph.
+        GraphAttrs
+            The expected graph attributes in a dictionary.
+        """
 
-    directed = True
-    graph_attrs = create_dummy_graph_attrs(
-        node_dtype="int8",
-        node_attr_dtypes={"position": "double"},
-        edge_attr_dtypes={"score": "float64", "color": "uint8"},
-        directed=directed,
-    )
+        directed = True
+        graph_attrs = create_dummy_graph_attrs(
+            node_dtype=node_dtype,
+            node_attr_dtypes=node_attr_dtypes,
+            edge_attr_dtypes=edge_attr_dtypes,
+            directed=directed,
+        )
 
-    # TODO: write zarr from scratch to remove test dependency on networkx backend?
-    # write graph with networkx api
-    graph = nx.DiGraph() if directed else nx.Graph()
+        # TODO: write zarr from scratch to remove test dependency on networkx backend?
+        # write graph with networkx api
+        graph = nx.DiGraph() if directed else nx.Graph()
 
-    for idx, node in enumerate(graph_attrs["nodes"]):
-        attrs = {
-            name: attr_array[idx] for name, attr_array in graph_attrs["extra_node_attrs"].items()
-        }
-        graph.add_node(node, pos=graph_attrs["node_positions"][idx], **attrs)
+        for idx, node in enumerate(graph_attrs["nodes"]):
+            attrs = {
+                name: attr_array[idx]
+                for name, attr_array in graph_attrs["extra_node_attrs"].items()
+            }
+            graph.add_node(node, pos=graph_attrs["node_positions"][idx], **attrs)
 
-    for idx, edge in enumerate(graph_attrs["edges"]):
-        attrs = {name: attr_array[idx] for name, attr_array in graph_attrs["edge_attrs"].items()}
-        graph.add_edge(*edge.tolist(), **attrs)
+        for idx, edge in enumerate(graph_attrs["edges"]):
+            attrs = {
+                name: attr_array[idx]
+                for name, attr_array in graph_attrs["edge_attrs"].items()
+            }
+            graph.add_edge(*edge.tolist(), **attrs)
 
-    path = tmp_path / "rw_consistency.zarr/graph"
+        path = tmp_path / "rw_consistency.zarr/graph"
 
-    geff.write_nx(
-        graph,
-        path,
-        position_attr="pos",
-        axis_names=list(graph_attrs["axis_names"]),
-        axis_units=list(graph_attrs["axis_units"]),
-    )
+        geff.write_nx(
+            graph,
+            path,
+            position_attr="pos",
+            axis_names=list(graph_attrs["axis_names"]),
+            axis_units=list(graph_attrs["axis_units"]),
+        )
 
-    return path, graph_attrs
+        return path, graph_attrs
+
+    return func
