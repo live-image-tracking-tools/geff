@@ -78,6 +78,8 @@ def create_dummy_graph_attrs(
     }
 
 
+# Using a fixture instead of a function so the tmp_path fixture is automatically passed
+# Implemented as a closure where tmp_path is the bound variable
 @pytest.fixture
 def path_w_expected_graph_attrs(
     tmp_path,
