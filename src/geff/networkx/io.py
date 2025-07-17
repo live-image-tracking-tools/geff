@@ -118,6 +118,8 @@ def write_nx(
                     )
 
     # write metadata
+    roi_min: tuple[float, ...] | None
+    roi_max: tuple[float, ...] | None
     if position_attr is not None:
         roi_min, roi_max = get_roi(graph, position_attr=position_attr)
     else:

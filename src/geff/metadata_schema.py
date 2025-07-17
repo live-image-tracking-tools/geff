@@ -102,6 +102,15 @@ class GeffMetadata(BaseModel):
         """
         if isinstance(group, Path):
             group = zarr.open(group)
+
+        # Check if geff_version exists in zattrs
+        if "geff_version" not in group.attrs:
+            raise ValueError(
+                f"No geff_version found in {group}. This may indicate the path is incorrect or "
+                f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
+                f"/dataset.zarr/)."
+            )
+
         return cls(**group.attrs)
 
 

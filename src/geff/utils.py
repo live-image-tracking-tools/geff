@@ -30,7 +30,7 @@ def validate(path: str | Path):
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    meta = GeffMetadata(**graph.attrs)
+    meta = GeffMetadata.read(graph)
 
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
