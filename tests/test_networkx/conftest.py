@@ -1,16 +1,14 @@
-from typing import Literal, TypedDict, Any, Mapping
 from pathlib import Path
+from typing import Any, Literal, TypedDict
 
-import pytest
-import numpy as np
-from numpy.typing import NDArray
 import networkx as nx
+import numpy as np
+import pytest
+from numpy.typing import NDArray
 
 import geff
 
-DTypeStr = Literal[
-    "double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64"
-]
+DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64"]
 Axes = Literal["t", "z", "y", "x"]
 
 
@@ -40,7 +38,6 @@ def create_dummy_graph_attrs(
     edge_attr_dtypes: ExampleEdgeAttrs,
     directed: bool,
 ) -> GraphAttrs:
-
     axis_names = ("t", "z", "y", "x")
     axis_units = ("s", "nm", "nm", "nm")
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
@@ -105,16 +102,12 @@ def path_w_expected_graph_attrs(tmp_path) -> tuple[Path, GraphAttrs]:
 
     for idx, node in enumerate(graph_attrs["nodes"]):
         attrs = {
-            name: attr_array[idx]
-            for name, attr_array in graph_attrs["extra_node_attrs"].items()
+            name: attr_array[idx] for name, attr_array in graph_attrs["extra_node_attrs"].items()
         }
         graph.add_node(node, pos=graph_attrs["node_positions"][idx], **attrs)
 
     for idx, edge in enumerate(graph_attrs["edges"]):
-        attrs = {
-            name: attr_array[idx]
-            for name, attr_array in graph_attrs["edge_attrs"].items()
-        }
+        attrs = {name: attr_array[idx] for name, attr_array in graph_attrs["edge_attrs"].items()}
         graph.add_edge(*edge.tolist(), **attrs)
 
     path = tmp_path / "rw_consistency.zarr/graph"

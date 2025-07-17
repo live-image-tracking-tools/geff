@@ -13,9 +13,7 @@ def test_networkx_read(path_w_expected_graph_attrs):
     graph = geff.read_nx(path)
 
     assert set(graph.nodes) == {*graph_attrs["nodes"].tolist()}
-    assert set(graph.edges) == {
-        *[tuple(edges) for edges in graph_attrs["edges"].tolist()]
-    }
+    assert set(graph.edges) == {*[tuple(edges) for edges in graph_attrs["edges"].tolist()]}
     for idx, node in enumerate(graph_attrs["nodes"]):
         np.testing.assert_array_equal(
             graph.nodes[node.item()]["pos"], graph_attrs["node_positions"][idx]
