@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 import geff
 
 DTypeStr = Literal[
-    "double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64"
+    "double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"
 ]
 Axes = Literal["t", "z", "y", "x"]
 

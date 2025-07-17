@@ -4,7 +4,7 @@ import pytest
 
 import geff
 
-node_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
 node_attr_dtypes = [
     {"position": "double"},
     {"position": "int"},
@@ -35,7 +35,9 @@ def test_read_write_consistency(
     graph = geff.read_nx(path)
 
     assert set(graph.nodes) == {*graph_attrs["nodes"].tolist()}
-    assert set(graph.edges) == {*[tuple(edges) for edges in graph_attrs["edges"].tolist()]}
+    assert set(graph.edges) == {
+        *[tuple(edges) for edges in graph_attrs["edges"].tolist()]
+    }
     for idx, node in enumerate(graph_attrs["nodes"]):
         np.testing.assert_array_equal(
             graph.nodes[node.item()]["pos"], graph_attrs["node_positions"][idx]
@@ -53,7 +55,9 @@ def test_read_write_consistency(
 @pytest.mark.parametrize("node_attr_dtypes", node_attr_dtypes)
 @pytest.mark.parametrize("edge_attr_dtypes", edge_attr_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
-def test_read_write_no_spatial(tmp_path, node_dtype, node_attr_dtypes, edge_attr_dtypes, directed):
+def test_read_write_no_spatial(
+    tmp_path, node_dtype, node_attr_dtypes, edge_attr_dtypes, directed
+):
     graph = nx.DiGraph() if directed else nx.Graph()
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
@@ -87,8 +91,12 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_attr_dtypes, edge_attr
         assert graph.nodes[node.item()]["attr"] == compare.nodes[node.item()]["attr"]
 
     for edge in edges:
-        assert graph.edges[edge.tolist()]["score"] == compare.edges[edge.tolist()]["score"]
-        assert graph.edges[edge.tolist()]["color"] == compare.edges[edge.tolist()]["color"]
+        assert (
+            graph.edges[edge.tolist()]["score"] == compare.edges[edge.tolist()]["score"]
+        )
+        assert (
+            graph.edges[edge.tolist()]["color"] == compare.edges[edge.tolist()]["color"]
+        )
 
 
 def test_write_empty_graph():
