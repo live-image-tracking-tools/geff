@@ -78,7 +78,7 @@ def create_dummy_graph_attrs(
     }
 
 
-@pytest.mark.fixure
+@pytest.fixture
 def path_w_expected_graph_attrs(
     tmp_path,
 ) -> Callable[
