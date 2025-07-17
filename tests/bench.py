@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 import geff.networkx.io as geff_nx
+import geff.rustworkx.io as geff_rx
 from geff.utils import validate
 
 ROUNDS = 3
@@ -54,7 +55,6 @@ def test_validate(benchmark, big_graph_path):
     benchmark.pedantic(validate, kwargs={"path": big_graph_path}, rounds=ROUNDS)
 
 
-def test_read(benchmark, big_graph_path):
-    benchmark.pedantic(
-        geff_nx.read_nx, kwargs={"path": big_graph_path, "validate": False}, rounds=ROUNDS
-    )
+@pytest.mark.parametrize("read_func", [geff_nx.read_nx, geff_rx.read_rx])
+def test_read(read_func, benchmark, big_graph_path):
+    benchmark.pedantic(read_func, kwargs={"path": big_graph_path, "validate": False}, rounds=ROUNDS)
