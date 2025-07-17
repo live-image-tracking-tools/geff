@@ -158,7 +158,7 @@ class TestMetadataModel:
             extra=True,
         )
         zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, "a")
+        group = zarr.open(zpath, mode="a")
         meta.write(group)
         compare = GeffMetadata.read(group)
         assert compare == meta
