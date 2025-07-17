@@ -28,6 +28,14 @@ def validate(path: str | Path):
 
     graph = zarr.open(path, mode="r")
 
+    # Check if zattrs are empty or missing
+    if not graph.attrs:
+        raise ValueError(
+            f"No zattrs found in {path}. This may indicate the path is incorrect or "
+            f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
+            f"/dataset.zarr/)."
+        )
+
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
     meta = GeffMetadata(**graph.attrs)
