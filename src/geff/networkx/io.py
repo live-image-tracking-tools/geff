@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING
 
 import networkx as nx
 import numpy as np
@@ -39,41 +39,6 @@ def get_roi(graph: nx.Graph, position_attr: str) -> tuple[tuple[float, ...], tup
             _max = np.max([_max, pos], axis=0)
 
     return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
-
-
-class NXWriterHelper(BaseWriterHelper):
-    """
-    Helper class for writing node or edge attributes to a zarr group.
-
-    Args:
-        group: The zarr group to write the attribute to.
-        data_sequence: a sequence of (id, data) pairs. For example, graph.nodes(data=True)
-        position_attr: The name of the position attribute. If None, no position attribute
-    """
-
-    def __init__(
-        self,
-        group: zarr.Group,
-        data_sequence: Sequence[tuple[Any, dict[str, Any]]],
-        position_attr: str | None = None,
-    ):
-        super().__init__(group, position_attr)
-        self._data = data_sequence
-        ids = [idx for idx, _ in data_sequence]
-        if len(ids) > 0:
-            self._group["ids"] = np.asarray(ids)
-        elif self._group.name == "/nodes":
-            self._group["ids"] = np.empty((0,), dtype=np.int64)
-        elif self._group.name == "/edges":
-            self._group["ids"] = np.empty((0, 2), dtype=np.int64)
-        else:
-            raise ValueError(f"Invalid group name: {self._group.name}")
-
-    def _data_dict_iterator(self) -> Sequence[tuple[Any, dict[str, Any]]]:
-        return self._data
-
-    def _attr_names(self) -> list[str]:
-        return list({k for _, data in self._data for k in data})
 
 
 def write_nx(
@@ -116,18 +81,17 @@ def write_nx(
     else:
         group = zarr.open(path, mode="a")
 
-    node_writer = NXWriterHelper(
-        group.require_group("nodes"),
-        list(graph.nodes(data=True)),
+    node_writer = BaseWriterHelper(
+        data=list(graph.nodes(data=True)),
         position_attr=position_attr,
     )
-    node_writer.write_attrs()
+    node_writer.write_attrs(group.require_group("nodes"))
 
-    edge_writer = NXWriterHelper(
-        group.require_group("edges"),
-        [((u, v), data) for u, v, data in graph.edges(data=True)],
+    edge_writer = BaseWriterHelper(
+        data=[((u, v), data) for u, v, data in graph.edges(data=True)],
+        position_attr=position_attr,
     )
-    edge_writer.write_attrs()
+    edge_writer.write_attrs(group.require_group("edges"))
 
     # write metadata
     roi_min: tuple[float, ...] | None
