@@ -41,6 +41,7 @@ class GeffMetadata(BaseModel):
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
+        # Check spatial metadata only if position is provided
         if self.position_attr is not None:
             # Check that rois are there if position provided
             if self.roi_min is None or self.roi_max is None:
