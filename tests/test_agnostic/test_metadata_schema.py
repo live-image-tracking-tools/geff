@@ -56,10 +56,7 @@ class TestMetadataModel:
         assert model.axis_names is None
         assert model.axis_units is None
 
-        model = GeffMetadata(
-            geff_version="0.0.1",
-            directed=True
-        )
+        model = GeffMetadata(geff_version="0.0.1", directed=True)
         assert model.position_attr is None
         assert model.roi_min is None
         assert model.roi_max is None
@@ -123,10 +120,7 @@ class TestMetadataModel:
             )
 
     def test_invalid_spatial_metadata(self):
-        with pytest.raises(
-            ValueError,
-            match="Spatial metadata"
-        ):
+        with pytest.raises(ValueError, match="Spatial metadata"):
             GeffMetadata(
                 geff_version="0.0.1-a",
                 directed=False,
@@ -158,7 +152,7 @@ class TestMetadataModel:
             extra=True,
         )
         zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, "a")
+        group = zarr.open(zpath, mode="a")
         meta.write(group)
         compare = GeffMetadata.read(group)
         assert compare == meta

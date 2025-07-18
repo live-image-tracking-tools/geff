@@ -13,7 +13,7 @@ license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
     "zarr>2,<4",
-    "pydantic", 
+    "pydantic>=2",
     "pyyaml",
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
     "networkx"]
