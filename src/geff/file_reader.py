@@ -47,6 +47,12 @@ class FileReader:
         self.node_props: dict[str, PropDict[zarr.Array]] = {}
         self.edge_props: dict[str, PropDict[zarr.Array]] = {}
 
+        node_props_group = zarr.open_group(self.group.store, path=f"nodes/props")
+        self.node_prop_names: list[str] = [*node_props_group.group_keys()]
+
+        edge_props_group = zarr.open_group(self.group.store, path=f"edges/props")
+        self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
+
     def read_node_props(self, name: str):
         prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}")
         prop_dict: PropDict = {"values": prop_group["values"]}
@@ -59,7 +65,7 @@ class FileReader:
         prop_dict: PropDict = {"values": prop_group["values"]}
         if "missing" in prop_group.keys():
             prop_dict["missing"] = prop_group["missing"]
-        self.node_props[name] = prop_dict
+        self.edge_props[name] = prop_dict
 
     def build(
         self,
@@ -97,7 +103,7 @@ class FileReader:
                 )
             }
             if "missing" in props:
-                node_props[name]["missing"] = np.array(
+                edge_props[name]["missing"] = np.array(
                     props["missing"][
                         edge_mask.tolist() if edge_mask is not None else ...
                     ],

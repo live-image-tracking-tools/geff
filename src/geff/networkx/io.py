@@ -2,22 +2,27 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 import networkx as nx
 import numpy as np
+from numpy.typing import NDArray
 import zarr
 
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
 from geff.writer_helper import write_props
+from geff.dict_representation import GraphDict, PropDict
+from geff.file_reader import FileReader
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tuple[float, ...]]:
+def get_roi(
+    graph: nx.Graph, position_prop: str
+) -> tuple[tuple[float, ...], tuple[float, ...]]:
     """Get the roi of a networkx graph.
 
     Args:
@@ -113,14 +118,26 @@ def write_nx(
         roi_min=roi_min,
         roi_max=roi_max,
         position_prop=position_prop,
-        axis_names=axis_names if axis_names is not None else graph.graph.get("axis_names", None),
-        axis_units=axis_units if axis_units is not None else graph.graph.get("axis_units", None),
+        axis_names=(
+            axis_names
+            if axis_names is not None
+            else graph.graph.get("axis_names", None)
+        ),
+        axis_units=(
+            axis_units
+            if axis_units is not None
+            else graph.graph.get("axis_units", None)
+        ),
     )
     metadata.write(group)
 
 
 def _set_property_values(
-    graph: nx.DiGraph, ids: np.ndarray, graph_group: zarr.Group, name: str, nodes: bool = True
+    graph: nx.Graph,
+    ids: NDArray[Any],
+    name: str,
+    prop_dict: PropDict[NDArray],
+    nodes: bool = True,
 ) -> None:
     """Add properties in-place to a networkx graph's
     nodes or edges by creating attributes on the nodes/edges
@@ -134,17 +151,12 @@ def _set_property_values(
         nodes (bool, optional): If True, extract and set node properties.  If False,
             extract and set edge properties. Defaults to True.
     """
-    element = "nodes" if nodes else "edges"
-    prop_group = graph_group[f"{element}/props/{name}"]
-    values = prop_group["values"][:]
-    sparse = "missing" in prop_group.array_keys()
-    if sparse:
-        missing = prop_group["missing"][:]
+    sparse = "missing" in prop_dict
     for idx in range(len(ids)):
         _id = ids[idx]
-        val = values[idx]
+        val = prop_dict["values"][idx]
         # If property is sparse and missing for this node, skip setting property
-        ignore = missing[idx] if sparse else False
+        ignore = prop_dict["missing"][idx] if sparse else False
         if not ignore:
             # Get either individual item or list instead of setting with np.array
             val = val.tolist() if val.size > 1 else val.item()
@@ -155,7 +167,30 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
+def ingest_dict_nx(graph_dict: GraphDict):
+    metadata = graph_dict["metadata"]
+
+    graph = nx.DiGraph() if metadata.directed else nx.Graph()
+    for key, val in metadata:
+        graph.graph[key] = val
+
+    graph.add_nodes_from(graph_dict["nodes"].tolist())
+    for name, prop_dict in graph_dict["node_props"].items():
+        _set_property_values(graph, graph_dict["nodes"], name, prop_dict, nodes=True)
+
+    graph.add_edges_from(graph_dict["edges"].tolist())
+    for name, prop_dict in graph_dict["edge_props"].items():
+        _set_property_values(graph, graph_dict["edges"], name, prop_dict, nodes=False)
+
+    return graph
+
+
+def read_nx(
+    path: Path | str,
+    validate: bool = True,
+    node_props: Optional[list[str]] = None,
+    edge_props: Optional[list[str]] = None,
+) -> nx.Graph:
     """Read a geff file into a networkx graph. Metadata properties will be stored in
     the graph properties, accessed via `G.graph[key]` where G is a networkx graph.
 
@@ -169,36 +204,22 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
-    # zarr python 3 doesn't support Path
-    path = str(path)
-    path = os.path.expanduser(path)
+    if isinstance(path, str):
+        path = Path(path)
+    path = path.expanduser()
+    file_reader = FileReader(path, validate)
 
-    # open zarr container
-    if validate:
-        geff.utils.validate(path)
+    if node_props is None:
+        node_props = file_reader.node_prop_names
+    if edge_props is None:
+        edge_props = file_reader.edge_prop_names
 
-    group = zarr.open(path, mode="r")
-    metadata = GeffMetadata.read(group)
+    for node_prop_name in node_props:
+        file_reader.read_node_props(node_prop_name)
+    for edge_prop_name in edge_props:
+        file_reader.read_edge_props(edge_prop_name)
 
-    # read meta-data
-    graph = nx.DiGraph() if metadata.directed else nx.Graph()
-    for key, val in metadata:
-        graph.graph[key] = val
-
-    nodes = group["nodes/ids"][:]
-    graph.add_nodes_from(nodes.tolist())
-
-    # collect node properties
-    for name in group["nodes/props"]:
-        _set_property_values(graph, nodes, group, name, nodes=True)
-
-    if "edges" in group.group_keys():
-        edges = group["edges/ids"][:]
-        graph.add_edges_from(edges.tolist())
-
-        # collect edge properties if they exist
-        if "edges/props" in group:
-            for name in group["edges/props"]:
-                _set_property_values(graph, edges, group, name, nodes=False)
+    graph_dict = file_reader.build()
+    graph = ingest_dict_nx(graph_dict)
 
     return graph
