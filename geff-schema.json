@@ -1,5 +1,5 @@
 {
-  "description": "Geff metadata schema to validate the properties json file in a geff zarr",
+  "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
   "properties": {
     "geff_version": {
       "pattern": "(0\\.0)|(0\\.1)|(0\\.2)",
