@@ -8,9 +8,7 @@ from numpy.typing import NDArray
 
 import geff
 
-DTypeStr = Literal[
-    "double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"
-]
+DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
 Axes = Literal["t", "z", "y", "x"]
 
 
@@ -83,9 +81,7 @@ def create_dummy_graph_attrs(
 @pytest.fixture
 def path_w_expected_graph_attrs(
     tmp_path,
-) -> Callable[
-    [DTypeStr, ExampleNodeAttrs, ExampleEdgeAttrs, bool], tuple[Path, GraphAttrs]
-]:
+) -> Callable[[DTypeStr, ExampleNodeAttrs, ExampleEdgeAttrs, bool], tuple[Path, GraphAttrs]]:
     def func(
         node_dtype: DTypeStr,
         node_attr_dtypes: ExampleNodeAttrs,
@@ -122,8 +118,7 @@ def path_w_expected_graph_attrs(
 
         for idx, edge in enumerate(graph_attrs["edges"]):
             attrs = {
-                name: attr_array[idx]
-                for name, attr_array in graph_attrs["edge_attrs"].items()
+                name: attr_array[idx] for name, attr_array in graph_attrs["edge_attrs"].items()
             }
             graph.add_edge(*edge.tolist(), **attrs)
 
