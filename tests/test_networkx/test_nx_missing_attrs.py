@@ -95,9 +95,9 @@ def test_missing_pos_attr(tmp_path):
     zarr_path = Path(tmp_path) / "test.zarr"
     graph, _ = graph_sparse_node_attrs()
     # wrong attribute name
-    with pytest.raises(ValueError, match="Position attribute pos not found in graph"):
+    with pytest.raises(ValueError, match=r"Position attribute \('pos'\) not found in \[.*\]"):
         geff.write_nx(graph, position_attr="pos", path=zarr_path)
     # missing attribute
     del graph.nodes[1]["position"]
-    with pytest.raises(ValueError, match="Node 1 does not have position attribute *"):
+    with pytest.raises(ValueError, match=r"Element '1' does not have position attribute"):
         geff.write_nx(graph, position_attr="position", path=zarr_path)
