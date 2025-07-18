@@ -93,11 +93,11 @@ def test_sparse_edge_props(tmp_path):
 
 def test_missing_pos_prop(tmp_path):
     zarr_path = Path(tmp_path) / "test.zarr"
-    graph, _ = graph_sparse_node_attrs()
-    # wrong attribute name
+    graph, _ = graph_sparse_node_props()
+    # wrong property name
     with pytest.raises(ValueError, match=r"Position property \('pos'\) not found in \[.*\]"):
-        geff.write_nx(graph, position_attr="pos", path=zarr_path)
-    # missing attribute
+        geff.write_nx(graph, position_prop="pos", path=zarr_path)
+    # missing property
     del graph.nodes[1]["position"]
     with pytest.raises(ValueError, match=r"Element '1' does not have position property"):
-        geff.write_nx(graph, position_attr="position", path=zarr_path)
+        geff.write_nx(graph, position_prop="position", path=zarr_path)

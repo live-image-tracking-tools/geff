@@ -11,7 +11,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
-from geff.writer_helper import write_attrs
+from geff.writer_helper import write_props
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -83,19 +83,19 @@ def write_nx(
         group = zarr.open(path, mode="a")
 
     node_data = list(graph.nodes(data=True))
-    write_attrs(
+    write_props(
         group=group.require_group("nodes"),
         data=node_data,
-        attr_names=list({k for _, data in node_data for k in data}),
-        position_attr=position_attr,
+        prop_names=list({k for _, data in node_data for k in data}),
+        position_prop=position_prop,
     )
     del node_data
 
     edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
-    write_attrs(
+    write_props(
         group=group.require_group("edges"),
         data=edge_data,
-        attr_names=list({k for _, data in edge_data for k in data}),
+        prop_names=list({k for _, data in edge_data for k in data}),
     )
     del edge_data
 
@@ -119,7 +119,7 @@ def write_nx(
     metadata.write(group)
 
 
-def _set_attribute_values(
+def _set_property_values(
     graph: nx.DiGraph, ids: np.ndarray, graph_group: zarr.Group, name: str, nodes: bool = True
 ) -> None:
     """Add properties in-place to a networkx graph's nodes or edges.

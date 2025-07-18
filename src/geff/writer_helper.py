@@ -4,25 +4,25 @@ import numpy as np
 import zarr
 
 
-def write_attrs(
+def write_props(
     group: zarr.Group,
     data: Sequence[tuple[Any, dict[str, Any]]],
-    attr_names: Sequence[str],
-    position_attr: str | None = None,
+    prop_names: Sequence[str],
+    position_prop: str | None = None,
 ) -> None:
     """
-    Write the attributes to the zarr group.
+    Write the properties to the zarr group.
 
     Args:
-        group: The zarr group to write the attribute to (e.g. `nodes` or `edges`)
+        group: The zarr group to write the property to (e.g. `nodes` or `edges`)
         data: A sequence of (id, data) pairs. For example, graph.nodes(data=True) for networkx
-        attr_names: The names of the attributes to write.
-        position_attr: The name of the position attribute.
+        prop_names: The names of the properties to write.
+        position_prop: The name of the position property.
 
     Raises:
         ValueError: If the group is not a 'nodes' or 'edges' group.
     """
-    # sanity check if the user is writing to the correct group (e.g. not `attrs` directly)
+    # sanity check if the user is writing to the correct group (e.g. not `props` directly)
     if group.name not in ["/nodes", "/edges"]:
         raise ValueError(f"Group must be a 'nodes' or 'edges' group. Found {group.name}")
 
@@ -40,14 +40,14 @@ def write_attrs(
         raise ValueError(f"Invalid group name: {group.name}")
 
     seen_position = False
-    for name in attr_names:
+    for name in prop_names:
         values = []
         missing = []
 
-        if position_attr is None:
+        if position_prop is None:
             is_position = False
         else:
-            is_position = name == position_attr
+            is_position = name == position_prop
             seen_position |= is_position
 
         # iterate over the data and checks for missing content
@@ -56,15 +56,15 @@ def write_attrs(
                 values.append(data_dict[name])
                 missing.append(False)
             else:
-                values.append(0)  # this fails to non-scalar attributes
+                values.append(0)  # this fails to non-scalar properties
                 missing.append(True)
                 if is_position:
-                    raise ValueError(f"Element '{key}' does not have position attribute")
+                    raise ValueError(f"Element '{key}' does not have position property")
 
-        group[f"attrs/{name}/values"] = np.asarray(values)
+        group[f"props/{name}/values"] = np.asarray(values)
 
         if not is_position:
-            group[f"attrs/{name}/missing"] = np.asarray(missing, dtype=bool)
+            group[f"props/{name}/missing"] = np.asarray(missing, dtype=bool)
 
-    if position_attr is not None and not seen_position:
-        raise ValueError(f"Position attribute ('{position_attr}') not found in {attr_names}")
+    if position_prop is not None and not seen_position:
+        raise ValueError(f"Position property ('{position_prop}') not found in {prop_names}")
