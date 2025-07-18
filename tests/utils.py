@@ -29,5 +29,8 @@ def check_equiv_geff(path_a, path_b):
 
         # Check shape and dtype of each prop
         for prop in ga["props"]:
-            assert ga["props"][prop].shape == gb["props"][prop].shape
-            assert ga["props"][prop].dtype == gb["props"][prop].dtype
+            if "missing" in ga[f"props/{prop}"]:
+                assert ga[f"props/{prop}/missing"].shape == gb[f"props/{prop}/missing"].shape
+                assert ga[f"props/{prop}/missing"].dtype == gb[f"props/{prop}/missing"].dtype
+            assert ga[f"props/{prop}/values"].shape == gb[f"props/{prop}/values"].shape
+            assert ga[f"props/{prop}/values"].dtype == gb[f"props/{prop}/values"].dtype
