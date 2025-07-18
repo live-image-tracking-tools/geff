@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import os
 import warnings
 from typing import TYPE_CHECKING
 
 import networkx as nx
 import numpy as np
 import zarr
-import os
+
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
