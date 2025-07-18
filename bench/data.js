@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752775877400,
+  "lastUpdate": 1752850481711,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1170,6 +1170,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5084517781962051",
             "extra": "mean: 15.743984614999997 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "63270704+melisande-c@users.noreply.github.com",
+            "name": "Melisande Croft",
+            "username": "melisande-c"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e4a08f3c724f7ca62a91e0ac00269955436cb39c",
+          "message": "Test: Fixture for path to example GEFF file (#98)\n\n# Proposed Change\nAdd pytest fixture for a path to example data and the expected graph\nattributes. This can be used as an initial first pass test for new\nbackends, an example test for the networkx API has been added.\n\n# Types of Changes\n- Tests\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the developer/contributing docs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n---------\n\nCo-authored-by: melisande-c <melisande.croft@fht.org>\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2025-07-18T10:52:33-04:00",
+          "tree_id": "3d6fc036f9972ce87286fe03ad81819f92fd540a",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/e4a08f3c724f7ca62a91e0ac00269955436cb39c"
+        },
+        "date": 1752850480917,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.13710388386434388,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03969404147141159",
+            "extra": "mean: 7.293739402666669 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.03200004668072,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0003335958069263467",
+            "extra": "mean: 43.41785333332856 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06351249162701936,
+            "unit": "iter/sec",
+            "range": "stddev: 0.42743992903414013",
+            "extra": "mean: 15.744934175666666 sec\nrounds: 3"
           }
         ]
       }
