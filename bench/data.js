@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752869238274,
+  "lastUpdate": 1752870894065,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1575,6 +1575,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5896237574292282",
             "extra": "mean: 15.803116974000005 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "funkej@janelia.hhmi.org",
+            "name": "Jan Funke",
+            "username": "funkey"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "10691038d6f43853d17cc653f64b019958f1dbc4",
+          "message": "Ensure that node/edge ID datasets have same dtype (#134)\n\n# Proposed Change\nSolves https://github.com/live-image-tracking-tools/geff/issues/133\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n\nWhich topics does your change affect? Delete those that do not apply.\n- `networkx` implementation\n\n# Checklist\n- [x] I have read the [developer/contributing](../CONTRIBUTING) docs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.",
+          "timestamp": "2025-07-18T16:32:45-04:00",
+          "tree_id": "4a056c87c135caf12009ed2556c65c0f158463b4",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/10691038d6f43853d17cc653f64b019958f1dbc4"
+        },
+        "date": 1752870893569,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11389666949583145,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2243515003430943",
+            "extra": "mean: 8.779887984666658 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.021924407876043,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0008101752968430476",
+            "extra": "mean: 43.43685533333996 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06405206347257195,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4822650266509218",
+            "extra": "mean: 15.61229952299999 sec\nrounds: 3"
           }
         ]
       }
