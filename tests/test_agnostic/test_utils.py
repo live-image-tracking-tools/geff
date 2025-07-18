@@ -16,14 +16,15 @@ def test_validate(tmp_path):
     z = zarr.open(zpath)
 
     # Missing metadata
-    with pytest.raises(ValueError, match="No geff_version found in"):
+    with pytest.raises(ValueError, match="No geff key found in"):
         validate(zpath)
-    z.attrs["geff_version"] = "v0.0.1"
-    z.attrs["directed"] = True
-    z.attrs["position_prop"] = "position"
-    z.attrs["roi_min"] = [0, 0]
-    z.attrs["roi_max"] = [100, 100]
-
+    z.attrs["geff"] = {
+        "geff_version": "v0.0.1",
+        "directed": True,
+        "position_prop": "position",
+        "roi_min": [0, 0],
+        "roi_max": [100, 100],
+    }
     # No nodes
     with pytest.raises(AssertionError, match="graph group must contain a nodes group"):
         validate(zpath)

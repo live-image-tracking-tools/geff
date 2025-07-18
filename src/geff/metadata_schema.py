@@ -112,7 +112,7 @@ class GeffMetadata(BaseModel):
                 f"/dataset.zarr/)."
             )
 
-        return cls(**group.attrs)
+        return cls(**group.attrs["geff"])
 
 
 class GeffSchema(BaseModel):
