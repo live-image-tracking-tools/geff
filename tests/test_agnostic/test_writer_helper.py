@@ -5,38 +5,38 @@ import zarr
 
 from geff.metadata_schema import GeffMetadata
 from geff.utils import validate
-from geff.writer_helper import write_attrs
+from geff.writer_helper import write_props
 
 
-def test_write_attrs(tmp_path: Path) -> None:
+def test_write_props(tmp_path: Path) -> None:
     zpath = tmp_path / "test.zarr"
     z = zarr.open(zpath)
 
-    write_attrs(
+    write_props(
         group=z.require_group("nodes"),
         data=[
             (0, {"a": 1, "b": 2}),
             (127, {"a": 5}),
             (1, {"a": 6, "c": 7}),
         ],
-        attr_names=["a", "b", "c"],
-        position_attr="a",
+        prop_names=["a", "b", "c"],
+        position_prop="a",
     )
 
-    write_attrs(
+    write_props(
         group=z.require_group("edges"),
         data=[
             ((0, 127), {"score": 0.5}),
             ((127, 1), {}),
             ((1, 0), {"score": 0.7}),
         ],
-        attr_names=["score"],
+        prop_names=["score"],
     )
 
     metadata = GeffMetadata(
         geff_version="0.1.0",
         directed=True,
-        position_attr="a",
+        position_prop="a",
         roi_min=(0,),
         roi_max=(7,),
     )
@@ -45,20 +45,20 @@ def test_write_attrs(tmp_path: Path) -> None:
     validate(zpath)
 
 
-def test_write_attrs_empty(tmp_path: Path) -> None:
+def test_write_props_empty(tmp_path: Path) -> None:
     zpath = tmp_path / "test.zarr"
     z = zarr.open(zpath)
 
-    write_attrs(
+    write_props(
         group=z.require_group("nodes"),
         data=[],
-        attr_names=["a"],
+        prop_names=["a"],
     )
 
-    write_attrs(
+    write_props(
         group=z.require_group("edges"),
         data=[],
-        attr_names=["score"],
+        prop_names=["score"],
     )
 
     metadata = GeffMetadata(
@@ -73,9 +73,9 @@ def test_write_attrs_empty(tmp_path: Path) -> None:
     assert z["edges/ids"].shape == (0, 2)
 
 
-def test_write_attrs_invalid_group(tmp_path: Path) -> None:
+def test_write_props_invalid_group(tmp_path: Path) -> None:
     zpath = tmp_path / "test.zarr"
     z = zarr.open(zpath)
 
     with pytest.raises(ValueError, match="Group must be a 'nodes' or 'edges' group"):
-        write_attrs(group=z, data=[], attr_names=["a"])
+        write_props(group=z, data=[], prop_names=["a"])

@@ -5,11 +5,11 @@ import pytest
 import geff
 
 node_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
-node_attr_dtypes = [
+node_prop_dtypes = [
     {"position": "double"},
     {"position": "int"},
 ]
-edge_attr_dtypes = [
+edge_prop_dtypes = [
     {"score": "float64", "color": "uint8"},
     {"score": "float32", "color": "int16"},
 ]
@@ -18,47 +18,47 @@ edge_attr_dtypes = [
 
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
-@pytest.mark.parametrize("node_attr_dtypes", node_attr_dtypes)
-@pytest.mark.parametrize("edge_attr_dtypes", edge_attr_dtypes)
+@pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
+@pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_consistency(
-    path_w_expected_graph_attrs,
+    path_w_expected_graph_props,
     node_dtype,
-    node_attr_dtypes,
-    edge_attr_dtypes,
+    node_prop_dtypes,
+    edge_prop_dtypes,
     directed,
 ):
-    path, graph_attrs = path_w_expected_graph_attrs(
-        node_dtype, node_attr_dtypes, edge_attr_dtypes, directed
+    path, graph_props = path_w_expected_graph_props(
+        node_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
 
     graph = geff.read_nx(path)
 
-    assert set(graph.nodes) == {*graph_attrs["nodes"].tolist()}
-    assert set(graph.edges) == {*[tuple(edges) for edges in graph_attrs["edges"].tolist()]}
-    for idx, node in enumerate(graph_attrs["nodes"]):
+    assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
+    assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
+    for idx, node in enumerate(graph_props["nodes"]):
         np.testing.assert_array_equal(
-            graph.nodes[node.item()]["pos"], graph_attrs["node_positions"][idx]
+            graph.nodes[node.item()]["pos"], graph_props["node_positions"][idx]
         )
 
-    for idx, edge in enumerate(graph_attrs["edges"]):
-        for name, values in graph_attrs["edge_attrs"].items():
+    for idx, edge in enumerate(graph_props["edges"]):
+        for name, values in graph_props["edge_props"].items():
             assert graph.edges[edge.tolist()][name] == values[idx].item()
 
-    assert graph.graph["axis_names"] == graph_attrs["axis_names"]
-    assert graph.graph["axis_units"] == graph_attrs["axis_units"]
+    assert graph.graph["axis_names"] == graph_props["axis_names"]
+    assert graph.graph["axis_units"] == graph_props["axis_units"]
 
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
-@pytest.mark.parametrize("node_attr_dtypes", node_attr_dtypes)
-@pytest.mark.parametrize("edge_attr_dtypes", edge_attr_dtypes)
+@pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
+@pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
-def test_read_write_no_spatial(tmp_path, node_dtype, node_attr_dtypes, edge_attr_dtypes, directed):
+def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop_dtypes, directed):
     graph = nx.DiGraph() if directed else nx.Graph()
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
-    attrs = np.array([4, 9, 10, 2, 8], dtype=node_attr_dtypes["position"])
-    for node, pos in zip(nodes, attrs):
+    props = np.array([4, 9, 10, 2, 8], dtype=node_prop_dtypes["position"])
+    for node, pos in zip(nodes, props):
         graph.add_node(node.item(), attr=pos.tolist())
 
     edges = np.array(
@@ -70,8 +70,8 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_attr_dtypes, edge_attr
         ],
         dtype=node_dtype,
     )
-    scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_attr_dtypes["score"])
-    colors = np.array([1, 2, 3, 4], dtype=edge_attr_dtypes["color"])
+    scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
+    colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
     for edge, score, color in zip(edges, scores, colors):
         graph.add_edge(*edge.tolist(), score=score.item(), color=color.item())
 
@@ -94,4 +94,4 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_attr_dtypes, edge_attr
 def test_write_empty_graph():
     graph = nx.DiGraph()
     with pytest.warns(match="Graph is empty - not writing anything "):
-        geff.write_nx(graph, position_attr="pos", path=".")
+        geff.write_nx(graph, position_prop="pos", path=".")

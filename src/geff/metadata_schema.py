@@ -35,18 +35,18 @@ class GeffMetadata(BaseModel):
     directed: bool
     roi_min: tuple[float, ...] | None = None
     roi_max: tuple[float, ...] | None = None
-    position_attr: str | None = None
+    position_prop: str | None = None
     axis_names: tuple[str, ...] | None = None
     axis_units: tuple[str, ...] | None = None
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
         # Check spatial metadata only if position is provided
-        if self.position_attr is not None:
+        if self.position_prop is not None:
             # Check that rois are there if position provided
             if self.roi_min is None or self.roi_max is None:
                 raise ValueError(
-                    f"Position attribute {self.position_attr} has been specified, "
+                    f"Position property {self.position_prop} has been specified, "
                     "but roi_min and/or roi_max are not specified."
                 )
 
@@ -76,7 +76,7 @@ class GeffMetadata(BaseModel):
         elif any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
             raise ValueError(
                 "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
-                " position_attr"
+                " position_prop"
             )
         return self
 
