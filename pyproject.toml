@@ -55,6 +55,7 @@ bench = [
     "pandas",
     "typer"
 ]
+spatial_graph = [ "spatial_graph" ]
 
 
 [tool.pixi.project]
