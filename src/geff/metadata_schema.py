@@ -9,6 +9,8 @@ import yaml
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
+from .units import validate_axis_type, validate_space_unit, validate_time_unit, VALID_AXIS_TYPES
+import warnings
 
 import geff
 
@@ -21,6 +23,29 @@ def _get_versions_regex(versions: list[str]):
 
 
 SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
+
+class Axis(BaseModel):
+    name: str
+    type: str | None = None
+    unit: str | None = None
+    min: float | None = None
+    max: float | None = None
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> GeffMetadata:
+        if (self.min is None) != (self.max is None):
+            raise ValueError(f"Min and max must both be None or neither: got min {min} and max {max}")
+        if self.min is not None and self.min > self.max:
+            raise ValueError(f"Min {min} is greater than max {max}")
+        if self.type is not None and validate_axis_type(self.type):
+            warnings.warn(
+                f"Type {self.type} not in valid types {VALID_AXIS_TYPES}."
+                "Reader applications may not know what to do with this information."
+            )
+        if self.type == "space" and not validate_space_unit(self.unit):
+            raise ValueError()
+        elif self.type == "time" and not validate_space_unit(self.unit):
+            raise ValueError()
 
 
 class GeffMetadata(BaseModel):
@@ -43,17 +68,7 @@ class GeffMetadata(BaseModel):
     def _validate_model(self) -> GeffMetadata:
         # Check spatial metadata only if position is provided
         if self.position_prop is not None:
-            # Check that rois are there if position provided
-            if self.roi_min is None or self.roi_max is None:
-                raise ValueError(
-                    f"Position property {self.position_prop} has been specified, "
-                    "but roi_min and/or roi_max are not specified."
-                )
 
-            if len(self.roi_min) != len(self.roi_max):
-                raise ValueError(
-                    f"Roi min {self.roi_min} and roi max {self.roi_max} have different lengths."
-                )
             ndim = len(self.roi_min)
             for dim in range(ndim):
                 if self.roi_min[dim] > self.roi_max[dim]:
