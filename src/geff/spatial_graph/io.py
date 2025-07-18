@@ -63,9 +63,9 @@ def write_sg(
     group["edges/ids"] = graph.edges
 
     for name in graph.node_attr_dtypes.keys():
-        group[f"nodes/attrs/{name}/values"] = getattr(graph.node_attrs, name)
+        group[f"nodes/props/{name}/values"] = getattr(graph.node_attrs, name)
     for name in graph.edge_attr_dtypes.keys():
-        group[f"edges/attrs/{name}/values"] = getattr(graph.edge_attrs, name)
+        group[f"edges/props/{name}/values"] = getattr(graph.edge_attrs, name)
 
     # write metadata
     roi_min, roi_max = graph.roi
@@ -74,7 +74,7 @@ def write_sg(
         directed=graph.directed,
         roi_min=roi_min,
         roi_max=roi_max,
-        position_attr=graph.position_attr,
+        position_prop=graph.position_attr,
         axis_names=axis_names,
         axis_units=axis_units,
     )
@@ -112,8 +112,8 @@ def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
     group = zarr.open(path, mode="r")
     metadata = GeffMetadata.read(group)
 
-    position_attr = metadata.position_attr
-    ndims = group[f"nodes/attrs/{position_attr}/values"].shape[1]
+    position_attr = metadata.position_prop
+    ndims = group[f"nodes/props/{position_attr}/values"].shape[1]
 
     def get_dtype_str(dataset):
         dtype = dataset.dtype
@@ -131,13 +131,13 @@ def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
 
     # collect node attributes
     node_attr_dtypes = {
-        name: get_dtype_str(group[f"nodes/attrs/{name}/values"]) for name in group["nodes/attrs"]
+        name: get_dtype_str(group[f"nodes/props/{name}/values"]) for name in group["nodes/props"]
     }
     edge_attr_dtypes = {
-        name: get_dtype_str(group[f"edges/attrs/{name}/values"]) for name in group["edges/attrs"]
+        name: get_dtype_str(group[f"edges/props/{name}/values"]) for name in group["edges/props"]
     }
-    node_attrs = {name: group[f"nodes/attrs/{name}/values"][:] for name in group["nodes/attrs"]}
-    edge_attrs = {name: group[f"edges/attrs/{name}/values"][:] for name in group["edges/attrs"]}
+    node_attrs = {name: group[f"nodes/props/{name}/values"][:] for name in group["nodes/props"]}
+    edge_attrs = {name: group[f"edges/props/{name}/values"][:] for name in group["edges/props"]}
 
     # create graph
     graph = sg.SpatialGraph(

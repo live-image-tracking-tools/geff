@@ -20,13 +20,13 @@ edge_attr_dtypes = [
 @pytest.mark.parametrize("edge_attr_dtypes", edge_attr_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_consistency(
-    path_w_expected_graph_attrs,
+    path_w_expected_graph_props,
     node_dtype,
     node_attr_dtypes,
     edge_attr_dtypes,
     directed,
 ):
-    path, graph_attrs = path_w_expected_graph_attrs(
+    path, graph_attrs = path_w_expected_graph_props(
         node_dtype, node_attr_dtypes, edge_attr_dtypes, directed
     )
 
