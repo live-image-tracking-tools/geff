@@ -54,6 +54,7 @@ def test_read_write_consistency(
 
     # Write again
     out_zarr = tmp_path / "write-out.zarr/tracks"
+    geff.write_nx(graph, out_zarr, position_prop="pos")
 
     # Check consistency with source fixture
     check_equiv_geff(path, out_zarr)
