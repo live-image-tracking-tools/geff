@@ -1,37 +1,38 @@
-from typing import TypedDict, Any, Optional, Generic, TypeVar
-from typing_extensions import NotRequired
 from pathlib import Path
+from typing import Any, Generic, Optional, TypedDict, TypeVar
 
-import zarr
 import numpy as np
+import zarr
 from numpy.typing import NDArray
+from typing_extensions import NotRequired
 
-from .metadata_schema import GeffMetadata
 from . import utils
+from .metadata_schema import GeffMetadata
 
 T_Array = TypeVar("T_Array", bound=zarr.Array | NDArray)
 
 
 # TODO: move dict defs to own module
-class AttrDict(TypedDict, Generic[T_Array]):
+# the typevar T_Array means that the arrays can either be numpy or zarr arrays
+class PropDict(TypedDict, Generic[T_Array]):
     values: T_Array
     missing: NotRequired[T_Array]
 
 
-# Itermediate dict format that can be injested to different backend types
+# Intermediate dict format that can be injested to different backend types
 class GraphDict(TypedDict):
     metadata: GeffMetadata
     nodes: NDArray[Any]
     edges: NDArray[Any]
-    node_attrs: dict[str, AttrDict[NDArray]]
-    edge_attrs: dict[str, AttrDict[NDArray]]
+    node_props: dict[str, PropDict[NDArray]]
+    edge_props: dict[str, PropDict[NDArray]]
 
 
 class FileReader:
     """
     File reader class that allows subset reading to an intermediate dict representation.
 
-    The subsets can be a subset of node and edge attributes, and a subset of nodes and
+    The subsets can be a subset of node and edge properties, and a subset of nodes and
     edges.
 
     Example:
@@ -40,17 +41,17 @@ class FileReader:
 
         >>> path = Path("example/path")
         ... file_reader = FileReader(path)
-        ... file_reader.read_node_attr("seg_id")
-        ... # graph_dict will only have the node attribute "seg_id"
+        ... file_reader.read_node_prop("seg_id")
+        ... # graph_dict will only have the node property "seg_id"
         ... graph_dict = file_reader.build()
         ... graph_dict
 
-        >>> file_reader.read_node_attr("t")
-        ... # Now graph dict will have two node attributes: "seg_id" and "t"
+        >>> file_reader.read_node_prop("t")
+        ... # Now graph dict will have two node properties: "seg_id" and "t"
         ... graph_dict = file_reader.build()
 
         >>> # Now graph_dict will only be a subset with nodes "t" < 5
-        ... graph_dict = file_reader.build(file_reader.node_attrs["t"]["values"][:] < 5)
+        ... graph_dict = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
         ... graph_dict
     """
 
@@ -61,62 +62,61 @@ class FileReader:
         self.metadata = GeffMetadata.read(self.group)
         self.nodes = self.group["nodes/ids"]
         self.edges = self.group["edges/ids"]
-        self.node_attrs: dict[str, AttrDict[zarr.Array]] = {}
-        self.edge_attrs: dict[str, AttrDict[zarr.Array]] = {}
+        self.node_props: dict[str, PropDict[zarr.Array]] = {}
+        self.edge_props: dict[str, PropDict[zarr.Array]] = {}
 
-    def read_node_attr(self, name: str):
-        attr_group = zarr.open_group(self.group.store, path=f"nodes/attrs/{name}")
-        attr_dict: AttrDict = {"values": attr_group["values"]}
-        if "missing" in attr_group.keys():
-            attr_dict["missing"] = attr_group["missing"]
-        self.node_attrs[name] = attr_dict
+    def read_node_props(self, name: str):
+        prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}")
+        prop_dict: PropDict = {"values": prop_group["values"]}
+        if "missing" in prop_group.keys():
+            prop_dict["missing"] = prop_group["missing"]
+        self.node_props[name] = prop_dict
 
-    def read_edge_attr(self, name: str):
-        attr_group = zarr.open_group(self.group.store, path=f"edges/attrs/{name}")
-        attr_dict: AttrDict = {"values": attr_group["values"]}
-        if "missing" in attr_group.keys():
-            attr_dict["missing"] = attr_group["missing"]
-        self.node_attrs[name] = attr_dict
+    def read_edge_props(self, name: str):
+        prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}")
+        prop_dict: PropDict = {"values": prop_group["values"]}
+        if "missing" in prop_group.keys():
+            prop_dict["missing"] = prop_group["missing"]
+        self.node_props[name] = prop_dict
 
     def build(
         self,
         node_mask: Optional[NDArray[np.bool]] = None,
         edge_mask: Optional[NDArray[np.bool]] = None,
     ) -> GraphDict:
-
         nodes = np.array(
             self.nodes[node_mask.tolist() if node_mask is not None else ...]
         )
-        node_attrs: dict[str, AttrDict[NDArray]] = {}
-        for name, attrs in self.node_attrs.items():
-            node_attrs[name] = {
+        node_props: dict[str, PropDict[NDArray]] = {}
+        for name, props in self.node_props.items():
+            node_props[name] = {
                 "values": np.array(
-                    attrs["values"][
+                    props["values"][
                         node_mask.tolist() if node_mask is not None else ...
                     ]
                 )
             }
-            if "missing" in attrs:
-                node_attrs[name]["missing"] = np.array(
-                    attrs["missing"][
+            if "missing" in props:
+                node_props[name]["missing"] = np.array(
+                    props["missing"][
                         node_mask.tolist() if node_mask is not None else ...
                     ],
                     dtype=bool,
                 )
 
         edges = np.array(self.edges[edge_mask.tolist() if edge_mask else ...])
-        edge_attrs: dict[str, AttrDict[NDArray]] = {}
-        for name, attrs in self.edge_attrs.items():
-            edge_attrs[name] = {
+        edge_props: dict[str, PropDict[NDArray]] = {}
+        for name, props in self.edge_props.items():
+            edge_props[name] = {
                 "values": np.array(
-                    attrs["values"][
+                    props["values"][
                         edge_mask.tolist() if edge_mask is not None else ...
                     ]
                 )
             }
-            if "missing" in attrs:
-                node_attrs[name]["missing"] = np.array(
-                    attrs["missing"][
+            if "missing" in props:
+                node_props[name]["missing"] = np.array(
+                    props["missing"][
                         edge_mask.tolist() if edge_mask is not None else ...
                     ],
                     dtype=bool,
@@ -125,7 +125,7 @@ class FileReader:
         return {
             "metadata": self.metadata,
             "nodes": nodes,
-            "node_attrs": node_attrs,
+            "node_props": node_props,
             "edges": edges,
-            "edge_attrs": edge_attrs,
+            "edge_props": edge_props,
         }
