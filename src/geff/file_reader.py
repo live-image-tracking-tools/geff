@@ -56,11 +56,18 @@ class FileReader:
         self.node_props: dict[str, PropDictZArray] = {}
         self.edge_props: dict[str, PropDictZArray] = {}
 
-        node_props_group = zarr.open_group(self.group.store, path="nodes/props", mode="r")
+        node_props_group = zarr.open_group(
+            self.group.store, path="nodes/props", mode="r"
+        )
         self.node_prop_names: list[str] = [*node_props_group.group_keys()]
 
-        edge_props_group = zarr.open_group(self.group.store, path="edges/props", mode="r")
-        self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
+        if "props" in self.group["edges"].keys():
+            edge_props_group = zarr.open_group(
+                self.group.store, path="edges/props", mode="r"
+            )
+            self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
+        else:
+            self.edge_prop_names = []
 
     def read_node_props(self, name: str):
         """
@@ -71,7 +78,9 @@ class FileReader:
         Args:
             name (str): The name of the node property.
         """
-        prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}", mode="r")
+        prop_group = zarr.open_group(
+            self.group.store, path=f"nodes/props/{name}", mode="r"
+        )
         prop_dict: PropDictZArray = {"values": prop_group["values"]}
         if "missing" in prop_group.keys():
             prop_dict["missing"] = prop_group["missing"]
@@ -86,7 +95,9 @@ class FileReader:
         Args:
             name (str): The name of the edge property.
         """
-        prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}", mode="r")
+        prop_group = zarr.open_group(
+            self.group.store, path=f"edges/props/{name}", mode="r"
+        )
         prop_dict: PropDictZArray = {"values": prop_group["values"]}
         if "missing" in prop_group.keys():
             prop_dict["missing"] = prop_group["missing"]
@@ -112,17 +123,23 @@ class FileReader:
         Returns:
             GraphDict: A graph represented in graph dict format.
         """
-        nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
+        nodes = np.array(
+            self.nodes[node_mask.tolist() if node_mask is not None else ...]
+        )
         node_props: dict[str, PropDictNpArray] = {}
         for name, props in self.node_props.items():
             node_props[name] = {
                 "values": np.array(
-                    props["values"][node_mask.tolist() if node_mask is not None else ...]
+                    props["values"][
+                        node_mask.tolist() if node_mask is not None else ...
+                    ]
                 )
             }
             if "missing" in props:
                 node_props[name]["missing"] = np.array(
-                    props["missing"][node_mask.tolist() if node_mask is not None else ...],
+                    props["missing"][
+                        node_mask.tolist() if node_mask is not None else ...
+                    ],
                     dtype=bool,
                 )
 
@@ -131,12 +148,16 @@ class FileReader:
         for name, props in self.edge_props.items():
             edge_props[name] = {
                 "values": np.array(
-                    props["values"][edge_mask.tolist() if edge_mask is not None else ...]
+                    props["values"][
+                        edge_mask.tolist() if edge_mask is not None else ...
+                    ]
                 )
             }
             if "missing" in props:
                 edge_props[name]["missing"] = np.array(
-                    props["missing"][edge_mask.tolist() if edge_mask is not None else ...],
+                    props["missing"][
+                        edge_mask.tolist() if edge_mask is not None else ...
+                    ],
                     dtype=bool,
                 )
 
