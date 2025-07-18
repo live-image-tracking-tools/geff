@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752859978457,
+  "lastUpdate": 1752865847714,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1440,6 +1440,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5561047611782917",
             "extra": "mean: 15.83090777533342 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1f344009517550c411a10fd81e41f4997f117a30",
+          "message": "Fix installs in ci after switching to groups instead of optional deps (#127)\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Maintenance (e.g. dependencies, CI, releases, etc.)",
+          "timestamp": "2025-07-18T15:08:40-04:00",
+          "tree_id": "63c5105246ef12bee86f423a311b4f6a338f64ca",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/1f344009517550c411a10fd81e41f4997f117a30"
+        },
+        "date": 1752865847072,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11318826331955958,
+            "unit": "iter/sec",
+            "range": "stddev: 1.124769251399605",
+            "extra": "mean: 8.834838265666669 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.31005011567591,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0003073747958332697",
+            "extra": "mean: 42.89995066666563 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06424243523911984,
+            "unit": "iter/sec",
+            "range": "stddev: 0.47055259967538815",
+            "extra": "mean: 15.566035071333337 sec\nrounds: 3"
           }
         ]
       }
