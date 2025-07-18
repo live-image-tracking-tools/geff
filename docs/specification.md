@@ -33,15 +33,9 @@ The `nodes\props` group will contain one or more `node property` groups, each wi
 !!! note
     When writing a graph with missing properties to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.
 
-<<<<<<< HEAD
-- The each of the `spatial_attrs` (if specified) and the `time_attr` (if specified) are a special node attribute groups that do not allow missing attributes.
-- The `seg_id` group is an optional, special node attribute group that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` group is not present, it is assumed that the graph is not associated with a segmentation. 
-<!-- Perhaps we just let the user specify the seg id attribute in the metadata instead? Then you can point it to the node ids if you wanted to -->
-=======
 - The `position` group is a special node property group that must be present if a `position_prop` is set in the `geff` metadata and does not allow missing properties.
 - The `seg_id` group is an optional, special node property group that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` group is not present, it is assumed that the graph is not associated with a segmentation. 
 <!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
->>>>>>> main
 
 ## The `edges` group
 Similar to the `nodes` group, the `edges` group will contain an `ids` array and a `props` group. If there are no edges in the graph, the edge group is not created.
