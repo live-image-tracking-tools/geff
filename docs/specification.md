@@ -2,7 +2,7 @@
 
 The graph exchange file format is `zarr` based. A graph is stored in a zarr group, which can have any name. This allows storing multiple `geff` graphs inside the same zarr root directory. A `geff` group is identified by the presence of a `geff_version` attribute in the `.zattrs`. Other `geff` metadata is also stored in the `.zattrs` file of the `geff` group. The `geff` group must contain a `nodes` group and an `edges` group.
 
-`geff` graphs have the option to provide position as a special attribute. In this case, a `position_attr` must be specified in the `geff` metadata along with a `roi_min` and `roi_max`. If a `position_attr` is provided, every node must have a position value.
+`geff` graphs have the option to provide time and spatial dimensions as special attributes. In this case, a list of `spatial_attrs` and/or a `time_attr` must be specified in the `geff` metadata along with a `spatial_min` and `spatial_max` and/or a `time_min` and `time_max`. If a `spatial_attrs` is provided, every node must have each of the spatial attributes. Similarly, if `time_attr` is provided, all nodes must have the time attribute.
 
 ## Zarr specification
 
@@ -29,7 +29,7 @@ The `nodes\attrs` group will contain one or more `node attribute` groups, each w
 !!! note
     When writing a graph with missing attributes to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the attribute, in order to keep the indices aligned with the node ids.
 
-- The `position` group is a special node attribute group that must be present if a `position_attr` is set in the `geff` metadata and does not allow missing attributes.
+- The each of the `spatial_attrs` (if specified) and the `time_attr` (if specified) are a special node attribute groups that do not allow missing attributes.
 - The `seg_id` group is an optional, special node attribute group that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` group is not present, it is assumed that the graph is not associated with a segmentation. 
 <!-- Perhaps we just let the user specify the seg id attribute in the metadata instead? Then you can point it to the node ids if you wanted to -->
 
@@ -58,8 +58,14 @@ Here is a schematic of the expected file structure.
 	    nodes/
             ids  # shape: (N,)  dtype: uint64
             attrs/
-                position/
-                    values # shape: (N, 3) dtype: float16
+                t/
+                    values # shape: (N,) dtype: uint16
+                z/
+                    values # shape: (N,) dtype: float32
+                y/
+                    values # shape: (N,) dtype: float32
+                x/
+                    values # shape: (N,) dtype: float32
                 color/
                     values # shape: (N, 4) dtype: float16
                     missing # shape: (N,) dtype: bool
@@ -81,12 +87,12 @@ This is a geff metadata zattrs file that matches the above example structure.
 ```json
 # /path/to.zarr/tracking_graph/.zattrs
 {
-    "axis_names": [ # optional
+    "spatial_attrs": [ # optional
         "z",
         "y",
         "x"
     ],
-    "axis_units": [ # optional
+    "spatial_units": [ # optional
         "um",
         "um",
         "um"
@@ -94,16 +100,19 @@ This is a geff metadata zattrs file that matches the above example structure.
     "directed": true,
     "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
     "position_attr": "position",
-    "roi_max": [ # Required if position_attr is specified
+    "spatial_max": [ 
         4398.1,
         1877.7,
         2152.3
     ],
-    "roi_min": [ # Required if position_attr is specified
+    "spatial_min": [
         1523.368197,
         81.667,
         764.42
     ],
+    "time_attr": "t",
+    "time_min": 0,
+    "time_max": 91
     ... # custom other things are allowed and ignored by geff
 }
 ```

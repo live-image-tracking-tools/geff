@@ -33,19 +33,24 @@ class GeffMetadata(BaseModel):
 
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
-    roi_min: tuple[float, ...] | None = None
-    roi_max: tuple[float, ...] | None = None
-    position_attr: str | None = None
-    axis_names: tuple[str, ...] | None = None
-    axis_units: tuple[str, ...] | None = None
+
+    spatial_attrs: tuple[str, ...] | None = None
+    spatial_units: tuple[str, ...] | None = None
+    spatial_min: tuple[float, ...] | None = None
+    spatial_max: tuple[float, ...] | None = None
+
+    time_attr: str | None = None
+    time_unit: str | None = None
+    time_min: float | None = None
+    time_max: float | None = None
 
     def model_post_init(self, *args, **kwargs):  # noqa D102
         # Check spatial metadata only if position is provided
-        if self.position_attr is not None:
+        if self.spatial_attrs is not None:
             # Check that rois are there if position provided
             if self.roi_min is None or self.roi_max is None:
                 raise ValueError(
-                    f"Position attribute {self.position_attr} has been specified, "
+                    f"Spatial attributes {self.spatial_attrs} has been specified, "
                     "but roi_min and/or roi_max are not specified."
                 )
 
@@ -61,22 +66,41 @@ class GeffMetadata(BaseModel):
                         f"max {self.roi_max} in dimension {dim}"
                     )
 
-            if self.axis_names is not None and len(self.axis_names) != ndim:
+            if len(self.spatial_attrs) != ndim:
                 raise ValueError(
-                    f"Length of axis names ({len(self.axis_names)}) does not match number of"
-                    f" dimensions in roi ({ndim})"
+                    f"Length of spatial attributes ({len(self.spatial_attrs)}) does not match"
+                    f" number of dimensions in roi ({ndim})"
                 )
-            if self.axis_units is not None and len(self.axis_units) != ndim:
+            if self.spatial_units is not None and len(self.spatial_units) != ndim:
                 raise ValueError(
-                    f"Length of axis units ({len(self.axis_units)}) does not match number of"
+                    f"Length of axis units ({len(self.spatial_units)}) does not match number of"
                     f" dimensions in roi ({ndim})"
                 )
         # If no position, check that other spatial metadata is not provided
         else:
-            if any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
+            if any([self.roi_min, self.roi_max, self.spatial_units]):
                 raise ValueError(
-                    "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
-                    " position_attr"
+                    "Spatial metadata (roi_min, roi_max, or spatial_units) provided without"
+                    " spatial_attrs"
+                )
+
+        # Check temporal metadata only if time_attr is provided
+        if self.time_attr is not None:
+            # Check that min and max are there if time provided
+            if self.time_min is None or self.time_max is None:
+                raise ValueError(
+                    f"time attribute {self.time_attr} has been specified, "
+                    "but time_min and/or time_max are not specified."
+                )
+
+            if self.time_min > self.time_max:
+                raise ValueError(f"Time min {self.time_min} is greater than max {self.time_max}")
+        # If no time, check that other temporal metadata is not provided
+        else:
+            if any([self.time_min, self.time_max, self.time_unit]):
+                raise ValueError(
+                    "Temporal metadata (time_min, time_max, or time_unit) provided without"
+                    " time_attr"
                 )
 
     def write(self, group: zarr.Group | Path):
