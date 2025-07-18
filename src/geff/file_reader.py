@@ -1,13 +1,12 @@
 from pathlib import Path
-from typing import Any, Generic, Optional, TypedDict, TypeVar
 
 import numpy as np
 import zarr
 from numpy.typing import NDArray
 
 from . import utils
+from .dict_representation import GraphDict, PropDict
 from .metadata_schema import GeffMetadata
-from .dict_representation import PropDict, GraphDict
 
 
 class FileReader:
@@ -38,6 +37,16 @@ class FileReader:
     """
 
     def __init__(self, path: Path, validate: bool = True):
+        """
+        File reader class that allows subset reading to an intermediate dict representation.
+
+        Args:
+            path (Path | str): The path to the root of the geff zarr, where the .attrs contains
+                the geff  metadata
+            validate (bool, optional): Flag indicating whether to perform validation on the
+                geff file before loading into memory. If set to False and there are
+                format issues, will likely fail with a cryptic error. Defaults to True.
+        """
         if validate:
             utils.validate(path)
         self.group = zarr.open_group(path, mode="r")
@@ -47,13 +56,21 @@ class FileReader:
         self.node_props: dict[str, PropDict[zarr.Array]] = {}
         self.edge_props: dict[str, PropDict[zarr.Array]] = {}
 
-        node_props_group = zarr.open_group(self.group.store, path=f"nodes/props")
+        node_props_group = zarr.open_group(self.group.store, path="nodes/props")
         self.node_prop_names: list[str] = [*node_props_group.group_keys()]
 
-        edge_props_group = zarr.open_group(self.group.store, path=f"edges/props")
+        edge_props_group = zarr.open_group(self.group.store, path="edges/props")
         self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
 
     def read_node_props(self, name: str):
+        """
+        Read the node property with the name `name` from a GEFF.
+
+        Call `build` to get the output `GraphDict` with the loaded properties.
+
+        Args:
+            name (str): The name of the node property.
+        """
         prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}")
         prop_dict: PropDict = {"values": prop_group["values"]}
         if "missing" in prop_group.keys():
@@ -61,6 +78,14 @@ class FileReader:
         self.node_props[name] = prop_dict
 
     def read_edge_props(self, name: str):
+        """
+        Read the edge property with the name `name` from a GEFF.
+
+        Call `build` to get the output `GraphDict` with the loaded properties.
+
+        Args:
+            name (str): The name of the edge property.
+        """
         prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}")
         prop_dict: PropDict = {"values": prop_group["values"]}
         if "missing" in prop_group.keys():
@@ -69,26 +94,35 @@ class FileReader:
 
     def build(
         self,
-        node_mask: Optional[NDArray[np.bool]] = None,
-        edge_mask: Optional[NDArray[np.bool]] = None,
+        node_mask: NDArray[np.bool] | None = None,
+        edge_mask: NDArray[np.bool] | None = None,
     ) -> GraphDict:
-        nodes = np.array(
-            self.nodes[node_mask.tolist() if node_mask is not None else ...]
-        )
+        """
+        Build a `GraphDict` from a GEFF.
+
+        A set of nodes and edges can be selected using `node_mask` and `edge_mask`.
+
+        Args:
+            node_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
+            of a subset of nodes, where `node_mask` is equal to True. It must be a 1D
+            array of length number of nodes.
+            edge_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
+            of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
+            array of length number of edges.
+        Returns:
+            GraphDict: A graph represented in graph dict format.
+        """
+        nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDict[NDArray]] = {}
         for name, props in self.node_props.items():
             node_props[name] = {
                 "values": np.array(
-                    props["values"][
-                        node_mask.tolist() if node_mask is not None else ...
-                    ]
+                    props["values"][node_mask.tolist() if node_mask is not None else ...]
                 )
             }
             if "missing" in props:
                 node_props[name]["missing"] = np.array(
-                    props["missing"][
-                        node_mask.tolist() if node_mask is not None else ...
-                    ],
+                    props["missing"][node_mask.tolist() if node_mask is not None else ...],
                     dtype=bool,
                 )
 
@@ -97,16 +131,12 @@ class FileReader:
         for name, props in self.edge_props.items():
             edge_props[name] = {
                 "values": np.array(
-                    props["values"][
-                        edge_mask.tolist() if edge_mask is not None else ...
-                    ]
+                    props["values"][edge_mask.tolist() if edge_mask is not None else ...]
                 )
             }
             if "missing" in props:
                 edge_props[name]["missing"] = np.array(
-                    props["missing"][
-                        edge_mask.tolist() if edge_mask is not None else ...
-                    ],
+                    props["missing"][edge_mask.tolist() if edge_mask is not None else ...],
                     dtype=bool,
                 )
 

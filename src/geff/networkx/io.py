@@ -1,28 +1,25 @@
 from __future__ import annotations
 
-import os
 import warnings
-from typing import TYPE_CHECKING, Any, Optional
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import networkx as nx
 import numpy as np
-from numpy.typing import NDArray
 import zarr
 
 import geff
-import geff.utils
+from geff.file_reader import FileReader
 from geff.metadata_schema import GeffMetadata
 from geff.writer_helper import write_props
-from geff.dict_representation import GraphDict, PropDict
-from geff.file_reader import FileReader
 
 if TYPE_CHECKING:
-    from pathlib import Path
+    from numpy.typing import NDArray
+
+    from geff.dict_representation import GraphDict, PropDict
 
 
-def get_roi(
-    graph: nx.Graph, position_prop: str
-) -> tuple[tuple[float, ...], tuple[float, ...]]:
+def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tuple[float, ...]]:
     """Get the roi of a networkx graph.
 
     Args:
@@ -118,16 +115,8 @@ def write_nx(
         roi_min=roi_min,
         roi_max=roi_max,
         position_prop=position_prop,
-        axis_names=(
-            axis_names
-            if axis_names is not None
-            else graph.graph.get("axis_names", None)
-        ),
-        axis_units=(
-            axis_units
-            if axis_units is not None
-            else graph.graph.get("axis_units", None)
-        ),
+        axis_names=(axis_names if axis_names is not None else graph.graph.get("axis_names", None)),
+        axis_units=(axis_units if axis_units is not None else graph.graph.get("axis_units", None)),
     )
     metadata.write(group)
 
@@ -146,8 +135,9 @@ def _set_property_values(
         graph (nx.DiGraph): The networkx graph, already populated with nodes or edges,
             that needs properties added
         ids (np.ndarray): Node or edge ids from Geff. If nodes, 1D. If edges, 2D.
-        graph_group (zarr.Group): A zarr group holding the geff graph.
-        name (str): The name of the property
+        name (str): The name of the property.
+        prop_dict (PropDict[np.ndarray]): A dictionary containing a "values" key with
+            an array of values and an optional "missing" key for missing values.
         nodes (bool, optional): If True, extract and set node properties.  If False,
             extract and set edge properties. Defaults to True.
     """
@@ -167,7 +157,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def ingest_dict_nx(graph_dict: GraphDict):
+def _ingest_dict_nx(graph_dict: GraphDict):
     metadata = graph_dict["metadata"]
 
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
@@ -188,8 +178,8 @@ def ingest_dict_nx(graph_dict: GraphDict):
 def read_nx(
     path: Path | str,
     validate: bool = True,
-    node_props: Optional[list[str]] = None,
-    edge_props: Optional[list[str]] = None,
+    node_props: list[str] | None = None,
+    edge_props: list[str] | None = None,
 ) -> nx.Graph:
     """Read a geff file into a networkx graph. Metadata properties will be stored in
     the graph properties, accessed via `G.graph[key]` where G is a networkx graph.
@@ -200,6 +190,10 @@ def read_nx(
         validate (bool, optional): Flag indicating whether to perform validation on the
             geff file before loading into memory. If set to False and there are
             format issues, will likely fail with a cryptic error. Defaults to True.
+        node_props (list of str, optional): The names of the node properties to load,
+            if None all properties will be loaded, defaults to None.
+        edge_props (list of str, optional): The names of the edge properties to load,
+            if None all properties will be loaded, defaults to None.
 
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
@@ -220,6 +214,6 @@ def read_nx(
         file_reader.read_edge_props(edge_prop_name)
 
     graph_dict = file_reader.build()
-    graph = ingest_dict_nx(graph_dict)
+    graph = _ingest_dict_nx(graph_dict)
 
     return graph
