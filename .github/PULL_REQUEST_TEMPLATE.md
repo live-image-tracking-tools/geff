@@ -16,7 +16,7 @@ Which topics does your change affect? Delete those that do not apply.
 # Checklist
 Put an x in the boxes that apply. You can also fill these out after creating the PR. If you're unsure about any of them, don't hesitate to ask. We're here to help! This is simply a reminder of what we are going to look for before merging your code.
 
-- [ ] I have read the developer/contributing docs.
+- [ ] I have read the [developer/contributing](../CONTRIBUTING) docs.
 - [ ] I have added tests that prove that my feature works in various situations or tests the bugfix (if appropriate).
 - [ ] I have checked that I maintained or improved code coverage.
 - [ ] I have written docstrings and checked that they render correctly.

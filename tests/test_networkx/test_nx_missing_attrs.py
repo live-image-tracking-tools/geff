@@ -8,7 +8,7 @@ import zarr
 import geff
 
 
-def graph_sparse_node_attrs():
+def graph_sparse_node_props():
     graph = nx.Graph()
     nodes = [1, 2, 3, 4, 5]
     positions = [
@@ -27,8 +27,8 @@ def graph_sparse_node_attrs():
     return graph, positions
 
 
-def graph_sparse_edge_attrs():
-    graph, _ = graph_sparse_node_attrs()
+def graph_sparse_edge_props():
+    graph, _ = graph_sparse_node_props()
     edges = [
         [1, 3],
         [1, 4],
@@ -43,23 +43,23 @@ def graph_sparse_edge_attrs():
     return graph
 
 
-def test_sparse_node_attrs(tmp_path):
+def test_sparse_node_props(tmp_path):
     zarr_path = Path(tmp_path) / "test.zarr"
-    graph, positions = graph_sparse_node_attrs()
-    geff.write_nx(graph, position_attr="position", path=zarr_path)
+    graph, positions = graph_sparse_node_props()
+    geff.write_nx(graph, position_prop="position", path=zarr_path)
     # check that the written thing is valid
     assert Path(zarr_path).exists()
     geff.validate(zarr_path)
 
     zroot = zarr.open(zarr_path, mode="r")
-    node_attrs = zroot["nodes"]["attrs"]
-    pos = node_attrs["position"]["values"][:]
+    node_props = zroot["nodes"]["props"]
+    pos = node_props["position"]["values"][:]
     np.testing.assert_array_almost_equal(np.array(positions), pos)
-    scores = node_attrs["score"]["values"][:]
+    scores = node_props["score"]["values"][:]
     assert scores[0] == 0.5
     assert scores[1] == 0.2
     assert scores[4] == 0.1
-    score_mask = node_attrs["score"]["missing"][:]
+    score_mask = node_props["score"]["missing"][:]
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 0, 1, 1, 0]))
 
     # read it back in and check for consistency
@@ -68,21 +68,21 @@ def test_sparse_node_attrs(tmp_path):
         assert read_graph.nodes[node] == data
 
 
-def test_sparse_edge_attrs(tmp_path):
+def test_sparse_edge_props(tmp_path):
     zarr_path = Path(tmp_path) / "test.zarr"
-    graph = graph_sparse_edge_attrs()
-    geff.write_nx(graph, position_attr="position", path=zarr_path)
+    graph = graph_sparse_edge_props()
+    geff.write_nx(graph, position_prop="position", path=zarr_path)
     # check that the written thing is valid
     assert Path(zarr_path).exists()
     geff.validate(zarr_path)
 
     zroot = zarr.open(zarr_path, mode="r")
-    edge_attrs = zroot["edges"]["attrs"]
-    scores = edge_attrs["score"]["values"][:]
+    edge_props = zroot["edges"]["props"]
+    scores = edge_props["score"]["values"][:]
     assert scores[0] == 0.1
     assert scores[2] == 0.5
 
-    score_mask = edge_attrs["score"]["missing"][:]
+    score_mask = edge_props["score"]["missing"][:]
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 1, 0]))
 
     # read it back in and check for consistency
@@ -91,13 +91,13 @@ def test_sparse_edge_attrs(tmp_path):
         assert read_graph.edges[u, v] == data
 
 
-def test_missing_pos_attr(tmp_path):
+def test_missing_pos_prop(tmp_path):
     zarr_path = Path(tmp_path) / "test.zarr"
-    graph, _ = graph_sparse_node_attrs()
-    # wrong attribute name
-    with pytest.raises(ValueError, match="Position attribute pos not found in graph"):
-        geff.write_nx(graph, position_attr="pos", path=zarr_path)
-    # missing attribute
+    graph, _ = graph_sparse_node_props()
+    # wrong property name
+    with pytest.raises(ValueError, match=r"Position property \('pos'\) not found in \[.*\]"):
+        geff.write_nx(graph, position_prop="pos", path=zarr_path)
+    # missing property
     del graph.nodes[1]["position"]
-    with pytest.raises(ValueError, match="Node 1 does not have position attribute *"):
-        geff.write_nx(graph, position_attr="position", path=zarr_path)
+    with pytest.raises(ValueError, match=r"Element '1' does not have position property"):
+        geff.write_nx(graph, position_prop="position", path=zarr_path)

@@ -2,7 +2,11 @@
 
 The graph exchange file format is `zarr` based. A graph is stored in a zarr group, which can have any name. This allows storing multiple `geff` graphs inside the same zarr root directory. A `geff` group is identified by the presence of a `geff_version` attribute in the `.zattrs`. Other `geff` metadata is also stored in the `.zattrs` file of the `geff` group. The `geff` group must contain a `nodes` group and an `edges` group.
 
+<<<<<<< HEAD
 `geff` graphs have the option to provide time and spatial dimensions as special attributes. In this case, a list of `spatial_attrs` and/or a `time_attr` must be specified in the `geff` metadata along with a `spatial_min` and `spatial_max` and/or a `time_min` and `time_max`. If a `spatial_attrs` is provided, every node must have each of the spatial attributes. Similarly, if `time_attr` is provided, all nodes must have the time attribute.
+=======
+`geff` graphs have the option to provide position as a special property. In this case, a `position_prop` must be specified in the `geff` metadata along with a `roi_min` and `roi_max`. If a `position_prop` is provided, every node must have a position value.
+>>>>>>> main
 
 ## Zarr specification
 
@@ -15,39 +19,45 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 %}
 
 ## The `nodes` group
-The nodes group will contain an `ids` array and an `attrs` group.
+The nodes group will contain an `ids` array and a `props` group.
 
 ### The `ids` array
 The `nodes\ids` array is a 1D array of node IDs of length `N` > 0, where `N` is the number of nodes in the graph. Node ids must be unique. Node IDs can have any type supported by zarr, but we recommend integer dtypes. For large graphs, `uint64` might be necessary to provide enough range for every node to have a unique ID. 
 
-### The `attrs` group and `node attribute` groups
-The `nodes\attrs` group will contain one or more `node attribute` groups, each with a `values` array and an optional `missing` array. 
+### The `props` group and `node property` groups
+The `nodes\props` group will contain one or more `node property` groups, each with a `values` array and an optional `missing` array.
 
-- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the node `ids` array, such that each row of the attribute `values` array stores the attribute for the node at that index in the ids array. 
-- The `missing` array is an optional, a one dimensional boolean array to support attributes that are not present on all nodes. A 1 at an index in the `missing` array indicates that the `value` of that attribute for the node at that index is None, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all nodes have values for the attribute. 
+- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the node `ids` array, such that each row of the property `values` array stores the property for the node at that index in the ids array.
+- The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all nodes. A 1 at an index in the `missing` array indicates that the `value` of that property for the node at that index is None, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all nodes have values for the property.
 
 !!! note
-    When writing a graph with missing attributes to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the attribute, in order to keep the indices aligned with the node ids.
+    When writing a graph with missing properties to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.
 
+<<<<<<< HEAD
 - The each of the `spatial_attrs` (if specified) and the `time_attr` (if specified) are a special node attribute groups that do not allow missing attributes.
 - The `seg_id` group is an optional, special node attribute group that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` group is not present, it is assumed that the graph is not associated with a segmentation. 
 <!-- Perhaps we just let the user specify the seg id attribute in the metadata instead? Then you can point it to the node ids if you wanted to -->
+=======
+- The `position` group is a special node property group that must be present if a `position_prop` is set in the `geff` metadata and does not allow missing properties.
+- The `seg_id` group is an optional, special node property group that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` group is not present, it is assumed that the graph is not associated with a segmentation. 
+<!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
+>>>>>>> main
 
 ## The `edges` group
-Similar to the `nodes` group, the `edges` group will contain an `ids` array and an `attrs` group. If there are no edges in the graph, the edge group is not created.
+Similar to the `nodes` group, the `edges` group will contain an `ids` array and a `props` group. If there are no edges in the graph, the edge group is not created.
 
 ### The `ids` array
 The `edges\ids` array is a 2D array with the same dtype as the `nodes\ids` array. It has shape `(2, E)`, where `E` is the number of edges in the graph. All elements in the `edges\ids` array must also be present in the `nodes\ids` array.
 Each row represents an edge between two nodes. For directed graphs, the first column is the source nodes and the second column holds the target nodes. For undirected graphs, the order is arbitrary.
 Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.
 
-### The `attrs` group and `edge attribute` groups
-The `edges\attrs` group will contain zero or more `edge attribute` groups, each with a `values` array and an optional `missing` array. 
+### The `props` group and `edge property` groups
+The `edges\props` group will contain zero or more `edge property` groups, each with a `values` array and an optional `missing` array.
 
-- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the `edges\ids` array, such that each row of the attribute `values` array stores the attribute for the edge at that index in the ids array. 
-- The `missing` array is an optional, a one dimensional boolean array to support attributes that are not present on all edges. A 1 at an index in the `missing` array indicates that the `value` of that attribute for the edge at that index is missing, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all edges have values for the attribute.
+- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the `edges\ids` array, such that each row of the property `values` array stores the property for the edge at that index in the ids array.
+- The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A 1 at an index in the `missing` array indicates that the `value` of that property for the edge at that index is missing, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all edges have values for the property.
 
-If you do not have any edge attributes, the `edges\attrs` group should still be present, but empty.
+If you do not have any edge properties, the `edges\props` group should still be present, but empty.
 
 ## Example file structure and metadata
 Here is a schematic of the expected file structure.
@@ -57,7 +67,7 @@ Here is a schematic of the expected file structure.
 	    .zattrs  # graph metadata with `geff_version`
 	    nodes/
             ids  # shape: (N,)  dtype: uint64
-            attrs/
+            props/
                 t/
                     values # shape: (N,) dtype: uint16
                 z/
@@ -71,7 +81,7 @@ Here is a schematic of the expected file structure.
                     missing # shape: (N,) dtype: bool
 	    edges/
             ids  # shape: (E, 2) dtype: uint64
-            attrs/
+            props/
                 distance/
                     values # shape: (E,) dtype: float16
                 score/
@@ -87,32 +97,31 @@ This is a geff metadata zattrs file that matches the above example structure.
 ```json
 # /path/to.zarr/tracking_graph/.zattrs
 {
-    "spatial_attrs": [ # optional
-        "z",
-        "y",
-        "x"
-    ],
-    "spatial_units": [ # optional
-        "um",
-        "um",
-        "um"
-    ],
-    "directed": true,
-    "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
-    "position_attr": "position",
-    "spatial_max": [ 
-        4398.1,
-        1877.7,
-        2152.3
-    ],
-    "spatial_min": [
-        1523.368197,
-        81.667,
-        764.42
-    ],
-    "time_attr": "t",
-    "time_min": 0,
-    "time_max": 91
+    "geff": {
+        "axis_names": [ # optional
+            "z",
+            "y",
+            "x"
+        ],
+        "axis_units": [ # optional
+            "um",
+            "um",
+            "um"
+        ],
+        "directed": true,
+        "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
+        "position_prop": "position",
+        "roi_max": [ # Required if position_prop is specified
+            4398.1,
+            1877.7,
+            2152.3
+        ],
+        "roi_min": [ # Required if position_prop is specified
+            1523.368197,
+            81.667,
+            764.42
+        ],
+    }
     ... # custom other things are allowed and ignored by geff
 }
 ```

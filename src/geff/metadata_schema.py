@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 import zarr
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
 import geff
@@ -29,28 +29,24 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(title="geff_metadata")
+    model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
 
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
+    roi_min: tuple[float, ...] | None = None
+    roi_max: tuple[float, ...] | None = None
+    position_prop: str | None = None
+    axis_names: tuple[str, ...] | None = None
+    axis_units: tuple[str, ...] | None = None
 
-    spatial_attrs: tuple[str, ...] | None = None
-    spatial_units: tuple[str, ...] | None = None
-    spatial_min: tuple[float, ...] | None = None
-    spatial_max: tuple[float, ...] | None = None
-
-    time_attr: str | None = None
-    time_unit: str | None = None
-    time_min: float | None = None
-    time_max: float | None = None
-
-    def model_post_init(self, *args, **kwargs):  # noqa D102
+    @model_validator(mode="after")
+    def _validate_model(self) -> GeffMetadata:
         # Check spatial metadata only if position is provided
-        if self.spatial_attrs is not None:
+        if self.position_prop is not None:
             # Check that rois are there if position provided
             if self.roi_min is None or self.roi_max is None:
                 raise ValueError(
-                    f"Spatial attributes {self.spatial_attrs} has been specified, "
+                    f"Position property {self.position_prop} has been specified, "
                     "but roi_min and/or roi_max are not specified."
                 )
 
@@ -77,31 +73,12 @@ class GeffMetadata(BaseModel):
                     f" dimensions in roi ({ndim})"
                 )
         # If no position, check that other spatial metadata is not provided
-        else:
-            if any([self.roi_min, self.roi_max, self.spatial_units]):
-                raise ValueError(
-                    "Spatial metadata (roi_min, roi_max, or spatial_units) provided without"
-                    " spatial_attrs"
-                )
-
-        # Check temporal metadata only if time_attr is provided
-        if self.time_attr is not None:
-            # Check that min and max are there if time provided
-            if self.time_min is None or self.time_max is None:
-                raise ValueError(
-                    f"time attribute {self.time_attr} has been specified, "
-                    "but time_min and/or time_max are not specified."
-                )
-
-            if self.time_min > self.time_max:
-                raise ValueError(f"Time min {self.time_min} is greater than max {self.time_max}")
-        # If no time, check that other temporal metadata is not provided
-        else:
-            if any([self.time_min, self.time_max, self.time_unit]):
-                raise ValueError(
-                    "Temporal metadata (time_min, time_max, or time_unit) provided without"
-                    " time_attr"
-                )
+        elif any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
+            raise ValueError(
+                "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
+                " position_prop"
+            )
+        return self
 
     def write(self, group: zarr.Group | Path):
         """Helper function to write GeffMetadata into the zarr geff group.
@@ -111,8 +88,8 @@ class GeffMetadata(BaseModel):
         """
         if isinstance(group, Path):
             group = zarr.open(group)
-        for key, value in self:
-            group.attrs[key] = value
+
+        group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
     def read(cls, group: zarr.Group | Path) -> GeffMetadata:
@@ -126,7 +103,20 @@ class GeffMetadata(BaseModel):
         """
         if isinstance(group, Path):
             group = zarr.open(group)
-        return cls(**group.attrs)
+
+        # Check if geff_version exists in zattrs
+        if "geff" not in group.attrs:
+            raise ValueError(
+                f"No geff key found in {group}. This may indicate the path is incorrect or "
+                f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
+                f"/dataset.zarr/)."
+            )
+
+        return cls(**group.attrs["geff"])
+
+
+class GeffSchema(BaseModel):
+    geff: GeffMetadata = Field(..., description="geff_metadata")
 
 
 def write_metadata_schema(outpath: Path):
@@ -135,6 +125,6 @@ def write_metadata_schema(outpath: Path):
     Args:
         outpath (Path): The file to write the schema to
     """
-    metadata_schema = GeffMetadata.model_json_schema()
+    metadata_schema = GeffSchema.model_json_schema()
     with open(outpath, "w") as f:
         f.write(json.dumps(metadata_schema, indent=2))

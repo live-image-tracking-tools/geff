@@ -5,13 +5,22 @@ ci:
   autofix_prs: false
 
 repos:
+  - repo: local
+    hooks:
+      - id: update-json
+        name: Update geff-schema.json
+        entry: pixi run -e dev update-json
+        language: python
+        types: [python]
+        pass_filenames: false
+        stages: [manual]
   - repo: https://github.com/crate-ci/typos
-    rev: v1
+    rev: v1.34.0
     hooks:
       - id: typos
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.4
+    rev: v0.12.3
     hooks:
       - id: ruff
         args: [--fix]
@@ -23,7 +32,7 @@ repos:
       - id: validate-pyproject
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+    rev: v1.17.0
     hooks:
       - id: mypy
         files: "^src/"

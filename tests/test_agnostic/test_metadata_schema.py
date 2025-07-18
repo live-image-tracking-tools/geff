@@ -38,7 +38,7 @@ class TestMetadataModel:
         model = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
-            position_attr="position",
+            position_prop="position",
             roi_min=[0, 0, 0],
             roi_max=[100, 100, 100],
             axis_names=["t", "y", "x"],
@@ -49,18 +49,15 @@ class TestMetadataModel:
         model = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
-            position_attr="position",
+            position_prop="position",
             roi_min=[0, 0, 0],
             roi_max=[100, 100, 100],
         )
         assert model.axis_names is None
         assert model.axis_units is None
 
-        model = GeffMetadata(
-            geff_version="0.0.1",
-            directed=True
-        )
-        assert model.position_attr is None
+        model = GeffMetadata(geff_version="0.0.1", directed=True)
+        assert model.position_prop is None
         assert model.roi_min is None
         assert model.roi_max is None
 
@@ -80,7 +77,7 @@ class TestMetadataModel:
             GeffMetadata(
                 geff_version="0.0.1-a",
                 directed=False,
-                position_attr="position",
+                position_prop="position",
                 roi_min=[1000, 0, 0],
                 roi_max=[100, 100, 100],
             )
@@ -88,7 +85,7 @@ class TestMetadataModel:
             GeffMetadata(
                 geff_version="0.0.1-a",
                 directed=False,
-                position_attr="position",
+                position_prop="position",
                 roi_min=[1000, 0],
                 roi_max=[100, 100, 100],
             )
@@ -101,7 +98,7 @@ class TestMetadataModel:
             GeffMetadata(
                 geff_version="0.0.1-a",
                 directed=False,
-                position_attr="position",
+                position_prop="position",
                 roi_min=[0, 0, 0],
                 roi_max=[100, 100, 100],
                 axis_names=["t", "y"],
@@ -115,7 +112,7 @@ class TestMetadataModel:
             GeffMetadata(
                 geff_version="0.0.1-a",
                 directed=False,
-                position_attr="position",
+                position_prop="position",
                 roi_min=[0, 0, 0],
                 roi_max=[100, 100, 100],
                 axis_names=["t", "y", "x"],
@@ -123,10 +120,7 @@ class TestMetadataModel:
             )
 
     def test_invalid_spatial_metadata(self):
-        with pytest.raises(
-            ValueError,
-            match="Spatial metadata"
-        ):
+        with pytest.raises(ValueError, match="Spatial metadata"):
             GeffMetadata(
                 geff_version="0.0.1-a",
                 directed=False,
@@ -138,7 +132,7 @@ class TestMetadataModel:
         GeffMetadata(
             geff_version="0.0.1",
             directed=True,
-            position_attr="position",
+            position_prop="position",
             roi_min=[0, 0, 0],
             roi_max=[100, 100, 100],
             axis_names=["t", "y", "x"],
@@ -150,7 +144,7 @@ class TestMetadataModel:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
-            position_attr="position",
+            position_prop="position",
             roi_min=[0, 0, 0],
             roi_max=[100, 100, 100],
             axis_names=["t", "y", "x"],
@@ -167,6 +161,24 @@ class TestMetadataModel:
         meta.write(zpath)
         compare = GeffMetadata.read(zpath)
         assert compare == meta
+
+    def test_model_mutation(self):
+        """Test that invalid model mutations raise errors."""
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            position_prop="position",
+            roi_min=(0, 0, 0),
+            roi_max=(100, 100, 100),
+        )
+
+        meta.roi_max = (200, 200, 200)  # fine...
+
+        with pytest.raises(pydantic.ValidationError):
+            meta.roi_min = None
+
+        with pytest.raises(pydantic.ValidationError):
+            meta.position_prop = None
 
 
 def test_write_schema(tmp_path):
