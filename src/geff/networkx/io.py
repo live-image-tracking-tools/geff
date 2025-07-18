@@ -198,11 +198,11 @@ def _set_property_values(
             extract and set edge properties. Defaults to True.
     """
     element = "nodes" if nodes else "edges"
-    attr_group = graph_group[f"{element}/props/{name}"]
-    values = attr_group["values"][:]
-    sparse = "missing" in attr_group.array_keys()
+    prop_group = graph_group[f"{element}/props/{name}"]
+    values = prop_group["values"][:]
+    sparse = "missing" in prop_group.array_keys()
     if sparse:
-        missing = attr_group["missing"][:]
+        missing = prop_group["missing"][:]
     for idx in range(len(ids)):
         _id = ids[idx]
         val = values[idx]

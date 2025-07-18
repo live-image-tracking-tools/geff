@@ -118,8 +118,8 @@ def path_w_expected_graph_props(
             graph.add_node(node, pos=graph_props["node_positions"][idx], **props)
 
         for idx, edge in enumerate(graph_props["edges"]):
-            attrs = {
-                name: attr_array[idx] for name, attr_array in graph_props["edge_attrs"].items()
+            props = {
+                name: prop_array[idx] for name, prop_array in graph_props["edge_props"].items()
             }
             graph.add_edge(*edge.tolist(), **props)
 

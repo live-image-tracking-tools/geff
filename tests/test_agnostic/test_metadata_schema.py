@@ -167,7 +167,7 @@ class TestMetadataModel:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
-            position_attr="position",
+            position_prop="position",
             roi_min=(0, 0, 0),
             roi_max=(100, 100, 100),
         )
@@ -178,7 +178,7 @@ class TestMetadataModel:
             meta.roi_min = None
 
         with pytest.raises(pydantic.ValidationError):
-            meta.position_attr = None
+            meta.position_prop = None
 
 
 def test_write_schema(tmp_path):
