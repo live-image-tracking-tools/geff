@@ -30,10 +30,6 @@ def test_read_write_consistency(
         node_dtype, node_attr_dtypes, edge_attr_dtypes, directed
     )
 
-    import zarr
-
-    print("node type in zarr", zarr.open(path)["nodes/ids"].dtype)
-    print("edge type in zarr", zarr.open(path)["edges/ids"].dtype)
     graph = geff.read_sg(path)
 
     np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(graph_attrs["nodes"]))
