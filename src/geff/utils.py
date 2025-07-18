@@ -49,20 +49,20 @@ def validate(path: str | Path):
 
     # Property array length should match id length
     id_len = nodes["ids"].shape[0]
-    for attr in nodes["props"].keys():
-        attr_group = nodes["props"][attr]
-        assert "values" in attr_group.array_keys(), (
-            f"node property group {attr} must have values group"
+    for prop in nodes["props"].keys():
+        prop_group = nodes["props"][prop]
+        assert "values" in prop_group.array_keys(), (
+            f"node property group {prop} must have values group"
         )
-        attr_len = attr_group["values"].shape[0]
-        assert attr_len == id_len, (
-            f"Node property {attr} values has length {attr_len}, which does not match "
+        prop_len = prop_group["values"].shape[0]
+        assert prop_len == id_len, (
+            f"Node property {prop} values has length {prop_len}, which does not match "
             f"id length {id_len}"
         )
-        if "missing" in attr_group.array_keys():
-            missing_len = attr_group["missing"].shape[0]
+        if "missing" in prop_group.array_keys():
+            missing_len = prop_group["missing"].shape[0]
             assert missing_len == id_len, (
-                f"Node property {attr} missing mask has length {missing_len}, which "
+                f"Node property {prop} missing mask has length {missing_len}, which "
                 f"does not match id length {id_len}"
             )
 
@@ -79,19 +79,19 @@ def validate(path: str | Path):
         # Edge property array length should match edge id length
         edge_id_len = edges["ids"].shape[0]
         if "props" in edges:
-            for attr in edges["props"].keys():
-                attr_group = edges["props"][attr]
-                assert "values" in attr_group.array_keys(), (
-                    f"Edge property group {attr} must have values group"
+            for prop in edges["props"].keys():
+                prop_group = edges["props"][prop]
+                assert "values" in prop_group.array_keys(), (
+                    f"Edge property group {prop} must have values group"
                 )
-                attr_len = attr_group["values"].shape[0]
-                assert attr_len == edge_id_len, (
-                    f"Edge property {attr} values has length {attr_len}, which does not "
+                prop_len = prop_group["values"].shape[0]
+                assert prop_len == edge_id_len, (
+                    f"Edge property {prop} values has length {prop_len}, which does not "
                     f"match id length {edge_id_len}"
                 )
-                if "missing" in attr_group.array_keys():
-                    missing_len = attr_group["missing"].shape[0]
+                if "missing" in prop_group.array_keys():
+                    missing_len = prop_group["missing"].shape[0]
                     assert missing_len == edge_id_len, (
-                        f"Edge property {attr} missing mask has length {missing_len}, "
+                        f"Edge property {prop} missing mask has length {missing_len}, "
                         f"which does not match id length {edge_id_len}"
                     )

@@ -21,11 +21,11 @@ def big_graph():
     for node, pos in zip(nodes, positions):
         graph.add_node(node.item(), position=pos.tolist())
 
-    float_attr = np.random.uniform(size=(N_NODES * N_NODES))
-    int_attr = np.arange(N_NODES * N_NODES)
+    float_prop = np.random.uniform(size=(N_NODES * N_NODES))
+    int_prop = np.arange(N_NODES * N_NODES)
     for i, (source, target) in enumerate(product(nodes, nodes)):
         if source != target:
-            graph.add_edge(source, target, float_attr=float_attr[i], int_attr=int_attr[i])
+            graph.add_edge(source, target, float_prop=float_prop[i], int_prop=int_prop[i])
 
     print("N nodes", len(graph.nodes))
     print("N edges", len(graph.edges))
