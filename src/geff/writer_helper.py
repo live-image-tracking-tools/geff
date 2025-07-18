@@ -8,6 +8,7 @@ def write_props(
     group: zarr.Group,
     data: Sequence[tuple[Any, dict[str, Any]]],
     prop_names: Sequence[str],
+    node_dtype: np.typing.DTypeLike,
     position_prop: str | None = None,
 ) -> None:
     """
