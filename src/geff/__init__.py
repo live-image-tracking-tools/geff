@@ -16,15 +16,15 @@ def __getattr__(name: str):
             from .spatial_graph.io import read_sg
 
             return read_sg
-        except ImportError:
-            raise ImportError("install with geff[spatial_graph] to use read_sg")
+        except ImportError as e:
+            raise ImportError("install with geff[spatial_graph] to use read_sg") from e
     if name == "write_sg":
         try:
             from .spatial_graph.io import write_sg
 
             return write_sg
-        except ImportError:
-            raise ImportError("install with geff[spatial_graph] to use read_sg")
+        except ImportError as e:
+            raise ImportError("install with geff[spatial_graph] to use read_sg") from e
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
