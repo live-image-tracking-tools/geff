@@ -10,7 +10,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
-from geff.writer_helper import BaseWriterHelper
+from geff.writer_helper import write_attrs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -81,17 +81,22 @@ def write_nx(
     else:
         group = zarr.open(path, mode="a")
 
-    node_writer = BaseWriterHelper(
-        data=list(graph.nodes(data=True)),
+    node_data = list(graph.nodes(data=True))
+    write_attrs(
+        group=group.require_group("nodes"),
+        data=node_data,
+        attr_names=list({k for _, data in node_data for k in data}),
         position_attr=position_attr,
     )
-    node_writer.write_attrs(group.require_group("nodes"))
+    del node_data
 
-    edge_writer = BaseWriterHelper(
-        data=[((u, v), data) for u, v, data in graph.edges(data=True)],
-        position_attr=position_attr,
+    edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
+    write_attrs(
+        group=group.require_group("edges"),
+        data=edge_data,
+        attr_names=list({k for _, data in edge_data for k in data}),
     )
-    edge_writer.write_attrs(group.require_group("edges"))
+    del edge_data
 
     # write metadata
     roi_min: tuple[float, ...] | None
