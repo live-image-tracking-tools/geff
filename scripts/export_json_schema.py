@@ -1,3 +1,4 @@
+#!/usr/bin/env -S pixi run python
 import argparse
 
 from geff.metadata_schema import write_metadata_schema

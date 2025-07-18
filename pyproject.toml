@@ -16,7 +16,8 @@ dependencies = [
     "pydantic>=2",
     "pyyaml",
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
-    "networkx"]
+    "networkx",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: MIT License",
@@ -27,15 +28,15 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
+test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
 dev = [
-    "pytest>=8.3.4",
-    "pytest-cov",
+    { include-group = "test" },
     "mypy",
     "pre-commit",
     "ruff",
     "ipython",
-    "types-PyYAML"
+    "types-PyYAML",
 ]
 docs = [
     "mkdocs-material",
@@ -48,6 +49,7 @@ docs = [
     "ruff",  # to format the source code signatures
 ]
 bench = [
+    { include-group = "test" },
     "pytest-benchmark",
     "tabulate",
     "pandas",
@@ -130,11 +132,15 @@ convention = "google"
 
 # https://docs.pytest.org/en/6.2.x/customize.html
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "7.0"
 testpaths = ["tests"]
-pythonpath = [
-  "tests"
+pythonpath = ["tests"]
+filterwarnings = [
+    "error",
+    # if needed, add global ignores here, for example:
+    # "ignore:Some message:SomeCategory",
 ]
+
 
 # https://mypy.readthedocs.io/en/stable/config_file.html
 [tool.mypy]

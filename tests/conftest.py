@@ -8,9 +8,7 @@ from numpy.typing import NDArray
 
 import geff
 
-DTypeStr = Literal[
-    "double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"
-]
+DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
 Axes = Literal["t", "z", "y", "x"]
 
 
@@ -18,26 +16,26 @@ class GraphAttrs(TypedDict):
     nodes: NDArray[Any]
     edges: NDArray[Any]
     node_positions: NDArray[Any]
-    extra_node_attrs: dict[str, NDArray[Any]]
-    edge_attrs: dict[str, NDArray[Any]]
+    extra_node_props: dict[str, NDArray[Any]]
+    edge_props: dict[str, NDArray[Any]]
     directed: bool
     axis_names: tuple[Axes, ...]
     axis_units: tuple[str, ...]
 
 
-class ExampleNodeAttrs(TypedDict):
+class ExampleNodeProps(TypedDict):
     position: DTypeStr
 
 
-class ExampleEdgeAttrs(TypedDict):
+class ExampleEdgeProps(TypedDict):
     score: DTypeStr
     color: DTypeStr
 
 
-def create_dummy_graph_attrs(
+def create_dummy_graph_props(
     node_dtype: DTypeStr,
-    node_attr_dtypes: ExampleNodeAttrs,
-    edge_attr_dtypes: ExampleEdgeAttrs,
+    node_prop_dtypes: ExampleNodeProps,
+    edge_prop_dtypes: ExampleEdgeProps,
     directed: bool,
 ) -> GraphAttrs:
     axis_names = ("t", "z", "y", "x")
@@ -51,7 +49,7 @@ def create_dummy_graph_attrs(
             [0.4, 0.2, 400.0, 0.1],
             [0.5, 0.1, 500.0, 0.1],
         ],
-        dtype=node_attr_dtypes["position"],
+        dtype=node_prop_dtypes["position"],
     )
 
     edges = np.array(
@@ -63,15 +61,15 @@ def create_dummy_graph_attrs(
         ],
         dtype=node_dtype,
     )
-    scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_attr_dtypes["score"])
-    colors = np.array([1, 2, 3, 4], dtype=edge_attr_dtypes["color"])
+    scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
+    colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
 
     return {
         "nodes": nodes,
         "edges": edges,
         "node_positions": positions,
-        "extra_node_attrs": {},
-        "edge_attrs": {"score": scores, "color": colors},
+        "extra_node_props": {},
+        "edge_props": {"score": scores, "color": colors},
         "directed": directed,
         "axis_names": axis_names,
         "axis_units": axis_units,
@@ -81,62 +79,59 @@ def create_dummy_graph_attrs(
 # Using a fixture instead of a function so the tmp_path fixture is automatically passed
 # Implemented as a closure where tmp_path is the bound variable
 @pytest.fixture
-def path_w_expected_graph_attrs(
+def path_w_expected_graph_props(
     tmp_path,
-) -> Callable[
-    [DTypeStr, ExampleNodeAttrs, ExampleEdgeAttrs, bool], tuple[Path, GraphAttrs]
-]:
+) -> Callable[[DTypeStr, ExampleNodeProps, ExampleEdgeProps, bool], tuple[Path, GraphAttrs]]:
     def func(
         node_dtype: DTypeStr,
-        node_attr_dtypes: ExampleNodeAttrs,
-        edge_attr_dtypes: ExampleEdgeAttrs,
+        node_prop_dtypes: ExampleNodeProps,
+        edge_prop_dtypes: ExampleEdgeProps,
         directed: bool,
     ) -> tuple[Path, GraphAttrs]:
         """
-        Fixture to a geff graph path saved on disk with the expected graph attributes.
+        Fixture to a geff graph path saved on disk with the expected graph properties.
 
         Returns:
         Path
             Path to the example graph.
         GraphAttrs
-            The expected graph attributes in a dictionary.
+            The expected graph properties in a dictionary.
         """
 
         directed = True
-        graph_attrs = create_dummy_graph_attrs(
+        graph_props = create_dummy_graph_props(
             node_dtype=node_dtype,
-            node_attr_dtypes=node_attr_dtypes,
-            edge_attr_dtypes=edge_attr_dtypes,
+            node_prop_dtypes=node_prop_dtypes,
+            edge_prop_dtypes=edge_prop_dtypes,
             directed=directed,
         )
 
         # write graph with networkx api
         graph = nx.DiGraph() if directed else nx.Graph()
 
-        for idx, node in enumerate(graph_attrs["nodes"]):
-            attrs = {
-                name: attr_array[idx]
-                for name, attr_array in graph_attrs["extra_node_attrs"].items()
+        for idx, node in enumerate(graph_props["nodes"]):
+            props = {
+                name: prop_array[idx]
+                for name, prop_array in graph_props["extra_node_props"].items()
             }
-            graph.add_node(node, pos=graph_attrs["node_positions"][idx], **attrs)
+            graph.add_node(node, pos=graph_props["node_positions"][idx], **props)
 
-        for idx, edge in enumerate(graph_attrs["edges"]):
-            attrs = {
-                name: attr_array[idx]
-                for name, attr_array in graph_attrs["edge_attrs"].items()
+        for idx, edge in enumerate(graph_props["edges"]):
+            props = {
+                name: prop_array[idx] for name, prop_array in graph_props["edge_props"].items()
             }
-            graph.add_edge(*edge.tolist(), **attrs)
+            graph.add_edge(*edge.tolist(), **props)
 
         path = tmp_path / "rw_consistency.zarr/graph"
 
         geff.write_nx(
             graph,
             path,
-            position_attr="pos",
-            axis_names=list(graph_attrs["axis_names"]),
-            axis_units=list(graph_attrs["axis_units"]),
+            position_prop="pos",
+            axis_names=list(graph_props["axis_names"]),
+            axis_units=list(graph_props["axis_units"]),
         )
 
-        return path, graph_attrs
+        return path, graph_props
 
     return func
