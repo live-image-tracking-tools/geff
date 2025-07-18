@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from importlib.resources import files
 from pathlib import Path
 
@@ -9,10 +10,10 @@ import yaml
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
-from .units import validate_axis_type, validate_space_unit, validate_time_unit, VALID_AXIS_TYPES
-import warnings
 
 import geff
+
+from .units import VALID_AXIS_TYPES, validate_axis_type, validate_space_unit
 
 with (files(geff) / "supported_versions.yml").open() as f:
     SUPPORTED_VERSIONS = yaml.safe_load(f)["versions"]
@@ -24,6 +25,7 @@ def _get_versions_regex(versions: list[str]):
 
 SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
 
+
 class Axis(BaseModel):
     name: str
     type: str | None = None
@@ -34,7 +36,9 @@ class Axis(BaseModel):
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
         if (self.min is None) != (self.max is None):
-            raise ValueError(f"Min and max must both be None or neither: got min {min} and max {max}")
+            raise ValueError(
+                f"Min and max must both be None or neither: got min {min} and max {max}"
+            )
         if self.min is not None and self.min > self.max:
             raise ValueError(f"Min {min} is greater than max {max}")
         if self.type is not None and validate_axis_type(self.type):
@@ -55,45 +59,10 @@ class GeffMetadata(BaseModel):
 
     # this determines the title of the generated json schema
     model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
+    axes: list[Axis]
 
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
-    roi_min: tuple[float, ...] | None = None
-    roi_max: tuple[float, ...] | None = None
-    position_prop: str | None = None
-    axis_names: tuple[str, ...] | None = None
-    axis_units: tuple[str, ...] | None = None
-
-    @model_validator(mode="after")
-    def _validate_model(self) -> GeffMetadata:
-        # Check spatial metadata only if position is provided
-        if self.position_prop is not None:
-
-            ndim = len(self.roi_min)
-            for dim in range(ndim):
-                if self.roi_min[dim] > self.roi_max[dim]:
-                    raise ValueError(
-                        f"Roi min {self.roi_min} is greater than "
-                        f"max {self.roi_max} in dimension {dim}"
-                    )
-
-            if len(self.spatial_attrs) != ndim:
-                raise ValueError(
-                    f"Length of spatial attributes ({len(self.spatial_attrs)}) does not match"
-                    f" number of dimensions in roi ({ndim})"
-                )
-            if self.spatial_units is not None and len(self.spatial_units) != ndim:
-                raise ValueError(
-                    f"Length of axis units ({len(self.spatial_units)}) does not match number of"
-                    f" dimensions in roi ({ndim})"
-                )
-        # If no position, check that other spatial metadata is not provided
-        elif any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
-            raise ValueError(
-                "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
-                " position_prop"
-            )
-        return self
 
     def write(self, group: zarr.Group | Path):
         """Helper function to write GeffMetadata into the zarr geff group.
