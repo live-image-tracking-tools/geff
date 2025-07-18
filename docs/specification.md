@@ -83,31 +83,29 @@ This is a geff metadata zattrs file that matches the above example structure.
 ```json
 # /path/to.zarr/tracking_graph/.zattrs
 {
-    "geff": {
-        "axis_names": [ # optional
-            "z",
-            "y",
-            "x"
-        ],
-        "axis_units": [ # optional
-            "um",
-            "um",
-            "um"
-        ],
-        "directed": true,
-        "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
-        "position_prop": "position",
-        "roi_max": [ # Required if position_prop is specified
-            4398.1,
-            1877.7,
-            2152.3
-        ],
-        "roi_min": [ # Required if position_prop is specified
-            1523.368197,
-            81.667,
-            764.42
-        ],
-    }
+    "axis_names": [ # optional
+        "z",
+        "y",
+        "x"
+    ],
+    "axis_units": [ # optional
+        "um",
+        "um",
+        "um"
+    ],
+    "directed": true,
+    "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
+    "position_prop": "position",
+    "roi_max": [ # Required if position_prop is specified
+        4398.1,
+        1877.7,
+        2152.3
+    ],
+    "roi_min": [ # Required if position_prop is specified
+        1523.368197,
+        81.667,
+        764.42
+    ],
     ... # custom other things are allowed and ignored by geff
 }
 ```
