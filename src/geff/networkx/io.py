@@ -187,8 +187,6 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     group = zarr.open(path, mode="r")
     metadata = GeffMetadata.read(group)
 
-
-
     # read meta-data
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
     graph.graph["ignored_attrs"] = {}

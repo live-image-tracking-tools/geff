@@ -4,7 +4,6 @@ import json
 import re
 from importlib.resources import files
 from pathlib import Path
-from typing import Any
 
 import yaml
 import zarr
@@ -118,7 +117,9 @@ class GeffMetadata(BaseModel):
         geff_attrs = group.attrs.asdict()
         model_fields = set(cls.model_fields.keys())
         ignored_attrs = {
-            key: value for key, value in geff_attrs.items() if key not in model_fields and key != "geff"
+            key: value
+            for key, value in geff_attrs.items()
+            if key not in model_fields and key != "geff"
         }
 
         # Check if geff_version exists in zattrs
