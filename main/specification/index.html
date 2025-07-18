@@ -333,9 +333,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-attrs-group-and-node-attribute-groups" class="md-nav__link">
+  <a href="#the-props-group-and-node-property-groups" class="md-nav__link">
     <span class="md-ellipsis">
-      The attrs group and node attribute groups
+      The props group and node property groups
     </span>
   </a>
   
@@ -366,9 +366,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-attrs-group-and-edge-attribute-groups" class="md-nav__link">
+  <a href="#the-props-group-and-edge-property-groups" class="md-nav__link">
     <span class="md-ellipsis">
-      The attrs group and edge attribute groups
+      The props group and edge property groups
     </span>
   </a>
   
@@ -482,9 +482,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-attrs-group-and-node-attribute-groups" class="md-nav__link">
+  <a href="#the-props-group-and-node-property-groups" class="md-nav__link">
     <span class="md-ellipsis">
-      The attrs group and node attribute groups
+      The props group and node property groups
     </span>
   </a>
   
@@ -515,9 +515,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-attrs-group-and-edge-attribute-groups" class="md-nav__link">
+  <a href="#the-props-group-and-edge-property-groups" class="md-nav__link">
     <span class="md-ellipsis">
-      The attrs group and edge attribute groups
+      The props group and edge property groups
     </span>
   </a>
   
@@ -555,7 +555,7 @@
 
 <h1 id="geff-specification">Geff specification</h1>
 <p>The graph exchange file format is <code>zarr</code> based. A graph is stored in a zarr group, which can have any name. This allows storing multiple <code>geff</code> graphs inside the same zarr root directory. A <code>geff</code> group is identified by the presence of a <code>geff_version</code> attribute in the <code>.zattrs</code>. Other <code>geff</code> metadata is also stored in the <code>.zattrs</code> file of the <code>geff</code> group. The <code>geff</code> group must contain a <code>nodes</code> group and an <code>edges</code> group.</p>
-<p><code>geff</code> graphs have the option to provide position as a special attribute. In this case, a <code>position_attr</code> must be specified in the <code>geff</code> metadata along with a <code>roi_min</code> and <code>roi_max</code>. If a <code>position_attr</code> is provided, every node must have a position value.</p>
+<p><code>geff</code> graphs have the option to provide position as a special property. In this case, a <code>position_prop</code> must be specified in the <code>geff</code> metadata along with a <code>roi_min</code> and <code>roi_max</code>. If a <code>position_prop</code> is provided, every node must have a position value.</p>
 <h2 id="zarr-specification">Zarr specification</h2>
 <p>Currently, <code>geff</code> supports zarr specifications <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html">2</a> and <a href="https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html">3</a>. However, <code>geff</code> will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.</p>
 <h2 id="geff-metadata">Geff metadata</h2>
@@ -572,12 +572,41 @@
     <meta charset="utf-8"/>
 
 
-    <title>geff_metadata</title>
+    <title>GeffSchema</title>
 </head>
 <body onload="anchorOnLoad();" id="root">
 
-    <div class="breadcrumbs"></div> <h1>geff_metadata</h1><span class="badge badge-dark value-type">Type: object</span><br/>
-<span class="description"><p>Geff metadata schema to validate the attributes json file in a geff zarr</p>
+    <div class="breadcrumbs"></div> <h1>GeffSchema</h1><span class="badge badge-dark value-type">Type: object</span><br/>
+
+
+
+
+
+
+
+<div class="accordion" id="accordiongeff">
+    <div class="card">
+        <div class="card-header" id="headinggeff">
+            <h2 class="mb-0">
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff"
+                        aria-expanded="" aria-controls="geff" onclick="setAnchor('#geff')"><span class="property-name">geff</span> <span class="badge badge-warning required-property">Required</span></button>
+            </h2>
+        </div>
+
+        <div id="geff"
+             class="collapse property-definition-div" aria-labelledby="headinggeff"
+             data-parent="#accordiongeff">
+            <div class="card-body pl-5">
+
+    <div class="breadcrumbs">root
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a></div><h4>geff_metadata</h4><span class="badge badge-dark value-type">Type: object</span><br/>
+<span class="description"><p>geff_metadata</p>
 </span>
 
 
@@ -585,18 +614,20 @@
 
 
 
-<div class="accordion" id="accordiongeff_version">
+
+
+<div class="accordion" id="accordiongeff_geff_version">
     <div class="card">
-        <div class="card-header" id="headinggeff_version">
+        <div class="card-header" id="headinggeff_geff_version">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_version"
-                        aria-expanded="" aria-controls="geff_version" onclick="setAnchor('#geff_version')"><span class="property-name">geff_version</span> <span class="badge badge-warning required-property">Required</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_geff_version"
+                        aria-expanded="" aria-controls="geff_geff_version" onclick="setAnchor('#geff_geff_version')"><span class="property-name">geff_version</span> <span class="badge badge-warning required-property">Required</span></button>
             </h2>
         </div>
 
-        <div id="geff_version"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_version"
-             data-parent="#accordiongeff_version">
+        <div id="geff_geff_version"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_geff_version"
+             data-parent="#accordiongeff_geff_version">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -606,8 +637,15 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_version" onclick="anchorLink('geff_version')">geff_version</a></div><h4>Geff Version</h4><span class="badge badge-dark value-type">Type: string</span><br/>
-<span class="pattern-value" id="geff_version_pattern">Must match regular expression: <code>(0\.0)|(0\.1)|(0\.2)</code></span>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_geff_version" onclick="anchorLink('geff_geff_version')">geff_version</a></div><h4>Geff Version</h4><span class="badge badge-dark value-type">Type: string</span><br/>
+<span class="pattern-value" id="geff_geff_version_pattern">Must match regular expression: <code>(0\.0)|(0\.1)|(0\.2)</code></span>
 
 
 
@@ -618,18 +656,18 @@
         </div>
     </div>
 </div>
-<div class="accordion" id="accordiondirected">
+<div class="accordion" id="accordiongeff_directed">
     <div class="card">
-        <div class="card-header" id="headingdirected">
+        <div class="card-header" id="headinggeff_directed">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#directed"
-                        aria-expanded="" aria-controls="directed" onclick="setAnchor('#directed')"><span class="property-name">directed</span> <span class="badge badge-warning required-property">Required</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_directed"
+                        aria-expanded="" aria-controls="geff_directed" onclick="setAnchor('#geff_directed')"><span class="property-name">directed</span> <span class="badge badge-warning required-property">Required</span></button>
             </h2>
         </div>
 
-        <div id="directed"
-             class="collapse property-definition-div" aria-labelledby="headingdirected"
-             data-parent="#accordiondirected">
+        <div id="geff_directed"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_directed"
+             data-parent="#accordiongeff_directed">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -639,7 +677,14 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#directed" onclick="anchorLink('directed')">directed</a></div><h4>Directed</h4><span class="badge badge-dark value-type">Type: boolean</span><br/>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_directed" onclick="anchorLink('geff_directed')">directed</a></div><h4>Directed</h4><span class="badge badge-dark value-type">Type: boolean</span><br/>
 
 
 
@@ -651,18 +696,18 @@
         </div>
     </div>
 </div>
-<div class="accordion" id="accordionroi_min">
+<div class="accordion" id="accordiongeff_roi_min">
     <div class="card">
-        <div class="card-header" id="headingroi_min">
+        <div class="card-header" id="headinggeff_roi_min">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#roi_min"
-                        aria-expanded="" aria-controls="roi_min" onclick="setAnchor('#roi_min')"><span class="property-name">roi_min</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_roi_min"
+                        aria-expanded="" aria-controls="geff_roi_min" onclick="setAnchor('#geff_roi_min')"><span class="property-name">roi_min</span></button>
             </h2>
         </div>
 
-        <div id="roi_min"
-             class="collapse property-definition-div" aria-labelledby="headingroi_min"
-             data-parent="#accordionroi_min">
+        <div id="geff_roi_min"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_roi_min"
+             data-parent="#accordiongeff_roi_min">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -672,22 +717,29 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min" onclick="anchorLink('roi_min')">roi_min</a></div><h4>Roi Min</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="roi_min_anyOf"><h2 class="handle">
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_min" onclick="anchorLink('geff_roi_min')">roi_min</a></div><h4>Roi Min</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+<div class="any-of-value" id="geff_roi_min_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsroi_min_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_roi_min_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="roi_min_anyOf_i0" data-toggle="tab" href="#tab-pane_roi_min_anyOf_i0" role="tab"
-               onclick="setAnchor('#roi_min_anyOf_i0')"
+               id="geff_roi_min_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_roi_min_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_roi_min_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="roi_min_anyOf_i1" data-toggle="tab" href="#tab-pane_roi_min_anyOf_i1" role="tab"
-               onclick="setAnchor('#roi_min_anyOf_i1')"
+               id="geff_roi_min_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_roi_min_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_roi_min_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_roi_min_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_roi_min_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -697,21 +749,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min" onclick="anchorLink('roi_min')">roi_min</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min_anyOf" onclick="anchorLink('roi_min_anyOf')">anyOf</a>
+    <a href="#geff_roi_min" onclick="anchorLink('geff_roi_min')">roi_min</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min_anyOf_i0" onclick="anchorLink('roi_min_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of number</span><br/>
+    <a href="#geff_roi_min_anyOf" onclick="anchorLink('geff_roi_min_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_min_anyOf_i0" onclick="anchorLink('geff_roi_min_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of number</span><br/>
 
 
 
@@ -720,7 +779,7 @@
 
          <span class="badge badge-info no-additional">No Additional Items</span><h4>Each item of this array must be:</h4>
     <div class="card">
-        <div class="card-body items-definition" id="roi_min_anyOf_i0_items">
+        <div class="card-body items-definition" id="geff_roi_min_anyOf_i0_items">
 
 
     <div class="breadcrumbs">root
@@ -730,28 +789,35 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min" onclick="anchorLink('roi_min')">roi_min</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min_anyOf" onclick="anchorLink('roi_min_anyOf')">anyOf</a>
+    <a href="#geff_roi_min" onclick="anchorLink('geff_roi_min')">roi_min</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min_anyOf_i0" onclick="anchorLink('roi_min_anyOf_i0')">item 0</a>
+    <a href="#geff_roi_min_anyOf" onclick="anchorLink('geff_roi_min_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min_anyOf_i0_items" onclick="anchorLink('roi_min_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: number</span><br/>
+    <a href="#geff_roi_min_anyOf_i0" onclick="anchorLink('geff_roi_min_anyOf_i0')">item 0</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_min_anyOf_i0_items" onclick="anchorLink('geff_roi_min_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: number</span><br/>
 
 
 
@@ -762,7 +828,7 @@
         </div>
     </div>
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_roi_min_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_roi_min_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -772,21 +838,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min" onclick="anchorLink('roi_min')">roi_min</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min_anyOf" onclick="anchorLink('roi_min_anyOf')">anyOf</a>
+    <a href="#geff_roi_min" onclick="anchorLink('geff_roi_min')">roi_min</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_min_anyOf_i1" onclick="anchorLink('roi_min_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_roi_min_anyOf" onclick="anchorLink('geff_roi_min_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_min_anyOf_i1" onclick="anchorLink('geff_roi_min_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -805,18 +878,18 @@
         </div>
     </div>
 </div>
-<div class="accordion" id="accordionroi_max">
+<div class="accordion" id="accordiongeff_roi_max">
     <div class="card">
-        <div class="card-header" id="headingroi_max">
+        <div class="card-header" id="headinggeff_roi_max">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#roi_max"
-                        aria-expanded="" aria-controls="roi_max" onclick="setAnchor('#roi_max')"><span class="property-name">roi_max</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_roi_max"
+                        aria-expanded="" aria-controls="geff_roi_max" onclick="setAnchor('#geff_roi_max')"><span class="property-name">roi_max</span></button>
             </h2>
         </div>
 
-        <div id="roi_max"
-             class="collapse property-definition-div" aria-labelledby="headingroi_max"
-             data-parent="#accordionroi_max">
+        <div id="geff_roi_max"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_roi_max"
+             data-parent="#accordiongeff_roi_max">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -826,22 +899,29 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max" onclick="anchorLink('roi_max')">roi_max</a></div><h4>Roi Max</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="roi_max_anyOf"><h2 class="handle">
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_max" onclick="anchorLink('geff_roi_max')">roi_max</a></div><h4>Roi Max</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+<div class="any-of-value" id="geff_roi_max_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsroi_max_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_roi_max_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="roi_max_anyOf_i0" data-toggle="tab" href="#tab-pane_roi_max_anyOf_i0" role="tab"
-               onclick="setAnchor('#roi_max_anyOf_i0')"
+               id="geff_roi_max_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_roi_max_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_roi_max_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="roi_max_anyOf_i1" data-toggle="tab" href="#tab-pane_roi_max_anyOf_i1" role="tab"
-               onclick="setAnchor('#roi_max_anyOf_i1')"
+               id="geff_roi_max_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_roi_max_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_roi_max_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_roi_max_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_roi_max_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -851,21 +931,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max" onclick="anchorLink('roi_max')">roi_max</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max_anyOf" onclick="anchorLink('roi_max_anyOf')">anyOf</a>
+    <a href="#geff_roi_max" onclick="anchorLink('geff_roi_max')">roi_max</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max_anyOf_i0" onclick="anchorLink('roi_max_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of number</span><br/>
+    <a href="#geff_roi_max_anyOf" onclick="anchorLink('geff_roi_max_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_max_anyOf_i0" onclick="anchorLink('geff_roi_max_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of number</span><br/>
 
 
 
@@ -874,7 +961,7 @@
 
          <span class="badge badge-info no-additional">No Additional Items</span><h4>Each item of this array must be:</h4>
     <div class="card">
-        <div class="card-body items-definition" id="roi_max_anyOf_i0_items">
+        <div class="card-body items-definition" id="geff_roi_max_anyOf_i0_items">
 
 
     <div class="breadcrumbs">root
@@ -884,28 +971,35 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max" onclick="anchorLink('roi_max')">roi_max</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max_anyOf" onclick="anchorLink('roi_max_anyOf')">anyOf</a>
+    <a href="#geff_roi_max" onclick="anchorLink('geff_roi_max')">roi_max</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max_anyOf_i0" onclick="anchorLink('roi_max_anyOf_i0')">item 0</a>
+    <a href="#geff_roi_max_anyOf" onclick="anchorLink('geff_roi_max_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max_anyOf_i0_items" onclick="anchorLink('roi_max_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: number</span><br/>
+    <a href="#geff_roi_max_anyOf_i0" onclick="anchorLink('geff_roi_max_anyOf_i0')">item 0</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_max_anyOf_i0_items" onclick="anchorLink('geff_roi_max_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: number</span><br/>
 
 
 
@@ -916,7 +1010,7 @@
         </div>
     </div>
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_roi_max_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_roi_max_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -926,21 +1020,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max" onclick="anchorLink('roi_max')">roi_max</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max_anyOf" onclick="anchorLink('roi_max_anyOf')">anyOf</a>
+    <a href="#geff_roi_max" onclick="anchorLink('geff_roi_max')">roi_max</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#roi_max_anyOf_i1" onclick="anchorLink('roi_max_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_roi_max_anyOf" onclick="anchorLink('geff_roi_max_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_roi_max_anyOf_i1" onclick="anchorLink('geff_roi_max_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -959,18 +1060,18 @@
         </div>
     </div>
 </div>
-<div class="accordion" id="accordionposition_attr">
+<div class="accordion" id="accordiongeff_position_prop">
     <div class="card">
-        <div class="card-header" id="headingposition_attr">
+        <div class="card-header" id="headinggeff_position_prop">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#position_attr"
-                        aria-expanded="" aria-controls="position_attr" onclick="setAnchor('#position_attr')"><span class="property-name">position_attr</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_position_prop"
+                        aria-expanded="" aria-controls="geff_position_prop" onclick="setAnchor('#geff_position_prop')"><span class="property-name">position_prop</span></button>
             </h2>
         </div>
 
-        <div id="position_attr"
-             class="collapse property-definition-div" aria-labelledby="headingposition_attr"
-             data-parent="#accordionposition_attr">
+        <div id="geff_position_prop"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_position_prop"
+             data-parent="#accordiongeff_position_prop">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -980,22 +1081,29 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#position_attr" onclick="anchorLink('position_attr')">position_attr</a></div><h4>Position Attr</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="position_attr_anyOf"><h2 class="handle">
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_position_prop" onclick="anchorLink('geff_position_prop')">position_prop</a></div><h4>Position Prop</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+<div class="any-of-value" id="geff_position_prop_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsposition_attr_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_position_prop_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="position_attr_anyOf_i0" data-toggle="tab" href="#tab-pane_position_attr_anyOf_i0" role="tab"
-               onclick="setAnchor('#position_attr_anyOf_i0')"
+               id="geff_position_prop_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_position_prop_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_position_prop_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="position_attr_anyOf_i1" data-toggle="tab" href="#tab-pane_position_attr_anyOf_i1" role="tab"
-               onclick="setAnchor('#position_attr_anyOf_i1')"
+               id="geff_position_prop_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_position_prop_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_position_prop_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_position_attr_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_position_prop_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -1005,21 +1113,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#position_attr" onclick="anchorLink('position_attr')">position_attr</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#position_attr_anyOf" onclick="anchorLink('position_attr_anyOf')">anyOf</a>
+    <a href="#geff_position_prop" onclick="anchorLink('geff_position_prop')">position_prop</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#position_attr_anyOf_i0" onclick="anchorLink('position_attr_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
+    <a href="#geff_position_prop_anyOf" onclick="anchorLink('geff_position_prop_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_position_prop_anyOf_i0" onclick="anchorLink('geff_position_prop_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
 
 
 
@@ -1028,7 +1143,7 @@
 
 
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_position_attr_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_position_prop_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -1038,21 +1153,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#position_attr" onclick="anchorLink('position_attr')">position_attr</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#position_attr_anyOf" onclick="anchorLink('position_attr_anyOf')">anyOf</a>
+    <a href="#geff_position_prop" onclick="anchorLink('geff_position_prop')">position_prop</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#position_attr_anyOf_i1" onclick="anchorLink('position_attr_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_position_prop_anyOf" onclick="anchorLink('geff_position_prop_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_position_prop_anyOf_i1" onclick="anchorLink('geff_position_prop_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -1071,18 +1193,18 @@
         </div>
     </div>
 </div>
-<div class="accordion" id="accordionaxis_names">
+<div class="accordion" id="accordiongeff_axis_names">
     <div class="card">
-        <div class="card-header" id="headingaxis_names">
+        <div class="card-header" id="headinggeff_axis_names">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#axis_names"
-                        aria-expanded="" aria-controls="axis_names" onclick="setAnchor('#axis_names')"><span class="property-name">axis_names</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_axis_names"
+                        aria-expanded="" aria-controls="geff_axis_names" onclick="setAnchor('#geff_axis_names')"><span class="property-name">axis_names</span></button>
             </h2>
         </div>
 
-        <div id="axis_names"
-             class="collapse property-definition-div" aria-labelledby="headingaxis_names"
-             data-parent="#accordionaxis_names">
+        <div id="geff_axis_names"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_axis_names"
+             data-parent="#accordiongeff_axis_names">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -1092,22 +1214,29 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names" onclick="anchorLink('axis_names')">axis_names</a></div><h4>Axis Names</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="axis_names_anyOf"><h2 class="handle">
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_names" onclick="anchorLink('geff_axis_names')">axis_names</a></div><h4>Axis Names</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+<div class="any-of-value" id="geff_axis_names_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsaxis_names_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_axis_names_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="axis_names_anyOf_i0" data-toggle="tab" href="#tab-pane_axis_names_anyOf_i0" role="tab"
-               onclick="setAnchor('#axis_names_anyOf_i0')"
+               id="geff_axis_names_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_axis_names_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_axis_names_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="axis_names_anyOf_i1" data-toggle="tab" href="#tab-pane_axis_names_anyOf_i1" role="tab"
-               onclick="setAnchor('#axis_names_anyOf_i1')"
+               id="geff_axis_names_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_axis_names_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_axis_names_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_axis_names_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_axis_names_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -1117,21 +1246,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names" onclick="anchorLink('axis_names')">axis_names</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names_anyOf" onclick="anchorLink('axis_names_anyOf')">anyOf</a>
+    <a href="#geff_axis_names" onclick="anchorLink('geff_axis_names')">axis_names</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names_anyOf_i0" onclick="anchorLink('axis_names_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of string</span><br/>
+    <a href="#geff_axis_names_anyOf" onclick="anchorLink('geff_axis_names_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_names_anyOf_i0" onclick="anchorLink('geff_axis_names_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of string</span><br/>
 
 
 
@@ -1140,7 +1276,7 @@
 
          <span class="badge badge-info no-additional">No Additional Items</span><h4>Each item of this array must be:</h4>
     <div class="card">
-        <div class="card-body items-definition" id="axis_names_anyOf_i0_items">
+        <div class="card-body items-definition" id="geff_axis_names_anyOf_i0_items">
 
 
     <div class="breadcrumbs">root
@@ -1150,28 +1286,35 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names" onclick="anchorLink('axis_names')">axis_names</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names_anyOf" onclick="anchorLink('axis_names_anyOf')">anyOf</a>
+    <a href="#geff_axis_names" onclick="anchorLink('geff_axis_names')">axis_names</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names_anyOf_i0" onclick="anchorLink('axis_names_anyOf_i0')">item 0</a>
+    <a href="#geff_axis_names_anyOf" onclick="anchorLink('geff_axis_names_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names_anyOf_i0_items" onclick="anchorLink('axis_names_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
+    <a href="#geff_axis_names_anyOf_i0" onclick="anchorLink('geff_axis_names_anyOf_i0')">item 0</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_names_anyOf_i0_items" onclick="anchorLink('geff_axis_names_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
 
 
 
@@ -1182,7 +1325,7 @@
         </div>
     </div>
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_axis_names_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_axis_names_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -1192,21 +1335,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names" onclick="anchorLink('axis_names')">axis_names</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names_anyOf" onclick="anchorLink('axis_names_anyOf')">anyOf</a>
+    <a href="#geff_axis_names" onclick="anchorLink('geff_axis_names')">axis_names</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_names_anyOf_i1" onclick="anchorLink('axis_names_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_axis_names_anyOf" onclick="anchorLink('geff_axis_names_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_names_anyOf_i1" onclick="anchorLink('geff_axis_names_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -1225,18 +1375,18 @@
         </div>
     </div>
 </div>
-<div class="accordion" id="accordionaxis_units">
+<div class="accordion" id="accordiongeff_axis_units">
     <div class="card">
-        <div class="card-header" id="headingaxis_units">
+        <div class="card-header" id="headinggeff_axis_units">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#axis_units"
-                        aria-expanded="" aria-controls="axis_units" onclick="setAnchor('#axis_units')"><span class="property-name">axis_units</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_axis_units"
+                        aria-expanded="" aria-controls="geff_axis_units" onclick="setAnchor('#geff_axis_units')"><span class="property-name">axis_units</span></button>
             </h2>
         </div>
 
-        <div id="axis_units"
-             class="collapse property-definition-div" aria-labelledby="headingaxis_units"
-             data-parent="#accordionaxis_units">
+        <div id="geff_axis_units"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_axis_units"
+             data-parent="#accordiongeff_axis_units">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -1246,22 +1396,29 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units" onclick="anchorLink('axis_units')">axis_units</a></div><h4>Axis Units</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="axis_units_anyOf"><h2 class="handle">
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_units" onclick="anchorLink('geff_axis_units')">axis_units</a></div><h4>Axis Units</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+<div class="any-of-value" id="geff_axis_units_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsaxis_units_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_axis_units_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="axis_units_anyOf_i0" data-toggle="tab" href="#tab-pane_axis_units_anyOf_i0" role="tab"
-               onclick="setAnchor('#axis_units_anyOf_i0')"
+               id="geff_axis_units_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_axis_units_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_axis_units_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="axis_units_anyOf_i1" data-toggle="tab" href="#tab-pane_axis_units_anyOf_i1" role="tab"
-               onclick="setAnchor('#axis_units_anyOf_i1')"
+               id="geff_axis_units_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_axis_units_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_axis_units_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_axis_units_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_axis_units_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -1271,21 +1428,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units" onclick="anchorLink('axis_units')">axis_units</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units_anyOf" onclick="anchorLink('axis_units_anyOf')">anyOf</a>
+    <a href="#geff_axis_units" onclick="anchorLink('geff_axis_units')">axis_units</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units_anyOf_i0" onclick="anchorLink('axis_units_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of string</span><br/>
+    <a href="#geff_axis_units_anyOf" onclick="anchorLink('geff_axis_units_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_units_anyOf_i0" onclick="anchorLink('geff_axis_units_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: array of string</span><br/>
 
 
 
@@ -1294,7 +1458,7 @@
 
          <span class="badge badge-info no-additional">No Additional Items</span><h4>Each item of this array must be:</h4>
     <div class="card">
-        <div class="card-body items-definition" id="axis_units_anyOf_i0_items">
+        <div class="card-body items-definition" id="geff_axis_units_anyOf_i0_items">
 
 
     <div class="breadcrumbs">root
@@ -1304,28 +1468,35 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units" onclick="anchorLink('axis_units')">axis_units</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units_anyOf" onclick="anchorLink('axis_units_anyOf')">anyOf</a>
+    <a href="#geff_axis_units" onclick="anchorLink('geff_axis_units')">axis_units</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units_anyOf_i0" onclick="anchorLink('axis_units_anyOf_i0')">item 0</a>
+    <a href="#geff_axis_units_anyOf" onclick="anchorLink('geff_axis_units_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units_anyOf_i0_items" onclick="anchorLink('axis_units_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
+    <a href="#geff_axis_units_anyOf_i0" onclick="anchorLink('geff_axis_units_anyOf_i0')">item 0</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_units_anyOf_i0_items" onclick="anchorLink('geff_axis_units_anyOf_i0_items')">item 0 items</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
 
 
 
@@ -1336,7 +1507,7 @@
         </div>
     </div>
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_axis_units_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_axis_units_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -1346,21 +1517,28 @@
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units" onclick="anchorLink('axis_units')">axis_units</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units_anyOf" onclick="anchorLink('axis_units_anyOf')">anyOf</a>
+    <a href="#geff_axis_units" onclick="anchorLink('geff_axis_units')">axis_units</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#axis_units_anyOf_i1" onclick="anchorLink('axis_units_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_axis_units_anyOf" onclick="anchorLink('geff_axis_units_anyOf')">anyOf</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_axis_units_anyOf_i1" onclick="anchorLink('geff_axis_units_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -1375,49 +1553,53 @@
 
 
 
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </div>
 </div>
 
     <footer>
-        <p class="generated-by-footer">Generated using <a href="https://github.com/coveooss/json-schema-for-humans">json-schema-for-humans</a> on 2025-07-18 at 17:30:44 +0000</p>
+        <p class="generated-by-footer">Generated using <a href="https://github.com/coveooss/json-schema-for-humans">json-schema-for-humans</a> on 2025-07-18 at 19:11:14 +0000</p>
     </footer></body>
 </html>
 
 <h2 id="the-nodes-group">The <code>nodes</code> group</h2>
-<p>The nodes group will contain an <code>ids</code> array and an <code>attrs</code> group.</p>
+<p>The nodes group will contain an <code>ids</code> array and a <code>props</code> group.</p>
 <h3 id="the-ids-array">The <code>ids</code> array</h3>
 <p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt; 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs can have any type supported by zarr, but we recommend integer dtypes. For large graphs, <code>uint64</code> might be necessary to provide enough range for every node to have a unique ID. </p>
-<h3 id="the-attrs-group-and-node-attribute-groups">The <code>attrs</code> group and <code>node attribute</code> groups</h3>
-<p>The <code>nodes\attrs</code> group will contain one or more <code>node attribute</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array. </p>
+<h3 id="the-props-group-and-node-property-groups">The <code>props</code> group and <code>node property</code> groups</h3>
+<p>The <code>nodes\props</code> group will contain one or more <code>node property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
 <ul>
-<li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the node <code>ids</code> array, such that each row of the attribute <code>values</code> array stores the attribute for the node at that index in the ids array. </li>
-<li>The <code>missing</code> array is an optional, a one dimensional boolean array to support attributes that are not present on all nodes. A 1 at an index in the <code>missing</code> array indicates that the <code>value</code> of that attribute for the node at that index is None, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all nodes have values for the attribute. </li>
+<li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the node <code>ids</code> array, such that each row of the property <code>values</code> array stores the property for the node at that index in the ids array.</li>
+<li>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all nodes. A 1 at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the node at that index is None, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all nodes have values for the property.</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When writing a graph with missing attributes to the geff format, you must fill in a dummy value in the <code>values</code> array for the nodes that are missing the attribute, in order to keep the indices aligned with the node ids.</p>
+<p>When writing a graph with missing properties to the geff format, you must fill in a dummy value in the <code>values</code> array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.</p>
 </div>
 <ul>
-<li>The <code>position</code> group is a special node attribute group that must be present if a <code>position_attr</code> is set in the <code>geff</code> metadata and does not allow missing attributes.</li>
-<li>The <code>seg_id</code> group is an optional, special node attribute group that stores the segmenatation label for each node. The <code>seg_id</code> values do not need to be unique, in case labels are repeated between time points. If the <code>seg_id</code> group is not present, it is assumed that the graph is not associated with a segmentation. </li>
+<li>The <code>position</code> group is a special node property group that must be present if a <code>position_prop</code> is set in the <code>geff</code> metadata and does not allow missing properties.</li>
+<li>The <code>seg_id</code> group is an optional, special node property group that stores the segmenatation label for each node. The <code>seg_id</code> values do not need to be unique, in case labels are repeated between time points. If the <code>seg_id</code> group is not present, it is assumed that the graph is not associated with a segmentation. </li>
 </ul>
-<!-- Perhaps we just let the user specify the seg id attribute in the metadata instead? Then you can point it to the node ids if you wanted to -->
+<!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
 
 <h2 id="the-edges-group">The <code>edges</code> group</h2>
-<p>Similar to the <code>nodes</code> group, the <code>edges</code> group will contain an <code>ids</code> array and an <code>attrs</code> group. If there are no edges in the graph, the edge group is not created.</p>
+<p>Similar to the <code>nodes</code> group, the <code>edges</code> group will contain an <code>ids</code> array and a <code>props</code> group. If there are no edges in the graph, the edge group is not created.</p>
 <h3 id="the-ids-array_1">The <code>ids</code> array</h3>
 <p>The <code>edges\ids</code> array is a 2D array with the same dtype as the <code>nodes\ids</code> array. It has shape <code>(2, E)</code>, where <code>E</code> is the number of edges in the graph. All elements in the <code>edges\ids</code> array must also be present in the <code>nodes\ids</code> array.
 Each row represents an edge between two nodes. For directed graphs, the first column is the source nodes and the second column holds the target nodes. For undirected graphs, the order is arbitrary.
 Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.</p>
-<h3 id="the-attrs-group-and-edge-attribute-groups">The <code>attrs</code> group and <code>edge attribute</code> groups</h3>
-<p>The <code>edges\attrs</code> group will contain zero or more <code>edge attribute</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array. </p>
+<h3 id="the-props-group-and-edge-property-groups">The <code>props</code> group and <code>edge property</code> groups</h3>
+<p>The <code>edges\props</code> group will contain zero or more <code>edge property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
 <ul>
-<li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the <code>edges\ids</code> array, such that each row of the attribute <code>values</code> array stores the attribute for the edge at that index in the ids array. </li>
-<li>The <code>missing</code> array is an optional, a one dimensional boolean array to support attributes that are not present on all edges. A 1 at an index in the <code>missing</code> array indicates that the <code>value</code> of that attribute for the edge at that index is missing, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all edges have values for the attribute.</li>
+<li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the <code>edges\ids</code> array, such that each row of the property <code>values</code> array stores the property for the edge at that index in the ids array.</li>
+<li>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A 1 at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the edge at that index is missing, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all edges have values for the property.</li>
 </ul>
-<p>If you do not have any edge attributes, the <code>edges\attrs</code> group should still be present, but empty.</p>
+<p>If you do not have any edge properties, the <code>edges\props</code> group should still be present, but empty.</p>
 <h2 id="example-file-structure-and-metadata">Example file structure and metadata</h2>
 <p>Here is a schematic of the expected file structure.
 <div class="highlight"><pre><span></span><code><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">.</span><span class="n">zarr</span>
@@ -1425,7 +1607,7 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
         <span class="o">.</span><span class="n">zattrs</span>  <span class="c1"># graph metadata with `geff_version`</span>
         <span class="n">nodes</span><span class="o">/</span>
             <span class="n">ids</span>  <span class="c1"># shape: (N,)  dtype: uint64</span>
-            <span class="n">attrs</span><span class="o">/</span>
+            <span class="n">props</span><span class="o">/</span>
                 <span class="n">position</span><span class="o">/</span>
                     <span class="n">values</span> <span class="c1"># shape: (N, 3) dtype: float16</span>
                 <span class="n">color</span><span class="o">/</span>
@@ -1433,7 +1615,7 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
         <span class="n">edges</span><span class="o">/</span>
             <span class="n">ids</span>  <span class="c1"># shape: (E, 2) dtype: uint64</span>
-            <span class="n">attrs</span><span class="o">/</span>
+            <span class="n">props</span><span class="o">/</span>
                 <span class="n">distance</span><span class="o">/</span>
                     <span class="n">values</span> <span class="c1"># shape: (E,) dtype: float16</span>
                 <span class="n">score</span><span class="o">/</span>
@@ -1448,29 +1630,31 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
 This is a geff metadata zattrs file that matches the above example structure.
 <div class="highlight"><pre><span></span><code><span class="err">#</span><span class="w"> </span><span class="err">/pa</span><span class="kc">t</span><span class="err">h/</span><span class="kc">t</span><span class="err">o.zarr/</span><span class="kc">tra</span><span class="err">cki</span><span class="kc">n</span><span class="err">g_graph/.za</span><span class="kc">ttrs</span>
 <span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;axis_names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">op</span><span class="kc">t</span><span class="err">io</span><span class="kc">nal</span>
-<span class="w">        </span><span class="s2">&quot;z&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;x&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;axis_units&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">op</span><span class="kc">t</span><span class="err">io</span><span class="kc">nal</span>
-<span class="w">        </span><span class="s2">&quot;um&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;um&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;um&quot;</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;directed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;geff_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.1.3.dev4+gd5d1132.d20250616&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;position_attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;position&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;roi_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">Required</span><span class="w"> </span><span class="err">i</span><span class="kc">f</span><span class="w"> </span><span class="err">posi</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_a</span><span class="kc">ttr</span><span class="w"> </span><span class="err">is</span><span class="w"> </span><span class="err">speci</span><span class="kc">f</span><span class="err">ied</span>
-<span class="w">        </span><span class="mf">4398.1</span><span class="p">,</span>
-<span class="w">        </span><span class="mf">1877.7</span><span class="p">,</span>
-<span class="w">        </span><span class="mf">2152.3</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;roi_min&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">Required</span><span class="w"> </span><span class="err">i</span><span class="kc">f</span><span class="w"> </span><span class="err">posi</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_a</span><span class="kc">ttr</span><span class="w"> </span><span class="err">is</span><span class="w"> </span><span class="err">speci</span><span class="kc">f</span><span class="err">ied</span>
-<span class="w">        </span><span class="mf">1523.368197</span><span class="p">,</span>
-<span class="w">        </span><span class="mf">81.667</span><span class="p">,</span>
-<span class="w">        </span><span class="mf">764.42</span>
-<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;geff&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;axis_names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">op</span><span class="kc">t</span><span class="err">io</span><span class="kc">nal</span>
+<span class="w">            </span><span class="s2">&quot;z&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;x&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;axis_units&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">op</span><span class="kc">t</span><span class="err">io</span><span class="kc">nal</span>
+<span class="w">            </span><span class="s2">&quot;um&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;um&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;um&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;directed&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;geff_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.1.3.dev4+gd5d1132.d20250616&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;position_prop&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;position&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;roi_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">Required</span><span class="w"> </span><span class="err">i</span><span class="kc">f</span><span class="w"> </span><span class="err">posi</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_prop</span><span class="w"> </span><span class="err">is</span><span class="w"> </span><span class="err">speci</span><span class="kc">f</span><span class="err">ied</span>
+<span class="w">            </span><span class="mf">4398.1</span><span class="p">,</span>
+<span class="w">            </span><span class="mf">1877.7</span><span class="p">,</span>
+<span class="w">            </span><span class="mf">2152.3</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;roi_min&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">Required</span><span class="w"> </span><span class="err">i</span><span class="kc">f</span><span class="w"> </span><span class="err">posi</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">_prop</span><span class="w"> </span><span class="err">is</span><span class="w"> </span><span class="err">speci</span><span class="kc">f</span><span class="err">ied</span>
+<span class="w">            </span><span class="mf">1523.368197</span><span class="p">,</span>
+<span class="w">            </span><span class="mf">81.667</span><span class="p">,</span>
+<span class="w">            </span><span class="mf">764.42</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">    </span><span class="p">}</span>
 <span class="w">    </span><span class="err">...</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">cus</span><span class="kc">t</span><span class="err">om</span><span class="w"> </span><span class="err">o</span><span class="kc">t</span><span class="err">her</span><span class="w"> </span><span class="kc">t</span><span class="err">hi</span><span class="kc">n</span><span class="err">gs</span><span class="w"> </span><span class="err">are</span><span class="w"> </span><span class="err">allowed</span><span class="w"> </span><span class="err">a</span><span class="kc">n</span><span class="err">d</span><span class="w"> </span><span class="err">ig</span><span class="kc">n</span><span class="err">ored</span><span class="w"> </span><span class="err">by</span><span class="w"> </span><span class="err">ge</span><span class="kc">ff</span>
 <span class="p">}</span>
 </code></pre></div></p>

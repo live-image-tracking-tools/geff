@@ -564,8 +564,8 @@
 
     <div class="doc doc-contents first">
 
-        <p>Read a geff file into a networkx graph. Metadata attributes will be stored in
-the graph attributes, accessed via <code>G.graph[key]</code> where G is a networkx graph.</p>
+        <p>Read a geff file into a networkx graph. Metadata properties will be stored in
+the graph properties, accessed via <code>G.graph[key]</code> where G is a networkx graph.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -656,7 +656,7 @@ format issues, will likely fail with a cryptic error. Defaults to True.</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_nx</span><span class="p">(</span>
     <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">,</span>
     <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">position_prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">zarr_format</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
@@ -715,14 +715,14 @@ so will only overwrite geff-controlled groups.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>position_attr</code>
+                <code>position_prop</code>
             </td>
             <td>
                   <code><span title="Optional">Optional</span>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The name of the position attribute present on every node,
+                <p>The name of the position property present on every node,
 if present. Defaults to None.</p>
               </div>
             </td>
@@ -740,8 +740,8 @@ if present. Defaults to None.</p>
             <td>
               <div class="doc-md-description">
                 <p>The names of the spatial dims
-represented in position attribute. Defaults to None. Will override
-value in graph attributes if provided.</p>
+represented in position property. Defaults to None. Will override
+value in graph properties if provided.</p>
               </div>
             </td>
             <td>
@@ -758,8 +758,8 @@ value in graph attributes if provided.</p>
             <td>
               <div class="doc-md-description">
                 <p>The units of the spatial dims
-represented in position attribute. Defaults to None. Will override value
-in graph attributes if provided.</p>
+represented in position property. Defaults to None. Will override value
+in graph properties if provided.</p>
               </div>
             </td>
             <td>
@@ -794,7 +794,7 @@ Defaults to 2.</p>
               <div class="doc-md-description">
                 <p>Flag indicating whether to perform validation on the
 networkx graph before writing anything to disk. If set to False and there are
-missing attributes, will likely fail with a KeyError, leading to an incomplete
+missing properties, will likely fail with a KeyError, leading to an incomplete
 graph written to disk. Defaults to True.</p>
               </div>
             </td>
