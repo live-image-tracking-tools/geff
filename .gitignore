@@ -29,3 +29,5 @@ docs/schema/*
 # uv files
 .uv
 uv.lock
+
+/.idea

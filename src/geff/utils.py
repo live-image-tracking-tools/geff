@@ -25,7 +25,7 @@ def validate(path: str | Path):
 
     # zarr python 3 doesn't support Path
     path = str(path)
-
+    path = os.path.expanduser(path)
     graph = zarr.open(path, mode="r")
 
     # graph attrs validation
