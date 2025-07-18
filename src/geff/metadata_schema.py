@@ -25,7 +25,7 @@ SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
 
 class GeffMetadata(BaseModel):
     """
-    Geff metadata schema to validate the properties json file in a geff zarr
+    Geff metadata schema to validate the attributes json file in a geff zarr
     """
 
     # this determines the title of the generated json schema
