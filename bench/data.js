@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752866903567,
+  "lastUpdate": 1752869238274,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1530,6 +1530,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.4701486259283807",
             "extra": "mean: 15.791715666000007 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "mkitti@users.noreply.github.com",
+            "name": "Mark Kittisopikul",
+            "username": "mkitti"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2d4e206926426f77da87be722ddb33f1abe9d863",
+          "message": "Add unit validation functions (#121)\n\n- **Run ruff format**\n- **Add units.py to check for known valid units**\n\nDoes not add validation\n\n# Proposed Change\nBriefly describe the contribution. If it resolves an issue or feature\nrequest, be sure to link to that issue.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n- New feature or enhancement\n- Documentation update\n- Tests\n- Maintenance (e.g. dependencies, CI, releases, etc.)\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [ ] I have read the developer/contributing docs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2025-07-18T16:04:43-04:00",
+          "tree_id": "d167ea0f22b99812e447164012545a28880261a3",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/2d4e206926426f77da87be722ddb33f1abe9d863"
+        },
+        "date": 1752869237852,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.10631159603974798,
+            "unit": "iter/sec",
+            "range": "stddev: 1.4027314509186142",
+            "extra": "mean: 9.406311609000001 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.037503958322986,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0008881227336128459",
+            "extra": "mean: 43.4074803333336 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06327865582753356,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5896237574292282",
+            "extra": "mean: 15.803116974000005 sec\nrounds: 3"
           }
         ]
       }
