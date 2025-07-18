@@ -31,7 +31,7 @@ def write_props(
     ids = [idx for idx, _ in data]
 
     if len(ids) > 0:
-        group["ids"] = np.asarray(ids)
+        group["ids"] = np.asarray(ids, dtype=node_dtype)
     # special corner cases where the graph is empty the ids must still have the
     # correct dimension (N,) for nodes, (N, 2) for edges
     elif group.name == "/nodes":
