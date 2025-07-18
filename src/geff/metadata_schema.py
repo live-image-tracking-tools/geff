@@ -30,7 +30,7 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(validate_assignment=True, extra="allow")
+    model_config = ConfigDict(title="geff_metadata", validate_assignment=True, extra="allow")
 
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool

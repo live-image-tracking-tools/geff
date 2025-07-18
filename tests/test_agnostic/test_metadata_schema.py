@@ -141,7 +141,7 @@ class TestMetadataModel:
         )
 
     def test_read_write(self, tmp_path):
-        metadata = GeffMetadata(
+        meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
             position_prop="position",
@@ -152,10 +152,16 @@ class TestMetadataModel:
             extra=True,
             ignored_attrs={"foo": "bar"},
         )
-        path = tmp_path / "test.zarr"
-        metadata.write(path)
-        read_metadata = GeffMetadata.read(path)
-        assert read_metadata == metadata
+        zpath = tmp_path / "test.zarr"
+        group = zarr.open(zpath, mode="a")
+        meta.write(group)
+        compare = GeffMetadata.read(group)
+        assert compare == meta
+
+        meta.directed = False
+        meta.write(zpath)
+        compare = GeffMetadata.read(zpath)
+        assert compare == meta
 
     def test_model_mutation(self):
         """Test that invalid model mutations raise errors."""
