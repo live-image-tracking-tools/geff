@@ -69,6 +69,9 @@ def test_write_attrs_empty(tmp_path: Path) -> None:
 
     validate(zpath)
 
+    assert z["nodes/ids"].shape == (0,)
+    assert z["edges/ids"].shape == (0, 2)
+
 
 def test_write_attrs_invalid_group(tmp_path: Path) -> None:
     zpath = tmp_path / "test.zarr"
