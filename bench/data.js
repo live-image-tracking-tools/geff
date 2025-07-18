@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752859227220,
+  "lastUpdate": 1752859475852,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1350,6 +1350,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.4446939799008658",
             "extra": "mean: 15.721227852333342 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "georgeoshardo@protonmail.com",
+            "name": "Georgeos Hardo",
+            "username": "georgeoshardo"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "98769fc9b152615622a27a614d27b62efa0ef22c",
+          "message": "Use os.path.expanduser to support tildes in paths (#120)\n\n# Proposed Change\n\nUse os.path.expanduser to support tildes in paths. Closes #118 \n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n\nWhich topics does your change affect? Delete those that do not apply.\n- `networkx` implementation\n\n# Checklist\n\n- [ ] I have read the developer/contributing docs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.",
+          "timestamp": "2025-07-18T13:22:31-04:00",
+          "tree_id": "b7a2a87f7130f36077689ed037263a42d830d743",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/98769fc9b152615622a27a614d27b62efa0ef22c"
+        },
+        "date": 1752859475107,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.13529507037531344,
+            "unit": "iter/sec",
+            "range": "stddev: 0.006971001439456599",
+            "extra": "mean: 7.3912522993333285 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.142726750121128,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0005796251882055555",
+            "extra": "mean: 43.210120000002426 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06400962840272623,
+            "unit": "iter/sec",
+            "range": "stddev: 0.44703487833697075",
+            "extra": "mean: 15.622649669333327 sec\nrounds: 3"
           }
         ]
       }
