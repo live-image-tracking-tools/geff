@@ -172,6 +172,9 @@ exclude_lines = [
 source = ["src/geff"]
 omit = ["*/__init__.py"]
 
+[tool.typos.default]
+extend-ignore-identifiers-re = ["(?i)ome"]
+
 # https://github.com/mgedmin/check-manifest#configuration
 # [tool.check-manifest]
 # ignore = [
