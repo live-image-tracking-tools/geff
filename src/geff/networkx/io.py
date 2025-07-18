@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import warnings
 from typing import TYPE_CHECKING
 
@@ -169,6 +170,7 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     """
     # zarr python 3 doesn't support Path
     path = str(path)
+    path = os.path.expanduser(path)
 
     # open zarr container
     if validate:
