@@ -47,6 +47,7 @@ def test_read_write_consistency(
 
     assert graph.graph["axis_names"] == graph_props["axis_names"]
     assert graph.graph["axis_units"] == graph_props["axis_units"]
+    assert graph.graph["ignored_attrs"] == graph_props["ignored_attrs"]
 
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)

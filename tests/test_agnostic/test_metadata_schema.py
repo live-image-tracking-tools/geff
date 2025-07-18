@@ -141,7 +141,7 @@ class TestMetadataModel:
         )
 
     def test_read_write(self, tmp_path):
-        meta = GeffMetadata(
+        metadata = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
             position_prop="position",
@@ -150,17 +150,12 @@ class TestMetadataModel:
             axis_names=["t", "y", "x"],
             axis_units=["min", "nm", "nm"],
             extra=True,
+            ignored_attrs={"foo": "bar"},
         )
-        zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, mode="a")
-        meta.write(group)
-        compare = GeffMetadata.read(group)
-        assert compare == meta
-
-        meta.directed = False
-        meta.write(zpath)
-        compare = GeffMetadata.read(zpath)
-        assert compare == meta
+        path = tmp_path / "test.zarr"
+        metadata.write(path)
+        read_metadata = GeffMetadata.read(path)
+        assert read_metadata == metadata
 
     def test_model_mutation(self):
         """Test that invalid model mutations raise errors."""
@@ -179,6 +174,23 @@ class TestMetadataModel:
 
         with pytest.raises(pydantic.ValidationError):
             meta.position_prop = None
+
+    def test_read_write_extra_properties(self, tmp_path):
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            position_prop="position",
+            roi_min=[0, 0, 0],
+            roi_max=[100, 100, 100],
+            axis_names=["t", "y", "x"],
+            axis_units=["min", "nm", "nm"],
+            extra=True,
+        )
+        zpath = tmp_path / "test.zarr"
+        group = zarr.open(zpath, mode="a")
+        meta.write(group)
+        compare = GeffMetadata.read(group)
+        assert compare == meta
 
 
 def test_write_schema(tmp_path):

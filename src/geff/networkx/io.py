@@ -121,6 +121,7 @@ def write_nx(
         position_prop=position_prop,
         axis_names=axis_names if axis_names is not None else graph.graph.get("axis_names", None),
         axis_units=axis_units if axis_units is not None else graph.graph.get("axis_units", None),
+        **graph.graph.get("ignored_attrs", {}),
     )
     metadata.write(group)
 
@@ -186,10 +187,16 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     group = zarr.open(path, mode="r")
     metadata = GeffMetadata.read(group)
 
+
+
     # read meta-data
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
+    graph.graph["ignored_attrs"] = {}
     for key, val in metadata:
-        graph.graph[key] = val
+        if key not in GeffMetadata.model_fields:
+            graph.graph["ignored_attrs"][key] = val
+        else:
+            graph.graph[key] = val
 
     nodes = group["nodes/ids"][:]
     graph.add_nodes_from(nodes.tolist())
