@@ -1,1 +1,107 @@
-{"description": "Geff metadata schema to validate the attributes json file in a geff zarr", "properties": {"geff_version": {"pattern": "(0\\.0)|(0\\.1)|(0\\.2)", "title": "Geff Version", "type": "string"}, "directed": {"title": "Directed", "type": "boolean"}, "roi_min": {"anyOf": [{"items": {"type": "number"}, "type": "array"}, {"type": "null"}], "default": null, "title": "Roi Min"}, "roi_max": {"anyOf": [{"items": {"type": "number"}, "type": "array"}, {"type": "null"}], "default": null, "title": "Roi Max"}, "position_attr": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null, "title": "Position Attr"}, "axis_names": {"anyOf": [{"items": {"type": "string"}, "type": "array"}, {"type": "null"}], "default": null, "title": "Axis Names"}, "axis_units": {"anyOf": [{"items": {"type": "string"}, "type": "array"}, {"type": "null"}], "default": null, "title": "Axis Units"}}, "required": ["geff_version", "directed"], "title": "geff_metadata", "type": "object"}
+{
+  "$defs": {
+    "GeffMetadata": {
+      "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
+      "properties": {
+        "geff_version": {
+          "pattern": "(0\\.0)|(0\\.1)|(0\\.2)",
+          "title": "Geff Version",
+          "type": "string"
+        },
+        "directed": {
+          "title": "Directed",
+          "type": "boolean"
+        },
+        "roi_min": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Roi Min"
+        },
+        "roi_max": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Roi Max"
+        },
+        "position_attr": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Position Attr"
+        },
+        "axis_names": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis Names"
+        },
+        "axis_units": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis Units"
+        }
+      },
+      "required": [
+        "geff_version",
+        "directed"
+      ],
+      "title": "geff_metadata",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "geff": {
+      "$ref": "#/$defs/GeffMetadata",
+      "description": "geff_metadata"
+    }
+  },
+  "required": [
+    "geff"
+  ],
+  "title": "GeffSchema",
+  "type": "object"
+}

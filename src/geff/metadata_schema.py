@@ -88,8 +88,8 @@ class GeffMetadata(BaseModel):
         """
         if isinstance(group, Path):
             group = zarr.open(group)
-        for key, value in self:
-            group.attrs[key] = value
+
+        group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
     def read(cls, group: zarr.Group | Path) -> GeffMetadata:
@@ -105,14 +105,18 @@ class GeffMetadata(BaseModel):
             group = zarr.open(group)
 
         # Check if geff_version exists in zattrs
-        if "geff_version" not in group.attrs:
+        if "geff" not in group.attrs:
             raise ValueError(
-                f"No geff_version found in {group}. This may indicate the path is incorrect or "
+                f"No geff key found in {group}. This may indicate the path is incorrect or "
                 f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
                 f"/dataset.zarr/)."
             )
 
         return cls(**group.attrs)
+
+
+class GeffSchema(BaseModel):
+    geff: GeffMetadata = Field(..., description="geff_metadata")
 
 
 def write_metadata_schema(outpath: Path):
@@ -121,6 +125,6 @@ def write_metadata_schema(outpath: Path):
     Args:
         outpath (Path): The file to write the schema to
     """
-    metadata_schema = GeffMetadata.model_json_schema()
+    metadata_schema = GeffSchema.model_json_schema()
     with open(outpath, "w") as f:
         f.write(json.dumps(metadata_schema, indent=2))
