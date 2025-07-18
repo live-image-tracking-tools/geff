@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 import spatial_graph as sg
@@ -47,6 +48,10 @@ def write_sg(
 
             The version of zarr to write. Defaults to 2.
     """
+    if len(graph) == 0:
+        warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
+        return
+
     # open/create zarr container
     if zarr.__version__.startswith("3"):
         group = zarr.open(path, mode="a", zarr_format=zarr_format)
