@@ -85,10 +85,15 @@ def write_nx(
         group = zarr.open(path, mode="a")
 
     node_data = list(graph.nodes(data=True))
+    if node_data:
+        node_dtype = np.array([node_data[0][0]]).dtype
+    else:
+        node_dtype = np.int64  # fallback for empty graphs
     write_props(
         group=group.require_group("nodes"),
         data=node_data,
         prop_names=list({k for _, data in node_data for k in data}),
+        node_dtype=node_dtype,
         position_prop=position_prop,
     )
     del node_data
@@ -98,6 +103,7 @@ def write_nx(
         group=group.require_group("edges"),
         data=edge_data,
         prop_names=list({k for _, data in edge_data for k in data}),
+        node_dtype=node_dtype,
     )
     del edge_data
 
