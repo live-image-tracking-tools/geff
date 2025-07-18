@@ -5,7 +5,7 @@ import zarr
 from numpy.typing import NDArray
 
 from . import utils
-from .dict_representation import GraphDict, PropDict
+from .dict_representation import GraphDict, PropDictNpArray, PropDictZArray
 from .metadata_schema import GeffMetadata
 
 
@@ -53,8 +53,8 @@ class FileReader:
         self.metadata = GeffMetadata.read(self.group)
         self.nodes = self.group["nodes/ids"]
         self.edges = self.group["edges/ids"]
-        self.node_props: dict[str, PropDict[zarr.Array]] = {}
-        self.edge_props: dict[str, PropDict[zarr.Array]] = {}
+        self.node_props: dict[str, PropDictZArray] = {}
+        self.edge_props: dict[str, PropDictZArray] = {}
 
         node_props_group = zarr.open_group(self.group.store, path="nodes/props")
         self.node_prop_names: list[str] = [*node_props_group.group_keys()]
@@ -72,7 +72,7 @@ class FileReader:
             name (str): The name of the node property.
         """
         prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}")
-        prop_dict: PropDict = {"values": prop_group["values"]}
+        prop_dict: PropDictZArray = {"values": prop_group["values"]}
         if "missing" in prop_group.keys():
             prop_dict["missing"] = prop_group["missing"]
         self.node_props[name] = prop_dict
@@ -87,7 +87,7 @@ class FileReader:
             name (str): The name of the edge property.
         """
         prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}")
-        prop_dict: PropDict = {"values": prop_group["values"]}
+        prop_dict: PropDictZArray = {"values": prop_group["values"]}
         if "missing" in prop_group.keys():
             prop_dict["missing"] = prop_group["missing"]
         self.edge_props[name] = prop_dict
@@ -113,7 +113,7 @@ class FileReader:
             GraphDict: A graph represented in graph dict format.
         """
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
-        node_props: dict[str, PropDict[NDArray]] = {}
+        node_props: dict[str, PropDictNpArray] = {}
         for name, props in self.node_props.items():
             node_props[name] = {
                 "values": np.array(
@@ -127,7 +127,7 @@ class FileReader:
                 )
 
         edges = np.array(self.edges[edge_mask.tolist() if edge_mask else ...])
-        edge_props: dict[str, PropDict[NDArray]] = {}
+        edge_props: dict[str, PropDictNpArray] = {}
         for name, props in self.edge_props.items():
             edge_props[name] = {
                 "values": np.array(

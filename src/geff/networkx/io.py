@@ -16,7 +16,7 @@ from geff.writer_helper import write_props
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    from geff.dict_representation import GraphDict, PropDict
+    from geff.dict_representation import GraphDict, PropDictNpArray
 
 
 def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tuple[float, ...]]:
@@ -125,7 +125,7 @@ def _set_property_values(
     graph: nx.Graph,
     ids: NDArray[Any],
     name: str,
-    prop_dict: PropDict[NDArray],
+    prop_dict: PropDictNpArray,
     nodes: bool = True,
 ) -> None:
     """Add properties in-place to a networkx graph's
