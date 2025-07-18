@@ -25,7 +25,7 @@ SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
 
 class GeffMetadata(BaseModel):
     """
-    Geff metadata schema to validate the attributes json file in a geff zarr
+    Geff metadata schema to validate the properties json file in a geff zarr
     """
 
     # this determines the title of the generated json schema
@@ -35,17 +35,17 @@ class GeffMetadata(BaseModel):
     directed: bool
     roi_min: tuple[float, ...] | None = None
     roi_max: tuple[float, ...] | None = None
-    position_attr: str | None = None
+    position_prop: str | None = None
     axis_names: tuple[str, ...] | None = None
     axis_units: tuple[str, ...] | None = None
 
     def model_post_init(self, *args, **kwargs):  # noqa D102
         # Check spatial metadata only if position is provided
-        if self.position_attr is not None:
+        if self.position_prop is not None:
             # Check that rois are there if position provided
             if self.roi_min is None or self.roi_max is None:
                 raise ValueError(
-                    f"Position attribute {self.position_attr} has been specified, "
+                    f"Position property {self.position_prop} has been specified, "
                     "but roi_min and/or roi_max are not specified."
                 )
 
@@ -76,7 +76,7 @@ class GeffMetadata(BaseModel):
             if any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
                 raise ValueError(
                     "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
-                    " position_attr"
+                    " position_prop"
                 )
 
     def write(self, group: zarr.Group | Path):

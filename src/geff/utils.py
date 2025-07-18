@@ -35,34 +35,34 @@ def validate(path: str | Path):
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
 
-    # ids and attrs/position are required and should be same length
+    # ids and props/position are required and should be same length
     assert "ids" in nodes.array_keys(), "nodes group must contain an ids array"
-    assert "attrs" in nodes.group_keys(), "nodes group must contain an attrs group"
+    assert "props" in nodes.group_keys(), "nodes group must contain a props group"
 
-    if meta.position_attr is not None:
-        assert meta.position_attr in nodes["attrs"].group_keys(), (
-            "nodes group must contain an attrs/position group"
+    if meta.position_prop is not None:
+        assert meta.position_prop in nodes["props"].group_keys(), (
+            "nodes group must contain a props/position group"
         )
-        assert "missing" not in nodes[f"attrs/{meta.position_attr}"].array_keys(), (
+        assert "missing" not in nodes[f"props/{meta.position_prop}"].array_keys(), (
             "position group cannot have missing values"
         )
 
-    # Attribute array length should match id length
+    # Property array length should match id length
     id_len = nodes["ids"].shape[0]
-    for attr in nodes["attrs"].keys():
-        attr_group = nodes["attrs"][attr]
+    for attr in nodes["props"].keys():
+        attr_group = nodes["props"][attr]
         assert "values" in attr_group.array_keys(), (
-            f"node attribute group {attr} must have values group"
+            f"node property group {attr} must have values group"
         )
         attr_len = attr_group["values"].shape[0]
         assert attr_len == id_len, (
-            f"Node attribute {attr} values has length {attr_len}, which does not match "
+            f"Node property {attr} values has length {attr_len}, which does not match "
             f"id length {id_len}"
         )
         if "missing" in attr_group.array_keys():
             missing_len = attr_group["missing"].shape[0]
             assert missing_len == id_len, (
-                f"Node attribute {attr} missing mask has length {missing_len}, which "
+                f"Node property {attr} missing mask has length {missing_len}, which "
                 f"does not match id length {id_len}"
             )
 
@@ -76,22 +76,22 @@ def validate(path: str | Path):
             f"edges ids must have a last dimension of size 2, received shape {id_shape}"
         )
 
-        # Edge attribute array length should match edge id length
+        # Edge property array length should match edge id length
         edge_id_len = edges["ids"].shape[0]
-        if "attrs" in edges:
-            for attr in edges["attrs"].keys():
-                attr_group = edges["attrs"][attr]
+        if "props" in edges:
+            for attr in edges["props"].keys():
+                attr_group = edges["props"][attr]
                 assert "values" in attr_group.array_keys(), (
-                    f"Edge attribute group {attr} must have values group"
+                    f"Edge property group {attr} must have values group"
                 )
                 attr_len = attr_group["values"].shape[0]
                 assert attr_len == edge_id_len, (
-                    f"Edge attribute {attr} values has length {attr_len}, which does not "
+                    f"Edge property {attr} values has length {attr_len}, which does not "
                     f"match id length {edge_id_len}"
                 )
                 if "missing" in attr_group.array_keys():
                     missing_len = attr_group["missing"].shape[0]
                     assert missing_len == edge_id_len, (
-                        f"Edge attribute {attr} missing mask has length {missing_len}, "
+                        f"Edge property {attr} missing mask has length {missing_len}, "
                         f"which does not match id length {edge_id_len}"
                     )

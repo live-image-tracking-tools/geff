@@ -20,7 +20,7 @@ def test_validate(tmp_path):
         validate(zpath)
     z.attrs["geff_version"] = "v0.0.1"
     z.attrs["directed"] = True
-    z.attrs["position_attr"] = "position"
+    z.attrs["position_prop"] = "position"
     z.attrs["roi_min"] = [0, 0]
     z.attrs["roi_max"] = [100, 100]
 
@@ -35,50 +35,48 @@ def test_validate(tmp_path):
     n_node = 10
     z["nodes/ids"] = np.zeros(n_node)
 
-    # Nodes missing position attrs
-    with pytest.raises(AssertionError, match="nodes group must contain an attrs group"):
+    # Nodes missing position props
+    with pytest.raises(AssertionError, match="nodes group must contain a props group"):
         validate(zpath)
-    z["nodes"].create_group("attrs")
-    with pytest.raises(AssertionError, match="nodes group must contain an attrs/position group"):
+    z["nodes"].create_group("props")
+    with pytest.raises(AssertionError, match="nodes group must contain a props/position group"):
         validate(zpath)
-    z["nodes"].create_group("attrs/position")
-    with pytest.raises(
-        AssertionError, match="node attribute group position must have values group"
-    ):
+    z["nodes"].create_group("props/position")
+    with pytest.raises(AssertionError, match="node property group position must have values group"):
         validate(zpath)
-    z["nodes/attrs/position/values"] = np.zeros(n_node)
+    z["nodes/props/position/values"] = np.zeros(n_node)
     validate(zpath)
 
-    # valid and invalid "missing" arrays for position attribute
-    z["nodes/attrs/position/missing"] = np.zeros((n_node), dtype=bool)
+    # valid and invalid "missing" arrays for position property
+    z["nodes/props/position/missing"] = np.zeros((n_node), dtype=bool)
     with pytest.raises(AssertionError, match="position group cannot have missing values"):
         validate(zpath)
-    del z["nodes/attrs/position"]["missing"]
+    del z["nodes/props/position"]["missing"]
 
-    # Attr shape mismatch
-    z["nodes/attrs/badshape/values"] = np.zeros(n_node * 2)
+    # Property shape mismatch
+    z["nodes/props/badshape/values"] = np.zeros(n_node * 2)
     with pytest.raises(
         AssertionError,
         match=(
-            f"Node attribute badshape values has length {n_node * 2}, "
+            f"Node property badshape values has length {n_node * 2}, "
             f"which does not match id length {n_node}"
         ),
     ):
         validate(zpath)
 
-    del z["nodes/attrs"]["badshape"]
-    # Attr missing shape mismatch
-    z["nodes/attrs/badshape/values"] = np.zeros(shape=(n_node))
-    z["nodes/attrs/badshape/missing"] = np.zeros(shape=(n_node * 2))
+    del z["nodes/props"]["badshape"]
+    # Property missing shape mismatch
+    z["nodes/props/badshape/values"] = np.zeros(shape=(n_node))
+    z["nodes/props/badshape/missing"] = np.zeros(shape=(n_node * 2))
     with pytest.raises(
         AssertionError,
         match=(
-            f"Node attribute badshape missing mask has length {n_node * 2}, "
+            f"Node property badshape missing mask has length {n_node * 2}, "
             f"which does not match id length {n_node}"
         ),
     ):
         validate(zpath)
-    del z["nodes/attrs"]["badshape"]
+    del z["nodes/props"]["badshape"]
 
     # No edge group is okay, if the graph has no edges
     z.create_group("edges")
@@ -101,30 +99,30 @@ def test_validate(tmp_path):
     del z["edges"]["ids"]
     z["edges/ids"] = np.zeros((n_edges, 2))
 
-    # Attr values shape mismatch
-    z["edges/attrs/badshape/values"] = np.zeros((n_edges * 2, 2))
+    # Property values shape mismatch
+    z["edges/props/badshape/values"] = np.zeros((n_edges * 2, 2))
     with pytest.raises(
         AssertionError,
         match=(
-            f"Edge attribute badshape values has length {n_edges * 2}, "
+            f"Edge property badshape values has length {n_edges * 2}, "
             f"which does not match id length {n_edges}"
         ),
     ):
         validate(zpath)
-    del z["edges/attrs/badshape"]["values"]
+    del z["edges/props/badshape"]["values"]
 
-    # Attr missing shape mismatch
-    z["edges/attrs/badshape/values"] = np.zeros((n_edges, 2))
-    z["edges/attrs/badshape/missing"] = np.zeros((n_edges * 2, 2))
+    # Property missing shape mismatch
+    z["edges/props/badshape/values"] = np.zeros((n_edges, 2))
+    z["edges/props/badshape/missing"] = np.zeros((n_edges * 2, 2))
     with pytest.raises(
         AssertionError,
         match=(
-            f"Edge attribute badshape missing mask has length {n_edges * 2}, "
+            f"Edge property badshape missing mask has length {n_edges * 2}, "
             f"which does not match id length {n_edges}"
         ),
     ):
         validate(zpath)
-    del z["edges/attrs/badshape"]["missing"]
+    del z["edges/props/badshape"]["missing"]
 
     # everything passes
     validate(zpath)

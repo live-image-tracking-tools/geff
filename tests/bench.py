@@ -36,7 +36,7 @@ def big_graph():
 @pytest.fixture(scope="session")
 def big_graph_path(tmpdir_factory, big_graph):
     tmp_path = Path(tmpdir_factory.mktemp("data").join("test.zarr"))
-    geff_nx.write_nx(graph=big_graph, path=tmp_path, position_attr="position")
+    geff_nx.write_nx(graph=big_graph, path=tmp_path, position_prop="position")
     return tmp_path
 
 
@@ -45,7 +45,7 @@ def test_write(benchmark, tmp_path, big_graph):
 
     benchmark.pedantic(
         geff_nx.write_nx,
-        kwargs={"graph": big_graph, "position_attr": "position", "path": path},
+        kwargs={"graph": big_graph, "position_prop": "position", "path": path},
         rounds=ROUNDS,
     )
 
