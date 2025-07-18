@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752850481711,
+  "lastUpdate": 1752851968035,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1215,6 +1215,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.42743992903414013",
             "extra": "mean: 15.744934175666666 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "talley.lambert@gmail.com",
+            "name": "Talley Lambert",
+            "username": "tlambert03"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "27ffa207e4029e86ce321c12b441cc0718b6aa6a",
+          "message": "ensure consistent model after mutation (#105)\n\nthis change makes it so that it's not possible to mutate a\n`GeffMetadata` instance into an invalid state",
+          "timestamp": "2025-07-18T11:16:49-04:00",
+          "tree_id": "7a3ca48c8d326fbcf9a1d7433a7906a3668faab7",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/27ffa207e4029e86ce321c12b441cc0718b6aa6a"
+        },
+        "date": 1752851966843,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.13509101706210153,
+            "unit": "iter/sec",
+            "range": "stddev: 0.01734128726867922",
+            "extra": "mean: 7.402416694666667 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.181676078141543,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0006759000589720924",
+            "extra": "mean: 43.13751933333757 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.0636878828029682,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5198899222226586",
+            "extra": "mean: 15.70157392566667 sec\nrounds: 3"
           }
         ]
       }
