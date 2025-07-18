@@ -20,7 +20,7 @@ jobs:
     with:
       test-target: "tests"
       witty-cache: false
-      install-extras: "dev"
+      install-group: "dev"
 
   schema:
     name: Check json schema
@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          pip install .
+          python -m pip install .
 
       - name: Generate json 
         run: python scripts/export_json_schema.py --filename $testjson
@@ -74,7 +74,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          python -m pip install -e .[bench,dev]
+          python -m pip install -e . --group bench
 
       - name: Retrieve cached baseline if available
         uses: actions/cache/restore@v4

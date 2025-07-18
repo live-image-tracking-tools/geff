@@ -5,6 +5,15 @@ ci:
   autofix_prs: false
 
 repos:
+  - repo: local
+    hooks:
+      - id: update-json
+        name: Update geff-schema.json
+        entry: pixi run -e dev update-json
+        language: python
+        types: [python]
+        pass_filenames: false
+        stages: [manual]
   - repo: https://github.com/crate-ci/typos
     rev: v1.34.0
     hooks:
