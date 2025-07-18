@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import networkx as nx
 import numpy as np
 import zarr
-
+import os
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
@@ -236,6 +236,7 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     """
     # zarr python 3 doesn't support Path
     path = str(path)
+    path = os.path.expanduser(path)
 
     # open zarr container
     if validate:
