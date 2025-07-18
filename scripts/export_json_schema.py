@@ -1,3 +1,4 @@
+#!/usr/bin/env -S pixi run python
 import argparse
 import json
 
@@ -9,4 +10,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     with open(args.filename, "w") as f:
-        f.write(json.dumps(GeffMetadata.model_json_schema()))
+        f.write(json.dumps(GeffMetadata.model_json_schema(), indent=2))
+        f.write("\n")
