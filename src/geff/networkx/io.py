@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import warnings
 from typing import TYPE_CHECKING
 
@@ -10,6 +11,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
+from geff.writer_helper import write_attrs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -38,32 +40,6 @@ def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tup
             _max = np.max([_max, pos], axis=0)
 
     return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
-
-
-def get_node_props(graph: nx.Graph) -> list[str]:
-    """Get the property keys present on any node in the networkx graph. Does not imply
-    that the properties are present on all nodes.
-
-    Args:
-        graph (nx.Graph): A networkx graph
-
-    Returns:
-        list[str]: A list of all unique node property keys
-    """
-    return list({k for n in graph.nodes for k in graph.nodes[n]})
-
-
-def get_edge_props(graph: nx.Graph) -> list[str]:
-    """Get the property keys present on any edge in the networkx graph. Does not imply
-    that the properties are present on all edges.
-
-    Args:
-        graph (nx.Graph): A networkx graph
-
-    Returns:
-        list[str]: A list of all unique edge property keys
-    """
-    return list({k for e in graph.edges for k in graph.edges[e]})
 
 
 def write_nx(
@@ -106,14 +82,22 @@ def write_nx(
     else:
         group = zarr.open(path, mode="a")
 
-    node_props = get_node_props(graph)
-    if validate:
-        if position_prop is not None:
-            if position_prop not in node_props:
-                raise ValueError(f"Position property {position_prop} not found in graph")
-            for node, data in graph.nodes(data=True):
-                if position_prop not in data:
-                    raise ValueError(f"Node {node} does not have position property {position_prop}")
+    node_data = list(graph.nodes(data=True))
+    write_attrs(
+        group=group.require_group("nodes"),
+        data=node_data,
+        attr_names=list({k for _, data in node_data for k in data}),
+        position_attr=position_attr,
+    )
+    del node_data
+
+    edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
+    write_attrs(
+        group=group.require_group("edges"),
+        data=edge_data,
+        attr_names=list({k for _, data in edge_data for k in data}),
+    )
+    del edge_data
 
     # write metadata
     roi_min: tuple[float, ...] | None
@@ -122,6 +106,7 @@ def write_nx(
         roi_min, roi_max = get_roi(graph, position_prop=position_prop)
     else:
         roi_min, roi_max = None, None
+
     metadata = GeffMetadata(
         geff_version=geff.__version__,
         directed=isinstance(graph, nx.DiGraph),
@@ -133,57 +118,8 @@ def write_nx(
     )
     metadata.write(group)
 
-    # get node and edge IDs
-    nodes_list = list(graph.nodes())
-    nodes_arr = np.array(nodes_list)
-    edges_list = list(graph.edges())
-    edges_arr = np.array(edges_list)
 
-    # write nodes
-    group["nodes/ids"] = nodes_arr
-
-    # write node properties
-    for name in node_props:
-        values = []
-        missing = []
-        for node in nodes_list:
-            if name in graph.nodes[node]:
-                value = graph.nodes[node][name]
-                mask = 0
-            else:
-                value = 0
-                mask = 1
-            values.append(value)
-            missing.append(mask)
-        # Missing value are only allowed for non-position property
-        if name != position_prop:
-            # Always store missing array even if all values are present
-            group[f"nodes/props/{name}/missing"] = np.array(missing, dtype=bool)
-        group[f"nodes/props/{name}/values"] = np.array(values)
-
-    # write edges
-    # Edge group is only created if edges are present on graph
-    if len(edges_list) > 0:
-        group["edges/ids"] = edges_arr
-
-        # write edge properties
-        for name in get_edge_props(graph):
-            values = []
-            missing = []
-            for edge in edges_list:
-                if name in graph.edges[edge]:
-                    value = graph.edges[edge][name]
-                    mask = 0
-                else:
-                    value = 0
-                    mask = 1
-                values.append(value)
-                missing.append(mask)
-            group[f"edges/props/{name}/missing"] = np.array(missing, dtype=bool)
-            group[f"edges/props/{name}/values"] = np.array(values)
-
-
-def _set_property_values(
+def _set_attribute_values(
     graph: nx.DiGraph, ids: np.ndarray, graph_group: zarr.Group, name: str, nodes: bool = True
 ) -> None:
     """Add properties in-place to a networkx graph's nodes or edges.
@@ -234,6 +170,7 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     """
     # zarr python 3 doesn't support Path
     path = str(path)
+    path = os.path.expanduser(path)
 
     # open zarr container
     if validate:
