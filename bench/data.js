@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752865847714,
+  "lastUpdate": 1752866903567,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1485,6 +1485,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.47055259967538815",
             "extra": "mean: 15.566035071333337 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "malinmayorc@janelia.hhmi.org",
+            "name": "Caroline Malin-Mayor",
+            "username": "cmalinmayor"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "913c6c8cd08412b84087b08bfbddde0c0e1e2a2a",
+          "message": "102 nest geff metadata (#128)\n\n# Proposed Change\nNest the geff metadata under the \"geff\" key instead of in the main\nattrs.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Documentation update\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the [developer/contributing](../CONTRIBUTING) docs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly.\n- [x] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.",
+          "timestamp": "2025-07-18T15:10:15-04:00",
+          "tree_id": "3e987528ff5eebb441448c63f5fdc8f8d31c6baf",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/913c6c8cd08412b84087b08bfbddde0c0e1e2a2a"
+        },
+        "date": 1752866902380,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11328561494179856,
+            "unit": "iter/sec",
+            "range": "stddev: 1.228961513662249",
+            "extra": "mean: 8.827246076333331 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 22.973723168520902,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0011862980982831853",
+            "extra": "mean: 43.52799033333099 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06332434177199804,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4701486259283807",
+            "extra": "mean: 15.791715666000007 sec\nrounds: 3"
           }
         ]
       }
