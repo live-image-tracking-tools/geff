@@ -122,7 +122,7 @@ def write_nx(
 def _set_property_values(
     graph: nx.DiGraph, ids: np.ndarray, graph_group: zarr.Group, name: str, nodes: bool = True
 ) -> None:
-    """Add properties in-place to a networkx graph's nodes or edges.
+    """Add properties in-place to a networkx graph's nodes or edges by creating attributes on the nodes/edges
 
     Args:
         graph (nx.DiGraph): The networkx graph, already populated with nodes or edges,
