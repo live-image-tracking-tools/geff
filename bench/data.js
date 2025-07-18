@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752859475852,
+  "lastUpdate": 1752859978457,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1395,6 +1395,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.44703487833697075",
             "extra": "mean: 15.622649669333327 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jordao.bragantini@gmail.com",
+            "name": "Jordão Bragantini",
+            "username": "JoOkuma"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "36232c43a46382186c23187c1198bada6052aba5",
+          "message": "General `geff` writer helper (#97)\n\n# Proposed Change\n\nThis PR adds a `geff` writer abstract class to simplify the writing of\nalternative backends.\n\n# Types of Changes\n\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n\nWhich topics does your change affect? Delete those that do not apply.\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [X] I have read the developer/contributing docs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [X] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n# Further Comments\nI had to change more things than I expected.\nPartially addresses #91 \n\ncc @msschwartz21",
+          "timestamp": "2025-07-18T13:30:14-04:00",
+          "tree_id": "8d97ba15166152d83f53689f7028521570adff45",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/36232c43a46382186c23187c1198bada6052aba5"
+        },
+        "date": 1752859977812,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11513522504323612,
+            "unit": "iter/sec",
+            "range": "stddev: 1.376757616630841",
+            "extra": "mean: 8.685439227000037 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 22.54650560615611,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0002152209202789327",
+            "extra": "mean: 44.352770999997425 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06316757157527808,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5561047611782917",
+            "extra": "mean: 15.83090777533342 sec\nrounds: 3"
           }
         ]
       }
