@@ -1,4 +1,5 @@
-from typing import TypedDict, Any, Optional, NotRequired, Generic, TypeVar
+from typing import TypedDict, Any, Optional, Generic, TypeVar
+from typing_extensions import NotRequired
 from pathlib import Path
 
 import zarr
