@@ -162,6 +162,24 @@ class TestMetadataModel:
         compare = GeffMetadata.read(zpath)
         assert compare == meta
 
+    def test_model_mutation(self):
+        """Test that invalid model mutations raise errors."""
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            position_attr="position",
+            roi_min=(0, 0, 0),
+            roi_max=(100, 100, 100),
+        )
+
+        meta.roi_max = (200, 200, 200)  # fine...
+
+        with pytest.raises(pydantic.ValidationError):
+            meta.roi_min = None
+
+        with pytest.raises(pydantic.ValidationError):
+            meta.position_attr = None
+
 
 def test_write_schema(tmp_path):
     schema_path = tmp_path / "schema.json"

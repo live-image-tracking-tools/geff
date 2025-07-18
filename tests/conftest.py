@@ -9,6 +9,7 @@ from numpy.typing import NDArray
 import geff
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
+DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
 Axes = Literal["t", "z", "y", "x"]
 
 
@@ -117,8 +118,8 @@ def path_w_expected_graph_props(
             graph.add_node(node, pos=graph_props["node_positions"][idx], **props)
 
         for idx, edge in enumerate(graph_props["edges"]):
-            props = {
-                name: prop_array[idx] for name, prop_array in graph_props["edge_props"].items()
+            attrs = {
+                name: attr_array[idx] for name, attr_array in graph_props["edge_attrs"].items()
             }
             graph.add_edge(*edge.tolist(), **props)
 
