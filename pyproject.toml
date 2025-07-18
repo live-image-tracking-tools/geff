@@ -37,6 +37,7 @@ dev = [
     "ruff",
     "ipython",
     "types-PyYAML",
+    "spatial_graph",
 ]
 docs = [
     "mkdocs-material",
