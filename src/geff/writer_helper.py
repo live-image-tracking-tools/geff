@@ -11,7 +11,7 @@ def write_dict_like(
     edge_data: Sequence[tuple[Any, dict[str, Any]]],
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
-    position_prop: str | None = None,
+    axis_names: list[str] | None = None,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -27,8 +27,8 @@ def write_dict_like(
             geff
         edge_prop_names (Sequence[str]): a list of edge properties to include in the
             geff
-        position_prop (str | None, optional): The position property, if any,
-            for checking if it has missing values. Defaults to None.
+        axis_names (Sequence[str] | None): The name of the spatiotemporal properties, if
+            any. Defaults to None
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -48,18 +48,21 @@ def write_dict_like(
 
     write_id_arrays(geff_path, nodes_arr, edges_arr)
 
-    if position_prop is not None and position_prop not in node_prop_names:
+    if axis_names is not None:
         node_prop_names = list(node_prop_names)
-        node_prop_names.append(position_prop)
+        for axis in axis_names:
+            if axis not in node_prop_names:
+                node_prop_names.append(axis)
 
     node_props_dict = dict_props_to_arr(node_data, node_prop_names)
-    if position_prop is not None:
-        pos_missing_arr = node_props_dict[position_prop][1]
-        if pos_missing_arr is not None:
-            raise ValueError(
-                f"Position property '{position_prop}' not found in : "
-                "{nodes_arr[pos_missing_arr].tolist()}"
-            )
+    if axis_names is not None:
+        for axis in axis_names:
+            missing_arr = node_props_dict[axis][1]
+            if missing_arr is not None:
+                raise ValueError(
+                    f"Spatiotemporal property '{axis}' not found in : "
+                    f"{nodes_arr[missing_arr].tolist()}"
+                )
     write_props_arrays(geff_path, "nodes", node_props_dict)
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
