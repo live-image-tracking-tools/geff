@@ -88,11 +88,12 @@ def axes_from_lists(
     for a single property, use None.
 
     Args:
-        axis_names (list[str] | None, optional): _description_. Defaults to None.
-        axis_units (list[str] | None, optional): _description_. Defaults to None.
-        axis_types (list[str] | None, optional): _description_. Defaults to None.
-        roi_min (list[float] | None, optional): _description_. Defaults to None.
-        roi_max (list[float] | None, optional): _description_. Defaults to None.
+        axis_names (list[str] | None, optional): Names of properties for spatiotemporal axes. Defaults to None.
+        axis_units (list[str] | None, optional): Units corresponding to named properties. Defaults to None.
+        axis_types (list[str] | None, optional): Axis type for each property.
+            Choose from "space", "time", "channel". Defaults to None.
+        roi_min (list[float] | None, optional): Minimum value for each property. Defaults to None.
+        roi_max (list[float] | None, optional): Maximum value for each property. Defaults to None.
 
     Returns:
         list[Axis]:
