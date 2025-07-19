@@ -18,7 +18,7 @@ class FileReader:
 
     Example:
         >>> from pathlib import Path
-        ... from geff.read_file import FileReader
+        ... from geff.file_reader import FileReader
 
         >>> path = Path("example/path")
         ... file_reader = FileReader(path)
