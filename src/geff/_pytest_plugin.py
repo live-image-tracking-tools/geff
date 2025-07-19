@@ -38,7 +38,7 @@ def create_dummy_graph_props(
     edge_prop_dtypes: ExampleEdgeProps,
     directed: bool,
 ) -> GraphAttrs:
-    axis_names = ("t", "z", "y", "x")
+    axis_names: tuple[Axes, ...] = ("t", "z", "y", "x")
     axis_units = ("s", "nm", "nm", "nm")
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
     t = np.array([0.1, 0.2, 0.3, 0.4, 0.5], dtype=node_prop_dtypes["position"])
