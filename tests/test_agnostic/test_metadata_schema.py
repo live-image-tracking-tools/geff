@@ -111,6 +111,19 @@ class TestMetadataModel:
         with pytest.raises(pydantic.ValidationError):
             meta.geff_version = "abcde"
 
+    def test_read_write_ignored_metadata(self, tmp_path):
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            foo="bar",
+            bar={"baz": "qux"},
+        )
+        zpath = tmp_path / "test.zarr"
+        group = zarr.open(zpath, mode="a")
+        meta.write(group)
+        compare = GeffMetadata.read(group)
+        assert compare.foo == "bar"
+        assert compare.bar == {"baz": "qux"}
 
 class TestAxis:
     def test_valid(self):

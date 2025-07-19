@@ -157,11 +157,19 @@ def write_nx(
     axes = axes_from_lists(
         axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
     )
-    metadata = GeffMetadata(
-        geff_version=geff.__version__,
-        directed=isinstance(graph, nx.DiGraph),
-        axes=axes,
-    )
+
+    # Update metadata with new axes, version, and directedness
+    # This is necessary because the metadata can carry extra properties
+    if metadata is not None:
+        metadata.geff_version = geff.__version__
+        metadata.directed = isinstance(graph, nx.DiGraph)
+        metadata.axes = axes
+    else:
+        metadata = GeffMetadata(
+            geff_version=geff.__version__,
+            directed=isinstance(graph, nx.DiGraph),
+            axes=axes,
+        )
     metadata.write(group)
 
 
