@@ -31,8 +31,14 @@ classifiers = [
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
+ctc = [
+    "scikit-image",
+    "tifffile",
+    "imagecodecs",
+]
 dev = [
     { include-group = "test" },
+    { include-group = "ctc" },
     "mypy",
     "pre-commit",
     "ruff",
@@ -55,11 +61,6 @@ bench = [
     "tabulate",
     "pandas",
     "typer"
-]
-ctc = [
-    "scikit-image",
-    "tifffile",
-    "imagecodecs",
 ]
 
 
