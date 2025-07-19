@@ -4,7 +4,13 @@ import pydantic
 import pytest
 import zarr
 
-from geff.metadata_schema import Axis, GeffMetadata, _get_versions_regex, write_metadata_schema
+from geff.metadata_schema import (
+    Axis,
+    GeffMetadata,
+    Shape,
+    _get_versions_regex,
+    write_metadata_schema,
+)
 
 
 class TestVersionRegex:
@@ -60,6 +66,15 @@ class TestMetadataModel:
         with pytest.raises(ValueError, match=r"Duplicate axes names found in"):
             GeffMetadata(
                 geff_version="0.0.1", directed=True, axes=[{"name": "test"}, {"name": "test"}]
+            )
+
+    def test_invalid_shape_axes_matching(self):
+        with pytest.raises(ValueError, match=r"Shape .* has axis .* that is not in axes names .*"):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                axes=[{"name": "a"}, {"name": "b"}],
+                shapes=[Shape(name="radius", type="sphere", axes=["a", "z"])],
             )
 
     def test_invalid_version(self):
@@ -157,6 +172,43 @@ class TestAxis:
         # Min > max
         with pytest.raises(ValueError, match=r"Min .* is greater than max .*"):
             Axis(name="test", min=0, max=-10)
+
+
+class TestShape:
+    def test_valid(self):
+        # Minial fields for each type
+        Shape(name="radius", type="sphere")
+        Shape(name="covariance2d", type="ellipse")
+        Shape(name="covariance3d", type="ellipsoid")
+
+        # All fields
+        Shape(name="radius", type="sphere", unit="micrometer", axes=["y", "x"])
+
+    def test_no_name(self):
+        with pytest.raises(pydantic.ValidationError):
+            Shape(type="sphere")
+
+    def test_no_type(self):
+        with pytest.raises(pydantic.ValidationError):
+            Shape(name="radius")
+
+    def test_bad_type(self):
+        with pytest.warns(UserWarning, match=r"Type .* not in valid types"):
+            Shape(name="test", type="other")
+
+    def test_invalid_units(self):
+        # Spatial
+        with pytest.warns(UserWarning, match=r"Shape spatial unit .* not in valid"):
+            Shape(name="test", type="sphere", unit="bad unit")
+
+    def test_axes_dimensions(self):
+        # Ellipse should have 2 axes, if defined
+        with pytest.raises(ValueError, match=r"Shape ellipse must have 2 axes"):
+            Shape(name="covariance2d", type="ellipse", axes=["a", "b", "c"])
+
+        # Ellipsoid should have 3 axes, if defined
+        with pytest.raises(ValueError, match=r"Shape ellipsoid must have 3 axes"):
+            Shape(name="covariance3d", type="ellipsoid", axes=["a", "b"])
 
 
 def test_write_schema(tmp_path):
