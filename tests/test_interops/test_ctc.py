@@ -1,18 +1,18 @@
+import itertools
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from geff.interops.ctc import from_ctc_to_geff
+from geff.interops.ctc import ctc_to_geff, from_ctc_to_geff
 from geff.networkx.io import read_nx
 
 tifffile = pytest.importorskip("tifffile")
 
 
-@pytest.fixture
-def mock_ctc_data(
+def create_mock_data(
     tmp_path: Path,
-    request: pytest.FixtureRequest,
+    is_gt: bool,
 ) -> Path:
     """
     mock graph is:
@@ -23,8 +23,6 @@ def mock_ctc_data(
             / \\     |
     t=2    2   5     9
     """
-    is_gt = request.param
-
     labels = np.zeros((3, 10, 10), dtype=np.uint16)
 
     labels[0, 3, 3] = 1
@@ -58,13 +56,29 @@ def mock_ctc_data(
     return tmp_path
 
 
-@pytest.mark.parametrize("mock_ctc_data", [True, False], indirect=True)
-def test_ctc_to_geff(mock_ctc_data: Path) -> None:
-    geff_path = mock_ctc_data / "little.geff"
-    from_ctc_to_geff(
-        ctc_path=mock_ctc_data,
-        geff_path=geff_path,
-    )
+@pytest.mark.parametrize(
+    "cli,is_gt",
+    list(itertools.product([True, False], [True, False])),
+)
+def test_ctc_to_geff(
+    tmp_path: Path,
+    cli: bool,
+    is_gt: bool,
+) -> None:
+    ctc_path = create_mock_data(tmp_path, is_gt)
+    geff_path = ctc_path / "little.geff"
+
+    if cli:
+        cmd_args = [str(ctc_path), str(geff_path)]
+        try:
+            ctc_to_geff(cmd_args)
+        except SystemExit as sys_exit:
+            assert sys_exit.code == 0, f"{cmd_args} failed with exit code {sys_exit.code}"
+    else:
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=geff_path,
+        )
 
     assert geff_path.exists()
 
