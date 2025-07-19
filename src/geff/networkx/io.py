@@ -10,7 +10,7 @@ import zarr
 
 import geff
 import geff.utils
-from geff.metadata_schema import GeffMetadata
+from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.writer_helper import write_props
 
 if TYPE_CHECKING:
@@ -112,15 +112,14 @@ def write_nx(
         roi_min, roi_max = get_roi(graph, position_prop=position_prop)
     else:
         roi_min, roi_max = None, None
-
+    axis_names = axis_names if axis_names is not None else graph.graph.get("axis_names", None)
+    axis_units = axis_units if axis_units is not None else graph.graph.get("axis_units", None)
+    # TODO: Add axis types
+    axes = axes_from_lists(axis_names, axis_units=axis_units, roi_min=roi_min, roi_max=roi_max)
     metadata = GeffMetadata(
         geff_version=geff.__version__,
         directed=isinstance(graph, nx.DiGraph),
-        roi_min=roi_min,
-        roi_max=roi_max,
-        position_prop=position_prop,
-        axis_names=axis_names if axis_names is not None else graph.graph.get("axis_names", None),
-        axis_units=axis_units if axis_units is not None else graph.graph.get("axis_units", None),
+        axes=axes,
     )
     metadata.write(group)
 
