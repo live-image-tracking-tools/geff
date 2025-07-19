@@ -1,5 +1,66 @@
 {
   "$defs": {
+    "Axis": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Axis",
+      "type": "object"
+    },
     "GeffMetadata": {
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
@@ -12,11 +73,11 @@
           "title": "Directed",
           "type": "boolean"
         },
-        "roi_min": {
+        "axes": {
           "anyOf": [
             {
               "items": {
-                "type": "number"
+                "$ref": "#/$defs/Axis"
               },
               "type": "array"
             },
@@ -25,64 +86,7 @@
             }
           ],
           "default": null,
-          "title": "Roi Min"
-        },
-        "roi_max": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "number"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Roi Max"
-        },
-        "position_prop": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Position Prop"
-        },
-        "axis_names": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Axis Names"
-        },
-        "axis_units": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Axis Units"
+          "title": "Axes"
         }
       },
       "required": [
