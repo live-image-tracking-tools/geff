@@ -30,22 +30,14 @@ def validate(path: str | Path):
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    meta = GeffMetadata.read(graph)
+    GeffMetadata.read(graph)
 
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
 
-    # ids and props/position are required and should be same length
+    # ids and props are required and should be same length
     assert "ids" in nodes.array_keys(), "nodes group must contain an ids array"
     assert "props" in nodes.group_keys(), "nodes group must contain a props group"
-
-    if meta.position_prop is not None:
-        assert meta.position_prop in nodes["props"].group_keys(), (
-            "nodes group must contain a props/position group"
-        )
-        assert "missing" not in nodes[f"props/{meta.position_prop}"].array_keys(), (
-            "position group cannot have missing values"
-        )
 
     # Property array length should match id length
     id_len = nodes["ids"].shape[0]
@@ -65,6 +57,8 @@ def validate(path: str | Path):
                 f"Node property {prop} missing mask has length {missing_len}, which "
                 f"does not match id length {id_len}"
             )
+
+    # TODO: Do we want to prevent missing values on spatialtemporal properties
 
     if "edges" in graph.group_keys():
         edges = graph["edges"]

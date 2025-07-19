@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from importlib.resources import files
 from pathlib import Path
+from typing import Sequence
 
 import yaml
 import zarr
@@ -11,6 +13,14 @@ from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
 import geff
+
+from .units import (
+    VALID_AXIS_TYPES,
+    VALID_SPACE_UNITS,
+    VALID_TIME_UNITS,
+    validate_axis_type,
+    validate_space_unit,
+)
 
 with (files(geff) / "supported_versions.yml").open() as f:
     SUPPORTED_VERSIONS = yaml.safe_load(f)["versions"]
@@ -23,6 +33,45 @@ def _get_versions_regex(versions: list[str]):
 SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
 
 
+class Axis(BaseModel):
+    name: str
+    type: str | None = None
+    unit: str | None = None
+    min: float | None = None
+    max: float | None = None
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> Axis:
+        if (self.min is None) != (self.max is None):  # type: ignore
+            raise ValueError(
+                f"Min and max must both be None or neither: got min {self.min} and max {self.max}"
+            )
+        if self.min is not None and self.min > self.max:  # type: ignore
+            raise ValueError(f"Min {self.min} is greater than max {self.max}")
+
+        if self.type is not None and not validate_axis_type(self.type):  # type: ignore
+            warnings.warn(
+                f"Type {self.type} not in valid types {VALID_AXIS_TYPES}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+
+        if self.type == "space" and not validate_space_unit(self.unit):  # type: ignore
+            warnings.warn(
+                f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+        elif self.type == "time" and not validate_space_unit(self.unit):  # type: ignore
+            warnings.warn(
+                f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+
+        return self
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -33,51 +82,15 @@ class GeffMetadata(BaseModel):
 
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
-    roi_min: tuple[float, ...] | None = None
-    roi_max: tuple[float, ...] | None = None
-    position_prop: str | None = None
-    axis_names: tuple[str, ...] | None = None
-    axis_units: tuple[str, ...] | None = None
+    axes: Sequence[Axis] | None = None
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
-        # Check spatial metadata only if position is provided
-        if self.position_prop is not None:
-            # Check that rois are there if position provided
-            if self.roi_min is None or self.roi_max is None:
-                raise ValueError(
-                    f"Position property {self.position_prop} has been specified, "
-                    "but roi_min and/or roi_max are not specified."
-                )
-
-            if len(self.roi_min) != len(self.roi_max):
-                raise ValueError(
-                    f"Roi min {self.roi_min} and roi max {self.roi_max} have different lengths."
-                )
-            ndim = len(self.roi_min)
-            for dim in range(ndim):
-                if self.roi_min[dim] > self.roi_max[dim]:
-                    raise ValueError(
-                        f"Roi min {self.roi_min} is greater than "
-                        f"max {self.roi_max} in dimension {dim}"
-                    )
-
-            if self.axis_names is not None and len(self.axis_names) != ndim:
-                raise ValueError(
-                    f"Length of axis names ({len(self.axis_names)}) does not match number of"
-                    f" dimensions in roi ({ndim})"
-                )
-            if self.axis_units is not None and len(self.axis_units) != ndim:
-                raise ValueError(
-                    f"Length of axis units ({len(self.axis_units)}) does not match number of"
-                    f" dimensions in roi ({ndim})"
-                )
-        # If no position, check that other spatial metadata is not provided
-        elif any([self.roi_min, self.roi_max, self.axis_names, self.axis_units]):
-            raise ValueError(
-                "Spatial metadata (roi_min, roi_max, axis_names or axis_units) provided without"
-                " position_prop"
-            )
+        # Axes names must be unique
+        if self.axes is not None:
+            names = [ax.name for ax in self.axes]
+            if len(names) != len(set(names)):
+                raise ValueError(f"Duplicate axes names found in {names}")
         return self
 
     def write(self, group: zarr.Group | Path):

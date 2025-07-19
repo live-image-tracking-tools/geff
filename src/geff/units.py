@@ -56,8 +56,16 @@ VALID_TIME_UNITS = [
     "zettasecond",
 ]
 
+VALID_AXIS_TYPES = [
+    "space", 
+    "time",
+    "channel", # TODO: discuss
+]
 
-def validate_space_unit(unit_name: str):
+def validate_axis_type(axis_type: str) -> bool:
+    return axis_type in VALID_AXIS_TYPES
+
+def validate_space_unit(unit_name: str) -> bool:
     """validate_space_unit
 
     Returns True if a space unit is a KNOWN valid unit.
@@ -66,7 +74,7 @@ def validate_space_unit(unit_name: str):
     return unit_name in VALID_SPACE_UNITS
 
 
-def validate_time_unit(unit_name: str):
+def validate_time_unit(unit_name: str) -> bool:
     """validate_time_unit
 
     Returns True if a time unit is a KNOWN valid unit.
