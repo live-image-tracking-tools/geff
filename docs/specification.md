@@ -13,7 +13,15 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 {%
     include "schema/schema.html"
 %}
-Note: The axes dictionary is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
+!!! note
+
+    The axes dictionary is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
+
+    ::: geff.units.VALID_AXIS_TYPES  
+
+    ::: geff.units.VALID_SPACE_UNITS    
+
+    ::: geff.units.VALID_TIME_UNITS  
 
 ## The `nodes` group
 The nodes group will contain an `ids` array and optionally a `props` group. 
