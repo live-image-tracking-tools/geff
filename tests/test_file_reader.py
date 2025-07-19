@@ -115,3 +115,60 @@ def test_build_w_masked_nodes_edges(
 
     # make sure graph dict can be ingested
     _ = _ingest_dict_nx(graph_dict)
+
+
+def test_read_node_props(path_w_expected_graph_props):
+    path, graph_props = path_w_expected_graph_props(
+        node_dtype="uint8",
+        node_prop_dtypes={"position": "double"},
+        edge_prop_dtypes={"score": "float64", "color": "uint8"},
+        directed=True,
+    )
+
+    file_reader = FileReader(path)
+
+    # make sure the node props are also masked
+    n_nodes = file_reader.nodes.shape[0]
+    node_mask = np.zeros(n_nodes, dtype=bool)
+    node_mask[: n_nodes // 2] = True  # mask half the nodes
+
+    graph_dict = file_reader.build(node_mask=node_mask)
+    assert len(graph_dict["node_props"]) == 0
+
+    file_reader.read_node_props("pos")
+    graph_dict = file_reader.build(node_mask=node_mask)
+    assert "pos" in graph_dict["node_props"]
+    np.testing.assert_allclose(
+        graph_props["node_positions"][node_mask],
+        graph_dict["node_props"]["pos"]["values"],
+    )
+
+    _ = _ingest_dict_nx(graph_dict)
+
+
+def test_read_edge_props(path_w_expected_graph_props):
+    path, graph_props = path_w_expected_graph_props(
+        node_dtype="uint8",
+        node_prop_dtypes={"position": "double"},
+        edge_prop_dtypes={"score": "float64", "color": "uint8"},
+        directed=True,
+    )
+
+    file_reader = FileReader(path)
+
+    # make sure props are also masked
+    n_edges = file_reader.edges.shape[0]
+    edge_mask = np.zeros(n_edges, dtype=bool)
+    edge_mask[: n_edges // 2] = True  # mask half the edges
+
+    graph_dict = file_reader.build(edge_mask=edge_mask)
+    assert len(graph_dict["edge_props"]) == 0
+
+    file_reader.read_edge_props("score")
+    graph_dict = file_reader.build(edge_mask=edge_mask)
+    np.testing.assert_allclose(
+        graph_props["edge_props"]["score"][edge_mask],
+        graph_dict["edge_props"]["score"]["values"],
+    )
+
+    _ = _ingest_dict_nx(graph_dict)
