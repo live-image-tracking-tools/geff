@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tuple[float, ...]]:
+def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
     """Get the roi of a networkx graph.
 
     Args:
@@ -30,7 +30,7 @@ def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tup
     _min = None
     _max = None
     for _, data in graph.nodes(data=True):
-        pos = np.array(data[position_prop])
+        pos = np.array([data[name] for name in axis_names])
         if _min is None:
             _min = pos
             _max = pos
@@ -44,7 +44,6 @@ def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tup
 def write_nx(
     graph: nx.Graph,
     path: str | Path,
-    position_prop: str | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
     zarr_format: int = 2,
@@ -76,18 +75,22 @@ def write_nx(
         group = zarr.open(path, mode="a", zarr_format=zarr_format)
     else:
         group = zarr.open(path, mode="a")
+    axis_names = axis_names if axis_names is not None else graph.graph.get("axis_names", None)
 
     node_data = list(graph.nodes(data=True))
     if node_data:
         node_dtype = np.array([node_data[0][0]]).dtype
     else:
         node_dtype = np.int64  # fallback for empty graphs
+
+    node_prop_names = list({k for _, data in node_data for k in data})
+    print(node_prop_names)
     write_props(
         group=group.require_group("nodes"),
         data=node_data,
         prop_names=list({k for _, data in node_data for k in data}),
         node_dtype=node_dtype,
-        position_prop=position_prop,
+        axis_names=axis_names,
     )
     del node_data
 
@@ -103,11 +106,10 @@ def write_nx(
     # write metadata
     roi_min: tuple[float, ...] | None
     roi_max: tuple[float, ...] | None
-    if position_prop is not None and graph.number_of_nodes() > 0:
-        roi_min, roi_max = get_roi(graph, position_prop=position_prop)
+    if axis_names is not None and graph.number_of_nodes() > 0:
+        roi_min, roi_max = get_roi(graph, axis_names)
     else:
         roi_min, roi_max = None, None
-    axis_names = axis_names if axis_names is not None else graph.graph.get("axis_names", None)
     axis_units = axis_units if axis_units is not None else graph.graph.get("axis_units", None)
     # TODO: Add axis types
     axes = axes_from_lists(axis_names, axis_units=axis_units, roi_min=roi_min, roi_max=roi_max)

@@ -9,7 +9,7 @@ def write_props(
     data: Sequence[tuple[Any, dict[str, Any]]],
     prop_names: Sequence[str],
     node_dtype: np.typing.DTypeLike,
-    position_prop: str | None = None,
+    axis_names: list[str] | None = None,
 ) -> None:
     """
     Write the properties to the zarr group.
@@ -41,16 +41,23 @@ def write_props(
     else:
         raise ValueError(f"Invalid group name: {group.name}")
 
-    seen_position = False
+    if axis_names is None:
+        seen_axes = None
+    else:
+        seen_axes = [
+            False,
+        ] * len(axis_names)
+
     for name in prop_names:
         values = []
         missing = []
 
-        if position_prop is None:
+        if axis_names is None:
             is_position = False
         else:
-            is_position = name == position_prop
-            seen_position |= is_position
+            is_position = name in axis_names
+            if is_position:
+                seen_axes[axis_names.index(name)] = True  # type: ignore
 
         # iterate over the data and checks for missing content
         for key, data_dict in data:
@@ -62,11 +69,11 @@ def write_props(
                 missing.append(True)
                 if is_position:
                     raise ValueError(f"Element '{key}' does not have position property")
-
         group[f"props/{name}/values"] = np.asarray(values)
 
         if not is_position:
             group[f"props/{name}/missing"] = np.asarray(missing, dtype=bool)
 
-    if position_prop is not None and not seen_position and len(ids) > 0:
-        raise ValueError(f"Position property ('{position_prop}') not found in {prop_names}")
+    if axis_names is not None and len(ids) > 0 and False in seen_axes:  # type: ignore
+        missing_idx = seen_axes.index(False)  # type: ignore
+        raise ValueError(f"Spatiotemporal property ('{axis_names[missing_idx]}') not found")

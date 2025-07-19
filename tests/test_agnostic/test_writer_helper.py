@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import zarr
 
-from geff.metadata_schema import GeffMetadata
+from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.utils import validate
 from geff.writer_helper import write_props
 
@@ -21,7 +21,7 @@ def test_write_props(tmp_path: Path) -> None:
         ],
         prop_names=["a", "b", "c"],
         node_dtype="int64",
-        position_prop="a",
+        axis_names=["a"],
     )
 
     write_props(
@@ -34,13 +34,15 @@ def test_write_props(tmp_path: Path) -> None:
         prop_names=["score"],
         node_dtype="int64",
     )
-
+    axes = axes_from_lists(
+        axis_names=["x"],
+        roi_min=(0,),
+        roi_max=(7,),
+    )
     metadata = GeffMetadata(
         geff_version="0.1.0",
         directed=True,
-        position_prop="a",
-        roi_min=(0,),
-        roi_max=(7,),
+        axes=axes,
     )
     metadata.write(z)
 

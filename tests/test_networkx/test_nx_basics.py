@@ -37,9 +37,8 @@ def test_read_write_consistency(
     assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
     assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
     for idx, node in enumerate(graph_props["nodes"]):
-        np.testing.assert_array_equal(
-            graph.nodes[node.item()]["pos"], graph_props["node_positions"][idx]
-        )
+        # TODO: test other dimensions
+        np.testing.assert_array_equal(graph.nodes[node.item()]["t"], graph_props["t"][idx])
 
     for idx, edge in enumerate(graph_props["edges"]):
         for name, values in graph_props["edge_props"].items():
@@ -60,7 +59,7 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
     props = np.array([4, 9, 10, 2, 8], dtype=node_prop_dtypes["position"])
     for node, pos in zip(nodes, props):
-        graph.add_node(node.item(), attr=pos.tolist())
+        graph.add_node(node.item(), attr=pos)
 
     edges = np.array(
         [
@@ -94,4 +93,4 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
 
 def test_write_empty_graph(tmp_path):
     graph = nx.DiGraph()
-    geff.write_nx(graph, position_prop="pos", path=tmp_path / "empty.zarr")
+    geff.write_nx(graph, axis_names=["t", "y", "x"], path=tmp_path / "empty.zarr")
