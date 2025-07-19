@@ -83,8 +83,8 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
 
     assert set(graph.nodes) == set(compare.nodes)
     assert set(graph.edges) == set(compare.edges)
-    for node in nodes:
-        assert graph.nodes[node.item()]["attr"] == compare.nodes[node.item()]["attr"]
+    for node in nodes.tolist():
+        assert graph.nodes[node]["attr"] == compare.nodes[node]["attr"]
 
     for edge in edges:
         assert graph.edges[edge.tolist()]["score"] == compare.edges[edge.tolist()]["score"]
