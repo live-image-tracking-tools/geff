@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import networkx as nx
 import numpy as np
@@ -10,19 +10,23 @@ import zarr
 
 import geff
 import geff.utils
-from geff.metadata_schema import GeffMetadata
+from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.writer_helper import write_props
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+import logging
 
-def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tuple[float, ...]]:
+logger = logging.getLogger(__name__)
+
+
+def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
     """Get the roi of a networkx graph.
 
     Args:
         graph (nx.Graph): A non-empty networkx graph
-        position_prop (str): All nodes on graph have this property holding their position
+        axis_names (str): All nodes on graph have these property holding their position
 
     Returns:
         tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
@@ -31,8 +35,8 @@ def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tup
     _min = None
     _max = None
     for _, data in graph.nodes(data=True):
-        pos = np.array(data[position_prop])
-        if _min is None:
+        pos = np.array([data[name] for name in axis_names])
+        if _min is None or _max is None:
             _min = pos
             _max = pos
         else:
@@ -42,14 +46,58 @@ def get_roi(graph: nx.Graph, position_prop: str) -> tuple[tuple[float, ...], tup
     return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
 
 
+def _get_graph_existing_metadata(
+    graph: nx.Graph,
+    metadata: GeffMetadata | None = None,
+    axis_names: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+) -> tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
+    """Get the existing metadata from a graph.
+
+    If axis lists are provided, they will override the graph properties and metadata.
+    If metadata is provided, it will override the graph properties.
+    If neither are provided, the graph properties will be used.
+
+    Args:
+        graph (nx.Graph): A networkx graph
+        metadata (GeffMetadata, optional): The metadata of the graph. Defaults to None.
+        axis_names (list[str | None], optional): The names of the spatial dims. Defaults to None.
+        axis_units (list[str | None], optional): The units of the spatial dims. Defaults to None.
+        axis_types (list[str | None], optional): The types of the spatial dims. Defaults to None.
+
+    Returns:
+        tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
+            A tuple with the names of the spatial dims, the units of the spatial dims,
+            and the types of the spatial dims. None if not provided.
+    """
+    lists_provided = any(x is not None for x in [axis_names, axis_units, axis_types])
+    metadata_provided = metadata is not None
+
+    if lists_provided and metadata_provided:
+        warnings.warn(
+            "Both axis lists and metadata provided. Overriding metadata with axis lists.",
+            stacklevel=2,
+        )
+
+    # If any axis lists is not provided, fallback to metadata if provided
+    if metadata is not None and metadata.axes is not None:
+        # the x = x or y is a python idiom for setting x to y if x is None, otherwise x
+        axis_names = axis_names or [axis.name for axis in metadata.axes]
+        axis_units = axis_units or [axis.unit for axis in metadata.axes]
+        axis_types = axis_types or [axis.type for axis in metadata.axes]
+
+    return axis_names, axis_units, axis_types
+
+
 def write_nx(
     graph: nx.Graph,
     path: str | Path,
-    position_prop: str | None = None,
+    metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
-    axis_units: list[str] | None = None,
-    zarr_format: int = 2,
-    validate: bool = True,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+    zarr_format: Literal[2, 3] | None = 2,
 ):
     """Write a networkx graph to the geff file format
 
@@ -57,42 +105,37 @@ def write_nx(
         graph (nx.Graph): A networkx graph
         path (str | Path): The path to the output zarr. Opens in append mode,
             so will only overwrite geff-controlled groups.
-        position_prop (Optional[str]): The name of the position property present on every node,
-            if present. Defaults to None.
+        metadata (GeffMetadata, optional): The original metadata of the graph.
+            Defaults to None. If provided, will override the graph properties.
         axis_names (Optional[list[str]], optional): The names of the spatial dims
             represented in position property. Defaults to None. Will override
-            value in graph properties if provided.
+            both value in graph properties and metadata if provided.
         axis_units (Optional[list[str]], optional): The units of the spatial dims
             represented in position property. Defaults to None. Will override value
-            in graph properties if provided.
+            both value in graph properties and metadata if provided.
+        axis_types (Optional[list[str]], optional): The types of the spatial dims
+            represented in position property. Usually one of "time", "space", or "channel".
+            Defaults to None. Will override both value in graph properties and metadata
+            if provided.
         zarr_format (int, optional): The version of zarr to write.
             Defaults to 2.
-        validate (bool, optional): Flag indicating whether to perform validation on the
-            networkx graph before writing anything to disk. If set to False and there are
-            missing properties, will likely fail with a KeyError, leading to an incomplete
-            graph written to disk. Defaults to True.
     """
-    if graph.number_of_nodes() == 0:
-        warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
-        return
-
     # open/create zarr container
     if zarr.__version__.startswith("3"):
-        group = zarr.open(path, mode="a", zarr_format=zarr_format)
+        group = zarr.open_group(path, mode="a", zarr_format=zarr_format)
     else:
-        group = zarr.open(path, mode="a")
+        group = zarr.open_group(path, mode="a")
+
+    axis_names, axis_units, axis_types = _get_graph_existing_metadata(
+        graph, metadata, axis_names, axis_units, axis_types
+    )
 
     node_data = list(graph.nodes(data=True))
-    if node_data:
-        node_dtype = np.array([node_data[0][0]]).dtype
-    else:
-        node_dtype = np.int64  # fallback for empty graphs
     write_props(
         group=group.require_group("nodes"),
         data=node_data,
         prop_names=list({k for _, data in node_data for k in data}),
-        node_dtype=node_dtype,
-        position_prop=position_prop,
+        axis_names=axis_names,
     )
     del node_data
 
@@ -101,28 +144,33 @@ def write_nx(
         group=group.require_group("edges"),
         data=edge_data,
         prop_names=list({k for _, data in edge_data for k in data}),
-        node_dtype=node_dtype,
     )
     del edge_data
 
     # write metadata
     roi_min: tuple[float, ...] | None
     roi_max: tuple[float, ...] | None
-    if position_prop is not None:
-        roi_min, roi_max = get_roi(graph, position_prop=position_prop)
+    if axis_names is not None and graph.number_of_nodes() > 0:
+        roi_min, roi_max = get_roi(graph, axis_names)
     else:
         roi_min, roi_max = None, None
 
-    metadata = GeffMetadata(
-        geff_version=geff.__version__,
-        directed=isinstance(graph, nx.DiGraph),
-        roi_min=roi_min,
-        roi_max=roi_max,
-        position_prop=position_prop,
-        axis_names=axis_names if axis_names is not None else graph.graph.get("axis_names", None),
-        axis_units=axis_units if axis_units is not None else graph.graph.get("axis_units", None),
-        **graph.graph.get("ignored_attrs", {}),
+    axes = axes_from_lists(
+        axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
     )
+
+    # Update metadata with new axes, version, and directedness
+    # This is necessary because the metadata can carry extra properties
+    if metadata is not None:
+        metadata.geff_version = geff.__version__
+        metadata.directed = isinstance(graph, nx.DiGraph)
+        metadata.axes = axes
+    else:
+        metadata = GeffMetadata(
+            geff_version=geff.__version__,
+            directed=isinstance(graph, nx.DiGraph),
+            axes=axes,
+        )
     metadata.write(group)
 
 
@@ -162,7 +210,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
+def read_nx(path: Path | str, validate: bool = True) -> tuple[nx.Graph, GeffMetadata]:
     """Read a geff file into a networkx graph. Metadata properties will be stored in
     the graph properties, accessed via `G.graph[key]` where G is a networkx graph.
 
@@ -184,17 +232,11 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     if validate:
         geff.utils.validate(path)
 
-    group = zarr.open(path, mode="r")
+    group = zarr.open_group(path, mode="r")
     metadata = GeffMetadata.read(group)
 
     # read meta-data
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
-    graph.graph["ignored_attrs"] = {}
-    for key, val in metadata:
-        if key not in GeffMetadata.model_fields:
-            graph.graph["ignored_attrs"][key] = val
-        else:
-            graph.graph[key] = val
 
     nodes = group["nodes/ids"][:]
     graph.add_nodes_from(nodes.tolist())
@@ -212,4 +254,4 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
             for name in group["edges/props"]:
                 _set_property_values(graph, edges, group, name, nodes=False)
 
-    return graph
+    return graph, metadata
