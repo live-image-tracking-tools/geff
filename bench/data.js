@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752949753097,
+  "lastUpdate": 1752950564721,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1890,6 +1890,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.48034258083972875",
             "extra": "mean: 15.551396240333332 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "45037215+TeunHuijben@users.noreply.github.com",
+            "name": "Teun Huijben",
+            "username": "TeunHuijben"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5fc4c1df20fb26e5b44a974d4a725817872b5be0",
+          "message": "removed lingering occurences of position_props (#156)\n\nRemoved two occurrences of `position_props` in the repo (one in a\ndocstring, one in a test script)",
+          "timestamp": "2025-07-19T14:40:10-04:00",
+          "tree_id": "490b8fa28358c863007dd761a20fd9ef588a098e",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/5fc4c1df20fb26e5b44a974d4a725817872b5be0"
+        },
+        "date": 1752950563659,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11928813514653684,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1530442154301783",
+            "extra": "mean: 8.383063401666666 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 17.41980607911731,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0006574649183113956",
+            "extra": "mean: 57.40592033333769 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06330787603184307,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5129998673531103",
+            "extra": "mean: 15.795822932000002 sec\nrounds: 3"
           }
         ]
       }
