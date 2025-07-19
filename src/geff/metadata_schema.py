@@ -18,6 +18,8 @@ from .units import (
     validate_time_unit,
 )
 
+VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?$"
+
 
 class Axis(BaseModel):
     name: str
