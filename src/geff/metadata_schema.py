@@ -84,6 +84,9 @@ def axes_from_lists(
     and maxes. If axis_names is None, there are no spatial axes and the list will
     be empty. Nones for all other arguments will omit them from the axes.
 
+    All provided arguments must have the same length. If an argument should not be specified
+    for a single property, use None.
+
     Args:
         axis_names (list[str] | None, optional): _description_. Defaults to None.
         axis_units (list[str] | None, optional): _description_. Defaults to None.
