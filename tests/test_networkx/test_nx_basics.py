@@ -4,10 +4,10 @@ import pytest
 
 import geff
 
-node_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
+node_id_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
 node_prop_dtypes = [
-    {"position": "double"},
-    {"position": "int"},
+    {"position": "double", "time": "double"},
+    {"position": "int", "time": "int"},
 ]
 edge_prop_dtypes = [
     {"score": "float64", "color": "uint8"},
@@ -17,19 +17,23 @@ edge_prop_dtypes = [
 # TODO: mixed dtypes?
 
 
-@pytest.mark.parametrize("node_dtype", node_dtypes)
+@pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
 @pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
 @pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
+@pytest.mark.parametrize("include_t", [True, False])
+@pytest.mark.parametrize("include_z", [True, False])
 def test_read_write_consistency(
     path_w_expected_graph_props,
-    node_dtype,
+    node_id_dtype,
     node_prop_dtypes,
     edge_prop_dtypes,
     directed,
+    include_t,
+    include_z,
 ):
     path, graph_props = path_w_expected_graph_props(
-        node_dtype, node_prop_dtypes, edge_prop_dtypes, directed
+        node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed, include_t=include_t, include_z=include_z
     )
 
     graph = geff.read_nx(path)
@@ -37,8 +41,11 @@ def test_read_write_consistency(
     assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
     assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
     for idx, node in enumerate(graph_props["nodes"]):
+        if include_t and len(graph_props["t"]) > 0:
+            np.testing.assert_array_equal(graph.nodes[node.item()]["t"], graph_props["t"][idx])
+        if include_z and len(graph_props["z"]) > 0:
+            np.testing.assert_array_equal(graph.nodes[node.item()]["z"], graph_props["z"][idx])
         # TODO: test other dimensions
-        np.testing.assert_array_equal(graph.nodes[node.item()]["t"], graph_props["t"][idx])
 
     for idx, edge in enumerate(graph_props["edges"]):
         for name, values in graph_props["edge_props"].items():
@@ -49,14 +56,16 @@ def test_read_write_consistency(
     # assert graph.graph["axis_units"] == graph_props["axis_units"]
 
 
-@pytest.mark.parametrize("node_dtype", node_dtypes)
+@pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
 @pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
 @pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
-def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop_dtypes, directed):
+def test_read_write_no_spatial(
+    tmp_path, node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
+):
     graph = nx.DiGraph() if directed else nx.Graph()
 
-    nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
+    nodes = np.array([10, 2, 127, 4, 5], dtype=node_id_dtype)
     props = np.array([4, 9, 10, 2, 8], dtype=node_prop_dtypes["position"])
     for node, pos in zip(nodes, props):
         graph.add_node(node.item(), attr=pos)
@@ -68,7 +77,7 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
             [2, 4],
             [4, 5],
         ],
-        dtype=node_dtype,
+        dtype=node_id_dtype,
     )
     scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
     colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
