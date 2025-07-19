@@ -137,10 +137,16 @@ class Shape(BaseModel):
 
         if self.unit is not None and not validate_space_unit(self.unit):
             warnings.warn(
-                f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
+                f"Shape spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
                 "Reader applications may not know what to do with this information.",
                 stacklevel=2,
             )
+
+        if self.type == "ellipse" and self.axes is not None and len(self.axes) != 2:
+            raise ValueError("Shape ellipse must have 2 axes")
+
+        if self.type == "ellipsoid" and self.axes is not None and len(self.axes) != 3:
+            raise ValueError("Shape ellipsoid must have 3 axes")
 
         return self
 
