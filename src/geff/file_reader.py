@@ -74,6 +74,8 @@ class FileReader:
     def read_node_props(self, names: list[str] | None = None):
         """
         Read the node property with the name `name` from a GEFF.
+        
+        If no names are specified, then all properties will be loaded
 
         Call `build` to get the output `GraphDict` with the loaded properties.
 
