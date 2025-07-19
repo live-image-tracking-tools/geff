@@ -3,8 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from typer.testing import CliRunner
 
-from geff.interops.ctc import ctc_to_geff, from_ctc_to_geff
+from geff.interops.ctc import app, from_ctc_to_geff
 from geff.networkx.io import read_nx
 
 tifffile = pytest.importorskip("tifffile")
@@ -70,10 +71,8 @@ def test_ctc_to_geff(
 
     if cli:
         cmd_args = [str(ctc_path), str(geff_path)]
-        try:
-            ctc_to_geff(cmd_args)
-        except SystemExit as sys_exit:
-            assert sys_exit.code == 0, f"{cmd_args} failed with exit code {sys_exit.code}"
+        result = CliRunner().invoke(app, cmd_args)
+        assert result.exit_code == 0, f"{cmd_args} failed with exit code {result.exit_code}"
     else:
         from_ctc_to_geff(
             ctc_path=ctc_path,

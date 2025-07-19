@@ -1,9 +1,9 @@
 import shutil
 from pathlib import Path
 
-import click
 import numpy as np
 import tifffile
+import typer
 import zarr
 from skimage.measure import regionprops
 
@@ -13,8 +13,8 @@ from geff.writer_helper import write_props
 
 
 def from_ctc_to_geff(
-    ctc_path: Path | str,
-    geff_path: Path | str,
+    ctc_path: Path,
+    geff_path: Path,
     overwrite: bool = False,
 ) -> None:
     """
@@ -125,17 +125,8 @@ def from_ctc_to_geff(
     metadata.write(group)
 
 
-@click.command("ctc2geff")
-@click.argument("ctc_path", type=click.Path(exists=True))
-@click.argument("geff_path", type=click.Path())
-@click.option("--overwrite", is_flag=True, help="Overwrite the GEFF file if it already exists")
-def ctc_to_geff(ctc_path: Path, geff_path: Path, overwrite: bool) -> None:
-    """
-    Convert a CTC file to a GEFF file.
+app = typer.Typer()
+app.command()(from_ctc_to_geff)
 
-    Args:
-        ctc_path: The path to the CTC file.
-        geff_path: The path to the GEFF file.
-        overwrite: Whether to overwrite the GEFF file if it already exists.
-    """
-    from_ctc_to_geff(ctc_path, geff_path, overwrite)
+if __name__ == "__main__":
+    app()

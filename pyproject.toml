@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
-    "click",
+    "typer",
     "zarr>2,<4",
     "pydantic>=2",
     "pyyaml",
@@ -193,7 +193,7 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 # ]
 
 [project.entry-points.console_scripts]
-ctc2geff = "geff.interops.ctc:ctc_to_geff"
+ctc2geff = "geff.interops.ctc:app"
 
 [project.entry-points.pytest11]
 geff = "geff._pytest_plugin" 
