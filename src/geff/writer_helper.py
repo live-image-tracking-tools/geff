@@ -68,5 +68,5 @@ def write_props(
         if not is_position:
             group[f"props/{name}/missing"] = np.asarray(missing, dtype=bool)
 
-    if position_prop is not None and not seen_position:
+    if position_prop is not None and not seen_position and len(ids) > 0:
         raise ValueError(f"Position property ('{position_prop}') not found in {prop_names}")

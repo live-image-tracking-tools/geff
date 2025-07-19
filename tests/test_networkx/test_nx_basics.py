@@ -92,7 +92,6 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
         assert graph.edges[edge.tolist()]["color"] == compare.edges[edge.tolist()]["color"]
 
 
-def test_write_empty_graph():
+def test_write_empty_graph(tmp_path):
     graph = nx.DiGraph()
-    with pytest.warns(match="Graph is empty - not writing anything "):
-        geff.write_nx(graph, position_prop="pos", path=".")
+    geff.write_nx(graph, position_prop="pos", path=tmp_path / "empty.zarr")

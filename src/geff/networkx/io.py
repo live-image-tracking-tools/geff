@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import warnings
 from typing import TYPE_CHECKING
 
 import networkx as nx
@@ -72,10 +71,6 @@ def write_nx(
             missing properties, will likely fail with a KeyError, leading to an incomplete
             graph written to disk. Defaults to True.
     """
-    if graph.number_of_nodes() == 0:
-        warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
-        return
-
     # open/create zarr container
     if zarr.__version__.startswith("3"):
         group = zarr.open(path, mode="a", zarr_format=zarr_format)
@@ -108,7 +103,7 @@ def write_nx(
     # write metadata
     roi_min: tuple[float, ...] | None
     roi_max: tuple[float, ...] | None
-    if position_prop is not None:
+    if position_prop is not None and graph.number_of_nodes() > 0:
         roi_min, roi_max = get_roi(graph, position_prop=position_prop)
     else:
         roi_min, roi_max = None, None
