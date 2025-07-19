@@ -102,5 +102,5 @@ def test_missing_pos_prop(tmp_path):
     # missing property
     del graph.nodes[1]["t"]
     print(graph.nodes[1])
-    with pytest.raises(ValueError, match=r"Element '1' does not have position property"):
+    with pytest.raises(ValueError, match=r"Spatiotemporal property 't' not found in : \[1\]"):
         geff.write_nx(graph, axis_names=["t", "y", "x"], path=zarr_path)
