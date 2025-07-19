@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [dependency-groups]
@@ -182,3 +183,6 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 #     ".ruff_cache/**/*",
 #     "tests/**/*",
 # ]
+
+[project.entry-points.pytest11]
+geff = "geff._pytest_plugin" 
