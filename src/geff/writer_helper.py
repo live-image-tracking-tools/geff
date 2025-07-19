@@ -107,6 +107,32 @@ def dict_props_to_arr(
     return props_dict
 
 
+def write_array_like(
+    geff_path: Path | str,
+    node_ids: np.ndarray,
+    node_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
+    edge_ids: np.ndarray,
+    edge_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
+):
+    """Write a geff file from already constructed arrays of node and edge ids and props
+
+    Currently does not do any validation that the arrays are valid, but could be added
+    as an optional flag.
+
+    Args:
+        geff_path (Path | str): _description_
+        node_ids (np.ndarray): _description_
+        node_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): _description_
+        edge_ids (np.ndarray): _description_
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): _description_
+    """
+    write_id_arrays(geff_path, node_ids, edge_ids)
+    if node_props is not None:
+        write_props_arrays(geff_path, "nodes", node_props)
+    if edge_props is not None:
+        write_props_arrays(geff_path, "edges", edge_props)
+
+
 def write_id_arrays(geff_path: Path | str, node_ids: np.ndarray, edge_ids: np.ndarray) -> None:
     """Writes a set of node ids and edge ids to a geff group.
 
