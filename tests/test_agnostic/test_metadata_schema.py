@@ -125,6 +125,7 @@ class TestMetadataModel:
         assert compare.foo == "bar"
         assert compare.bar == {"baz": "qux"}
 
+
 class TestAxis:
     def test_valid(self):
         # minimal fields
