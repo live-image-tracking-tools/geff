@@ -74,6 +74,7 @@ def write_nx(
         group = zarr.open_group(path, mode="a", zarr_format=zarr_format)
     else:
         group = zarr.open_group(path, mode="a")
+    # TODO: update this once we have changed/standardized how we are handling pre-existing metadata
     axis_names = axis_names if axis_names is not None else graph.graph.get("axis_names", None)
     axis_units = axis_units if axis_units is not None else graph.graph.get("axis_units", None)
     axis_types = axis_types if axis_types is not None else graph.graph.get("axis_types", None)
