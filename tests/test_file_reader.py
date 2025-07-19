@@ -135,12 +135,12 @@ def test_read_node_props(path_w_expected_graph_props):
     graph_dict = file_reader.build(node_mask=node_mask)
     assert len(graph_dict["node_props"]) == 0
 
-    file_reader.read_node_props("pos")
+    file_reader.read_node_props("t")
     graph_dict = file_reader.build(node_mask=node_mask)
-    assert "pos" in graph_dict["node_props"]
+    assert "t" in graph_dict["node_props"]
     np.testing.assert_allclose(
-        graph_props["node_positions"][node_mask],
-        graph_dict["node_props"]["pos"]["values"],
+        graph_props["t"][node_mask],
+        graph_dict["node_props"]["t"]["values"],
     )
 
     _ = _ingest_dict_nx(graph_dict)
