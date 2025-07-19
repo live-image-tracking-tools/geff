@@ -171,11 +171,14 @@ class GeffMetadata(BaseModel):
             for shape in self.shapes:
                 if shape.axes is not None:
                     for axis in shape.axes:
-                        if axis not in [a.name for a in self.axes]:
+                        axes_names = [a.name for a in self.axes]
+                        if axis not in axes_names:
                             raise ValueError(
-                                f"Shape {shape.name} has axes {shape.axes} that are not "
-                                f"subset of axes names {[a.name for a in self.axes]}"
+                                f"Shape {shape.name} has axis {axis} that is not "
+                                f"in axes names {axes_names}"
                             )
+
+        # TODO check that axes maps only to spatial axes?
 
         return self
 
