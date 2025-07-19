@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import zarr
 
-from geff.metadata_schema import GeffMetadata
+from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.utils import validate
 from geff.writer_helper import write_props
 
@@ -20,8 +20,7 @@ def test_write_props(tmp_path: Path) -> None:
             (1, {"a": 6, "c": 7}),
         ],
         prop_names=["a", "b", "c"],
-        node_dtype="int64",
-        position_prop="a",
+        axis_names=["a"],
     )
 
     write_props(
@@ -32,15 +31,16 @@ def test_write_props(tmp_path: Path) -> None:
             ((1, 0), {"score": 0.7}),
         ],
         prop_names=["score"],
-        node_dtype="int64",
     )
-
+    axes = axes_from_lists(
+        axis_names=["x"],
+        roi_min=(0,),
+        roi_max=(7,),
+    )
     metadata = GeffMetadata(
         geff_version="0.1.0",
         directed=True,
-        position_prop="a",
-        roi_min=(0,),
-        roi_max=(7,),
+        axes=axes,
     )
     metadata.write(z)
 
@@ -55,14 +55,12 @@ def test_write_props_empty(tmp_path: Path) -> None:
         group=z.require_group("nodes"),
         data=[],
         prop_names=["a"],
-        node_dtype="int64",
     )
 
     write_props(
         group=z.require_group("edges"),
         data=[],
         prop_names=["score"],
-        node_dtype="int64",
     )
 
     metadata = GeffMetadata(
@@ -82,4 +80,4 @@ def test_write_props_invalid_group(tmp_path: Path) -> None:
     z = zarr.open(zpath)
 
     with pytest.raises(ValueError, match="Group must be a 'nodes' or 'edges' group"):
-        write_props(group=z, data=[], prop_names=["a"], node_dtype="int64")
+        write_props(group=z, data=[], prop_names=["a"])
