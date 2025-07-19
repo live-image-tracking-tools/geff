@@ -64,6 +64,11 @@ def create_dummy_graph_props(
     scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
     colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
 
+    ignored_attrs = {
+        "foo": np.empty(len(nodes), dtype=node_dtype).tolist(),
+        "bar": np.empty(len(edges), dtype=node_dtype).tolist(),
+    }
+
     return {
         "nodes": nodes,
         "edges": edges,
@@ -73,6 +78,7 @@ def create_dummy_graph_props(
         "directed": directed,
         "axis_names": axis_names,
         "axis_units": axis_units,
+        "ignored_attrs": ignored_attrs,
     }
 
 
@@ -121,6 +127,8 @@ def path_w_expected_graph_props(
                 name: prop_array[idx] for name, prop_array in graph_props["edge_props"].items()
             }
             graph.add_edge(*edge.tolist(), **props)
+
+        graph.graph["ignored_attrs"] = graph_props.get("ignored_attrs", {})
 
         path = tmp_path / "rw_consistency.zarr/graph"
 

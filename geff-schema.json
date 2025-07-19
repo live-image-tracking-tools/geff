@@ -1,6 +1,7 @@
 {
   "$defs": {
     "GeffMetadata": {
+      "additionalProperties": true,
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
         "geff_version": {
