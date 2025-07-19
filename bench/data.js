@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752960303983,
+  "lastUpdate": 1752962831265,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2025,6 +2025,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5275798329624102",
             "extra": "mean: 15.76804525966667 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "45037215+TeunHuijben@users.noreply.github.com",
+            "name": "Teun Huijben",
+            "username": "TeunHuijben"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1457d3b11ff8f2594613f125cdcae8222759c2c8",
+          "message": "removed $ from regex version pattern (#166)\n\nremoved $ from regex version pattern to not force the version string to\nend after the git commit\n\n# Proposed Change\nBriefly describe the contribution. If it resolves an issue or feature\nrequest, be sure to link to that issue.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n\nWhich topics does your change affect? Delete those that do not apply.\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [ ] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n\n## If you changed the specification\n- [ ] I have checked that any validation functions and tests reflect the\nchanges.\n- [ ] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [ ] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n## If you have added or changed an implementation\n- [ ] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [ ] I updated pyproject.toml with new dependencies if needed.\n- [ ] I added a function to tests/bench.py to benchmark the new\nimplementation.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...",
+          "timestamp": "2025-07-19T18:05:12-04:00",
+          "tree_id": "8045daa8f380a0824c80e4a39cfdcfffcea04843",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/1457d3b11ff8f2594613f125cdcae8222759c2c8"
+        },
+        "date": 1752962830823,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11988207305490246,
+            "unit": "iter/sec",
+            "range": "stddev: 1.153197287865622",
+            "extra": "mean: 8.341530760333361 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 17.738028721191913,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0014568124930760843",
+            "extra": "mean: 56.37605033333178 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06417517438370678,
+            "unit": "iter/sec",
+            "range": "stddev: 0.46573041013878413",
+            "extra": "mean: 15.582349554999988 sec\nrounds: 3"
           }
         ]
       }
