@@ -23,16 +23,6 @@ from .units import (
     validate_time_unit,
 )
 
-with (files(geff) / "supported_versions.yml").open() as f:
-    SUPPORTED_VERSIONS = yaml.safe_load(f)["versions"]
-
-
-def _get_versions_regex(versions: list[str]):
-    return r"|".join([rf"({re.escape(version)})" for version in versions])
-
-
-SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
-
 
 class Axis(BaseModel):
     name: str
@@ -126,7 +116,7 @@ class GeffMetadata(BaseModel):
     # this determines the title of the generated json schema
     model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
 
-    geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
+    geff_version: str
     directed: bool
     axes: Sequence[Axis] | None = None
 
