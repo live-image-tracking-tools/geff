@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 import geff
-from tests.utils import check_equiv_geff
+from geff.utils import check_equiv_geff
 
 node_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
 node_prop_dtypes = [
@@ -54,7 +54,12 @@ def test_read_write_consistency(
 
     # Write again
     out_zarr = tmp_path / "write-out.zarr/tracks"
-    geff.write_nx(graph, out_zarr, position_prop="pos")
+    geff.write_nx(
+        graph,
+        out_zarr,
+        axis_names=list(graph_props["axis_names"]),
+        axis_units=list(graph_props["axis_units"]),
+    )
 
     # Check consistency with source fixture
     check_equiv_geff(path, out_zarr)
