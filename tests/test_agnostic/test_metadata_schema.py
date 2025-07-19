@@ -1,11 +1,35 @@
+import re
+
 import pydantic
 import pytest
 import zarr
 
-from geff.metadata_schema import Axis, GeffMetadata, write_metadata_schema
+from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, write_metadata_schema
 
 
 class TestMetadataModel:
+    def test_version_pattern(self):
+        # Valid versions
+        valid_versions = [
+            "1.0",
+            "0.1.0",
+            "1.0.0.dev1",
+            "2.3.4+local",
+            "3.4.5.dev6+g61d5f18",
+            "10.20.30",
+        ]
+        for version in valid_versions:
+            assert re.fullmatch(VERSION_PATTERN, version)
+
+        # Invalid versions
+        invalid_versions = [
+            "1.0.0.dev",  # Incomplete dev version
+            "1.0.0+local+",  # Extra '+' at the end
+            "abc.def",  # Non-numeric version
+        ]
+        for version in invalid_versions:
+            assert not re.fullmatch(VERSION_PATTERN, version)
+
     def test_valid_init(self):
         # Minimal required fields
         model = GeffMetadata(geff_version="0.0.1", directed=True)
