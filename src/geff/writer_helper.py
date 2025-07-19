@@ -40,6 +40,7 @@ def write_props(
     else:
         raise ValueError(f"Invalid group name: {group.name}")
 
+    # For each of the spatiotemporal axes, keep track of if we have seen them during writing
     if axis_names is None:
         seen_axes = None
     else:
