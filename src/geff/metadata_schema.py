@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from importlib.metadata import version
 from importlib.resources import files
 from pathlib import Path
 
@@ -31,7 +32,11 @@ class GeffMetadata(BaseModel):
     # this determines the title of the generated json schema
     model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
 
-    geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
+    geff_version: str = Field(
+        default_factory=lambda: version("geff"),
+        validate_default=True,
+        pattern=SUPPORTED_VERSIONS_REGEX,
+    )
     directed: bool
     roi_min: tuple[float, ...] | None = None
     roi_max: tuple[float, ...] | None = None
