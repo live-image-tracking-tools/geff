@@ -15,6 +15,10 @@ from geff.writer_helper import write_props
 if TYPE_CHECKING:
     from pathlib import Path
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
     """Get the roi of a networkx graph.
@@ -45,9 +49,9 @@ def _get_graph_existing_metadata(
     graph: nx.Graph,
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
-    axis_units: list[str] | None = None,
-    axis_types: list[str] | None = None,
-) -> tuple[list[str], list[str], list[str]]:
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+) -> tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
     """Get the existing metadata from a graph.
 
     If axis lists are provided, they will override the graph properties and metadata.
@@ -57,41 +61,44 @@ def _get_graph_existing_metadata(
     Args:
         graph (nx.Graph): A networkx graph
         metadata (GeffMetadata, optional): The metadata of the graph. Defaults to None.
-        axis_names (list[str], optional): The names of the spatial dims. Defaults to None.
-        axis_units (list[str], optional): The units of the spatial dims. Defaults to None.
-        axis_types (list[str], optional): The types of the spatial dims. Defaults to None.
+        axis_names (list[str | None], optional): The names of the spatial dims. Defaults to None.
+        axis_units (list[str | None], optional): The units of the spatial dims. Defaults to None.
+        axis_types (list[str | None], optional): The types of the spatial dims. Defaults to None.
 
     Returns:
-        tuple[list[str], list[str], list[str]]: A tuple with the names of the spatial dims,
-            the units of the spatial dims, and the types of the spatial dims
+        tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
+            A tuple with the names of the spatial dims, the units of the spatial dims,
+            and the types of the spatial dims. None if not provided.
     """
-    lists_provided = all(x is not None for x in [axis_names, axis_units, axis_types])
-    lists_partially_provided = any(x is not None for x in [axis_names, axis_units, axis_types])
+    lists_provided = any(x is not None for x in [axis_names, axis_units, axis_types])
     metadata_provided = metadata is not None
 
-    if lists_partially_provided:
-        # TODO: discussion needed on how to handle this case
-        raise ValueError("when providing axis lists, all three must be provided.")
-
     if lists_provided and metadata_provided:
-        warnings.warn("Both axis lists and metadata provided. Overriding metadata with axis lists.")
-        return axis_names, axis_units, axis_types
-    elif metadata_provided:
-        return metadata.axes.axis_names, metadata.axes.axis_units, metadata.axes.axis_types
-    else:
-        # Fallback to graph properties
-        axis_names = graph.graph.get("axis_names", None)
-        axis_units = graph.graph.get("axis_units", None)
-        axis_types = graph.graph.get("axis_types", None)
-        return axis_names, axis_units, axis_types
+        logger.warning(
+            "Both axis lists and metadata provided. Overriding metadata with axis lists."
+        )
+
+    # If any axis lists is not provided, fallback to metadata if provided
+    if metadata is not None and metadata.axes is not None:
+        axis_names = axis_names or [axis.name for axis in metadata.axes]
+        axis_units = axis_units or [axis.unit for axis in metadata.axes]
+        axis_types = axis_types or [axis.type for axis in metadata.axes]
+
+    # Fallback to graph properties as last resort
+    axis_names = axis_names or graph.graph.get("axis_names", None)
+    axis_units = axis_units or graph.graph.get("axis_units", None)
+    axis_types = axis_types or graph.graph.get("axis_types", None)
+
+    return axis_names, axis_units, axis_types
+
 
 def write_nx(
     graph: nx.Graph,
     path: str | Path,
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
-    axis_units: list[str] | None = None,
-    axis_types: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
     zarr_format: Literal[2, 3] | None = 2,
 ):
     """Write a networkx graph to the geff file format
@@ -110,7 +117,7 @@ def write_nx(
             both value in graph properties and metadata if provided.
         axis_types (Optional[list[str]], optional): The types of the spatial dims
             represented in position property. Usually one of "time", "space", or "channel".
-            Defaults to None. Will override both value in graph properties and metadata 
+            Defaults to None. Will override both value in graph properties and metadata
             if provided.
         zarr_format (int, optional): The version of zarr to write.
             Defaults to 2.
