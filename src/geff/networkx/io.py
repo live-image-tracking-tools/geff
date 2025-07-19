@@ -21,7 +21,7 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
 
     Args:
         graph (nx.Graph): A non-empty networkx graph
-        position_prop (str): All nodes on graph have this property holding their position
+        axis_names (str): All nodes on graph have these property holding their position
 
     Returns:
         tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
@@ -46,8 +46,8 @@ def write_nx(
     path: str | Path,
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
+    axis_types: list[str] | None = None,
     zarr_format: int = 2,
-    validate: bool = True,
 ):
     """Write a networkx graph to the geff file format
 
@@ -63,12 +63,11 @@ def write_nx(
         axis_units (Optional[list[str]], optional): The units of the spatial dims
             represented in position property. Defaults to None. Will override value
             in graph properties if provided.
+        axis_types (Optional[list[str]], optional): The types of the spatial dims
+            represented in position property. Usually one of "time", "space", or "channel".
+            Defaults to None. Will override value in graph properties if provided.
         zarr_format (int, optional): The version of zarr to write.
             Defaults to 2.
-        validate (bool, optional): Flag indicating whether to perform validation on the
-            networkx graph before writing anything to disk. If set to False and there are
-            missing properties, will likely fail with a KeyError, leading to an incomplete
-            graph written to disk. Defaults to True.
     """
     # open/create zarr container
     if zarr.__version__.startswith("3"):
@@ -76,6 +75,8 @@ def write_nx(
     else:
         group = zarr.open(path, mode="a")
     axis_names = axis_names if axis_names is not None else graph.graph.get("axis_names", None)
+    axis_units = axis_units if axis_units is not None else graph.graph.get("axis_units", None)
+    axis_types = axis_types if axis_types is not None else graph.graph.get("axis_types", None)
 
     node_data = list(graph.nodes(data=True))
     if node_data:
@@ -83,8 +84,6 @@ def write_nx(
     else:
         node_dtype = np.int64  # fallback for empty graphs
 
-    node_prop_names = list({k for _, data in node_data for k in data})
-    print(node_prop_names)
     write_props(
         group=group.require_group("nodes"),
         data=node_data,
@@ -110,9 +109,9 @@ def write_nx(
         roi_min, roi_max = get_roi(graph, axis_names)
     else:
         roi_min, roi_max = None, None
-    axis_units = axis_units if axis_units is not None else graph.graph.get("axis_units", None)
-    # TODO: Add axis types
-    axes = axes_from_lists(axis_names, axis_units=axis_units, roi_min=roi_min, roi_max=roi_max)
+    axes = axes_from_lists(
+        axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
+    )
     metadata = GeffMetadata(
         geff_version=geff.__version__,
         directed=isinstance(graph, nx.DiGraph),
