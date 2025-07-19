@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752886658978,
+  "lastUpdate": 1752886917359,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1665,6 +1665,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.531920857471153",
             "extra": "mean: 15.607365664999994 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "91a7e217a09ef3337503fdf575d283b352a5009d",
+          "message": "Add checklist items for spec updates and implementation updates (#132)\n\nCloses #92",
+          "timestamp": "2025-07-18T20:59:26-04:00",
+          "tree_id": "4646d63f89bda26a5ea7d993889d85bc7d6dc4ab",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/91a7e217a09ef3337503fdf575d283b352a5009d"
+        },
+        "date": 1752886916732,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11077763733304812,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2990164654886138",
+            "extra": "mean: 9.027092688333331 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.196226802766237,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0011802026467805321",
+            "extra": "mean: 43.11045966668795 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06259611375188044,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5330580916081966",
+            "extra": "mean: 15.975432659666657 sec\nrounds: 3"
           }
         ]
       }
