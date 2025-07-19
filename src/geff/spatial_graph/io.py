@@ -7,17 +7,18 @@ import spatial_graph as sg
 import zarr
 
 import geff
-from geff.metadata_schema import GeffMetadata
+from geff.metadata_schema import GeffMetadata, axes_from_lists
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
 def write_sg(
-    graph: sg.SpatialGraph,
+    graph: sg.SpatialGraph | sg.SpatialDiGraph,
     path: str | Path,
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
+    axis_types: list[str] | None = None,
     zarr_format: int = 2,
 ):
     """Write a SpatialGraph to the geff file format
@@ -35,14 +36,17 @@ def write_sg(
         axis_names (Optional[list[str]], optional):
 
             The names of the spatial dims represented in position attribute.
-            Defaults to None. Will override value in graph attributes if
-            provided.
+            Defaults to None.
 
         axis_units (Optional[list[str]], optional):
 
             The units of the spatial dims represented in position attribute.
-            Defaults to None. Will override value in graph attributes if
-            provided.
+            Defaults to None.
+
+        axis_types (Optional[list[str]], optional):
+
+            The types of the spatial dims represented in position property.
+            Usually one of "time", "space", or "channel". Defaults to None.
 
         zarr_format (int, optional):
 
@@ -52,33 +56,30 @@ def write_sg(
         warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
         return
 
-    # open/create zarr container
-    if zarr.__version__.startswith("3"):
-        group = zarr.open(path, mode="a", zarr_format=zarr_format)
-    else:
-        group = zarr.open(path, mode="a")
-
-    # write node/edge IDs
-    group["nodes/ids"] = graph.nodes
-    group["edges/ids"] = graph.edges
-
-    for name in graph.node_attr_dtypes.keys():
-        group[f"nodes/props/{name}/values"] = getattr(graph.node_attrs, name)
-    for name in graph.edge_attr_dtypes.keys():
-        group[f"edges/props/{name}/values"] = getattr(graph.edge_attrs, name)
-
-    # write metadata
+    # create metadata
     roi_min, roi_max = graph.roi
+    axes = axes_from_lists(
+        axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
+    )
     metadata = GeffMetadata(
         geff_version=geff.__version__,
         directed=graph.directed,
-        roi_min=roi_min,
-        roi_max=roi_max,
-        position_prop=graph.position_attr,
-        axis_names=axis_names,
-        axis_units=axis_units,
+        axes=axes,
     )
-    metadata.write(group)
+
+    # write to geff
+    geff.write_arrays(
+        geff_path=path,
+        node_ids=graph.nodes,
+        node_props={
+            name: getattr(graph.node_attrs, name) for name in graph.node_attr_dtypes.keys()
+        },
+        edge_ids=graph.edges,
+        edge_props={
+            name: getattr(graph.edge_attrs, name) for name in graph.edge_attr_dtypes.keys()
+        },
+        metadata=metadata,
+    )
 
 
 def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
