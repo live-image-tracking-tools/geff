@@ -19,7 +19,7 @@ def test_validate(tmp_path):
     with pytest.raises(ValueError, match="No geff key found in"):
         validate(zpath)
     z.attrs["geff"] = {
-        "geff_version": "v0.0.1",
+        "geff_version": "0.0.1",
         "directed": True,
         "roi_min": [0, 0],
         "roi_max": [100, 100],

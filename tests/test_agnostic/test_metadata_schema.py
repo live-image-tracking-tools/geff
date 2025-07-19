@@ -1,36 +1,8 @@
-import re
-
 import pydantic
 import pytest
 import zarr
 
-from geff.metadata_schema import Axis, GeffMetadata, _get_versions_regex, write_metadata_schema
-
-
-class TestVersionRegex:
-    def test_get_versions_regex_simple(self):
-        version_str = "0.0.1-a"
-        versions = ["0.0"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is not None
-
-    def test_get_versions_regex_complex(self):
-        version_str = "0.1.1-a"
-        versions = ["0.0", "0.1"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is not None
-
-    def test_invalid_version_regex(self):
-        version_str = "v1.0.1-a"
-        versions = ["0.0", "0.1"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is None
-
-    def test_invalid_prefix_regex(self):
-        version_str = "9810.0.1"
-        versions = ["0.0", "0.1"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is None
+from geff.metadata_schema import Axis, GeffMetadata, write_metadata_schema
 
 
 class TestMetadataModel:
