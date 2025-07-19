@@ -130,13 +130,13 @@ class GeffMetadata(BaseModel):
                 raise ValueError(f"Duplicate axes names found in {names}")
         return self
 
-    def write(self, group: zarr.Group | Path):
+    def write(self, group: zarr.Group | Path | str):
         """Helper function to write GeffMetadata into the zarr geff group.
 
         Args:
             group (zarr.Group | Path): The geff group to write the metadata to
         """
-        if isinstance(group, Path):
+        if isinstance(group, Path | str):
             group = zarr.open(group)
 
         group.attrs["geff"] = self.model_dump(mode="json")
