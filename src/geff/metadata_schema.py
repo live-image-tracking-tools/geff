@@ -1,18 +1,13 @@
 from __future__ import annotations
 
 import json
-import re
 import warnings
-from importlib.resources import files
 from pathlib import Path
 from typing import Sequence
 
-import yaml
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
-
-import geff
 
 from .units import (
     VALID_AXIS_TYPES,
@@ -118,8 +113,11 @@ class GeffMetadata(BaseModel):
 
     geff_version: str = Field(
         ...,
-        regex=r"^\d+\.\d+\.\d+$",
-        description="Geff version string following semantic versioning (MAJOR.MINOR.PATCH).",
+        pattern=r"^\d+\.\d+\.\d+(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?$",
+        description=(
+            "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
+            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18)."
+        ),
     )
     directed: bool
     axes: Sequence[Axis] | None = None
