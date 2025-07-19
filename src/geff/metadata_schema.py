@@ -116,7 +116,11 @@ class GeffMetadata(BaseModel):
     # this determines the title of the generated json schema
     model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
 
-    geff_version: str
+    geff_version: str = Field(
+        ...,
+        regex=r"^\d+\.\d+\.\d+$",
+        description="Geff version string following semantic versioning (MAJOR.MINOR.PATCH).",
+    )
     directed: bool
     axes: Sequence[Axis] | None = None
 
