@@ -15,7 +15,10 @@ Axes = Literal["t", "z", "y", "x"]
 class GraphAttrs(TypedDict):
     nodes: NDArray[Any]
     edges: NDArray[Any]
-    node_positions: NDArray[Any]
+    t: NDArray[Any]
+    z: NDArray[Any]
+    y: NDArray[Any]
+    x: NDArray[Any]
     extra_node_props: dict[str, NDArray[Any]]
     edge_props: dict[str, NDArray[Any]]
     directed: bool

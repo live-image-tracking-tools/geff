@@ -20,7 +20,6 @@ def test_write_props(tmp_path: Path) -> None:
             (1, {"a": 6, "c": 7}),
         ],
         prop_names=["a", "b", "c"],
-        node_dtype="int64",
         axis_names=["a"],
     )
 
@@ -32,7 +31,6 @@ def test_write_props(tmp_path: Path) -> None:
             ((1, 0), {"score": 0.7}),
         ],
         prop_names=["score"],
-        node_dtype="int64",
     )
     axes = axes_from_lists(
         axis_names=["x"],
@@ -57,14 +55,12 @@ def test_write_props_empty(tmp_path: Path) -> None:
         group=z.require_group("nodes"),
         data=[],
         prop_names=["a"],
-        node_dtype="int64",
     )
 
     write_props(
         group=z.require_group("edges"),
         data=[],
         prop_names=["score"],
-        node_dtype="int64",
     )
 
     metadata = GeffMetadata(
@@ -84,4 +80,4 @@ def test_write_props_invalid_group(tmp_path: Path) -> None:
     z = zarr.open(zpath)
 
     with pytest.raises(ValueError, match="Group must be a 'nodes' or 'edges' group"):
-        write_props(group=z, data=[], prop_names=["a"], node_dtype="int64")
+        write_props(group=z, data=[], prop_names=["a"])
