@@ -11,7 +11,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata
-from geff.writer_helper import write_props
+from geff.writer_helper import write_dict_like
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -49,7 +49,6 @@ def write_nx(
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
     zarr_format: int = 2,
-    validate: bool = True,
 ):
     """Write a networkx graph to the geff file format
 
@@ -67,11 +66,8 @@ def write_nx(
             in graph properties if provided.
         zarr_format (int, optional): The version of zarr to write.
             Defaults to 2.
-        validate (bool, optional): Flag indicating whether to perform validation on the
-            networkx graph before writing anything to disk. If set to False and there are
-            missing properties, will likely fail with a KeyError, leading to an incomplete
-            graph written to disk. Defaults to True.
     """
+    # TODO: remove this check in another PR
     if graph.number_of_nodes() == 0:
         warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
         return
@@ -81,29 +77,13 @@ def write_nx(
         group = zarr.open(path, mode="a", zarr_format=zarr_format)
     else:
         group = zarr.open(path, mode="a")
-
-    node_data = list(graph.nodes(data=True))
-    if node_data:
-        node_dtype = np.array([node_data[0][0]]).dtype
-    else:
-        node_dtype = np.int64  # fallback for empty graphs
-    write_props(
-        group=group.require_group("nodes"),
-        data=node_data,
-        prop_names=list({k for _, data in node_data for k in data}),
-        node_dtype=node_dtype,
-        position_prop=position_prop,
-    )
-    del node_data
+    node_props = list({k for _, data in graph.nodes(data=True) for k in data})
 
     edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
-    write_props(
-        group=group.require_group("edges"),
-        data=edge_data,
-        prop_names=list({k for _, data in edge_data for k in data}),
-        node_dtype=node_dtype,
+    edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
+    write_dict_like(
+        path, graph.nodes(data=True), edge_data, node_props, edge_props, position_prop=position_prop
     )
-    del edge_data
 
     # write metadata
     roi_min: tuple[float, ...] | None
