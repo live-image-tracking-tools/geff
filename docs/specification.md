@@ -83,11 +83,13 @@ This is a geff metadata zattrs file that matches the above example structure.
 {
     "geff": {
         "axis_names": [ # optional
+            "t",
             "z",
             "y",
             "x"
         ],
         "axis_units": [ # optional
+            "s",
             "um",
             "um",
             "um"
@@ -105,6 +107,12 @@ This is a geff metadata zattrs file that matches the above example structure.
             81.667,
             764.42
         ],
+        "display_hints": {
+            "display_horizontal": "x",
+            "display_vertical": "y",
+            "display_depth": "z",
+            "display_time": "t",
+        },
     }
     ... # custom other things are allowed and ignored by geff
 }
