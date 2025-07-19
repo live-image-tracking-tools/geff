@@ -113,7 +113,7 @@ class GeffMetadata(BaseModel):
 
     geff_version: str = Field(
         ...,
-        pattern=r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?$",
+        pattern=VERSION_PATTERN,
         description=(
             "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
             "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18)."
