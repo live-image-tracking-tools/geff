@@ -1,18 +1,13 @@
 from __future__ import annotations
 
 import json
-import re
 import warnings
-from importlib.resources import files
 from pathlib import Path
 from typing import Sequence
 
-import yaml
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
-
-import geff
 
 from .units import (
     VALID_AXIS_TYPES,
@@ -22,16 +17,6 @@ from .units import (
     validate_space_unit,
     validate_time_unit,
 )
-
-with (files(geff) / "supported_versions.yml").open() as f:
-    SUPPORTED_VERSIONS = yaml.safe_load(f)["versions"]
-
-
-def _get_versions_regex(versions: list[str]):
-    return r"|".join([rf"({re.escape(version)})" for version in versions])
-
-
-SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
 
 
 class Axis(BaseModel):
@@ -126,7 +111,7 @@ class GeffMetadata(BaseModel):
     # this determines the title of the generated json schema
     model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
 
-    geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
+    geff_version: str = Field(pattern=r"\d\.\d\.\d")
     directed: bool
     axes: Sequence[Axis] | None = None
 
