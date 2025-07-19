@@ -164,7 +164,7 @@ def test_read_edge_props(path_w_expected_graph_props):
     graph_dict = file_reader.build(edge_mask=edge_mask)
     assert len(graph_dict["edge_props"]) == 0
 
-    file_reader.read_edge_props("score")
+    file_reader.read_edge_props(["score"])
     graph_dict = file_reader.build(edge_mask=edge_mask)
     np.testing.assert_allclose(
         graph_props["edge_props"]["score"][edge_mask],

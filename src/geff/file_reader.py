@@ -30,6 +30,7 @@ class FileReader:
         >>> file_reader.read_node_prop("t")
         ... # Now graph dict will have two node properties: "seg_id" and "t"
         ... graph_dict = file_reader.build()
+        ... graph_dict
 
         >>> # Now graph_dict will only be a subset with nodes "t" < 5
         ... graph_dict = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
@@ -65,35 +66,45 @@ class FileReader:
         else:
             self.edge_prop_names = []
 
-    def read_node_props(self, name: str):
+    def read_node_props(self, names: list[str] | None = None):
         """
         Read the node property with the name `name` from a GEFF.
 
         Call `build` to get the output `GraphDict` with the loaded properties.
 
         Args:
-            name (str): The name of the node property.
+            names (lists of str, optional): The names of the node properties to load. If
+            None all node properties will be loaded.
         """
-        prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}", mode="r")
-        prop_dict: PropDictZArray = {"values": prop_group["values"]}
-        if "missing" in prop_group.keys():
-            prop_dict["missing"] = prop_group["missing"]
-        self.node_props[name] = prop_dict
+        if names is None:
+            names = self.node_prop_names
 
-    def read_edge_props(self, name: str):
+        for name in names:
+            prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}", mode="r")
+            prop_dict: PropDictZArray = {"values": prop_group["values"]}
+            if "missing" in prop_group.keys():
+                prop_dict["missing"] = prop_group["missing"]
+            self.node_props[name] = prop_dict
+
+    def read_edge_props(self, names: list[str] | None = None):
         """
         Read the edge property with the name `name` from a GEFF.
 
         Call `build` to get the output `GraphDict` with the loaded properties.
 
         Args:
-            name (str): The name of the edge property.
+            names (lists of str, optional): The names of the edge properties to load. If
+            None all node properties will be loaded.
         """
-        prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}", mode="r")
-        prop_dict: PropDictZArray = {"values": prop_group["values"]}
-        if "missing" in prop_group.keys():
-            prop_dict["missing"] = prop_group["missing"]
-        self.edge_props[name] = prop_dict
+        if names is None:
+            names = self.edge_prop_names
+
+        for name in names:
+            prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}", mode="r")
+            prop_dict: PropDictZArray = {"values": prop_group["values"]}
+            if "missing" in prop_group.keys():
+                prop_dict["missing"] = prop_group["missing"]
+            self.edge_props[name] = prop_dict
 
     def build(
         self,
@@ -194,15 +205,8 @@ def read_to_dict(
     path = path.expanduser()
     file_reader = FileReader(path, validate)
 
-    if node_props is None:
-        node_props = file_reader.node_prop_names
-    if edge_props is None:
-        edge_props = file_reader.edge_prop_names
-
-    for node_prop_name in node_props:
-        file_reader.read_node_props(node_prop_name)
-    for edge_prop_name in edge_props:
-        file_reader.read_edge_props(edge_prop_name)
+    file_reader.read_node_props(node_props)
+    file_reader.read_edge_props(edge_props)
 
     graph_dict = file_reader.build()
     return graph_dict
