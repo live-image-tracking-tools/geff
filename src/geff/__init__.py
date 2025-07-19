@@ -7,6 +7,7 @@ except PackageNotFoundError:
 
 from .metadata_schema import GeffMetadata
 from .networkx.io import read_nx, write_nx
+from .rustworkx.io import read_rx
 from .utils import validate
 
-__all__ = ["GeffMetadata", "read_nx", "validate", "write_nx"]
+__all__ = ["GeffMetadata", "read_nx", "read_rx", "validate", "write_nx"]
