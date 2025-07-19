@@ -4,6 +4,10 @@ The graph exchange file format is `zarr` based. A graph is stored in a zarr grou
 
 `geff` graphs have the option to provide time and spatial dimensions as special attributes. These attributes are specified in the `axes` section of the metadata, inspired by the OME-zarr `axes` specification. 
 
+## Backwards compatibility
+
+Prior to the v1 release of `geff`, we cannot guarantee that a file written by a specific version of `geff` can be read by another version of `geff`. However, after the initial v1.0.0 release we will maintain backwards compatibility. The version of `geff` used to write the file is documented in the `geff` metadata.
+
 ## Zarr specification
 
 Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html). However, `geff` will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.

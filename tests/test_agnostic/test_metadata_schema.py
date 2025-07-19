@@ -1,36 +1,8 @@
-import re
-
 import pydantic
 import pytest
 import zarr
 
-from geff.metadata_schema import Axis, GeffMetadata, _get_versions_regex, write_metadata_schema
-
-
-class TestVersionRegex:
-    def test_get_versions_regex_simple(self):
-        version_str = "0.0.1-a"
-        versions = ["0.0"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is not None
-
-    def test_get_versions_regex_complex(self):
-        version_str = "0.1.1-a"
-        versions = ["0.0", "0.1"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is not None
-
-    def test_invalid_version_regex(self):
-        version_str = "v1.0.1-a"
-        versions = ["0.0", "0.1"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is None
-
-    def test_invalid_prefix_regex(self):
-        version_str = "9810.0.1"
-        versions = ["0.0", "0.1"]
-        regex = _get_versions_regex(versions)
-        assert re.match(regex, version_str) is None
+from geff.metadata_schema import Axis, GeffMetadata, write_metadata_schema
 
 
 class TestMetadataModel:
@@ -62,9 +34,20 @@ class TestMetadataModel:
                 geff_version="0.0.1", directed=True, axes=[{"name": "test"}, {"name": "test"}]
             )
 
-    def test_invalid_version(self):
+    def test_versions(self):
+        # Invalid version
         with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
             GeffMetadata(geff_version="aljkdf", directed=True)
+
+        # v prefix ok
+        version = "v0.1.0"
+        meta = GeffMetadata(geff_version=version, directed=True)
+        assert version == meta.geff_version
+
+        # things after version ok
+        version = "0.1.3.dev1+g2388d18.d20250613"
+        meta = GeffMetadata(geff_version=version, directed=True)
+        assert version == meta.geff_version
 
     def test_extra_attrs(self):
         # Should not fail
