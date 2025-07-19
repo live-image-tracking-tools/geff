@@ -10,7 +10,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata, axes_from_lists
-from geff.writer_helper import write_dict_like
+from geff.write_dict_like import write_dict_like
 
 if TYPE_CHECKING:
     from pathlib import Path
