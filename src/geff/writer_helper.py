@@ -73,6 +73,7 @@ def write_props(
         if not is_position:
             group[f"props/{name}/missing"] = np.asarray(missing, dtype=bool)
 
+    # Raise error if we did not see one of the spatiotemporal properties while writing
     if axis_names is not None and len(ids) > 0 and False in seen_axes:  # type: ignore
         missing_idx = seen_axes.index(False)  # type: ignore
         raise ValueError(f"Spatiotemporal property ('{axis_names[missing_idx]}') not found")
