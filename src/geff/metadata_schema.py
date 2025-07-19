@@ -23,6 +23,13 @@ def _get_versions_regex(versions: list[str]):
 SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
 
 
+class DisplayHint(BaseModel):
+    display_horizontal: str
+    display_vertical: str
+    display_depth: str
+    display_time: str
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -38,6 +45,7 @@ class GeffMetadata(BaseModel):
     position_prop: str | None = None
     axis_names: tuple[str, ...] | None = None
     axis_units: tuple[str, ...] | None = None
+    display_hints: DisplayHint | None = None
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:

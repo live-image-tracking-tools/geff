@@ -1,5 +1,33 @@
 {
   "$defs": {
+    "DisplayHint": {
+      "properties": {
+        "display_horizontal": {
+          "title": "Display Horizontal",
+          "type": "string"
+        },
+        "display_vertical": {
+          "title": "Display Vertical",
+          "type": "string"
+        },
+        "display_depth": {
+          "title": "Display Depth",
+          "type": "string"
+        },
+        "display_time": {
+          "title": "Display Time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "display_horizontal",
+        "display_vertical",
+        "display_depth",
+        "display_time"
+      ],
+      "title": "DisplayHint",
+      "type": "object"
+    },
     "GeffMetadata": {
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
@@ -83,6 +111,17 @@
           ],
           "default": null,
           "title": "Axis Units"
+        },
+        "display_hints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DisplayHint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
