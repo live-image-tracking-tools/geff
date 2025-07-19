@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752870894065,
+  "lastUpdate": 1752886658978,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1620,6 +1620,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.4822650266509218",
             "extra": "mean: 15.61229952299999 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "mkitti@users.noreply.github.com",
+            "name": "Mark Kittisopikul",
+            "username": "mkitti"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "54c8be4e4dfffde162dd0b83722874e6bd967c1c",
+          "message": "Add win-64, osx-64, and linux-64 platforms for pixi (#140)\n\n# Proposed Change\n\nFix #136 by adding win-64, linux-64, and osx-64 platforms for pixi.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Maintenance (e.g. dependencies, CI, releases, etc.)\n\nWhich topics does your change affect? Delete those that do not apply.\n\nFix #136\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the [developer/contributing](../CONTRIBUTING) docs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...",
+          "timestamp": "2025-07-18T20:55:03-04:00",
+          "tree_id": "4b3d570687145f58a88ceb6d8309c905f3c57ccb",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/54c8be4e4dfffde162dd0b83722874e6bd967c1c"
+        },
+        "date": 1752886658223,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.10840839780739096,
+            "unit": "iter/sec",
+            "range": "stddev: 1.3574327180649337",
+            "extra": "mean: 9.224377633333338 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 22.760753278053464,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0017768480040686557",
+            "extra": "mean: 43.93527700000277 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06407231184712557,
+            "unit": "iter/sec",
+            "range": "stddev: 0.531920857471153",
+            "extra": "mean: 15.607365664999994 sec\nrounds: 3"
           }
         ]
       }
