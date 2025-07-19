@@ -19,6 +19,7 @@ from .units import (
     VALID_SPACE_UNITS,
     VALID_TIME_UNITS,
     validate_axis_type,
+    validate_shape_type,
     validate_space_unit,
     validate_time_unit,
 )
@@ -118,6 +119,31 @@ def axes_from_lists(
     return axes
 
 
+class Shape(BaseModel):
+    name: str
+    type: str
+    unit: str
+    axes: Sequence[str]
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> Shape:
+        if not validate_shape_type(self.type):
+            warnings.warn(
+                f"Type {self.type} not in valid types {VALID_AXIS_TYPES}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+
+        if not validate_space_unit(self.unit):
+            warnings.warn(
+                f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+
+        return self
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -129,6 +155,7 @@ class GeffMetadata(BaseModel):
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
     axes: Sequence[Axis] | None = None
+    shapes: Sequence[Shape] | None = None
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
@@ -137,6 +164,17 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
+
+        # Shapes axes must be subset of axes names if both are defined
+        if self.shapes is not None and self.axes is not None:
+            for shape in self.shapes:
+                for axis in shape.axes:
+                    if axis not in [a.name for a in self.axes]:
+                        raise ValueError(
+                            f"Shape {shape.name} has axes {shape.axes} that are not "
+                            f"subset of axes names {[a.name for a in self.axes]}"
+                        )
+
         return self
 
     def write(self, group: zarr.Group | Path | str):

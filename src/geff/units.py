@@ -62,6 +62,12 @@ VALID_AXIS_TYPES = [
     "channel",  # TODO: discuss
 ]
 
+VALID_SHAPE_TYPES = [
+    "sphere",
+    "ellipse",
+    "ellipsoid",
+]
+
 
 def validate_axis_type(axis_type: str) -> bool:
     """Validate axis type against standard list
@@ -73,6 +79,18 @@ def validate_axis_type(axis_type: str) -> bool:
         bool: False if the axis is not in valid types
     """
     return axis_type in VALID_AXIS_TYPES
+
+
+def validate_shape_type(shape_type: str) -> bool:
+    """Validate shape type against standard list
+
+    Args:
+        shape_type (str): Shape type to check
+
+    Returns:
+        bool: False if the shape is not in valid types
+    """
+    return shape_type in VALID_SHAPE_TYPES
 
 
 def validate_space_unit(unit_name: str) -> bool:
