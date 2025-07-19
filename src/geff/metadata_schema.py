@@ -5,6 +5,7 @@ import re
 import warnings
 from importlib.resources import files
 from pathlib import Path
+from typing import Sequence
 
 import yaml
 import zarr
@@ -13,7 +14,13 @@ from pydantic.config import ConfigDict
 
 import geff
 
-from .units import VALID_AXIS_TYPES, validate_axis_type, validate_space_unit
+from .units import (
+    VALID_AXIS_TYPES,
+    VALID_SPACE_UNITS,
+    VALID_TIME_UNITS,
+    validate_axis_type,
+    validate_space_unit,
+)
 
 with (files(geff) / "supported_versions.yml").open() as f:
     SUPPORTED_VERSIONS = yaml.safe_load(f)["versions"]
@@ -34,22 +41,35 @@ class Axis(BaseModel):
     max: float | None = None
 
     @model_validator(mode="after")
-    def _validate_model(self) -> GeffMetadata:
-        if (self.min is None) != (self.max is None):
+    def _validate_model(self) -> Axis:
+        if (self.min is None) != (self.max is None):  # type: ignore
             raise ValueError(
-                f"Min and max must both be None or neither: got min {min} and max {max}"
+                f"Min and max must both be None or neither: got min {self.min} and max {self.max}"
             )
-        if self.min is not None and self.min > self.max:
-            raise ValueError(f"Min {min} is greater than max {max}")
-        if self.type is not None and validate_axis_type(self.type):
+        if self.min is not None and self.min > self.max:  # type: ignore
+            raise ValueError(f"Min {self.min} is greater than max {self.max}")
+
+        if self.type is not None and not validate_axis_type(self.type):  # type: ignore
             warnings.warn(
-                f"Type {self.type} not in valid types {VALID_AXIS_TYPES}."
-                "Reader applications may not know what to do with this information."
+                f"Type {self.type} not in valid types {VALID_AXIS_TYPES}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
             )
-        if self.type == "space" and not validate_space_unit(self.unit):
-            raise ValueError()
-        elif self.type == "time" and not validate_space_unit(self.unit):
-            raise ValueError()
+
+        if self.type == "space" and not validate_space_unit(self.unit):  # type: ignore
+            warnings.warn(
+                f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+        elif self.type == "time" and not validate_space_unit(self.unit):  # type: ignore
+            warnings.warn(
+                f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+
+        return self
 
 
 class GeffMetadata(BaseModel):
@@ -59,10 +79,19 @@ class GeffMetadata(BaseModel):
 
     # this determines the title of the generated json schema
     model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
-    axes: list[Axis]
 
     geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
+    axes: Sequence[Axis] | None = None
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> GeffMetadata:
+        # Axes names must be unique
+        if self.axes is not None:
+            names = [ax.name for ax in self.axes]
+            if len(names) != len(set(names)):
+                raise ValueError(f"Duplicate axes names found in {names}")
+        return self
 
     def write(self, group: zarr.Group | Path):
         """Helper function to write GeffMetadata into the zarr geff group.
