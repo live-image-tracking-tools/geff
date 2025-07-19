@@ -87,11 +87,6 @@ def _get_graph_existing_metadata(
         axis_units = axis_units or [axis.unit for axis in metadata.axes]
         axis_types = axis_types or [axis.type for axis in metadata.axes]
 
-    # Fallback to graph properties as last resort
-    axis_names = axis_names or graph.graph.get("axis_names", None)
-    axis_units = axis_units or graph.graph.get("axis_units", None)
-    axis_types = axis_types or graph.graph.get("axis_types", None)
-
     return axis_names, axis_units, axis_types
 
 
