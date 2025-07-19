@@ -150,3 +150,50 @@ class FileReader:
             "edges": edges,
             "edge_props": edge_props,
         }
+
+
+# NOTE: if different FileReaders exist in the future a `file_reader` argument can be
+#   added to this function to select between them.
+def read_to_dict(
+    path: Path | str,
+    validate: bool = True,
+    node_props: list[str] | None = None,
+    edge_props: list[str] | None = None,
+) -> GraphDict:
+    """
+    Read a GEFF zarr file to a dictionary representation.
+
+    A subset of node and edge properties can be selected with the `node_props` and
+    `edge_props` argument.
+
+    Args:
+        path (Path | str): The path to the root of the geff zarr, where the .attrs contains
+            the geff  metadata
+        validate (bool, optional): Flag indicating whether to perform validation on the
+            geff file before loading into memory. If set to False and there are
+            format issues, will likely fail with a cryptic error. Defaults to True.
+        node_props (list of str, optional): The names of the node properties to load,
+            if None all properties will be loaded, defaults to None.
+        edge_props (list of str, optional): The names of the edge properties to load,
+            if None all properties will be loaded, defaults to None.
+
+    Returns:
+        A networkx graph containing the graph that was stored in the geff file format
+    """
+    if isinstance(path, str):
+        path = Path(path)
+    path = path.expanduser()
+    file_reader = FileReader(path, validate)
+
+    if node_props is None:
+        node_props = file_reader.node_prop_names
+    if edge_props is None:
+        edge_props = file_reader.edge_prop_names
+
+    for node_prop_name in node_props:
+        file_reader.read_node_props(node_prop_name)
+    for edge_prop_name in edge_props:
+        file_reader.read_edge_props(edge_prop_name)
+
+    graph_dict = file_reader.build()
+    return graph_dict

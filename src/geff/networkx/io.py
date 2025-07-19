@@ -9,7 +9,7 @@ import numpy as np
 import zarr
 
 import geff
-from geff.file_reader import FileReader
+from geff.file_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata
 from geff.writer_helper import write_props
 
@@ -204,22 +204,7 @@ def read_nx(
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
-    if isinstance(path, str):
-        path = Path(path)
-    path = path.expanduser()
-    file_reader = FileReader(path, validate)
-
-    if node_props is None:
-        node_props = file_reader.node_prop_names
-    if edge_props is None:
-        edge_props = file_reader.edge_prop_names
-
-    for node_prop_name in node_props:
-        file_reader.read_node_props(node_prop_name)
-    for edge_prop_name in edge_props:
-        file_reader.read_edge_props(edge_prop_name)
-
-    graph_dict = file_reader.build()
+    graph_dict = read_to_dict(path, validate, node_props, edge_props)
     graph = _ingest_dict_nx(graph_dict)
 
     return graph
