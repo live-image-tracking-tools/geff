@@ -44,10 +44,6 @@ def test_read_write_consistency(
         for name, values in graph_props["edge_props"].items():
             assert graph.edges[edge.tolist()][name] == values[idx].item()
 
-    # TODO: test metadata
-    # assert graph.graph["axis_names"] == graph_props["axis_names"]
-    # assert graph.graph["axis_units"] == graph_props["axis_units"]
-
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
 @pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
@@ -133,7 +129,7 @@ def test_write_nx_with_metadata(tmp_path):
     assert read_metadata.axes[1].min == 2.0 and read_metadata.axes[1].max == 4.0
 
 
-def test_write_nx_metadata_override_precedence(tmp_path, caplog):
+def test_write_nx_metadata_override_precedence(tmp_path):
     """Test that explicit axis parameters override metadata"""
     from geff.metadata_schema import GeffMetadata, axes_from_lists
 
@@ -152,7 +148,7 @@ def test_write_nx_metadata_override_precedence(tmp_path, caplog):
     path = tmp_path / "override_test.zarr"
 
     # Should log warning when both metadata and axis lists are provided
-    with caplog.at_level("WARNING"):
+    with pytest.warns(UserWarning):
         geff.write_nx(
             graph,
             path,
@@ -161,8 +157,6 @@ def test_write_nx_metadata_override_precedence(tmp_path, caplog):
             axis_units=["meter", "meter", "meter"],
             axis_types=["space", "space", "space"],
         )
-        assert len(caplog.records) == 1
-        assert "Both axis lists and metadata provided" in caplog.records[0].message
 
     # Verify that axis lists took precedence
     read_graph, read_metadata = geff.read_nx(path)

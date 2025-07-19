@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from typing import TYPE_CHECKING, Literal
 
 import networkx as nx
@@ -74,12 +75,14 @@ def _get_graph_existing_metadata(
     metadata_provided = metadata is not None
 
     if lists_provided and metadata_provided:
-        logger.warning(
-            "Both axis lists and metadata provided. Overriding metadata with axis lists."
+        warnings.warn(
+            "Both axis lists and metadata provided. Overriding metadata with axis lists.",
+            stacklevel=2,
         )
 
     # If any axis lists is not provided, fallback to metadata if provided
     if metadata is not None and metadata.axes is not None:
+        # the x = x or y is a python idiom for setting x to y if x is None, otherwise x
         axis_names = axis_names or [axis.name for axis in metadata.axes]
         axis_units = axis_units or [axis.unit for axis in metadata.axes]
         axis_types = axis_types or [axis.type for axis in metadata.axes]
