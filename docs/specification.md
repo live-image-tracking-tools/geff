@@ -38,6 +38,8 @@ The `nodes\props` group is optional and will contain one or more `node property`
 -  Geff provides special support for spatio-temporal properties, although they are not required. When `axes` are specified in the `geff` metadata, each axis name identifies a spatio-temporal property. Spatio-temporal properties are not allowed to have missing arrays. Otherwise, they are identical to other properties from a storage specification perspective.
 
 - The `seg_id` property is an optional, special node property that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` property is not present, it is assumed that the graph is not associated with a segmentation. 
+
+-  Geff provides special support for predefined shape properties, although they are not required. These currently include: `sphere`, `ellipse`, `ellipsoid`. Values can be marked as `missing`, and a node may contain multiple shape properties. Otherwise, they are identical to other properties from a storage specification perspective.
 <!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
 
 !!! note
@@ -77,6 +79,15 @@ Here is a schematic of the expected file structure.
                     values # shape: (N,) dtype: float32
                 x/
                     values # shape: (N,) dtype: float32
+                radius/
+                    values # shape: (N,) dtype: float32
+                    missing # shape: (N,) dtype: bool
+                covariance2d/
+                    values # shape: (N, 3) dtype: float32
+                    missing # shape: (N,) dtype: bool
+                covariance3d/
+                    values # shape: (N, 6) dtype: float32
+                    missing # shape: (N,) dtype: bool
                 color/
                     values # shape: (N, 4) dtype: float16
                     missing # shape: (N,) dtype: bool
@@ -106,7 +117,14 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'z', 'type': "space", 'unit': "micrometers", 'min': 1523.36, 'max': 4398.1},
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
-        ]
+        ],
+        "shapes" : [
+            {'name': "radius", 'type': "sphere", 'unit': " micrometers"}, 
+            {'name': "covariance2d", 'type': "ellipse", 'unit': " micrometers"},  # Units explicit, or derived from axes?
+            {'name': "covariance3d", 'type': "ellipsoid", 'unit': " micrometers"},  # Units explicit! Example: 3D points in 2d SMLM 
+            # Question: non-base units supported? covariance values are actually stored in units^2. Not supported in SI.
+            # Where to store the order of values in covariance matrix?
+        ],
     }
     ... # custom other things are allowed and ignored by geff
 }
