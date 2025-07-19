@@ -21,7 +21,10 @@ def write_sg(
     axis_types: list[str] | None = None,
     zarr_format: int = 2,
 ):
-    """Write a SpatialGraph to the geff file format
+    """Write a SpatialGraph to the geff file format.
+
+    Because SpatialGraph does not support ragged or missing node/edge attributes,
+    the missing arrays will not be written.
 
     Args:
         graph (sg.SpatialGraph):
@@ -85,6 +88,9 @@ def write_sg(
 def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
     """Read a geff file into a SpatialGraph.
 
+    Because SpatialGraph does not support missing/ragged node/edge attributes,
+    missing arrays will be ignored, with a warning raised.
+
     Args:
 
         path (Path | str):
@@ -134,9 +140,19 @@ def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
     node_attr_dtypes = {
         name: get_dtype_str(group[f"nodes/props/{name}/values"]) for name in group["nodes/props"]
     }
+    for name in group["nodes/props"]:
+        if "missing" in group[f"nodes/props/{name}"].array_keys():
+            warnings.warn(
+                f"Potential missing values for attr {name} are being ignored", stacklevel=2
+            )
     edge_attr_dtypes = {
         name: get_dtype_str(group[f"edges/props/{name}/values"]) for name in group["edges/props"]
     }
+    for name in group["edges/props"]:
+        if "missing" in group[f"edges/props/{name}"].array_keys():
+            warnings.warn(
+                f"Potential missing values for attr {name} are being ignored", stacklevel=2
+            )
     node_attrs = {name: group[f"nodes/props/{name}/values"][:] for name in group["nodes/props"]}
     edge_attrs = {name: group[f"edges/props/{name}/values"][:] for name in group["edges/props"]}
 
