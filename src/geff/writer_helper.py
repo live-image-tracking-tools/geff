@@ -17,7 +17,6 @@ def write_props(
         group: The zarr group to write the property to (e.g. `nodes` or `edges`)
         data: A sequence of (id, data) pairs. For example, graph.nodes(data=True) for networkx
         prop_names: The names of the properties to write.
-        node_dtype: The numpy dtype to use for the node and edge ID datasets.
         axis_names: The name of the spatiotemporal properties
 
     Raises:
