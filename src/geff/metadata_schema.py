@@ -20,6 +20,7 @@ from .units import (
     VALID_TIME_UNITS,
     validate_axis_type,
     validate_space_unit,
+    validate_time_unit,
 )
 
 with (files(geff) / "supported_versions.yml").open() as f:
@@ -62,7 +63,7 @@ class Axis(BaseModel):
                 "Reader applications may not know what to do with this information.",
                 stacklevel=2,
             )
-        elif self.type == "time" and not validate_space_unit(self.unit):  # type: ignore
+        elif self.type == "time" and not validate_time_unit(self.unit):  # type: ignore
             warnings.warn(
                 f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
                 "Reader applications may not know what to do with this information.",
