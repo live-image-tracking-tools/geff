@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import warnings
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import networkx as nx
@@ -14,6 +13,8 @@ from geff.metadata_schema import GeffMetadata
 from geff.writer_helper import write_props
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from numpy.typing import NDArray
 
     from geff.dict_representation import GraphDict, PropDictNpArray
