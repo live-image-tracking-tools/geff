@@ -57,9 +57,14 @@ class FileReader:
         self.node_props: dict[str, PropDictZArray] = {}
         self.edge_props: dict[str, PropDictZArray] = {}
 
-        node_props_group = zarr.open_group(self.group.store, path="nodes/props", mode="r")
-        self.node_prop_names: list[str] = [*node_props_group.group_keys()]
+        # get node properties names
+        if "props" in self.group["nodes"].keys():
+            node_props_group = zarr.open_group(self.group.store, path="nodes/props", mode="r")
+            self.node_prop_names: list[str] = [*node_props_group.group_keys()]
+        else:
+            self.node_prop_names = []
 
+        # get edge property names
         if "props" in self.group["edges"].keys():
             edge_props_group = zarr.open_group(self.group.store, path="edges/props", mode="r")
             self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
