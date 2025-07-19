@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable, Literal, TypedDict, cast
+from typing import Any, Callable, Literal, Optional, TypedDict, cast
 
 import networkx as nx
 import numpy as np
@@ -29,6 +29,7 @@ class GraphAttrs(TypedDict):
 class ExampleNodePropsDtypes(TypedDict):
     position: DTypeStr
     time: DTypeStr
+    extra: DTypeStr
 
 
 class ExampleEdgePropsDtypes(TypedDict):
@@ -43,6 +44,7 @@ def create_dummy_graph_props(
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
+    extra_node_props: Optional[list[dict[str, DTypeStr]]] = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
@@ -118,6 +120,22 @@ def create_dummy_graph_props(
 
     edges = np.array(edges, dtype=object if node_id_dtype == "str" else node_id_dtype)
 
+    # Generate extra node properties
+    extra_node_props_dict = {}
+    if extra_node_props is not None:
+        for i, prop_spec in enumerate(extra_node_props):
+            for prop_name, prop_dtype in prop_spec.items():
+                if prop_dtype == "str":
+                    extra_node_props_dict[prop_name] = np.array(
+                        [f"{prop_name}_{i}" for i in range(num_nodes)], dtype=prop_dtype
+                    )
+                elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
+                    extra_node_props_dict[prop_name] = np.arange(num_nodes, dtype=prop_dtype)
+                else:  # float types
+                    extra_node_props_dict[prop_name] = np.linspace(
+                        0.1, 1.0, num_nodes, dtype=prop_dtype
+                    )
+
     # Generate edge properties
     scores = np.linspace(0.1, 0.4, len(edges), dtype=edge_prop_dtypes["score"])
     colors = np.arange(len(edges), dtype=edge_prop_dtypes["color"])
@@ -129,7 +147,7 @@ def create_dummy_graph_props(
         "z": z,
         "y": y,
         "x": x,
-        "extra_node_props": {},
+        "extra_node_props": extra_node_props_dict,
         "edge_props": {"score": scores, "color": colors},
         "directed": directed,
         "axis_names": axis_names,
@@ -150,6 +168,7 @@ def path_w_expected_graph_props(
         bool,
         int,
         int,
+        list[dict[str, DTypeStr]],
         bool,
         bool,
         bool,
@@ -164,6 +183,7 @@ def path_w_expected_graph_props(
         directed: bool,
         num_nodes: int = 5,
         num_edges: int = 4,
+        extra_node_props: Optional[list[dict[str, DTypeStr]]] = None,
         include_t: bool = True,
         include_z: bool = True,
         include_y: bool = True,
@@ -186,6 +206,7 @@ def path_w_expected_graph_props(
             directed=directed,
             num_nodes=num_nodes,
             num_edges=num_edges,
+            extra_node_props=extra_node_props,
             include_t=include_t,
             include_z=include_z,
             include_y=include_y,

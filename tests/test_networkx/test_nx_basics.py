@@ -33,7 +33,12 @@ def test_read_write_consistency(
     include_z,
 ):
     path, graph_props = path_w_expected_graph_props(
-        node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed, include_t=include_t, include_z=include_z
+        node_id_dtype,
+        node_prop_dtypes,
+        edge_prop_dtypes,
+        directed,
+        include_t=include_t,
+        include_z=include_z,
     )
 
     graph = geff.read_nx(path)
