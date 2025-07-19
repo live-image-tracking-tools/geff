@@ -8,7 +8,6 @@ def write_props(
     group: zarr.Group,
     data: Sequence[tuple[Any, dict[str, Any]]],
     prop_names: Sequence[str],
-    node_dtype: np.typing.DTypeLike,
     axis_names: list[str] | None = None,
 ) -> None:
     """
@@ -19,7 +18,7 @@ def write_props(
         data: A sequence of (id, data) pairs. For example, graph.nodes(data=True) for networkx
         prop_names: The names of the properties to write.
         node_dtype: The numpy dtype to use for the node and edge ID datasets.
-        position_prop: The name of the position property.
+        axis_names: The name of the spatiotemporal properties
 
     Raises:
         ValueError: If the group is not a 'nodes' or 'edges' group.

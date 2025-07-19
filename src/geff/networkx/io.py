@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import networkx as nx
 import numpy as np
@@ -31,7 +31,7 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
     _max = None
     for _, data in graph.nodes(data=True):
         pos = np.array([data[name] for name in axis_names])
-        if _min is None:
+        if _min is None or _max is None:
             _min = pos
             _max = pos
         else:
@@ -47,7 +47,7 @@ def write_nx(
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
     axis_types: list[str] | None = None,
-    zarr_format: int = 2,
+    zarr_format: Literal[2, 3] | None = 2,
 ):
     """Write a networkx graph to the geff file format
 
@@ -71,24 +71,18 @@ def write_nx(
     """
     # open/create zarr container
     if zarr.__version__.startswith("3"):
-        group = zarr.open(path, mode="a", zarr_format=zarr_format)
+        group = zarr.open_group(path, mode="a", zarr_format=zarr_format)
     else:
-        group = zarr.open(path, mode="a")
+        group = zarr.open_group(path, mode="a")
     axis_names = axis_names if axis_names is not None else graph.graph.get("axis_names", None)
     axis_units = axis_units if axis_units is not None else graph.graph.get("axis_units", None)
     axis_types = axis_types if axis_types is not None else graph.graph.get("axis_types", None)
 
     node_data = list(graph.nodes(data=True))
-    if node_data:
-        node_dtype = np.array([node_data[0][0]]).dtype
-    else:
-        node_dtype = np.int64  # fallback for empty graphs
-
     write_props(
         group=group.require_group("nodes"),
         data=node_data,
         prop_names=list({k for _, data in node_data for k in data}),
-        node_dtype=node_dtype,
         axis_names=axis_names,
     )
     del node_data
@@ -98,7 +92,6 @@ def write_nx(
         group=group.require_group("edges"),
         data=edge_data,
         prop_names=list({k for _, data in edge_data for k in data}),
-        node_dtype=node_dtype,
     )
     del edge_data
 
@@ -178,7 +171,7 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
     if validate:
         geff.utils.validate(path)
 
-    group = zarr.open(path, mode="r")
+    group = zarr.open_group(path, mode="r")
     metadata = GeffMetadata.read(group)
 
     # read meta-data
