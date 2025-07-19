@@ -3,10 +3,10 @@ from typing import Any, Sequence
 
 import numpy as np
 
-from .write_array_like import write_id_arrays, write_props_arrays
+from .write_arrays import write_id_arrays, write_props_arrays
 
 
-def write_dict_like(
+def write_dicts(
     geff_path: Path | str,
     node_data: Sequence[tuple[Any, dict[str, Any]]],
     edge_data: Sequence[tuple[Any, dict[str, Any]]],

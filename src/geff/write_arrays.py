@@ -2,14 +2,16 @@ from pathlib import Path
 
 import numpy as np
 import zarr
+from .metadata_schema import GeffMetadata
 
 
-def write_array_like(
+def write_arrays(
     geff_path: Path | str,
     node_ids: np.ndarray,
     node_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
     edge_ids: np.ndarray,
     edge_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
+    metadata: GeffMetadata,
 ):
     """Write a geff file from already constructed arrays of node and edge ids and props
 
@@ -28,6 +30,7 @@ def write_array_like(
         write_props_arrays(geff_path, "nodes", node_props)
     if edge_props is not None:
         write_props_arrays(geff_path, "edges", edge_props)
+    metadata.write(geff_path)
 
 
 def write_id_arrays(geff_path: Path | str, node_ids: np.ndarray, edge_ids: np.ndarray) -> None:
