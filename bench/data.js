@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752946874590,
+  "lastUpdate": 1752947139552,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1800,6 +1800,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.4672057685052953",
             "extra": "mean: 15.70689315366667 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "611e7a27eca108a7620708fe5c6605e397218021",
+          "message": "Specification updates: switch to an OME-like list of spatiotemporal axes with metadata (#147)\n\n# Proposed Change\nContinuing PR discussion started in #131\n\nThis PR is intended to close #80 and its subissues, but we need to go\nthrough and check that all of the subissues are actually addressed.\n\n- [x] #83 -- complete with the Axes basemodel \n- [x] #87 -- already closed by another PR\n- [x] #102 -- already closed by another PR\n- [x] #104 -- completed with this PR\n- [x] #89 -- already closed by another PR\n\nRemaining to dos:\n\n- [ ] Compute min/max for axes props -> deferring on this until we have\nthe helper functions from #148\n- [x] Validation/special handling for axes props, e.g. don't allow\nmissing nodes\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Documentation update\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly.\n\n## If you changed the specification\n- [ ] I have checked that any validation functions and tests reflect the\nchanges.\n- [ ] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [ ] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...\n\n---------\n\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>\nCo-authored-by: Teun Huijben <teun.huijben@czbiohub.org>\nCo-authored-by: Teun Huijben <45037215+TeunHuijben@users.noreply.github.com>",
+          "timestamp": "2025-07-19T13:39:17-04:00",
+          "tree_id": "846e45e307cc8bdf555075afcc0c7644bdfb4e05",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/611e7a27eca108a7620708fe5c6605e397218021"
+        },
+        "date": 1752947139038,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12131271353773183,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1248927991056572",
+            "extra": "mean: 8.243159112 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 17.846529271237596,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0006812740053680847",
+            "extra": "mean: 56.033303999991325 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.063947367515844,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5257912524295439",
+            "extra": "mean: 15.637860303666665 sec\nrounds: 3"
           }
         ]
       }
