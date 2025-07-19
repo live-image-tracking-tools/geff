@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 import zarr
+
 from .metadata_schema import GeffMetadata
 
 
@@ -24,6 +25,7 @@ def write_arrays(
         node_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): _description_
         edge_ids (np.ndarray): _description_
         edge_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): _description_
+        metadata (GeffMetadata): _description_
     """
     write_id_arrays(geff_path, node_ids, edge_ids)
     if node_props is not None:

@@ -10,7 +10,7 @@ import zarr
 import geff
 import geff.utils
 from geff.metadata_schema import GeffMetadata, axes_from_lists
-from geff.write_dict_like import write_dict_like
+from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -83,12 +83,13 @@ def write_nx(
 
     edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
     edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
-    write_dict_like(
+    write_dicts(
         path,
         graph.nodes(data=True),
         edge_data,
         node_props,
         edge_props,
+        axis_names,
     )
 
     # write metadata
