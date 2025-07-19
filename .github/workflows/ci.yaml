@@ -74,7 +74,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          python -m pip install -e . --group bench
 
       - name: Retrieve cached baseline if available
         uses: actions/cache/restore@v4
@@ -87,6 +86,7 @@ jobs:
         if: steps.cache_baseline.outputs.cache-hit != 'true'
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
+          python -m pip install -e . --group bench
           pytest tests/bench.py -v --benchmark-json baseline.json
 
       - name: Cache baseline results
@@ -99,6 +99,7 @@ jobs:
       - name: Run benchmark on PR head commit
         run: |
           git checkout ${{ github.event.pull_request.head.sha }}
+          python -m pip install -e . --group bench
           pytest tests/bench.py -v --benchmark-json pr.json
 
       - name: Generate report

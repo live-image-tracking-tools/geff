@@ -1,48 +1,12 @@
 {
   "$defs": {
-    "GeffMetadata": {
-      "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
+    "Axis": {
       "properties": {
-        "geff_version": {
-          "pattern": "(0\\.0)|(0\\.1)|(0\\.2)",
-          "title": "Geff Version",
+        "name": {
+          "title": "Name",
           "type": "string"
         },
-        "directed": {
-          "title": "Directed",
-          "type": "boolean"
-        },
-        "roi_min": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "number"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Roi Min"
-        },
-        "roi_max": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "number"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Roi Max"
-        },
-        "position_prop": {
+        "type": {
           "anyOf": [
             {
               "type": "string"
@@ -52,13 +16,68 @@
             }
           ],
           "default": null,
-          "title": "Position Prop"
+          "title": "Type"
         },
-        "axis_names": {
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min"
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Axis",
+      "type": "object"
+    },
+    "GeffMetadata": {
+      "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
+      "properties": {
+        "geff_version": {
+          "pattern": "(0\\.0)|(0\\.1)|(0\\.2)|(0\\.3)",
+          "title": "Geff Version",
+          "type": "string"
+        },
+        "directed": {
+          "title": "Directed",
+          "type": "boolean"
+        },
+        "axes": {
           "anyOf": [
             {
               "items": {
-                "type": "string"
+                "$ref": "#/$defs/Axis"
               },
               "type": "array"
             },
@@ -67,22 +86,7 @@
             }
           ],
           "default": null,
-          "title": "Axis Names"
-        },
-        "axis_units": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Axis Units"
+          "title": "Axes"
         }
       },
       "required": [

@@ -182,3 +182,6 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 #     ".ruff_cache/**/*",
 #     "tests/**/*",
 # ]
+
+[project.entry-points.pytest11]
+geff = "geff._pytest_plugin" 
