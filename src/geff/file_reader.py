@@ -129,7 +129,16 @@ class FileReader:
                     dtype=bool,
                 )
 
-        edges = np.array(self.edges[edge_mask.tolist() if edge_mask else ...])
+        # remove edges if any of it's nodes has been masked
+        edges = self.edges[:]
+        if node_mask is not None:
+            edge_mask_removed_nodes = np.isin(edges, nodes).all(axis=1)
+            if edge_mask is not None:
+                edge_mask = np.logical_and(edge_mask, edge_mask_removed_nodes)
+            else:
+                edge_mask = edge_mask_removed_nodes
+        edges = edges[edge_mask if edge_mask is not None else ...]
+
         edge_props: dict[str, PropDictNpArray] = {}
         for name, props in self.edge_props.items():
             edge_props[name] = {
