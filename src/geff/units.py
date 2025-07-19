@@ -57,27 +57,45 @@ VALID_TIME_UNITS = [
 ]
 
 VALID_AXIS_TYPES = [
-    "space", 
+    "space",
     "time",
-    "channel", # TODO: discuss
+    "channel",  # TODO: discuss
 ]
 
+
 def validate_axis_type(axis_type: str) -> bool:
+    """Validate axis type against standard list
+
+    Args:
+        axis_type (str): Axis type to check
+
+    Returns:
+        bool: False if the axis is not in valid types
+    """
     return axis_type in VALID_AXIS_TYPES
 
-def validate_space_unit(unit_name: str) -> bool:
-    """validate_space_unit
 
-    Returns True if a space unit is a KNOWN valid unit.
-    Return False if the unit is not known. The unit may be valid.
+def validate_space_unit(unit_name: str) -> bool:
+    """Checks space unit against ome-zarr supported units
+
+    Args:
+        unit_name (str): Unit name to check
+
+    Returns:
+        bool: True if a space unit is a KNOWN valid unit.
+        False if the unit is not known. The unit may be valid.
     """
     return unit_name in VALID_SPACE_UNITS
 
 
 def validate_time_unit(unit_name: str) -> bool:
-    """validate_time_unit
+    """Check time unit against ome-zarr supported units
 
-    Returns True if a time unit is a KNOWN valid unit.
-    Return False if the unit is not known. The unit may be valid.
+    Args:
+        unit_name (str): Unit name to check
+
+    Returns:
+        bool: True if a time unit is a KNOWN valid unit.
+        False if the unit is not known. The unit may be valid.
     """
     return unit_name in VALID_TIME_UNITS
