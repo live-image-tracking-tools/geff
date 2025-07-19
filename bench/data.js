@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752886917359,
+  "lastUpdate": 1752941141050,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1710,6 +1710,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5330580916081966",
             "extra": "mean: 15.975432659666657 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "17995243+DragaDoncila@users.noreply.github.com",
+            "name": "Draga Doncila Pop",
+            "username": "DragaDoncila"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0b714b3daf6ca4bfe9b641ec9c6f8a1a8ff70d0d",
+          "message": "Expose test fixture in pytest plugin (#135)\n\n# Proposed Change\nExpose example geff fixture in pytest plugin for use by other packages\nwith a geff dependency.\n\n# Types of Changes\n- Tests\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [ ] I have read the [developer/contributing](../CONTRIBUTING) docs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n---------\n\nCo-authored-by: Draga Doncila <ddon0001@student.monash.edu>\nCo-authored-by: Teun Huijben <45037215+TeunHuijben@users.noreply.github.com>",
+          "timestamp": "2025-07-19T12:03:37-04:00",
+          "tree_id": "f2a772e895d6cd0dd628225bef775c21a6c39bb7",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/0b714b3daf6ca4bfe9b641ec9c6f8a1a8ff70d0d"
+        },
+        "date": 1752941140578,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11101718772907468,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2772644251410599",
+            "extra": "mean: 9.007614230333331 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 23.532006376050777,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0002052476483375676",
+            "extra": "mean: 42.495313999988106 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06290447820752318,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4273898292602204",
+            "extra": "mean: 15.897119386333344 sec\nrounds: 3"
           }
         ]
       }
