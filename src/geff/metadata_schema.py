@@ -143,15 +143,7 @@ class GeffMetadata(BaseModel):
         if isinstance(group, Path | str):
             group = zarr.open(group)
 
-        all_data = self.model_dump(mode="json")
-        geff_data = {k: v for k, v in all_data.items() if k in GeffMetadata.model_fields}
-
-        group.attrs["geff"] = geff_data
-
-        # Write extra attributes as individual attributes with their original values
-        for key, value in self:
-            if key not in GeffMetadata.model_fields:
-                group.attrs[key] = value
+        group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
     def read(cls, group: zarr.Group | Path) -> GeffMetadata:
@@ -166,15 +158,6 @@ class GeffMetadata(BaseModel):
         if isinstance(group, Path):
             group = zarr.open(group)
 
-        # Separate known geff attributes from others to be passed as ignored_attrs
-        geff_attrs = group.attrs.asdict()
-        model_fields = set(cls.model_fields.keys())
-        ignored_attrs = {
-            key: value
-            for key, value in geff_attrs.items()
-            if key not in model_fields and key != "geff"
-        }
-
         # Check if geff_version exists in zattrs
         if "geff" not in group.attrs:
             raise ValueError(
@@ -183,11 +166,7 @@ class GeffMetadata(BaseModel):
                 f"/dataset.zarr/)."
             )
 
-        geff_data = group.attrs["geff"]
-        if ignored_attrs:
-            geff_data.update(ignored_attrs)
-
-        return cls(**geff_data)
+        return cls(**group.attrs["geff"])
 
 
 class GeffSchema(BaseModel):

@@ -83,7 +83,6 @@ class TestMetadataModel:
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
             ],
             extra=True,
-            ignored_attrs={"foo": "bar"},
         )
         zpath = tmp_path / "test.zarr"
         group = zarr.open(zpath, mode="a")
@@ -168,23 +167,6 @@ class TestAxis:
         # Min > max
         with pytest.raises(ValueError, match=r"Min .* is greater than max .*"):
             Axis(name="test", min=0, max=-10)
-
-    def test_read_write_extra_properties(self, tmp_path):
-        meta = GeffMetadata(
-            geff_version="0.0.1",
-            directed=True,
-            position_prop="position",
-            roi_min=[0, 0, 0],
-            roi_max=[100, 100, 100],
-            axis_names=["t", "y", "x"],
-            axis_units=["min", "nm", "nm"],
-            extra=True,
-        )
-        zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, mode="a")
-        meta.write(group)
-        compare = GeffMetadata.read(group)
-        assert compare == meta
 
 
 def test_write_schema(tmp_path):

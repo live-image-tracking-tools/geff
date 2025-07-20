@@ -129,8 +129,6 @@ def path_w_expected_graph_props(
             }
             graph.add_edge(*edge.tolist(), **props)
 
-        graph.graph["ignored_attrs"] = graph_props.get("ignored_attrs", {})
-
         path = tmp_path / "rw_consistency.zarr/graph"
 
         geff.write_nx(
