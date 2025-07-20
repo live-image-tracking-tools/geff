@@ -8,6 +8,7 @@ import zarr
 
 import geff
 from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.write_arrays import write_arrays
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -71,7 +72,7 @@ def write_sg(
     )
 
     # write to geff
-    geff.write_arrays(
+    write_arrays(
         geff_path=path,
         node_ids=graph.nodes,
         node_props={
