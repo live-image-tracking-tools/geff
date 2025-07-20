@@ -29,8 +29,15 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
     """
     _min = None
     _max = None
-    for _, data in graph.nodes(data=True):
-        pos = np.array([data[name] for name in axis_names])
+    for node, data in graph.nodes(data=True):
+        try:
+            pos = np.array([data[name] for name in axis_names])
+        except KeyError as e:
+            for name in axis_names:
+                if name not in data:
+                    raise ValueError(
+                        f"Spatiotemporal property {name} not found in node {node}"
+                    ) from e
         if _min is None or _max is None:
             _min = pos
             _max = pos
