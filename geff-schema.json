@@ -1,12 +1,6 @@
 {
   "$defs": {
-<<<<<<< HEAD
-    "GeffMetadata": {
-      "additionalProperties": true,
-      "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
-=======
     "Axis": {
->>>>>>> 647692e
       "properties": {
         "name": {
           "title": "Name",
