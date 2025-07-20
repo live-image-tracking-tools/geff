@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from typing import TYPE_CHECKING, Literal
 
 import networkx as nx
@@ -14,6 +15,10 @@ from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
@@ -48,12 +53,57 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
     return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
 
 
+def _get_graph_existing_metadata(
+    graph: nx.Graph,
+    metadata: GeffMetadata | None = None,
+    axis_names: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+) -> tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
+    """Get the existing metadata from a graph.
+
+    If axis lists are provided, they will override the graph properties and metadata.
+    If metadata is provided, it will override the graph properties.
+    If neither are provided, the graph properties will be used.
+
+    Args:
+        graph (nx.Graph): A networkx graph
+        metadata (GeffMetadata, optional): The metadata of the graph. Defaults to None.
+        axis_names (list[str | None], optional): The names of the spatial dims. Defaults to None.
+        axis_units (list[str | None], optional): The units of the spatial dims. Defaults to None.
+        axis_types (list[str | None], optional): The types of the spatial dims. Defaults to None.
+
+    Returns:
+        tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
+            A tuple with the names of the spatial dims, the units of the spatial dims,
+            and the types of the spatial dims. None if not provided.
+    """
+    lists_provided = any(x is not None for x in [axis_names, axis_units, axis_types])
+    metadata_provided = metadata is not None
+
+    if lists_provided and metadata_provided:
+        warnings.warn(
+            "Both axis lists and metadata provided. Overriding metadata with axis lists.",
+            stacklevel=2,
+        )
+
+    # If any axis lists is not provided, fallback to metadata if provided
+    if metadata is not None and metadata.axes is not None:
+        # the x = x or y is a python idiom for setting x to y if x is None, otherwise x
+        axis_names = axis_names or [axis.name for axis in metadata.axes]
+        axis_units = axis_units or [axis.unit for axis in metadata.axes]
+        axis_types = axis_types or [axis.type for axis in metadata.axes]
+
+    return axis_names, axis_units, axis_types
+
+
 def write_nx(
     graph: nx.Graph,
     path: str | Path,
+    metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
-    axis_units: list[str] | None = None,
-    axis_types: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
     zarr_format: Literal[2, 3] | None = 2,
 ):
     """Write a networkx graph to the geff file format
@@ -62,15 +112,18 @@ def write_nx(
         graph (nx.Graph): A networkx graph
         path (str | Path): The path to the output zarr. Opens in append mode,
             so will only overwrite geff-controlled groups.
+        metadata (GeffMetadata, optional): The original metadata of the graph.
+            Defaults to None. If provided, will override the graph properties.
         axis_names (Optional[list[str]], optional): The names of the spatial dims
             represented in position property. Defaults to None. Will override
-            value in graph properties if provided.
+            both value in graph properties and metadata if provided.
         axis_units (Optional[list[str]], optional): The units of the spatial dims
             represented in position property. Defaults to None. Will override value
-            in graph properties if provided.
+            both value in graph properties and metadata if provided.
         axis_types (Optional[list[str]], optional): The types of the spatial dims
             represented in position property. Usually one of "time", "space", or "channel".
-            Defaults to None. Will override value in graph properties if provided.
+            Defaults to None. Will override both value in graph properties and metadata
+            if provided.
         zarr_format (int, optional): The version of zarr to write.
             Defaults to 2.
     """
@@ -79,10 +132,10 @@ def write_nx(
         group = zarr.open_group(path, mode="a", zarr_format=zarr_format)
     else:
         group = zarr.open_group(path, mode="a")
-    # TODO: update this once we have changed/standardized how we are handling pre-existing metadata
-    axis_names = axis_names if axis_names is not None else graph.graph.get("axis_names", None)
-    axis_units = axis_units if axis_units is not None else graph.graph.get("axis_units", None)
-    axis_types = axis_types if axis_types is not None else graph.graph.get("axis_types", None)
+
+    axis_names, axis_units, axis_types = _get_graph_existing_metadata(
+        graph, metadata, axis_names, axis_units, axis_types
+    )
 
     node_props = list({k for _, data in graph.nodes(data=True) for k in data})
 
@@ -151,7 +204,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
+def read_nx(path: Path | str, validate: bool = True) -> tuple[nx.Graph, GeffMetadata]:
     """Read a geff file into a networkx graph. Metadata properties will be stored in
     the graph properties, accessed via `G.graph[key]` where G is a networkx graph.
 
@@ -178,8 +231,6 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
 
     # read meta-data
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
-    for key, val in metadata:
-        graph.graph[key] = val
 
     nodes = group["nodes/ids"][:]
     graph.add_nodes_from(nodes.tolist())
@@ -197,4 +248,4 @@ def read_nx(path: Path | str, validate: bool = True) -> nx.Graph:
             for name in group["edges/props"]:
                 _set_property_values(graph, edges, group, name, nodes=False)
 
-    return graph
+    return graph, metadata
