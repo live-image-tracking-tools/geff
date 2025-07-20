@@ -83,7 +83,7 @@ update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "coverage run -m pytest"
-benchmark = { cmd = "pytest tests/benfch.py" }
+benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.bench.tasks]
 benchmark = "pytest tests/bench.py"
