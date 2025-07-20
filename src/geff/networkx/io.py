@@ -160,7 +160,8 @@ def write_nx(
     )
 
     # Conditionally update metadata with new axes, version, and directedness
-    # If metadata is provided, extra properties are preserved; otherwise, a new GeffMetadata object is created
+    # If metadata is provided, extra properties are preserved; otherwise, a new GeffMetadata object
+    # is created
     if metadata is not None:
         import copy
         metadata = copy.deepcopy(metadata)
