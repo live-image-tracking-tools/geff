@@ -32,18 +32,19 @@ def test_read_write_consistency(
     # with pytest.warns(UserWarning, match="Potential missing values for attr"):
     # TODO: make sure test data has missing values, otherwise this warning will
     # not be triggered
-    graph = geff.read_sg(path)
+    graph = geff.read_sg(path, position_attr="pos")
 
     np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(graph_attrs["nodes"]))
     np.testing.assert_array_equal(np.sort(graph.edges), np.sort(graph_attrs["edges"]))
 
     for idx, node in enumerate(graph_attrs["nodes"]):
         np.testing.assert_array_equal(
-            graph.node_attrs[node].pos, graph_attrs["node_positions"][idx]
+            graph.node_attrs[node].pos,
+            np.array([graph_attrs[d][idx] for d in ["t", "z", "y", "x"]]),
         )
 
     for idx, edge in enumerate(graph_attrs["edges"]):
-        for name, values in graph_attrs["edge_attrs"].items():
+        for name, values in graph_attrs["edge_props"].items():
             assert getattr(graph.edge_attrs[edge], name) == values[idx].item()
 
 
