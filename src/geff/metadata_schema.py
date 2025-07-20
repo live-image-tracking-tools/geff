@@ -125,15 +125,22 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
-
-    geff_version: str = Field(
-        default_factory=lambda: version("geff"),
-        validate_default=True,
-        pattern=SUPPORTED_VERSIONS_REGEX,
+    model_config = ConfigDict(
+        title="geff_metadata",
+        validate_assignment=True,
     )
+
+    geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
     directed: bool
     axes: Sequence[Axis] | None = None
+
+    def __init__(self, **data):
+        # We want to keep the geff_version Field required in the schema,
+        # but we also want to assign a default value if it is not provided.
+        # Hence this custom __init__ method.
+        if "geff_version" not in data:
+            data["geff_version"] = version("geff")
+        super().__init__(**data)
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
