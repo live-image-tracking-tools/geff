@@ -3,6 +3,7 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING
 
+import numpy as np
 import spatial_graph as sg
 import zarr
 
@@ -60,6 +61,26 @@ def write_sg(
         warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
         return
 
+    if axis_names is None:
+        assert graph.dims <= 4, (
+            "For SpatialGraphs with more than 4 dimension, axis_names has to be provided."
+        )
+        axis_names = ["t", "z", "y", "x"][-graph.dims :]
+    else:
+        assert len(axis_names) == graph.dims, (
+            "The number of axis names has to match the dimensionality of the SpatialGraph"
+        )
+
+    if axis_types is not None:
+        assert len(axis_types) == graph.dims, (
+            "The number of axis types has to match the dimensionality of the SpatialGraph"
+        )
+
+    if axis_units is not None:
+        assert len(axis_units) == graph.dims, (
+            "The number of axis types has to match the dimensionality of the SpatialGraph"
+        )
+
     # create metadata
     roi_min, roi_max = graph.roi
     axes = axes_from_lists(
@@ -78,6 +99,7 @@ def write_sg(
         node_props={
             name: getattr(graph.node_attrs, name) for name in graph.node_attr_dtypes.keys()
         },
+        node_props_unsquish={graph.position_attr: axis_names},
         edge_ids=graph.edges,
         edge_props={
             name: getattr(graph.edge_attrs, name) for name in graph.edge_attr_dtypes.keys()
@@ -86,7 +108,9 @@ def write_sg(
     )
 
 
-def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
+def read_sg(
+    path: Path | str, validate: bool = True, position_attr: str = "position"
+) -> sg.SpatialGraph:
     """Read a geff file into a SpatialGraph.
 
     Because SpatialGraph does not support missing/ragged node/edge attributes,
@@ -105,6 +129,11 @@ def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
             before loading into memory. If set to False and there are format
             issues, will likely fail with a cryptic error. Defaults to True.
 
+        position_attr (str, optional):
+
+            How to call the position attribute in the returned SpatialGraph.
+            Defaults to "position".
+
     Returns:
 
         A SpatialGraph containing the graph that was stored in the geff file
@@ -120,8 +149,10 @@ def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
     group = zarr.open(path, mode="r")
     metadata = GeffMetadata.read(group)
 
-    position_attr = metadata.position_prop
-    ndims = group[f"nodes/props/{position_attr}/values"].shape[1]
+    assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"
+
+    position_attrs = [axis.name for axis in metadata.axes]
+    ndims = len(position_attrs)
 
     def get_dtype_str(dataset):
         dtype = dataset.dtype
@@ -156,6 +187,14 @@ def read_sg(path: Path | str, validate: bool = True) -> sg.SpatialGraph:
             )
     node_attrs = {name: group[f"nodes/props/{name}/values"][:] for name in group["nodes/props"]}
     edge_attrs = {name: group[f"edges/props/{name}/values"][:] for name in group["edges/props"]}
+
+    # squish position attributes together into one position attribute
+    position = np.stack([node_attrs[name] for name in position_attrs], axis=1)
+    for name in position_attrs:
+        del node_attrs[name]
+        del node_attr_dtypes[name]
+    node_attrs[position_attr] = position
+    node_attr_dtypes[position_attr] = get_dtype_str(position)
 
     # create graph
     graph = sg.SpatialGraph(
