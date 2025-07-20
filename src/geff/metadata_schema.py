@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 import json
-import re
 import warnings
 from importlib.metadata import version
 from importlib.resources import files
 from pathlib import Path
 from typing import Sequence
 
-import yaml
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
-
-import geff
 
 from .units import (
     VALID_AXIS_TYPES,
@@ -24,15 +20,7 @@ from .units import (
     validate_time_unit,
 )
 
-with (files(geff) / "supported_versions.yml").open() as f:
-    SUPPORTED_VERSIONS = yaml.safe_load(f)["versions"]
-
-
-def _get_versions_regex(versions: list[str]):
-    return r"|".join([rf"({re.escape(version)})" for version in versions])
-
-
-SUPPORTED_VERSIONS_REGEX = _get_versions_regex(SUPPORTED_VERSIONS)
+VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
 
 class Axis(BaseModel):
@@ -76,10 +64,10 @@ class Axis(BaseModel):
 
 def axes_from_lists(
     axis_names: Sequence[str] | None = None,
-    axis_units: Sequence[str] | None = None,
-    axis_types: Sequence[str] | None = None,
-    roi_min: Sequence[float] | None = None,
-    roi_max: Sequence[float] | None = None,
+    axis_units: Sequence[str | None] | None = None,
+    axis_types: Sequence[str | None] | None = None,
+    roi_min: Sequence[float | None] | None = None,
+    roi_max: Sequence[float | None] | None = None,
 ) -> list[Axis]:
     """Create a list of Axes objects from lists of axis names, units, types, mins,
     and maxes. If axis_names is None, there are no spatial axes and the list will
@@ -91,13 +79,13 @@ def axes_from_lists(
     Args:
         axis_names (list[str] | None, optional): Names of properties for spatiotemporal
             axes. Defaults to None.
-        axis_units (list[str] | None, optional): Units corresponding to named properties.
+        axis_units (list[str | None] | None, optional): Units corresponding to named properties.
             Defaults to None.
-        axis_types (list[str] | None, optional): Axis type for each property.
+        axis_types (list[str | None] | None, optional): Axis type for each property.
             Choose from "space", "time", "channel". Defaults to None.
-        roi_min (list[float] | None, optional): Minimum value for each property.
+        roi_min (list[float | None] | None, optional): Minimum value for each property.
             Defaults to None.
-        roi_max (list[float] | None, optional): Maximum value for each property.
+        roi_max (list[float | None] | None, optional): Maximum value for each property.
             Defaults to None.
 
     Returns:
@@ -130,7 +118,14 @@ class GeffMetadata(BaseModel):
         validate_assignment=True,
     )
 
-    geff_version: str = Field(pattern=SUPPORTED_VERSIONS_REGEX)
+    geff_version: str = Field(
+        ...,
+        pattern=VERSION_PATTERN,
+        description=(
+            "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
+            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18)."
+        ),
+    )
     directed: bool
     axes: Sequence[Axis] | None = None
 
