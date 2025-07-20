@@ -135,15 +135,17 @@ class GeffReader:
         Returns:
             GraphDict: A graph represented in graph dict format.
         """
-        nodes = np.array(self.nodes[node_mask if node_mask is not None else ...])
+        nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray] = {}
         for name, props in self.node_props.items():
             node_props[name] = {
-                "values": np.array(props["values"][node_mask if node_mask is not None else ...])
+                "values": np.array(
+                    props["values"][node_mask.tolist() if node_mask is not None else ...]
+                )
             }
             if "missing" in props:
                 node_props[name]["missing"] = np.array(
-                    props["missing"][node_mask if node_mask is not None else ...],
+                    props["missing"][node_mask.tolist() if node_mask is not None else ...],
                     dtype=bool,
                 )
 
@@ -160,11 +162,13 @@ class GeffReader:
         edge_props: dict[str, PropDictNpArray] = {}
         for name, props in self.edge_props.items():
             edge_props[name] = {
-                "values": np.array(props["values"][edge_mask if edge_mask is not None else ...])
+                "values": np.array(
+                    props["values"][edge_mask.tolist() if edge_mask is not None else ...]
+                )
             }
             if "missing" in props:
                 edge_props[name]["missing"] = np.array(
-                    props["missing"][edge_mask if edge_mask is not None else ...],
+                    props["missing"][edge_mask.tolist() if edge_mask is not None else ...],
                     dtype=bool,
                 )
 
