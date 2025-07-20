@@ -90,6 +90,7 @@
         }
       },
       "required": [
+        "geff_version",
         "directed"
       ],
       "title": "geff_metadata",
