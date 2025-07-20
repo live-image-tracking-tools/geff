@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.file_reader import FileReader
+from geff.geff_reader import GeffReader
 from geff.networkx.io import _ingest_dict_nx
 
 node_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
@@ -29,7 +29,7 @@ def test_build_w_masked_nodes(
     path, graph_props = path_w_expected_graph_props(
         node_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
-    file_reader = FileReader(path)
+    file_reader = GeffReader(path)
 
     n_nodes = file_reader.nodes.shape[0]
     node_mask = np.zeros(n_nodes, dtype=bool)
@@ -61,7 +61,7 @@ def test_build_w_masked_edges(
     path, graph_props = path_w_expected_graph_props(
         node_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
-    file_reader = FileReader(path)
+    file_reader = GeffReader(path)
 
     n_edges = file_reader.edges.shape[0]
     edge_mask = np.zeros(n_edges, dtype=bool)
@@ -89,7 +89,7 @@ def test_build_w_masked_nodes_edges(
     path, graph_props = path_w_expected_graph_props(
         node_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
-    file_reader = FileReader(path)
+    file_reader = GeffReader(path)
 
     n_nodes = file_reader.nodes.shape[0]
     node_mask = np.zeros(n_nodes, dtype=bool)
@@ -125,7 +125,7 @@ def test_read_node_props(path_w_expected_graph_props):
         directed=True,
     )
 
-    file_reader = FileReader(path)
+    file_reader = GeffReader(path)
 
     # make sure the node props are also masked
     n_nodes = file_reader.nodes.shape[0]
@@ -154,7 +154,7 @@ def test_read_edge_props(path_w_expected_graph_props):
         directed=True,
     )
 
-    file_reader = FileReader(path)
+    file_reader = GeffReader(path)
 
     # make sure props are also masked
     n_edges = file_reader.edges.shape[0]

@@ -8,7 +8,7 @@ import numpy as np
 import zarr
 
 import geff
-from geff.file_reader import read_to_dict
+from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.writer_helper import write_props
 

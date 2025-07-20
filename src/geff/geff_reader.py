@@ -9,7 +9,7 @@ from .dict_representation import GraphDict, PropDictNpArray, PropDictZArray
 from .metadata_schema import GeffMetadata
 
 
-class FileReader:
+class GeffReader:
     """
     File reader class that allows subset reading to an intermediate dict representation.
 
@@ -208,7 +208,7 @@ def read_to_dict(
     if isinstance(path, str):
         path = Path(path)
     path = path.expanduser()
-    file_reader = FileReader(path, validate)
+    file_reader = GeffReader(path, validate)
 
     file_reader.read_node_props(node_props)
     file_reader.read_edge_props(edge_props)
