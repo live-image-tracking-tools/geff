@@ -62,8 +62,6 @@ def write_nx(
         graph (nx.Graph): A networkx graph
         path (str | Path): The path to the output zarr. Opens in append mode,
             so will only overwrite geff-controlled groups.
-        position_prop (Optional[str]): The name of the position property present on every node,
-            if present. Defaults to None.
         axis_names (Optional[list[str]], optional): The names of the spatial dims
             represented in position property. Defaults to None. Will override
             value in graph properties if provided.
@@ -96,6 +94,7 @@ def write_nx(
         edge_data,
         node_props,
         edge_props,
+        axis_names,
     )
 
     # write metadata

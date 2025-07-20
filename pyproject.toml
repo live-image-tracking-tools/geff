@@ -27,6 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [project.optional-dependencies]
@@ -82,8 +83,8 @@ bench = { features = ["dev", "bench"], solve-group = "default" }
 update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
-test = "pytest tests"
-benchmark = { cmd = "pytest tests/bench.py" }
+test = "coverage run -m pytest"
+benchmark = { cmd = "pytest tests/benfch.py" }
 
 [tool.pixi.feature.bench.tasks]
 benchmark = "pytest tests/bench.py"
