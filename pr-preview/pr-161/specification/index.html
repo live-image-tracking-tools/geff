@@ -753,7 +753,8 @@ If not provided, the version will be set to the current geff package version.</p
             />
         </svg>
     <a href="#geff_directed" onclick="anchorLink('geff_directed')">directed</a></div><h4>Directed</h4><span class="badge badge-dark value-type">Type: boolean</span><br/>
-
+<span class="description"><p>True if the graph is directed, otherwise False.</p>
+</span>
 
 
 
@@ -793,7 +794,16 @@ If not provided, the version will be set to the current geff package version.</p
             />
         </svg>
     <a href="#geff_axes" onclick="anchorLink('geff_axes')">axes</a></div><h4>Axes</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="geff_axes_anyOf"><h2 class="handle">
+<div class="description collapse" id="collapseDescription_geff_axes">
+            <p>Optional list of Axis objects defining the axes of each node in the graph.<br />
+Each object's <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> keymust be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information. Each axis can additionally optionally define a <code>unit</code> key, which should match the validOME-Zarr units, and <code>min</code> and <code>max</code> keys to define the range of the axis.</p>
+
+        </div>
+        <div>
+            <a class="collapse-description-link collapsed" data-toggle="collapse" href="#collapseDescription_geff_axes"
+               aria-expanded="false" aria-controls="collapseDescriptiongeff_axes"
+            ></a>
+        </div><div class="any-of-value" id="geff_axes_anyOf"><h2 class="handle">
   <label>Any of</label>
 </h2><ul class="nav nav-tabs" id="tabsgeff_axes_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
