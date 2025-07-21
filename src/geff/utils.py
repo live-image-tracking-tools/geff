@@ -114,13 +114,19 @@ def check_equiv_geff(path_a, path_b):
         assert ga["ids"].shape == gb["ids"].shape
         assert ga["ids"].dtype == gb["ids"].dtype
 
-        # Check that properties in each geff are the same
-        assert set(ga["props"]) == set(gb["props"])
+        ga_has_props = "props" in ga
+        gb_has_props = "props" in gb
 
-        # Check shape and dtype of each prop
-        for prop in ga["props"]:
-            if "missing" in ga[f"props/{prop}"]:
-                assert ga[f"props/{prop}/missing"].shape == gb[f"props/{prop}/missing"].shape
-                assert ga[f"props/{prop}/missing"].dtype == gb[f"props/{prop}/missing"].dtype
-            assert ga[f"props/{prop}/values"].shape == gb[f"props/{prop}/values"].shape
-            assert ga[f"props/{prop}/values"].dtype == gb[f"props/{prop}/values"].dtype
+        assert ga_has_props == gb_has_props
+
+        if ga_has_props:
+            # Check that properties in each geff are the same
+            assert set(ga["props"]) == set(gb["props"])
+
+            # Check shape and dtype of each prop
+            for prop in ga["props"]:
+                if "missing" in ga[f"props/{prop}"]:
+                    assert ga[f"props/{prop}/missing"].shape == gb[f"props/{prop}/missing"].shape
+                    assert ga[f"props/{prop}/missing"].dtype == gb[f"props/{prop}/missing"].dtype
+                assert ga[f"props/{prop}/values"].shape == gb[f"props/{prop}/values"].shape
+                assert ga[f"props/{prop}/values"].dtype == gb[f"props/{prop}/values"].dtype
