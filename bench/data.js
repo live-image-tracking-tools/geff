@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753120721982,
+  "lastUpdate": 1753124592539,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2295,6 +2295,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5486298691905883",
             "extra": "mean: 15.27265558033334 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "talley.lambert@gmail.com",
+            "name": "Talley Lambert",
+            "username": "tlambert03"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9b0dd4321244a13417927c13f752be6a3f062cbf",
+          "message": "Update pre-commit hooks and fix linting issues (#171)\n\nThis makes a couple small changes to linting rules, and then reruns\npre-commit:\n\n1. adds `target-version = \"py310\"` to ruff rules, (matching the project\nmin)\n2. adds fix=true to ruff rules in pyproject (convenient when running\nruff format in vscode)\n3. puts ruff rules in a `[tool.ruff.lint]` section (removing warnings\nfrom ruff when running ruff)\n4. runs pre-commit, which makes some changes due to the higher\ntarget-version, along with the `UP` rule\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2025-07-21T15:00:29-04:00",
+          "tree_id": "c5d542b036b1d62bc46fe710dab5f948fc21dbe5",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/9b0dd4321244a13417927c13f752be6a3f062cbf"
+        },
+        "date": 1753124592059,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12144779556639942,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1709096071845848",
+            "extra": "mean: 8.23399054166667 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.19054228666099,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0016819014199244513",
+            "extra": "mean: 52.10900166667424 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06543321426524107,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5189815032443579",
+            "extra": "mean: 15.282758324333338 sec\nrounds: 3"
           }
         ]
       }
