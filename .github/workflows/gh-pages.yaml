@@ -33,14 +33,15 @@ jobs:
       - name: Install dependencies
         run: pip install -e . --group docs
 
-      - id: get_version
-        uses: battila7/get-version-action@v2
-
       - name: configure git
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git fetch origin gh-pages --depth=1
+
+      - id: get_version
+        if: github.event_name == 'push'
+        uses: battila7/get-version-action@v2
 
       # if this workflow is triggered by a push event, deploy the docs to gh-pages
       - name: Push changes to gh-pages branch
@@ -51,14 +52,15 @@ jobs:
       - name: Build docs
         if: github.event_name == 'pull_request'
         run: mkdocs build --strict
-        
-      - name: Deploy gh-pages preview  # https://github.com/rossjrw/pr-preview-action
+
+      - name: Deploy gh-pages preview # https://github.com/rossjrw/pr-preview-action
         if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed'
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: ./site/
 
   benchmark:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: Report benchmarks on gh-pages
     runs-on: ubuntu-latest
     concurrency:
