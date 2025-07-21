@@ -91,8 +91,7 @@ build = "*"
 build = "python -m build"
 
 [tool.pixi.feature.docs.tasks]
-preview-docs = {cmd = "mkdocs serve", depends-on = "schema-docs"}
-schema-docs = "generate-schema-doc geff-schema.json docs/schema/schema.html"
+preview-docs = {cmd = "mkdocs serve"}
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
