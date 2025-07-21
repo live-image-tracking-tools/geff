@@ -9,8 +9,8 @@ from skimage.measure import regionprops
 from zarr.storage import StoreLike
 
 import geff
-from geff.metadata_schema import GeffMetadata
-from geff.writer_helper import write_props
+from geff.metadata_schema import Axis, GeffMetadata
+from geff.write_arrays import write_arrays
 
 
 def from_ctc_to_geff(
@@ -57,9 +57,15 @@ def from_ctc_to_geff(
         shutil.rmtree(geff_path)
 
     tracks: dict[int, list[int]] = {}
-    nodes = []
+
     edges = []
-    node_dict = {}
+    node_props: dict[str, list[int | float]] = {
+        "id": [],
+        "tracklet_id": [],
+        "t": [],
+        "x": [],
+        "y": [],
+    }
 
     segm_array = None
     node_id = 0
@@ -72,6 +78,9 @@ def from_ctc_to_geff(
         frame = tifffile.imread(filepath)
 
         if segmentation_store is not None and segm_array is None:
+            if frame.ndim == 3:
+                node_props["z"] = []
+
             # created in first iteration
             if tczyx:
                 n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
@@ -90,16 +99,12 @@ def from_ctc_to_geff(
 
         for obj in regionprops(frame):
             tracklet_id = obj.label
-            node_dict = {
-                "id": node_id,
-                "tracklet_id": tracklet_id,
-                "t": t,
-            }
+            node_props["id"].append(node_id)
+            node_props["tracklet_id"].append(tracklet_id)
+            node_props["t"].append(t)
             # using y,x for 2d and z,y,x for 3d
             for c, v in zip(("x", "y", "z"), obj.centroid[::-1], strict=False):
-                node_dict[c] = v
-
-            nodes.append(node_dict)
+                node_props[c].append(v)
 
             if tracklet_id not in tracks:
                 tracks[tracklet_id] = []
@@ -107,7 +112,7 @@ def from_ctc_to_geff(
             tracks[tracklet_id].append(node_id)
             node_id += 1
 
-    if len(nodes) == 0:
+    if len(node_props["id"]) == 0:
         raise ValueError(f"No nodes found in the CTC directory {ctc_path}")
 
     for node_ids in tracks.values():
@@ -129,27 +134,28 @@ def from_ctc_to_geff(
         # forward in time (parent -> child)
         edges.append((parent_node_id, child_node_id))
 
-    axis_names = ["t", "z", "y", "x"] if "z" in node_dict else ["t", "y", "x"]
+    axis_names = [
+        Axis(name="t", type="time"),
+        Axis(name="y", type="space"),
+        Axis(name="x", type="space"),
+    ]
+    if "z" in node_props:
+        axis_names.insert(1, Axis(name="z", type="space"))
 
-    # TODO:
-    # call new write_geff function to convert to geff
-    group = zarr.open(geff_path, mode="w")
-    write_props(
-        group=group.require_group("nodes"),
-        data=[(d.pop("id"), d) for d in nodes],
-        prop_names=["track_id", *axis_names],
-        axis_names=axis_names,
+    node_ids = np.asarray(node_props.pop("id"), dtype=int)
+
+    write_arrays(
+        geff_path=geff_path,
+        node_ids=node_ids,
+        node_props={name: (np.asarray(values), None) for name, values in node_props.items()},
+        edge_ids=np.asarray(edges, dtype=node_ids.dtype),
+        edge_props={},
+        metadata=GeffMetadata(
+            geff_version=geff.__version__,
+            axes=axis_names,
+            directed=True,
+        ),
     )
-    write_props(
-        group=group.require_group("edges"),
-        data=[(e, {}) for e in edges],
-        prop_names=[],
-    )
-    metadata = GeffMetadata(
-        geff_version=geff.__version__,
-        directed=True,
-    )
-    metadata.write(group)
 
 
 def from_ctc_to_geff_cli(

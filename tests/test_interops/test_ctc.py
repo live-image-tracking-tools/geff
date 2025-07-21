@@ -91,7 +91,7 @@ def test_ctc_to_geff(
 
     assert geff_path.exists()
 
-    graph = read_nx(geff_path)
+    graph, _ = read_nx(geff_path)
 
     expected_nodes = {0, 1, 2, 3, 4, 5}
     expected_edges = {(0, 2), (2, 3), (2, 4), (1, 5)}
@@ -100,7 +100,7 @@ def test_ctc_to_geff(
     assert set(graph.edges()) == expected_edges
 
     for _, data in graph.nodes(data=True):
-        for key in ["track_id", "t", "y", "x"]:
+        for key in ["tracklet_id", "t", "y", "x"]:
             assert key in data
 
     expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
