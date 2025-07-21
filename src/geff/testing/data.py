@@ -1,8 +1,9 @@
-from pathlib import Path
 from typing import Any, Literal, Optional, TypedDict, cast
 
 import networkx as nx
 import numpy as np
+import zarr
+import zarr.storage
 from numpy.typing import NDArray
 
 import geff
@@ -214,8 +215,8 @@ def create_memory_mock_geff(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
-) -> tuple[Path, GraphAttrs]:
-    """Create a mock geff graph in memory and return the path and graph properties.
+) -> tuple[zarr.Group, GraphAttrs]:
+    """Create a mock geff graph in memory and return the zarr store and graph properties.
 
     Args:
         node_id_dtype: Data type for node IDs
@@ -231,69 +232,55 @@ def create_memory_mock_geff(
         include_x: Whether to include x dimension
 
     Returns:
-        Tuple of (path to geff file, graph properties dictionary)
+        Tuple of (zarr store in memory, graph properties dictionary)
     """
-    import shutil
-    import tempfile
+    graph_props = create_dummy_graph_props(
+        node_id_dtype=node_id_dtype,
+        node_prop_dtypes=node_prop_dtypes,
+        edge_prop_dtypes=edge_prop_dtypes,
+        directed=directed,
+        num_nodes=num_nodes,
+        num_edges=num_edges,
+        extra_node_props=extra_node_props,
+        include_t=include_t,
+        include_z=include_z,
+        include_y=include_y,
+        include_x=include_x,
+    )
 
-    # Create a temporary directory
-    temp_dir = Path(tempfile.mkdtemp())
+    # write graph with networkx api
+    graph = nx.DiGraph() if directed else nx.Graph()
 
-    try:
-        graph_props = create_dummy_graph_props(
-            node_id_dtype=node_id_dtype,
-            node_prop_dtypes=node_prop_dtypes,
-            edge_prop_dtypes=edge_prop_dtypes,
-            directed=directed,
-            num_nodes=num_nodes,
-            num_edges=num_edges,
-            extra_node_props=extra_node_props,
-            include_t=include_t,
-            include_z=include_z,
-            include_y=include_y,
-            include_x=include_x,
-        )
+    for idx, node in enumerate(graph_props["nodes"]):
+        props = {
+            name: prop_array[idx] for name, prop_array in graph_props["extra_node_props"].items()
+        }
+        node_attrs = {}
 
-        # write graph with networkx api
-        graph = nx.DiGraph() if directed else nx.Graph()
+        # Only add spatial dimensions that are included
+        if include_t and len(graph_props["t"]) > 0:
+            node_attrs["t"] = graph_props["t"][idx]
+        if include_z and len(graph_props["z"]) > 0:
+            node_attrs["z"] = graph_props["z"][idx]
+        if include_y and len(graph_props["y"]) > 0:
+            node_attrs["y"] = graph_props["y"][idx]
+        if include_x and len(graph_props["x"]) > 0:
+            node_attrs["x"] = graph_props["x"][idx]
 
-        for idx, node in enumerate(graph_props["nodes"]):
-            props = {
-                name: prop_array[idx]
-                for name, prop_array in graph_props["extra_node_props"].items()
-            }
-            node_attrs = {}
+        graph.add_node(node, **node_attrs, **props)
 
-            # Only add spatial dimensions that are included
-            if include_t and len(graph_props["t"]) > 0:
-                node_attrs["t"] = graph_props["t"][idx]
-            if include_z and len(graph_props["z"]) > 0:
-                node_attrs["z"] = graph_props["z"][idx]
-            if include_y and len(graph_props["y"]) > 0:
-                node_attrs["y"] = graph_props["y"][idx]
-            if include_x and len(graph_props["x"]) > 0:
-                node_attrs["x"] = graph_props["x"][idx]
+    for idx, edge in enumerate(graph_props["edges"]):
+        props = {name: prop_array[idx] for name, prop_array in graph_props["edge_props"].items()}
+        graph.add_edge(*edge.tolist(), **props)
 
-            graph.add_node(node, **node_attrs, **props)
+    # Create memory store and write graph to it
+    store = zarr.storage.MemoryStore()
 
-        for idx, edge in enumerate(graph_props["edges"]):
-            props = {
-                name: prop_array[idx] for name, prop_array in graph_props["edge_props"].items()
-            }
-            graph.add_edge(*edge.tolist(), **props)
+    geff.write_nx(
+        graph,
+        store,
+        axis_names=list(graph_props["axis_names"]),
+        axis_units=list(graph_props["axis_units"]),
+    )
 
-        path = temp_dir / "rw_consistency.zarr/graph"
-
-        geff.write_nx(
-            graph,
-            path,
-            axis_names=list(graph_props["axis_names"]),
-            axis_units=list(graph_props["axis_units"]),
-        )
-
-        return path, graph_props
-
-    except Exception:
-        # Clean up on error
-        shutil.rmtree(temp_dir)
-        raise
+    return store, graph_props

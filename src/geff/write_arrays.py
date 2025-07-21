@@ -1,14 +1,14 @@
-from pathlib import Path
 from typing import Literal
 
 import numpy as np
 import zarr
+from zarr.storage import StoreLike
 
 from .metadata_schema import GeffMetadata
 
 
 def write_arrays(
-    geff_path: Path | str,
+    geff_store: StoreLike,
     node_ids: np.ndarray,
     node_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
     edge_ids: np.ndarray,
@@ -22,31 +22,32 @@ def write_arrays(
     as an optional flag.
 
     Args:
-        geff_path (Path | str): The path to the zarr group where the graph will be written
+        geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
         node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
             edge_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): A dictionary
+        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
             from node property names to (values, missing) arrays, which should have same
             length as node_ids.
         edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
             as node_ids.
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): A dictionary
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
             from edge property names to (values, missing) arrays, which should have same
             length as edge_ids.
         metadata (GeffMetadata): The metadata of the graph.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
     """
-    write_id_arrays(geff_path, node_ids, edge_ids)
+    write_id_arrays(geff_store, node_ids, edge_ids)
     if node_props is not None:
-        write_props_arrays(geff_path, "nodes", node_props, zarr_format=zarr_format)
+        write_props_arrays(geff_store, "nodes", node_props, zarr_format=zarr_format)
     if edge_props is not None:
-        write_props_arrays(geff_path, "edges", edge_props, zarr_format=zarr_format)
-    metadata.write(geff_path)
+        write_props_arrays(geff_store, "edges", edge_props, zarr_format=zarr_format)
+    metadata.write(geff_store)
 
 
 def write_id_arrays(
-    geff_path: Path | str,
+    geff_store: StoreLike,
     node_ids: np.ndarray,
     edge_ids: np.ndarray,
     zarr_format: Literal[2, 3] = 2,
@@ -54,7 +55,8 @@ def write_id_arrays(
     """Writes a set of node ids and edge ids to a geff group.
 
     Args:
-        geff_path (Path): path to geff group to write the nodes/ids and edges/ids into
+        geff_store (str | Path | zarr store): path/str to geff group, or the store itself,
+            to write the nodes/ids and edges/ids into
         node_ids (np.ndarray): an array of strings or ints with shape (N,)
         edge_ids (np.ndarray): an array with same type as node_ds and shape (N, 2)
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
@@ -66,17 +68,18 @@ def write_id_arrays(
         raise TypeError(
             f"Node ids and edge ids must have same dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
         )
-    path = str(geff_path)
     if zarr.__version__.startswith("3"):
-        geff_root = zarr.open(path, mode="a", zarr_format=zarr_format)  # zarr format defaulted to 2
+        geff_root = zarr.open(
+            geff_store, mode="a", zarr_format=zarr_format
+        )  # zarr format defaulted to 2
     else:
-        geff_root = zarr.open(path, mode="a")
+        geff_root = zarr.open(geff_store, mode="a")
     geff_root["nodes/ids"] = node_ids
     geff_root["edges/ids"] = edge_ids
 
 
 def write_props_arrays(
-    geff_path: Path | str,
+    geff_store: StoreLike,
     group: str,
     props: dict[str, tuple[np.ndarray, np.ndarray | None]],
     zarr_format: Literal[2, 3] = 2,
@@ -86,9 +89,10 @@ def write_props_arrays(
     Can be used to add new properties if they don't already exist.
 
     Args:
-        geff_path (Path): path to geff group to write the properties to
+        geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
         group (str): "nodes" or "edges"
-        props (dict[str, tuple[np.ndarray, np.ndarray  |  None]]): a dictionary from
+        props (dict[str, tuple[np.ndarray, np.ndarray | None]]): a dictionary from
             attr name to (attr_values, attr_missing) arrays.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
@@ -99,11 +103,12 @@ def write_props_arrays(
     if group not in ["nodes", "edges"]:
         raise ValueError(f"Group must be a 'nodes' or 'edges' group. Found {group}")
 
-    path = str(geff_path)
     if zarr.__version__.startswith("3"):
-        geff_root = zarr.open(path, mode="a", zarr_format=zarr_format)  # zarr format defaulted to 2
+        geff_root = zarr.open(
+            geff_store, mode="a", zarr_format=zarr_format
+        )  # zarr format defaulted to 2
     else:
-        geff_root = zarr.open(path, mode="a")
+        geff_root = zarr.open(geff_store, mode="a")
     props_group = geff_root.require_group(f"{group}/props")
     for prop, arrays in props.items():
         prop_group = props_group.create_group(prop)

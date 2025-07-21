@@ -32,7 +32,7 @@ def test_read_write_consistency(
     include_t,
     include_z,
 ):
-    path, graph_props = create_memory_mock_geff(
+    store, graph_props = create_memory_mock_geff(
         node_id_dtype,
         node_prop_dtypes,
         edge_prop_dtypes,
@@ -41,7 +41,7 @@ def test_read_write_consistency(
         include_z=include_z,
     )
 
-    graph, _ = geff.read_nx(path)
+    graph, _ = geff.read_nx(store)
 
     assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
     assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
@@ -107,7 +107,7 @@ def test_read_write_no_spatial(
 
 def test_write_empty_graph(tmp_path):
     graph = nx.DiGraph()
-    geff.write_nx(graph, axis_names=["t", "y", "x"], path=tmp_path / "empty.zarr")
+    geff.write_nx(graph, axis_names=["t", "y", "x"], store=tmp_path / "empty.zarr")
 
 
 def test_write_nx_with_metadata(tmp_path):
@@ -169,7 +169,7 @@ def test_write_nx_metadata_override_precedence(tmp_path):
     with pytest.warns(UserWarning):
         geff.write_nx(
             graph,
-            path,
+            store=path,
             metadata=metadata,
             axis_names=["x", "y", "z"],  # Override with different axes
             axis_units=["meter", "meter", "meter"],

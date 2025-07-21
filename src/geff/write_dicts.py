@@ -1,14 +1,14 @@
 import warnings
-from pathlib import Path
 from typing import Any, Literal, Sequence
 
 import numpy as np
+from zarr.storage import StoreLike
 
 from .write_arrays import write_id_arrays, write_props_arrays
 
 
 def write_dicts(
-    geff_path: Path | str,
+    geff_store: StoreLike,
     node_data: Sequence[tuple[Any, dict[str, Any]]],
     edge_data: Sequence[tuple[Any, dict[str, Any]]],
     node_prop_names: Sequence[str],
@@ -19,7 +19,8 @@ def write_dicts(
     """Write a dict-like graph representation to geff
 
     Args:
-        geff_path (Path | str): The path to the geff zarr group to write to
+        geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
         node_data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of tuples with
             node_ids and node_data, where node_data is a dictionary from str names
             to any values.
@@ -51,7 +52,7 @@ def write_dicts(
     else:
         edges_arr = np.empty((0, 2), dtype=nodes_arr.dtype)
 
-    write_id_arrays(geff_path, nodes_arr, edges_arr, zarr_format=zarr_format)
+    write_id_arrays(geff_store, nodes_arr, edges_arr, zarr_format=zarr_format)
 
     if axis_names is not None:
         node_prop_names = list(node_prop_names)
@@ -68,10 +69,10 @@ def write_dicts(
                     f"Spatiotemporal property '{axis}' not found in : "
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
-    write_props_arrays(geff_path, "nodes", node_props_dict, zarr_format=zarr_format)
+    write_props_arrays(geff_store, "nodes", node_props_dict, zarr_format=zarr_format)
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
-    write_props_arrays(geff_path, "edges", edge_props_dict, zarr_format=zarr_format)
+    write_props_arrays(geff_store, "edges", edge_props_dict, zarr_format=zarr_format)
 
 
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:

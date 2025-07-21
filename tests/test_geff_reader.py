@@ -26,10 +26,11 @@ def test_build_w_masked_nodes(
     edge_prop_dtypes,
     directed,
 ):
-    path, graph_props = create_memory_mock_geff(
+    store, graph_props = create_memory_mock_geff(
         node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
-    file_reader = GeffReader(path)
+
+    file_reader = GeffReader(store)
 
     n_nodes = file_reader.nodes.shape[0]
     node_mask = np.zeros(n_nodes, dtype=bool)
@@ -57,10 +58,10 @@ def test_build_w_masked_edges(
     edge_prop_dtypes,
     directed,
 ):
-    path, graph_props = create_memory_mock_geff(
+    store, graph_props = create_memory_mock_geff(
         node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
-    file_reader = GeffReader(path)
+    file_reader = GeffReader(store)
 
     n_edges = file_reader.edges.shape[0]
     edge_mask = np.zeros(n_edges, dtype=bool)
@@ -84,10 +85,10 @@ def test_build_w_masked_nodes_edges(
     edge_prop_dtypes,
     directed,
 ):
-    path, graph_props = create_memory_mock_geff(
+    store, graph_props = create_memory_mock_geff(
         node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
-    file_reader = GeffReader(path)
+    file_reader = GeffReader(store)
 
     n_nodes = file_reader.nodes.shape[0]
     node_mask = np.zeros(n_nodes, dtype=bool)
@@ -116,14 +117,14 @@ def test_build_w_masked_nodes_edges(
 
 
 def test_read_node_props():
-    path, graph_props = create_memory_mock_geff(
+    store, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
         node_prop_dtypes={"position": "double", "time": "double"},
         edge_prop_dtypes={"score": "float64", "color": "uint8"},
         directed=True,
     )
 
-    file_reader = GeffReader(path)
+    file_reader = GeffReader(store)
 
     # make sure the node props are also masked
     n_nodes = file_reader.nodes.shape[0]
@@ -145,14 +146,14 @@ def test_read_node_props():
 
 
 def test_read_edge_props():
-    path, graph_props = create_memory_mock_geff(
+    store, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
         node_prop_dtypes={"position": "double", "time": "double"},
         edge_prop_dtypes={"score": "float64", "color": "uint8"},
         directed=True,
     )
 
-    file_reader = GeffReader(path)
+    file_reader = GeffReader(store)
 
     # make sure props are also masked
     n_edges = file_reader.edges.shape[0]
