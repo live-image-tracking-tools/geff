@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -17,7 +17,9 @@ from .units import (
     validate_space_unit,
     validate_time_unit,
 )
-from .shapes import Shape
+
+if TYPE_CHECKING:
+    from .shapes import Shape
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 

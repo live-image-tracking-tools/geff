@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import warnings
-from pydantic import BaseModel, Field, model_validator, field_serializer
-from pydantic_core import core_schema
+from typing import Any
+
 import numpy as np
 import numpy.typing as npt
-from typing import Any
+from pydantic import BaseModel, field_serializer, model_validator
+from pydantic_core import core_schema
 
 VALID_SHAPE_TYPES = [
     "sphere",
