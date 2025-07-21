@@ -26,4 +26,5 @@ def validate_geff_edges(group):
 
     return all_edges_valid, invalid_edges
 
-
+def validate_seg_id(group):
+    pass
