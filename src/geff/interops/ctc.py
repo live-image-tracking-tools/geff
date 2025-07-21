@@ -6,6 +6,7 @@ import tifffile
 import typer
 import zarr
 from skimage.measure import regionprops
+from zarr.storage import StoreLike
 
 import geff
 from geff.metadata_schema import GeffMetadata
@@ -15,6 +16,8 @@ from geff.writer_helper import write_props
 def from_ctc_to_geff(
     ctc_path: Path,
     geff_path: Path,
+    segmentation_store: StoreLike | None = None,
+    tczyx: bool = False,
     overwrite: bool = False,
 ) -> None:
     """
@@ -23,6 +26,9 @@ def from_ctc_to_geff(
     Args:
         ctc_path: The path to the CTC file.
         geff_path: The path to the GEFF file.
+        segmentation_store: The path or store to the segmentation file.
+                            If not provided, it won't be exported.
+        tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite: Whether to overwrite the GEFF file if it already exists.
     """
     ctc_path = Path(ctc_path)
@@ -55,14 +61,35 @@ def from_ctc_to_geff(
     edges = []
     node_dict = {}
 
+    segm_array = None
     node_id = 0
 
-    for t, filepath in enumerate(sorted(ctc_path.glob("*.tif"))):
+    sorted_files = sorted(ctc_path.glob("*.tif"))
+    n_1_padding: tuple[int, ...] = ()
+    expand_dims: tuple[None, ...] | slice = slice(None)
+
+    for t, filepath in enumerate(sorted_files):
         frame = tifffile.imread(filepath)
+
+        if segmentation_store is not None and segm_array is None:
+            # created in first iteration
+            if tczyx:
+                n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
+                expand_dims = (np.newaxis,) * len(n_1_padding)
+
+            segm_array = zarr.create_array(
+                segmentation_store,
+                shape=(len(sorted_files), *n_1_padding, *frame.shape),
+                chunks=(1, *n_1_padding, *frame.shape),
+                dtype=frame.dtype,
+                overwrite=overwrite,
+            )
+
+        if segm_array is not None:
+            segm_array[t] = frame[expand_dims]
 
         for obj in regionprops(frame):
             track_id = obj.label
-            # node_id = f"{track_id}_{t}"  # should we use string? it wasn't working for zarr v3
             node_dict = {
                 "id": node_id,
                 "track_id": track_id,
@@ -125,8 +152,34 @@ def from_ctc_to_geff(
     metadata.write(group)
 
 
+def from_ctc_to_geff_cli(
+    ctc_path: Path,
+    geff_path: Path,
+    segm_path: Path | None = None,
+    tczyx: bool = False,
+    overwrite: bool = False,
+) -> None:
+    """
+    Convert a CTC file to a GEFF file.
+
+    Args:
+        ctc_path: The path to the CTC file.
+        geff_path: The path to the GEFF file.
+        segm_path: The path to export the segmentation file, if not provided, it won't be exported.
+        tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
+        overwrite: Whether to overwrite the GEFF file if it already exists.
+    """
+    from_ctc_to_geff(
+        ctc_path=ctc_path,
+        geff_path=geff_path,
+        segmentation_store=segm_path,
+        tczyx=tczyx,
+        overwrite=overwrite,
+    )
+
+
 app = typer.Typer()
-app.command()(from_ctc_to_geff)
+app.command()(from_ctc_to_geff_cli)
 
 if __name__ == "__main__":
     app()

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import zarr
 from typer.testing import CliRunner
 
 from geff.interops.ctc import app, from_ctc_to_geff
@@ -58,46 +59,39 @@ def create_mock_data(
 
 
 @pytest.mark.parametrize(
-    "cli,is_gt",
-    list(itertools.product([True, False], [True, False])),
+    "cli,is_gt,tczyx",
+    list(itertools.product([False, True], [True, False], [True, False])),
 )
 def test_ctc_to_geff(
     tmp_path: Path,
     cli: bool,
     is_gt: bool,
+    tczyx: bool,
 ) -> None:
     ctc_path = create_mock_data(tmp_path, is_gt)
     geff_path = ctc_path / "little.geff"
+    segm_path = ctc_path / "segm.zarr"
 
     if cli:
-        cmd_args = [str(ctc_path), str(geff_path)]
+        cmd_args = [str(ctc_path), str(geff_path), "--segm-path", str(segm_path)]
+        if tczyx:
+            cmd_args.append("--tczyx")
         result = CliRunner().invoke(app, cmd_args)
-        assert result.exit_code == 0, f"{cmd_args} failed with exit code {result.exit_code}"
+        assert result.exit_code == 0, (
+            f"{cmd_args} failed with exit code {result.exit_code} and "
+            f"message:\n{result.stdout}\n{result.stderr}"
+        )
     else:
         from_ctc_to_geff(
             ctc_path=ctc_path,
             geff_path=geff_path,
+            segmentation_store=segm_path,
+            tczyx=True,
         )
 
     assert geff_path.exists()
 
     graph = read_nx(geff_path)
-
-    # expected_nodes = {
-    #     "1_0",
-    #     "1_1",
-    #     "2_2",
-    #     "5_2",
-    #     "7_0",
-    #     "9_2",
-    # }
-
-    # expected_edges = {
-    #     ("1_0", "1_1"),
-    #     ("1_1", "2_2"),
-    #     ("2_2", "5_2"),
-    #     ("7_0", "9_2"),
-    # }
 
     expected_nodes = {0, 1, 2, 3, 4, 5}
     expected_edges = {(0, 2), (2, 3), (2, 4), (1, 5)}
@@ -108,3 +102,19 @@ def test_ctc_to_geff(
     for _, data in graph.nodes(data=True):
         for key in ["track_id", "t", "y", "x"]:
             assert key in data
+
+    expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+
+    segm = zarr.open(segm_path, mode="r")[...]
+
+    assert segm.shape[0] == expected_segm.shape[0]
+
+    if tczyx:
+        assert segm.ndim == 5
+
+    for t in range(expected_segm.shape[0]):
+        np.testing.assert_array_equal(
+            np.squeeze(segm[t]),
+            expected_segm[t],
+            err_msg=f"t={t}",
+        )
