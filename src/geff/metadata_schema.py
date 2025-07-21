@@ -106,10 +106,16 @@ def axes_from_lists(
 
 
 class DisplayHint(BaseModel):
-    display_horizontal: str
-    display_vertical: str
-    display_depth: str
-    display_time: str
+    display_horizontal: str = Field(
+        ..., description="Which spatial axis to use for horizontal display"
+    )
+    display_vertical: str = Field(..., description="Which spatial axis to use for vertical display")
+    display_depth: str | None = Field(
+        None, description="Optional, which spatial axis to use for depth display"
+    )
+    display_time: str | None = Field(
+        None, description="Optional, which temporal axis to use for time"
+    )
 
 
 class GeffMetadata(BaseModel):
@@ -139,6 +145,37 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
+
+        # Display hint axes match names in axes
+        if self.axes is not None and self.display_hints is not None:
+            ax_names = [ax.name for ax in self.axes]
+            if self.display_hints.display_horizontal not in ax_names:
+                raise ValueError(
+                    f"Display hint display_horizontal name {self.display_hints.display_horizontal} "
+                    f"not found in axes {ax_names}"
+                )
+            if self.display_hints.display_vertical not in ax_names:
+                raise ValueError(
+                    f"Display hint display_vertical name {self.display_hints.display_vertical} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_time is not None
+                and self.display_hints.display_time not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_time name {self.display_hints.display_time} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_depth is not None
+                and self.display_hints.display_depth not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_depth name {self.display_hints.display_depth} "
+                    f"not found in axes {ax_names}"
+                )
+
         return self
 
     def write(self, group: zarr.Group | Path | str):
