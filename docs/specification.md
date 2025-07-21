@@ -116,8 +116,8 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
         ],
-        "sphere": {'name': "radius"}, # optional
-        "ellipsoid": {'name': "covariance3d"}, # optional
+        "sphere": "radius", # optional
+        "ellipsoid": "covariance3d", # optional
         # TODO Implicit assumptions on axis and units, make docs for this
     }
     ... # custom other things are allowed and ignored by geff

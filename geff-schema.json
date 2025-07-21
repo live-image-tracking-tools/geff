@@ -61,26 +61,6 @@
       "title": "Axis",
       "type": "object"
     },
-    "Ellipsoid": {
-      "description": "Ellipsoid shape with a covariance matrix",
-      "properties": {
-        "name": {
-          "title": "Name",
-          "type": "string"
-        },
-        "type": {
-          "const": "ellipsoid",
-          "default": "ellipsoid",
-          "title": "Type",
-          "type": "string"
-        }
-      },
-      "required": [
-        "name"
-      ],
-      "title": "Ellipsoid",
-      "type": "object"
-    },
     "GeffMetadata": {
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
@@ -112,31 +92,27 @@
         "sphere": {
           "anyOf": [
             {
-              "items": {
-                "$ref": "#/$defs/Sphere"
-              },
-              "type": "array"
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
+          "description": "Name of the sphere property, if applicable. If not provided, no sphere property is defined.",
           "title": "Sphere"
         },
         "ellipsoid": {
           "anyOf": [
             {
-              "items": {
-                "$ref": "#/$defs/Ellipsoid"
-              },
-              "type": "array"
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
+          "description": "Name of the ellipsoid property, if applicable. If not provided, no ellipsoid property is defined.",
           "title": "Ellipsoid"
         }
       },
@@ -145,26 +121,6 @@
         "directed"
       ],
       "title": "geff_metadata",
-      "type": "object"
-    },
-    "Sphere": {
-      "description": "Hypersphere shape with a radius",
-      "properties": {
-        "name": {
-          "title": "Name",
-          "type": "string"
-        },
-        "type": {
-          "const": "sphere",
-          "default": "sphere",
-          "title": "Type",
-          "type": "string"
-        }
-      },
-      "required": [
-        "name"
-      ],
-      "title": "Sphere",
       "type": "object"
     }
   },

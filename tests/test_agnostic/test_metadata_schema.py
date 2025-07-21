@@ -5,7 +5,6 @@ import pytest
 import zarr
 
 from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, write_metadata_schema
-from geff.shapes import Ellipsoid, Sphere
 
 
 class TestMetadataModel:
@@ -176,38 +175,38 @@ class TestAxis:
 #             Shape(name="test", type="other")
 
 
-class TestSphere:
-    def test_valid(self):
-        Sphere(name="radius")
+# class TestSphere:
+#     def test_valid(self):
+#         Sphere(name="radius")
 
-    # def test_invalid_radius(self):
-    #     with pytest.raises(ValueError, match=r"Radius must be positive"):
-    #         Sphere(name="radius", radius=-1)
+# def test_invalid_radius(self):
+#     with pytest.raises(ValueError, match=r"Radius must be positive"):
+#         Sphere(name="radius", radius=-1)
 
-    #     with pytest.raises(ValueError, match=r"Radius must be positive"):
-    #         Sphere(name="radius", radius=0)
+#     with pytest.raises(ValueError, match=r"Radius must be positive"):
+#         Sphere(name="radius", radius=0)
 
 
-class TestEllipsoid:
-    def test_valid(self):
-        Ellipsoid(name="covariance2d")
+# class TestEllipsoid:
+#     def test_valid(self):
+#         Ellipsoid(name="covariance2d")
 
-    # def test_invalid_covariance(self):
-    #     # Not a numpy array
-    #     with pytest.raises(TypeError, match=r"Covariance must be a numpy array"):
-    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 0], [0, 1]]))
+# def test_invalid_covariance(self):
+#     # Not a numpy array
+#     with pytest.raises(TypeError, match=r"Covariance must be a numpy array"):
+#         Ellipsoid(name="covariance2d", covariance=np.array([[1, 0], [0, 1]]))
 
-    #     # Not square
-    #     with pytest.raises(ValueError, match=r"Covariance must be a square matrix"):
-    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 0], [0, 1], [0, 0]]))
+#     # Not square
+#     with pytest.raises(ValueError, match=r"Covariance must be a square matrix"):
+#         Ellipsoid(name="covariance2d", covariance=np.array([[1, 0], [0, 1], [0, 0]]))
 
-    #     # Not symmetric
-    #     with pytest.raises(ValueError, match=r"Covariance matrix must be symmetric"):
-    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 2], [3, 4]]))
+#     # Not symmetric
+#     with pytest.raises(ValueError, match=r"Covariance matrix must be symmetric"):
+#         Ellipsoid(name="covariance2d", covariance=np.array([[1, 2], [3, 4]]))
 
-    #     # Not positive-semidefinite
-    #     with pytest.raises(ValueError, match=r"Covariance matrix must be positive-semidefinite"):
-    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 2], [2, -1]]))
+#     # Not positive-semidefinite
+#     with pytest.raises(ValueError, match=r"Covariance matrix must be positive-semidefinite"):
+#         Ellipsoid(name="covariance2d", covariance=np.array([[1, 2], [2, -1]]))
 
 
 def test_write_schema(tmp_path):

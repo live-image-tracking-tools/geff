@@ -10,7 +10,6 @@ import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
-from .shapes import Ellipsoid, Sphere  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
@@ -141,8 +140,16 @@ class GeffMetadata(BaseModel):
     )
     directed: bool
     axes: Sequence[Axis] | None = None
-    sphere: Sequence[Sphere] | None = None
-    ellipsoid: Sequence[Ellipsoid] | None = None
+    sphere: str | None = Field(
+        None,
+        description="Name of the sphere property, if applicable. "
+        "If not provided, no sphere property is defined.",
+    )
+    ellipsoid: str | None = Field(
+        None,
+        description="Name of the ellipsoid property, if applicable. "
+        "If not provided, no ellipsoid property is defined.",
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -198,11 +205,6 @@ class GeffMetadata(BaseModel):
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
-
-
-# Rebuild the models to ensure all forward references are resolved
-GeffMetadata.model_rebuild()
-GeffSchema.model_rebuild()
 
 
 def write_metadata_schema(outpath: Path):
