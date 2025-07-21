@@ -133,6 +133,14 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
+
+            if self.affine is not None:
+                if self.affine.ndim != len(self.axes):
+                    raise ValueError(
+                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
+                        f"got {self.affine.ndim}"
+                    )
+
         return self
 
     def write(self, group: zarr.Group | Path | str):
