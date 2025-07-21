@@ -1,3 +1,40 @@
+"""Test data generation utilities for geff graphs.
+
+This module provides functions to create mock geff graphs for testing and development.
+It includes both simple convenience functions and a comprehensive function for advanced use cases.
+
+Examples:
+    # Simple 2D graph with defaults
+    >>> store, props = create_simple_2d_geff()
+    >>> # Creates: 10 nodes, 15 edges, undirected, 2D (x, y, t)
+
+    # Simple 3D graph with custom size
+    >>> store, props = create_simple_3d_geff(num_nodes=20, num_edges=30)
+    >>> # Creates: 20 nodes, 30 edges, undirected, 3D (x, y, z, t)
+
+    # Advanced usage with full control
+    >>> store, props = create_memory_mock_geff(
+    ...     node_id_dtype="str",
+    ...     node_prop_dtypes={"position": "float64", "time": "float32"},
+    ...     edge_prop_dtypes={"score": "float64", "color": "uint8"},
+    ...     directed=True,
+    ...     num_nodes=5,
+    ...     num_edges=8,
+    ...     extra_node_props=[{"label": "str", "confidence": "float64"}],
+    ...     include_t=True,
+    ...     include_z=False,  # 2D only
+    ...     include_y=True,
+    ...     include_x=True,
+    ... )
+
+    # Using with GeffReader
+    >>> from geff import GeffReader
+    >>> store, props = create_simple_2d_geff()
+    >>> reader = GeffReader(store)
+    >>> graph = reader.read_nx()
+    >>> # graph is a networkx Graph ready for analysis
+"""
+
 from typing import Any, Literal, TypedDict, cast
 
 import networkx as nx
@@ -97,7 +134,7 @@ def create_dummy_graph_props(
 
     # Generate spatiotemporal coordinates with flexible dimensions
     t = (
-        np.linspace(0.1, 0.5, num_nodes, dtype=node_prop_dtypes["time"])
+        np.linspace(1, 5, num_nodes, dtype=node_prop_dtypes["time"])
         if include_t
         else np.array([], dtype="float64")  # Default dtype when time not included
     )
@@ -123,20 +160,45 @@ def create_dummy_graph_props(
     )
     actual_num_edges = min(num_edges, max_possible_edges)
 
-    # Create a simple edge pattern (0->1, 1->2, etc.)
+    # Create edges ensuring we don't create duplicates
     edges: list[list[Any]] = []
-    for i in range(actual_num_edges):
-        source_idx = i % num_nodes
-        target_idx = (i + 1) % num_nodes
-        if source_idx != target_idx:  # Avoid self-loops
-            # Create edge based on dtype
+    edge_count = 0
+
+    # For undirected graphs, we need to be more careful about duplicates
+    if not directed:
+        # Create a simple chain first, then add cross edges
+        for i in range(min(actual_num_edges, num_nodes - 1)):
+            source_idx = i
+            target_idx = i + 1
             if node_id_dtype == "str":
                 edges.append([f"node_{source_idx}", f"node_{target_idx}"])
             else:
                 edges.append([int(source_idx), int(target_idx)])
+            edge_count += 1
+
+        # Add remaining edges as cross connections
+        remaining_edges = actual_num_edges - edge_count
+        for i in range(remaining_edges):
+            source_idx = i % (num_nodes - 2)
+            target_idx = (i + 2) % (num_nodes - 1) + 1
+            if source_idx != target_idx:
+                if node_id_dtype == "str":
+                    edges.append([f"node_{source_idx}", f"node_{target_idx}"])
+                else:
+                    edges.append([int(source_idx), int(target_idx)])
+                edge_count += 1
+    else:
+        # For directed graphs, we can create more edges
+        for i in range(actual_num_edges):
+            source_idx = i % num_nodes
+            target_idx = (i + 1) % num_nodes
+            if source_idx != target_idx:  # Avoid self-loops
+                if node_id_dtype == "str":
+                    edges.append([f"node_{source_idx}", f"node_{target_idx}"])
+                else:
+                    edges.append([int(source_idx), int(target_idx)])
 
     edges = np.array(edges, dtype=object if node_id_dtype == "str" else node_id_dtype)
-
     # Generate extra node properties
     extra_node_props_dict = {}
     if extra_node_props is not None:
@@ -215,7 +277,7 @@ def create_memory_mock_geff(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
-) -> tuple[zarr.Group, GraphAttrs]:
+) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
     """Create a mock geff graph in memory and return the zarr store and graph properties.
 
     Args:
@@ -284,3 +346,113 @@ def create_memory_mock_geff(
     )
 
     return store, graph_props
+
+
+def create_simple_2d_geff(
+    num_nodes: int = 10,
+    num_edges: int = 15,
+    directed: bool = False,
+) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
+    """Create a simple 2D geff graph with default settings.
+
+    This is a convenience function for creating basic 2D graphs without having to
+    specify all the detailed parameters. Uses sensible defaults for common use cases.
+
+    Args:
+        num_nodes: Number of nodes to generate (default: 10)
+        num_edges: Number of edges to generate (default: 15)
+        directed: Whether the graph is directed (default: False)
+
+    Returns:
+        Tuple of (zarr store in memory, graph properties dictionary)
+
+    Examples:
+        Basic usage with defaults:
+            >>> store, props = create_simple_2d_geff()
+            >>> # store is a zarr.MemoryStore with 10 nodes, 15 edges
+
+        Custom graph size:
+            >>> store, props = create_simple_2d_geff(num_nodes=5, num_edges=8)
+            >>> # store has 5 nodes, 8 edges
+
+        Directed graph:
+            >>> store, props = create_simple_2d_geff(directed=True)
+            >>> # Creates a directed graph
+
+        Using with GeffReader:
+            >>> store, props = create_simple_2d_geff()
+            >>> reader = GeffReader(store)
+            >>> graph = reader.read_nx()
+            >>> # graph is a networkx Graph with 2D spatial data (x, y, t)
+    """
+    return create_memory_mock_geff(
+        node_id_dtype="int",
+        node_prop_dtypes={"position": "float64", "time": "float64"},
+        edge_prop_dtypes={"score": "float64", "color": "int"},
+        directed=directed,
+        num_nodes=num_nodes,
+        num_edges=num_edges,
+        include_t=True,
+        include_z=False,  # 2D only
+        include_y=True,
+        include_x=True,
+    )
+
+
+def create_simple_3d_geff(
+    num_nodes: int = 10,
+    num_edges: int = 15,
+    directed: bool = False,
+) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
+    """Create a simple 3D geff graph with default settings.
+
+    This is a convenience function for creating basic 3D graphs without having to
+    specify all the detailed parameters. Uses sensible defaults for common use cases.
+
+    Args:
+        num_nodes: Number of nodes to generate (default: 10)
+        num_edges: Number of edges to generate (default: 15)
+        directed: Whether the graph is directed (default: False)
+
+    Returns:
+        Tuple of (zarr store in memory, graph properties dictionary)
+
+    Examples:
+        Basic usage with defaults:
+            >>> store, props = create_simple_3d_geff()
+            >>> # store is a zarr.MemoryStore with 10 nodes, 15 edges
+
+        Custom graph size:
+            >>> store, props = create_simple_3d_geff(num_nodes=5, num_edges=8)
+            >>> # store has 5 nodes, 8 edges
+
+        Directed graph:
+            >>> store, props = create_simple_3d_geff(directed=True)
+            >>> # Creates a directed graph
+
+        Using with GeffReader:
+            >>> store, props = create_simple_3d_geff()
+            >>> reader = GeffReader(store)
+            >>> graph = reader.read_nx()
+            >>> # graph is a networkx Graph with 3D spatial data (x, y, z, t)
+
+        Accessing spatial coordinates:
+            >>> store, props = create_simple_3d_geff()
+            >>> reader = GeffReader(store)
+            >>> graph = reader.read_nx()
+            >>> # Each node has x, y, z, t coordinates
+            >>> node_data = graph.nodes[0]
+            >>> x, y, z, t = node_data['x'], node_data['y'], node_data['z'], node_data['t']
+    """
+    return create_memory_mock_geff(
+        node_id_dtype="int",
+        node_prop_dtypes={"position": "float64", "time": "float64"},
+        edge_prop_dtypes={"score": "float64", "color": "int"},
+        directed=directed,
+        num_nodes=num_nodes,
+        num_edges=num_edges,
+        include_t=True,
+        include_z=True,  # 3D includes z
+        include_y=True,
+        include_x=True,
+    )
