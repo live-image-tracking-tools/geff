@@ -102,7 +102,7 @@
             }
           ],
           "default": null,
-          "description": "A list of dictionaries of related objects such as labels or images.",
+          "description": "A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. The 'type' must be either 'labels' or 'image'. The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The 'label_prop' is only valid for type 'labels' and specifies the node property that will be used to identify the labels in the related object. ",
           "title": "Related Objects"
         }
       },
@@ -125,7 +125,7 @@
           "type": "string"
         },
         "path": {
-          "description": "Path of the related object within the zarr group, relative to the zarr attributes file.It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group.",
+          "description": "Path of the related object within the zarr group, relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group.",
           "title": "Path",
           "type": "string"
         },
@@ -139,7 +139,7 @@
             }
           ],
           "default": null,
-          "description": "Property name for label objects. This is the property that will be used to identify the labels in the related object.This is only valid for type 'labels'.",
+          "description": "Property name for label objects. This is the node property that will be used to identify the labels in the related object. This is only valid for type 'labels'.",
           "title": "Label Prop"
         }
       },
