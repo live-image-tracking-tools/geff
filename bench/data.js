@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753119829767,
+  "lastUpdate": 1753120721982,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2250,6 +2250,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.6344430877150187",
             "extra": "mean: 15.496271998666677 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "talley.lambert@gmail.com",
+            "name": "Talley Lambert",
+            "username": "tlambert03"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "eb999475d23289059fda4bc00d41b6dd076a4d3c",
+          "message": "Fix docs styling and autogenerate html docs at mkdocs build-time (#168)\n\nThis PR updates documentation in a few ways:\n\n1. fixes styles. The styles created by json-schema-for-humans was using\na relative path that was not valid when served by mkdocs... but they\nalso needed tweaking anyway. So this commits the styles and js to source\n(in the docs folder) and tells mkdocs how to load them (in mkdocs.yml)\n2. removes the need to run `generate-schema-doc` manually before running\n`mike/mkdocs build/serve`. Now you can just checkout the repo and run\n`uv run --group docs mkdocs serve` and it will autogenerate the schema\nand place it where it needs to go.\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2025-07-21T13:56:46-04:00",
+          "tree_id": "ab8ee1ec575f2abe6278d22036931c5866775ff3",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/eb999475d23289059fda4bc00d41b6dd076a4d3c"
+        },
+        "date": 1753120721475,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12085557853381863,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2611158913207976",
+            "extra": "mean: 8.274338778 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.55702567600853,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013105942891149611",
+            "extra": "mean: 51.1325196666661 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06547649783235497,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5486298691905883",
+            "extra": "mean: 15.27265558033334 sec\nrounds: 3"
           }
         ]
       }
