@@ -1,8 +1,8 @@
+import warnings
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
 
 import numpy as np
-import warnings
 
 from .write_arrays import write_id_arrays, write_props_arrays
 
@@ -14,6 +14,7 @@ def write_dicts(
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
     axis_names: list[str] | None = None,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -31,6 +32,8 @@ def write_dicts(
             geff
         axis_names (Sequence[str] | None): The name of the spatiotemporal properties, if
             any. Defaults to None
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
+            Defaults to 2.
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -48,7 +51,7 @@ def write_dicts(
     else:
         edges_arr = np.empty((0, 2), dtype=nodes_arr.dtype)
 
-    write_id_arrays(geff_path, nodes_arr, edges_arr)
+    write_id_arrays(geff_path, nodes_arr, edges_arr, zarr_format=zarr_format)
 
     if axis_names is not None:
         node_prop_names = list(node_prop_names)
@@ -65,10 +68,10 @@ def write_dicts(
                     f"Spatiotemporal property '{axis}' not found in : "
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
-    write_props_arrays(geff_path, "nodes", node_props_dict)
+    write_props_arrays(geff_path, "nodes", node_props_dict, zarr_format=zarr_format)
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
-    write_props_arrays(geff_path, "edges", edge_props_dict)
+    write_props_arrays(geff_path, "edges", edge_props_dict, zarr_format=zarr_format)
 
 
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
