@@ -19,7 +19,6 @@ jobs:
     uses: ./.github/workflows/test.yaml
     with:
       test-target: "tests"
-      witty-cache: false
       install-group: "dev"
 
   schema:
@@ -138,14 +137,6 @@ jobs:
         run: pip install .
 
       - run: echo ${{ github.ref_name }}
-
-      - name: Check supported_versions.yml
-        shell: python
-        run: |
-          import re; import sys; from geff.metadata_schema import SUPPORTED_VERSIONS_REGEX
-
-          if re.search(SUPPORTED_VERSIONS_REGEX, "${{ github.ref_name }}") is None:
-              sys.exit("`supported_versions.yml`  needs to be updated to include new release ${{ github.ref_name }}")
 
       - name: 👷 Build
         run: |

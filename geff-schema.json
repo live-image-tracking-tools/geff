@@ -65,11 +65,13 @@
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
         "geff_version": {
-          "pattern": "(0\\.0)|(0\\.1)|(0\\.2)|(0\\.3)",
+          "description": "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).\nIf not provided, the version will be set to the current geff package version.",
+          "pattern": "^\\d+\\.\\d+(?:\\.\\d+)?(?:\\.dev\\d+)?(?:\\+[a-zA-Z0-9]+)?",
           "title": "Geff Version",
           "type": "string"
         },
         "directed": {
+          "description": "True if the graph is directed, otherwise False.",
           "title": "Directed",
           "type": "boolean"
         },
@@ -86,6 +88,7 @@
             }
           ],
           "default": null,
+          "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
           "title": "Axes"
         }
       },
