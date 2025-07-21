@@ -2,6 +2,7 @@
 
 It generates the HTML documentation on the `on_page_markdown` hook.
 """
+
 from __future__ import annotations
 
 import re
