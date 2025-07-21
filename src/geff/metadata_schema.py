@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import warnings
 from importlib.metadata import version
-from importlib.resources import files
 from pathlib import Path
 from typing import Sequence
 
@@ -123,22 +122,22 @@ class GeffMetadata(BaseModel):
         pattern=VERSION_PATTERN,
         description=(
             "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
-            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18)."
+            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).\n"
+            "If not provided, the version will be set to the current geff package version."
         ),
     )
     directed: bool
     axes: Sequence[Axis] | None = None
 
-    def __init__(self, **data):
-        # We want to keep the geff_version Field required in the schema,
-        # but we also want to assign a default value if it is not provided.
-        # Hence this custom __init__ method.
-        if "geff_version" not in data:
-            data["geff_version"] = version("geff")
-        super().__init__(**data)
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_model_before(cls, values: dict) -> dict:
+        if "geff_version" not in values:
+            values["geff_version"] = version("geff")
+        return values
 
     @model_validator(mode="after")
-    def _validate_model(self) -> GeffMetadata:
+    def _validate_model_after(self) -> GeffMetadata:
         # Axes names must be unique
         if self.axes is not None:
             names = [ax.name for ax in self.axes]
