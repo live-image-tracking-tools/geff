@@ -26,7 +26,7 @@ def from_ctc_to_geff(
     Args:
         ctc_path: The path to the CTC file.
         geff_path: The path to the GEFF file.
-        segmentation_store: The path or store to the segmentation file.
+        segmentation_store: The path or store to save the segmentation to.
                             If not provided, it won't be exported.
         tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite: Whether to overwrite the GEFF file if it already exists.
