@@ -30,4 +30,5 @@ coverage.xml
 
 uv.lock
 /.idea
-.vscode/settings.json
+.vscode/
+site
