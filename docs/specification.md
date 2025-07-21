@@ -118,12 +118,11 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
         ],
-        "shapes" : [ # optional
-            {'name': "radius", 'type': "sphere", 'unit': " micrometers", 'axes': ['y', 'x']}, 
-            {'name': "covariance2d", 'type': "ellipse", 'unit': " micrometers", 'axes': ['y', 'x']},  # Units explicit, or derived from axes?
-            {'name': "covariance3d", 'type': "ellipsoid", 'unit': " micrometers", 'axes': ['z', 'y', 'x']},  # Units explicit! Example: 3D points in 2d SMLM 
-            # Question: non-base units supported? covariance values are actually stored in units^2. Not supported in SI.
-            # Where to store the order of values in covariance matrix? Store explictly.
+        "shapes" : [ # optional. They are spatial
+            {'name': "radius", 'type': "sphere"}, # name + type mandatory
+            {'name': "covariance3d", 'type': "ellipsoid"},
+            # Checks on matrix (symmetric, positive-semidefinite) in validator. Specify in spec the defintiion.
+            # Implicit assumptions on axis and units, specify in spec
         ],
     }
     ... # custom other things are allowed and ignored by geff

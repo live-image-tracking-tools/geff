@@ -64,7 +64,6 @@ VALID_AXIS_TYPES = [
 
 VALID_SHAPE_TYPES = [
     "sphere",
-    "ellipse",
     "ellipsoid",
 ]
 

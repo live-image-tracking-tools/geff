@@ -11,14 +11,13 @@ from pydantic.config import ConfigDict
 
 from .units import (
     VALID_AXIS_TYPES,
-    VALID_SHAPE_TYPES,
     VALID_SPACE_UNITS,
     VALID_TIME_UNITS,
     validate_axis_type,
-    validate_shape_type,
     validate_space_unit,
     validate_time_unit,
 )
+from .shapes import Shape
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
@@ -107,37 +106,6 @@ def axes_from_lists(
     return axes
 
 
-class Shape(BaseModel):
-    name: str
-    type: str
-    unit: str | None = None
-    axes: Sequence[str] | None = None
-
-    @model_validator(mode="after")
-    def _validate_model(self) -> Shape:
-        if not validate_shape_type(self.type):
-            warnings.warn(
-                f"Type {self.type} not in valid types {VALID_SHAPE_TYPES}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
-
-        if self.unit is not None and not validate_space_unit(self.unit):
-            warnings.warn(
-                f"Shape spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
-
-        if self.type == "ellipse" and self.axes is not None and len(self.axes) != 2:
-            raise ValueError("Shape ellipse must have 2 axes")
-
-        if self.type == "ellipsoid" and self.axes is not None and len(self.axes) != 3:
-            raise ValueError("Shape ellipsoid must have 3 axes")
-
-        return self
-
-
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -165,20 +133,6 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
-
-        # Shapes axes must be subset of axes names if both are defined
-        if self.shapes is not None and self.axes is not None:
-            for shape in self.shapes:
-                if shape.axes is not None:
-                    for axis in shape.axes:
-                        axes_names = [a.name for a in self.axes]
-                        if axis not in axes_names:
-                            raise ValueError(
-                                f"Shape {shape.name} has axis {axis} that is not "
-                                f"in axes names {axes_names}"
-                            )
-
-        # TODO check that axes maps only to spatial axes?
 
         return self
 
