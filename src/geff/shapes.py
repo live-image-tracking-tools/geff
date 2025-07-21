@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# coding: mypy
+#  type: ignore
+
 # from __future__ import annotations
 
 # from typing import Literal
