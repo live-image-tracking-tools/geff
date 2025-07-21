@@ -82,22 +82,34 @@ def create_dummy_graph_props(
     t = (
         np.linspace(0.1, 0.5, num_nodes, dtype=node_prop_dtypes["time"])
         if include_t
-        else np.array([], dtype=node_prop_dtypes["time"])
+        else np.array(
+            [], dtype="float64"
+        )  # Default dtype when time not included, type doesn't matter
+        # because node properties are not written to nodes when length is 0
     )
     z = (
         np.linspace(0.5, 0.1, num_nodes, dtype=node_prop_dtypes["position"])
         if include_z
-        else np.array([], dtype=node_prop_dtypes["position"])
+        else np.array(
+            [], dtype="float64"
+        )  # Default dtype when position not included, type doesn't matter
+        # because node properties are not written to nodes when length is 0
     )
     y = (
         np.linspace(100.0, 500.0, num_nodes, dtype=node_prop_dtypes["position"])
         if include_y
-        else np.array([], dtype=node_prop_dtypes["position"])
+        else np.array(
+            [], dtype="float64"
+        )  # Default dtype when position not included, type doesn't matter
+        # because node properties are not written to nodes when length is 0
     )
     x = (
         np.linspace(1.0, 0.1, num_nodes, dtype=node_prop_dtypes["position"])
         if include_x
-        else np.array([], dtype=node_prop_dtypes["position"])
+        else np.array(
+            [], dtype="float64"
+        )  # Default dtype when position not included, type doesn't matter
+        # because node properties are not written to nodes when length is 0
     )
 
     # Generate edges with flexible count (ensure we don't exceed possible edges)
