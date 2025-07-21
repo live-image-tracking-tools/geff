@@ -10,7 +10,7 @@ import zarr
 import geff
 from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata, axes_from_lists
-from geff.writer_helper import write_props
+from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -133,22 +133,18 @@ def write_nx(
         graph, metadata, axis_names, axis_units, axis_types
     )
 
-    node_data = list(graph.nodes(data=True))
-    write_props(
-        group=group.require_group("nodes"),
-        data=node_data,
-        prop_names=list({k for _, data in node_data for k in data}),
-        axis_names=axis_names,
-    )
-    del node_data
+    node_props = list({k for _, data in graph.nodes(data=True) for k in data})
 
     edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
-    write_props(
-        group=group.require_group("edges"),
-        data=edge_data,
-        prop_names=list({k for _, data in edge_data for k in data}),
+    edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
+    write_dicts(
+        path,
+        graph.nodes(data=True),
+        edge_data,
+        node_props,
+        edge_props,
+        axis_names,
     )
-    del edge_data
 
     # write metadata
     roi_min: tuple[float, ...] | None
