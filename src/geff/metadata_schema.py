@@ -130,7 +130,7 @@ class RelatedObject(BaseModel):
         ...,
         description=(
             "Path of the related object within the zarr group, relative "
-            "to the zarr attributes file. "
+            "to the geff zarr-attributes file. "
             "It is strongly recommended all related objects are stored as siblings "
             "of the geff group within the top-level zarr group."
         ),
