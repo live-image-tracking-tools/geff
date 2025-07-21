@@ -19,7 +19,7 @@ def graph_sparse_node_props():
         [1, 7, 6],
     ]
     node_scores = [0.5, 0.2, None, None, 0.1]
-    for node, pos, score in zip(nodes, positions, node_scores):
+    for node, pos, score in zip(nodes, positions, node_scores, strict=False):
         t, y, x = pos
         if score is not None:
             graph.add_node(node, t=t, y=y, x=x, score=score)
@@ -36,7 +36,7 @@ def graph_sparse_edge_props():
         [2, 5],
     ]
     edge_scores = [0.1, None, 0.5]
-    for edge, score in zip(edges, edge_scores):
+    for edge, score in zip(edges, edge_scores, strict=False):
         if score is not None:
             graph.add_edge(edge[0], edge[1], score=score)
         else:

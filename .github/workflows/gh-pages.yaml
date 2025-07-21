@@ -1,12 +1,16 @@
-name: Push gh-pages updates update
+name: Docs
 
 # push to the gh-pages branch whenever there is a new push to main or a new tag
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     tags: ["*"]
+  pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -17,10 +21,8 @@ env:
   SETUPTOOLS_SCM_PRETEND_VERSION: "0.0"
 
 jobs:
-  push-docs:
+  build-docs:
     runs-on: ubuntu-latest
-    concurrency:
-      group: gh-pages
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -31,11 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          pip install -e . --group docs
-
-      - id: get_version
-        uses: battila7/get-version-action@v2
+        run: pip install -e . --group docs
 
       - name: configure git
         run: |
@@ -43,14 +41,48 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git fetch origin gh-pages --depth=1
 
+      - id: get_version
+        if: github.event_name == 'push'
+        uses: battila7/get-version-action@v2
+
+      # if this workflow is triggered by a push event, deploy the docs to gh-pages
       - name: Push changes to gh-pages branch
+        if: github.event_name == 'push'
         run: mike deploy ${{ steps.get_version.outputs.version }} $TAG -u -p
 
+      # if triggered by a pull request, build the docs and upload them as an artifact
+      - name: Build docs
+        if: github.event_name == 'pull_request'
+        run: mkdocs build --strict
+
+      # it's too hard (from a security perspective) to host previews from fork PRs
+      # so we skip unless it's a PR from a branch in the same repository
+      - name: Deploy gh-pages preview # https://github.com/rossjrw/pr-preview-action
+        id: preview-step
+        if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: ./site/
+          comment: false
+
+      # Post the comment manually
+      - name: Post comment with gh-pages preview
+        if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: peter-evans/commit-comment@v3
+        with:
+          body: |
+            [PR Preview Action](https://github.com/rossjrw/pr-preview-action) ${{ steps.preview-step.outputs.action-version }}
+            :---:
+            | <p></p> :rocket: View preview at <br> ${{ steps.preview-step.outputs.preview-url }} <br><br>
+            | <h6>Built to branch [`gh-pages`](${{ github.server_url }}/${{ github.repository }}/tree/gh-pages) at ${{ steps.preview-step.outputs.action-start-time }}. <br> Preview will be ready when the [GitHub Pages deployment](${{ github.server_url }}/${{ github.repository }}/deployments) is complete. <br><br> </h6>
+
+
   benchmark:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: Report benchmarks on gh-pages
     runs-on: ubuntu-latest
-    concurrency:
-      group: gh-pages
+    needs:
+      - build-docs
     steps:
       - uses: actions/checkout@v4
 
@@ -74,7 +106,7 @@ jobs:
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: Python Benchmark with pytest-benchmark
-          tool: 'pytest'
+          tool: "pytest"
           output-file-path: output.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true

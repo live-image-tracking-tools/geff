@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 import warnings
+from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
-from typing import Sequence
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -138,8 +138,15 @@ class GeffMetadata(BaseModel):
             "If not provided, the version will be set to the current geff package version."
         ),
     )
-    directed: bool
-    axes: Sequence[Axis] | None = None
+    directed: bool = Field(description="True if the graph is directed, otherwise False.")
+    axes: Sequence[Axis] | None = Field(
+        None,
+        description="Optional list of Axis objects defining the axes of each node in the graph.\n"
+        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
+        "must be one of `space`, `time` or `channel`, though readers may not use this information. "
+        "Each axis can additionally optionally define a `unit` key, which should match the valid"
+        "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+    )
 
     @model_validator(mode="before")
     @classmethod
