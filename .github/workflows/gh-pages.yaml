@@ -68,7 +68,7 @@ jobs:
     name: Report benchmarks on gh-pages
     runs-on: ubuntu-latest
     needs:
-      - push-docs
+      - build-docs
     steps:
       - uses: actions/checkout@v4
 
