@@ -169,8 +169,9 @@ def write_nx(
         roi_max=roi_max,
     )
 
-    # Update metadata with new axes, version, and directedness
-    # This is necessary because the metadata can carry extra properties
+    # Conditionally update metadata with new axes, version, and directedness
+    # If metadata is provided, extra properties are preserved; otherwise, a new GeffMetadata object
+    # is created
     if metadata is not None:
         metadata = copy.deepcopy(metadata)
         metadata.geff_version = geff.__version__
