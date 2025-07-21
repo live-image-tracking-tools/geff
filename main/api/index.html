@@ -45,6 +45,8 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="../css/schema_doc.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -518,9 +520,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.writer_helper.write_props" class="md-nav__link">
+  <a href="#geff.write_arrays.write_arrays" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_props
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_arrays
     </span>
   </a>
   
@@ -768,9 +770,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.writer_helper.write_props" class="md-nav__link">
+  <a href="#geff.write_arrays.write_arrays" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_props
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_arrays
     </span>
   </a>
   
@@ -1909,22 +1911,31 @@ Defaults to None.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="geff.writer_helper.write_props" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">geff.writer_helper.write_props</span>
+<h3 id="geff.write_arrays.write_arrays" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">geff.write_arrays.write_arrays</span>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_props</span><span class="p">(</span>
-    <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">,</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]],</span>
-    <span class="n">prop_names</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_arrays</span><span class="p">(</span>
+    <span class="n">geff_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">node_ids</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">node_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
+    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">edge_ids</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
+    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span><span class="p">,</span>
+    <span class="n">node_props_unsquish</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">edge_props_unsquish</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
 
-        <p>Write the properties to the zarr group.</p>
+        <p>Write a geff file from already constructed arrays of node and edge ids and props</p>
+<p>Currently does not do any validation that the arrays are valid, but could be added
+as an optional flag.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1940,14 +1951,14 @@ Defaults to None.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>group</code>
+                <code>geff_path</code>
             </td>
             <td>
-                  <code><span title="zarr.Group">Group</span></code>
+                  <code><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a> | <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The zarr group to write the property to (e.g. <code>nodes</code> or <code>edges</code>)</p>
+                <p>The path to the zarr group where the graph will be written</p>
               </div>
             </td>
             <td>
@@ -1956,14 +1967,15 @@ Defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>data</code>
+                <code>node_ids</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]]]</code>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A sequence of (id, data) pairs. For example, graph.nodes(data=True) for networkx</p>
+                <p>An array containing the node ids. Must have same dtype as
+edge_ids.</p>
               </div>
             </td>
             <td>
@@ -1972,14 +1984,16 @@ Defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>prop_names</code>
+                <code>node_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="typing.Sequence" href="https://docs.python.org/3/library/typing.html#typing.Sequence">Sequence</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="numpy.ndarray">ndarray</span>, <span title="numpy.ndarray">ndarray</span> | None]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The names of the properties to write.</p>
+                <p>A dictionary
+from node property names to (values, missing) arrays, which should have same
+length as node_ids.</p>
               </div>
             </td>
             <td>
@@ -1988,13 +2002,15 @@ Defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>node_dtype</code>
+                <code>edge_ids</code>
             </td>
             <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The numpy dtype to use for the node and edge ID datasets.</p>
+                <p>An array containing the edge ids. Must have same dtype
+as node_ids.</p>
               </div>
             </td>
             <td>
@@ -2003,41 +2019,91 @@ Defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>axis_names</code>
+                <code>edge_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>] | None</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="numpy.ndarray">ndarray</span>, <span title="numpy.ndarray">ndarray</span> | None]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The name of the spatiotemporal properties</p>
+                <p>A dictionary
+from edge property names to (values, missing) arrays, which should have same
+length as edge_ids.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>metadata</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="            geff.GeffMetadata (geff.metadata_schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The metadata of the graph.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>zarr_format</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[2, 3]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The zarr specification to use when writing the zarr.
+Defaults to 2.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>node_props_unsquish</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>a dictionary
+indicication how to "unsquish" a property into individual scalars
+(e.g.: <code>{"pos": ["z", "y", "x"]}</code> will store the position property
+as three individual properties called "z", "y", and "x".</p>
               </div>
             </td>
             <td>
                   <code>None</code>
             </td>
           </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+                <code>edge_props_unsquish</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the group is not a 'nodes' or 'edges' group.</p>
+                <p>a dictionary
+indicication how to "unsquish" a property into individual scalars
+(e.g.: <code>{"pos": ["z", "y", "x"]}</code> will store the position property
+as three individual properties called "z", "y", and "x".</p>
               </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -2099,6 +2165,8 @@ Defaults to None.</p>
     
     
       <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+        <script src="../js/schema_doc.min.js"></script>
       
     
   </body>

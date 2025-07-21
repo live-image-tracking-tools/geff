@@ -47,6 +47,8 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
+      <link rel="stylesheet" href="../css/schema_doc.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -625,16 +627,14 @@
 <h2 id="zarr-specification">Zarr specification</h2>
 <p>Currently, <code>geff</code> supports zarr specifications <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html">2</a> and <a href="https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html">3</a>. However, <code>geff</code> will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.</p>
 <h2 id="geff-metadata">Geff metadata</h2>
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<div id="geff-schema"><head>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Overpass:300,400,600,800">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <link rel="stylesheet" type="text/css" href="schema_doc.css">
+
     <script src="https://use.fontawesome.com/facf9fa52c.js"></script>
-    <script src="schema_doc.min.js"></script>
+
     <meta charset="utf-8"/>
 
 
@@ -642,7 +642,7 @@
 </head>
 <body onload="anchorOnLoad();" id="root">
 
-    <div class="breadcrumbs"></div> <h1>GeffSchema</h1><span class="badge badge-dark value-type">Type: object</span><br/>
+    <div class="breadcrumbs"></div> <span class="badge badge-dark value-type">Type: object</span><br/>
 
 
 
@@ -711,7 +711,8 @@
             />
         </svg>
     <a href="#geff_geff_version" onclick="anchorLink('geff_geff_version')">geff_version</a></div><h4>Geff Version</h4><span class="badge badge-dark value-type">Type: string</span><br/>
-<span class="description"><p>Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).</p>
+<span class="description"><p>Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).<br />
+If not provided, the version will be set to the current geff package version.</p>
 </span><span class="pattern-value" id="geff_geff_version_pattern">Must match regular expression: <code>^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?</code></span>
 
 
@@ -752,7 +753,8 @@
             />
         </svg>
     <a href="#geff_directed" onclick="anchorLink('geff_directed')">directed</a></div><h4>Directed</h4><span class="badge badge-dark value-type">Type: boolean</span><br/>
-
+<span class="description"><p>True if the graph is directed, otherwise False.</p>
+</span>
 
 
 
@@ -792,7 +794,16 @@
             />
         </svg>
     <a href="#geff_axes" onclick="anchorLink('geff_axes')">axes</a></div><h4>Axes</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="geff_axes_anyOf"><h2 class="handle">
+<div class="description collapse" id="collapseDescription_geff_axes">
+            <p>Optional list of Axis objects defining the axes of each node in the graph.<br />
+Each object's <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> keymust be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information. Each axis can additionally optionally define a <code>unit</code> key, which should match the validOME-Zarr units, and <code>min</code> and <code>max</code> keys to define the range of the axis.</p>
+
+        </div>
+        <div>
+            <a class="collapse-description-link collapsed" data-toggle="collapse" href="#collapseDescription_geff_axes"
+               aria-expanded="false" aria-controls="collapseDescriptiongeff_axes"
+            ></a>
+        </div><div class="any-of-value" id="geff_axes_anyOf"><h2 class="handle">
   <label>Any of</label>
 </h2><ul class="nav nav-tabs" id="tabsgeff_axes_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
@@ -1888,10 +1899,8 @@
     </div>
 </div>
 
-    <footer>
-        <p class="generated-by-footer">Generated using <a href="https://github.com/coveooss/json-schema-for-humans">json-schema-for-humans</a> on 2025-07-21 at 10:40:06 +0000</p>
-    </footer></body>
-</html>
+    </body></div>
+
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The axes dictionary is modeled after the <a href="https://ngff.openmicroscopy.org/0.5/index.html#axes-md">OME-zarr</a> specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. </p>
@@ -2151,6 +2160,8 @@ This is a geff metadata zattrs file that matches the above example structure.
     
     
       <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      
+        <script src="../js/schema_doc.min.js"></script>
       
     
   </body>
