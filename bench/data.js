@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753094376487,
+  "lastUpdate": 1753112664512,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2115,6 +2115,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5342171535121121",
             "extra": "mean: 15.85203531966666 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "malinmayorc@janelia.hhmi.org",
+            "name": "Caroline Malin-Mayor",
+            "username": "cmalinmayor"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "827fd2ec539e43d1b66ee724fb1b7c1f3d5881f6",
+          "message": "Refactor helper functions to provide write_array and write_dict (#148)\n\n- Creates a helper for writing node/edge id arrays together, that checks\nif the dtypes match\n- Creates a helper for writing node or edge properties that are already\nin array form\n- Refactors the prior dictionary property writer to return the arrays\ninstead of writing them\n- Uses the refactored dictionary helper in a write_dict_like function\nthat writes the whole graph to geff\n- Uses this function in write_nx\n\nOpen todos and questions:\n- [ ] test the helpers directly, not just through the nx implementation\n- [x] is it too inefficient memory-wise to have the graph and all of the\nproperties attrs?\n- [ ] Can update/add new attrs with the same helper function, I think,\nbut should be documented and tested\n- [ ] We now enforce that node and edge ids must be the same dtype -\nshould we add this explicitly to the spec?\n\n# Proposed Change\nBriefly describe the contribution. If it resolves an issue or feature\nrequest, be sure to link to that issue.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n- New feature or enhancement\n- Documentation update\n- Tests\n- Maintenance (e.g. dependencies, CI, releases, etc.)\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n\n## If you have added or changed an implementation\n- [ ] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...\n\n---------\n\nCo-authored-by: Teun Huijben <teun.huijben@czbiohub.org>\nCo-authored-by: Teun Huijben <45037215+TeunHuijben@users.noreply.github.com>\nCo-authored-by: Jan Funke <funkej@janelia.hhmi.org>",
+          "timestamp": "2025-07-21T11:41:59-04:00",
+          "tree_id": "c363756187357de9c9b53cfba093fef685eb51e9",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/827fd2ec539e43d1b66ee724fb1b7c1f3d5881f6"
+        },
+        "date": 1753112664000,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12291331851136995,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1860935183922825",
+            "extra": "mean: 8.135814833666672 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.569821276845158,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013923564712788002",
+            "extra": "mean: 51.09908700000195 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06529075164657311,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4747900302255456",
+            "extra": "mean: 15.316104881333322 sec\nrounds: 3"
           }
         ]
       }
