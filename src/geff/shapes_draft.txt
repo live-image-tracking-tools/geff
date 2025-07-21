@@ -1,3 +1,6 @@
+# cspell:disable-file
+# typos: disable
+
 # from __future__ import annotations
 
 # from typing import Literal
@@ -27,7 +30,7 @@
 #     """Ellipsoid shape with a covariance matrix"""
 
 #     type: Literal["ellipsoid"] = "ellipsoid"
-#     # covariance: npt.NDArray[np.floating]
+#     # covariance: npt.ANDArray[np.floating]
 
 #     # @field_serializer("covariance")
 #     # def serialize_covariance(self, covariance: np.ndarray) -> list[list[float]]:
