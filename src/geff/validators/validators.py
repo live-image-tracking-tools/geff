@@ -2,7 +2,16 @@ import zarr
 
 def validate_geff_edges(group):
     '''
-    Validate edges in a GEFF group.
+    Validates that all edge source and target node IDs exist in the node list of a GEFF group.
+
+    Args:
+        group: An object with 'nodes' and 'edges' datasets. 
+
+    Returns:
+        Tuple[bool, List[Tuple[int, int]]]:
+            - all_edges_valid: True if every edge references only existing node IDs, otherwise False.
+            - invalid_edges: List of (source_id, target_id) tuples for edges that reference missing node IDs.
+
     '''
     node_ids = group['nodes']['ids'][:] 
     edges_ids = group['edges']['ids'][:]
@@ -16,3 +25,5 @@ def validate_geff_edges(group):
             invalid_edges.append((src, tgt))
 
     return all_edges_valid, invalid_edges
+
+
