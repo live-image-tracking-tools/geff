@@ -1,9 +1,10 @@
 import networkx as nx
 import numpy as np
 import pytest
+import zarr
 
 import geff
-from geff.testing.data import create_memory_mock_geff
+from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_prop_dtypes = [
@@ -189,7 +190,6 @@ def test_write_nx_metadata_override_precedence(tmp_path):
 
 def test_create_simple_2d_geff():
     """Test the create_simple_2d_geff convenience function"""
-    from geff.testing.data import create_simple_2d_geff
 
     # Test with defaults
     store, _ = create_simple_2d_geff()
@@ -253,7 +253,7 @@ def test_create_simple_3d_geff():
 
 def test_simple_geff_edge_properties():
     """Test that the simple functions create graphs with proper edge properties"""
-    from geff.testing.data import create_simple_2d_geff, create_simple_3d_geff
+    from geff.testing.data import create_simple_3d_geff
 
     # Test 2D
     store_2d, _ = create_simple_2d_geff()
@@ -499,3 +499,43 @@ def test_create_dummy_graph_props_extra_node_props():
     for i in range(5):
         assert extra_props["label"][i] == f"label_{i}"
         assert extra_props["category"][i] == i
+
+
+def test_write_nx_different_store_types(tmp_path):
+    """Test write_nx with different store types: path, string, and zarr.store"""
+
+    # Create a simple test graph
+    graph = nx.Graph()
+    graph.add_node(1, x=1.0, y=2.0)
+    graph.add_node(2, x=3.0, y=4.0)
+    graph.add_edge(1, 2, weight=0.5)
+
+    # Test 1: Path object
+    path_store = tmp_path / "test_path.zarr"
+    geff.write_nx(graph, path_store, axis_names=["x", "y"])
+
+    # Verify it was written correctly
+    graph_read, metadata = geff.read_nx(path_store)
+    assert len(graph_read.nodes) == 2
+    assert len(graph_read.edges) == 1
+    assert (1, 2) in graph_read.edges
+
+    # Test 2: String path
+    string_store = str(tmp_path / "test_string.zarr")
+    geff.write_nx(graph, string_store, axis_names=["x", "y"])
+
+    # Verify it was written correctly
+    graph_read, metadata = geff.read_nx(string_store)
+    assert len(graph_read.nodes) == 2
+    assert len(graph_read.edges) == 1
+    assert (1, 2) in graph_read.edges
+
+    # Test 3: Zarr MemoryStore
+    memory_store = zarr.storage.MemoryStore()
+    geff.write_nx(graph, memory_store, axis_names=["x", "y"])
+
+    # Verify it was written correctly
+    graph_read, metadata = geff.read_nx(memory_store)
+    assert len(graph_read.nodes) == 2
+    assert len(graph_read.edges) == 1
+    assert (1, 2) in graph_read.edges
