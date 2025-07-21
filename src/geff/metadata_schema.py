@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
-from typing import Sequence
+from typing import Literal, Sequence
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -105,6 +105,47 @@ def axes_from_lists(
     return axes
 
 
+class RelatedObject(BaseModel):
+    type: Literal["labels", "image"] = Field(
+        ...,
+        description=(
+            "Type of the related object. 'labels' for label objects, 'image' for image objects."
+        ),
+    )
+    path: str = Field(
+        ...,
+        description=(
+            "Path of the related object within the zarr group, relative "
+            "to the zarr attributes file."
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group."
+        ),
+    )
+    label_prop: str | None = Field(
+        None,
+        description=(
+            "Property name for label objects. This is the property that will be used "
+            "to identify the labels in the related object."
+            "This is only valid for type 'labels'."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> Axis:
+        if self.type != "labels" and self.label_prop is not None:
+            raise ValueError(
+                f"label_prop {self.label_prop} is only valid for type 'labels', "
+                f"but got type {self.type}."
+            )
+        elif self.type == "labels" and self.label_prop is None:
+            raise ValueError(
+                "label_prop must be specified for type 'labels'. "
+                "This is the property that will be used to identify"
+                " the labels in the related object."
+            )
+        return self
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -123,6 +164,10 @@ class GeffMetadata(BaseModel):
     )
     directed: bool
     axes: Sequence[Axis] | None = None
+    related_objects: Sequence[RelatedObject] | None = Field(
+        None,
+        description=("A list of dictionaries of related objects such as labels or images."),
+    )
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:

@@ -58,6 +58,38 @@ class TestMetadataModel:
                 geff_version="0.0.1", directed=True, axes=[{"name": "test"}, {"name": "test"}]
             )
 
+    def test_related_objects(self):
+        # Valid related objects
+        model = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            related_objects=[
+                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
+                {"type": "image", "path": "raw/"},
+            ],
+        )
+        assert len(model.related_objects) == 2
+
+        # Invalid related object type
+        with pytest.raises(
+            pydantic.ValidationError, match=".*Input should be 'labels' or 'image'.*"
+        ):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                related_objects=[{"type": "invalid_type", "path": "invalid/"}],
+            )
+
+        # Invalid combination of type and label_prop
+        with pytest.raises(
+            pydantic.ValidationError, match=".*label_prop .+ is only valid for type 'labels'.*"
+        ):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                related_objects=[{"type": "image", "path": "raw/", "label_prop": "seg_id"}],
+            )
+
     def test_invalid_version(self):
         with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
             GeffMetadata(geff_version="aljkdf", directed=True)

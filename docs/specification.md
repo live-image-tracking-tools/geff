@@ -64,7 +64,7 @@ The `edges/props` is optional. If you do not have any edge properties, the `edge
 Here is a schematic of the expected file structure.
 ``` python
 /path/to.zarr
-    /tracking_graph
+    /tracking_graph.geff
 	    .zattrs  # graph metadata with `geff_version`
 	    nodes/
             ids  # shape: (N,)  dtype: uint64
@@ -106,7 +106,15 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'z', 'type': "space", 'unit': "micrometers", 'min': 1523.36, 'max': 4398.1},
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
-        ]
+        ], 
+        "related_objects": {
+            {
+                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id",
+            },
+            {
+                "type":"image", "path":"../raw/",
+            },
+        }
     }
     ... # custom other things are allowed and ignored by geff
 }
