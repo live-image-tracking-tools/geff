@@ -68,3 +68,5 @@ def validate_no_repeated_edges(group: zarr.Group) -> tuple[bool, np.ndarray]:
 
 
 
+def validate_seg_id(group):
+    pass
