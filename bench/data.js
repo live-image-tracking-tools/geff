@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752962831265,
+  "lastUpdate": 1753094376487,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2070,6 +2070,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.46573041013878413",
             "extra": "mean: 15.582349554999988 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "63270704+melisande-c@users.noreply.github.com",
+            "name": "Melisande Croft",
+            "username": "melisande-c"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "29fbf6851b4a77855df1076ed2ec42aeaada4cec",
+          "message": "feat: FileReader class to read zarr to intermediate dict format (#129)\n\n# Proposed Change\nAdding a file reader class that allows a subset of the zarr to be read.\nFollows a builder pattern, this allows each `node_prop` and `edge_prop`\nto be read when required. When the `build` method is called, output\nboolean masks can be provided to read only a subset of nodes and edges.\n\nThe `build` method outputs a new intermediate dictionary representation\nof the graph defined as a `TypedDict`, this mirrors the structure in the\nzarr file. This allows for reusability of the `FileReader` for different\nbackends.\n\nA `read_to_dict` function has been added that outputs the intermediated\ndict representation. The `read_nx` function now uses this and can also\naccept a list of `node_props` and `edge_props` so that not all the\nproperties need to be read.\n\nTests have been added for the `FileReader`, it is also tested through\nthe `read_nx` texts.\n\n# Types of Changes\n- New feature or enhancement\n\nWhich topics does your change affect? Delete those that do not apply.\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the [developer/contributing](../CONTRIBUTING) docs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...\n\n---------\n\nCo-authored-by: melisande-c <melisande.croft@fht.org>\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>",
+          "timestamp": "2025-07-21T06:37:31-04:00",
+          "tree_id": "940b1db32a0182d673a4a246ba92860ce10d04a7",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/29fbf6851b4a77855df1076ed2ec42aeaada4cec"
+        },
+        "date": 1753094376009,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12017020146899031,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1541451326126924",
+            "extra": "mean: 8.321530527333335 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 17.16404571593266,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0011426586754032706",
+            "extra": "mean: 58.26132233333207 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06308338202851217,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5342171535121121",
+            "extra": "mean: 15.85203531966666 sec\nrounds: 3"
           }
         ]
       }
