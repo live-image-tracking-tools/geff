@@ -116,7 +116,7 @@ class RelatedObject(BaseModel):
         ...,
         description=(
             "Path of the related object within the zarr group, relative "
-            "to the zarr attributes file."
+            "to the zarr attributes file. "
             "It is strongly recommended all related objects are stored as siblings "
             "of the geff group within the top-level zarr group."
         ),
@@ -125,7 +125,7 @@ class RelatedObject(BaseModel):
         None,
         description=(
             "Property name for label objects. This is the property that will be used "
-            "to identify the labels in the related object."
+            "to identify the labels in the related object. "
             "This is only valid for type 'labels'."
         ),
     )
