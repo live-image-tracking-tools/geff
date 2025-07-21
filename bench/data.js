@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753124592539,
+  "lastUpdate": 1753130634859,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2340,6 +2340,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5189815032443579",
             "extra": "mean: 15.282758324333338 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "talley.lambert@gmail.com",
+            "name": "Talley Lambert",
+            "username": "tlambert03"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "68311a277d00867b40faee03c44a2c4683c43680",
+          "message": "Test docs on PR (#184)\n\n# Proposed Change\nrun `mkdocs build --strict` on PRs\n\n# Types of Changes\n- Documentation\n- Tests",
+          "timestamp": "2025-07-21T16:41:51-04:00",
+          "tree_id": "23e8bdf41a20301bf358f26a22f92c155bb380e9",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/68311a277d00867b40faee03c44a2c4683c43680"
+        },
+        "date": 1753130633717,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12334156906382879,
+            "unit": "iter/sec",
+            "range": "stddev: 1.17313169594428",
+            "extra": "mean: 8.10756671566667 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.280760658916197,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0011966164850848672",
+            "extra": "mean: 51.86517366666029 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06539413937324035,
+            "unit": "iter/sec",
+            "range": "stddev: 0.46260948228242404",
+            "extra": "mean: 15.291890214999995 sec\nrounds: 3"
           }
         ]
       }
