@@ -20,7 +20,8 @@ jobs:
   push-docs:
     runs-on: ubuntu-latest
     concurrency:
-      group: gh-pages
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -49,8 +50,7 @@ jobs:
   benchmark:
     name: Report benchmarks on gh-pages
     runs-on: ubuntu-latest
-    concurrency:
-      group: gh-pages
+    needs: push-docs
     steps:
       - uses: actions/checkout@v4
 
