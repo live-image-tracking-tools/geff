@@ -1,5 +1,6 @@
+import warnings
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
 
 import numpy as np
 
@@ -13,6 +14,7 @@ def write_dicts(
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
     axis_names: list[str] | None = None,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -30,6 +32,8 @@ def write_dicts(
             geff
         axis_names (Sequence[str] | None): The name of the spatiotemporal properties, if
             any. Defaults to None
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
+            Defaults to 2.
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -47,7 +51,7 @@ def write_dicts(
     else:
         edges_arr = np.empty((0, 2), dtype=nodes_arr.dtype)
 
-    write_id_arrays(geff_path, nodes_arr, edges_arr)
+    write_id_arrays(geff_path, nodes_arr, edges_arr, zarr_format=zarr_format)
 
     if axis_names is not None:
         node_prop_names = list(node_prop_names)
@@ -64,10 +68,48 @@ def write_dicts(
                     f"Spatiotemporal property '{axis}' not found in : "
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
-    write_props_arrays(geff_path, "nodes", node_props_dict)
+    write_props_arrays(geff_path, "nodes", node_props_dict, zarr_format=zarr_format)
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
-    write_props_arrays(geff_path, "edges", edge_props_dict)
+    write_props_arrays(geff_path, "edges", edge_props_dict, zarr_format=zarr_format)
+
+
+def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
+    """Determine default value to fill in missing values
+
+    Find the first non-missing value and then uses the following heuristics:
+    - Native python numerical types (int, float) -> 0
+    - Native python string -> ""
+    - Otherwise, return the  value, which is definitely the right type and
+    shape, but is potentially both confusing and inefficient. Should reconsider in
+    the future.
+
+    If there are no non-missing values, warns and then returns 0.
+
+    Args:
+        data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of elements and a dictionary
+            holding the properties of that element
+        prop_name (str): The property to get the default value for
+
+    Returns:
+        Any: A value to use as the default that is the same dtype and shape as the rest
+            of the values, for casting to a numpy array without errors.
+    """
+    for _, data_dict in data:
+        # find first non-missing value
+        if prop_name in data_dict:
+            value = data_dict[prop_name]
+            if isinstance(value, int | float):
+                return 0
+            elif isinstance(value, str):
+                return ""
+            else:
+                return value
+    warnings.warn(
+        f"Property {prop_name} is not present on any graph elements. Using 0 as the default.",
+        stacklevel=2,
+    )
+    return 0
 
 
 def dict_props_to_arr(
@@ -94,12 +136,16 @@ def dict_props_to_arr(
         missing = []
         # iterate over the data and checks for missing content
         missing_any = False
+        # to ensure valid dtype of missing, take first non-missing value
+        default_val = None
         for _, data_dict in data:
             if name in data_dict:
                 values.append(data_dict[name])
                 missing.append(False)
             else:
-                values.append(0)  # this fails to non-scalar properties
+                if default_val is None:
+                    default_val = _determine_default_value(data, name)
+                values.append(default_val)
                 missing.append(True)
                 missing_any = True
         values_arr = np.asarray(values)

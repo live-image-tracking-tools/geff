@@ -1,74 +1,39 @@
-# TODO: update to test the new writer helper functions
-# def test_write_props(tmp_path: Path) -> None:
-#     zpath = tmp_path / "test.zarr"
-#     z = zarr.open(zpath)
+import numpy as np
+import pytest
 
-# write_props(
-#     group=z.require_group("nodes"),
-#     data=[
-#         (0, {"a": 1, "b": 2}),
-#         (127, {"a": 5}),
-#         (1, {"a": 6, "c": 7}),
-#     ],
-#     prop_names=["a", "b", "c"],
-#     axis_names=["a"],
-# )
-
-# write_props(
-#     group=z.require_group("edges"),
-#     data=[
-#         ((0, 127), {"score": 0.5}),
-#         ((127, 1), {}),
-#         ((1, 0), {"score": 0.7}),
-#     ],
-#     prop_names=["score"],
-# )
-# axes = axes_from_lists(
-#     axis_names=["x"],
-#     roi_min=(0,),
-#     roi_max=(7,),
-# )
-# metadata = GeffMetadata(
-#     geff_version="0.1.0",
-#     directed=True,
-#     axes=axes,
-# )
-# metadata.write(z)
-
-#     validate(zpath)
+from geff.write_dicts import dict_props_to_arr
 
 
-# def test_write_props_empty(tmp_path: Path) -> None:
-#     zpath = tmp_path / "test.zarr"
-#     z = zarr.open(zpath)
-
-# write_props(
-#     group=z.require_group("nodes"),
-#     data=[],
-#     prop_names=["a"],
-# )
-
-# write_props(
-#     group=z.require_group("edges"),
-#     data=[],
-#     prop_names=["score"],
-# )
-
-#     metadata = GeffMetadata(
-#         geff_version="0.1.0",
-#         directed=True,
-#     )
-#     metadata.write(z)
-
-#     validate(zpath)
-
-#     assert z["nodes/ids"].shape == (0,)
-#     assert z["edges/ids"].shape == (0, 2)
+@pytest.fixture
+def data():
+    data = [
+        (0, {"num": 1, "str": "category"}),
+        (127, {"num": 5, "str_arr": ["test", "string"]}),
+        (1, {"num": 6, "num_arr": [1, 2]}),
+    ]
+    return data
 
 
-# def test_write_props_invalid_group(tmp_path: Path) -> None:
-#     zpath = tmp_path / "test.zarr"
-#     z = zarr.open(zpath)
+@pytest.mark.parametrize(
+    ("data_type", "expected"),
+    [
+        ("num", ([1, 5, 6], None)),
+        ("str", (["category", "", ""], [0, 1, 1])),
+        ("num_arr", ([[1, 2], [1, 2], [1, 2]], [1, 1, 0])),
+        ("str_arr", ([["test", "string"], ["test", "string"], ["test", "string"]], [1, 0, 1])),
+    ],
+)
+def test_dict_prop_to_arr(data, data_type, expected):
+    props_dict = dict_props_to_arr(data, [data_type])
+    print(props_dict)
+    values, missing = props_dict[data_type]
+    ex_values, ex_missing = expected
+    ex_values = np.array(ex_values)
+    ex_missing = np.array(ex_missing, dtype=bool) if ex_missing is not None else None
 
-# with pytest.raises(ValueError, match="Group must be a 'nodes' or 'edges' group"):
-#     write_props(group=z, data=[], prop_names=["a"])
+    np.testing.assert_array_equal(missing, ex_missing)
+    np.testing.assert_array_equal(values, ex_values)
+
+
+# TODO: test write_dicts (it is pretty solidly covered by networkx and write_array tests,
+# so I'm okay merging without, but we should do it when we have time)
