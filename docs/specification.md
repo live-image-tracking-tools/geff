@@ -10,9 +10,8 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 
 ## Geff metadata
 
-{%
-    include "schema/schema.html"
-%}
+<!-- GEFF-SCHEMA -->
+
 !!! note
 
     The axes dictionary is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 

@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import json
 import warnings
+from importlib.metadata import version
 from pathlib import Path
-from typing import Literal, Sequence
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -92,6 +96,18 @@ def axes_from_lists(
     axes: list[Axis] = []
     if axis_names is None:
         return axes
+
+    dims = len(axis_names)
+    if axis_types is not None:
+        assert len(axis_types) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
+    if axis_units is not None:
+        assert len(axis_units) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
     for i in range(len(axis_names)):
         axes.append(
             Axis(
@@ -152,14 +168,18 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
+    model_config = ConfigDict(
+        title="geff_metadata",
+        validate_assignment=True,
+    )
 
     geff_version: str = Field(
         ...,
         pattern=VERSION_PATTERN,
         description=(
             "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
-            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18)."
+            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).\n"
+            "If not provided, the version will be set to the current geff package version."
         ),
     )
     directed: bool
@@ -169,8 +189,15 @@ class GeffMetadata(BaseModel):
         description=("A list of dictionaries of related objects such as labels or images."),
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_model_before(cls, values: dict) -> dict:
+        if values.get("geff_version") is None:
+            values["geff_version"] = version("geff")
+        return values
+
     @model_validator(mode="after")
-    def _validate_model(self) -> GeffMetadata:
+    def _validate_model_after(self) -> GeffMetadata:
         # Axes names must be unique
         if self.axes is not None:
             names = [ax.name for ax in self.axes]
