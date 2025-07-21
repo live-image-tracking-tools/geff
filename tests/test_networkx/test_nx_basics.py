@@ -58,7 +58,7 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
     props = np.array([4, 9, 10, 2, 8], dtype=node_prop_dtypes["position"])
-    for node, pos in zip(nodes, props):
+    for node, pos in zip(nodes, props, strict=False):
         graph.add_node(node.item(), attr=pos)
 
     edges = np.array(
@@ -72,7 +72,7 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
     )
     scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
     colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
-    for edge, score, color in zip(edges, scores, colors):
+    for edge, score, color in zip(edges, scores, colors, strict=False):
         graph.add_edge(*edge.tolist(), score=score.item(), color=color.item())
 
     path = tmp_path / "rw_consistency.zarr/graph"
@@ -83,8 +83,8 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
 
     assert set(graph.nodes) == set(compare.nodes)
     assert set(graph.edges) == set(compare.edges)
-    for node in nodes:
-        assert graph.nodes[node.item()]["attr"] == compare.nodes[node.item()]["attr"]
+    for node in nodes.tolist():
+        assert graph.nodes[node]["attr"] == compare.nodes[node]["attr"]
 
     for edge in edges:
         assert graph.edges[edge.tolist()]["score"] == compare.edges[edge.tolist()]["score"]
@@ -147,14 +147,17 @@ def test_write_nx_metadata_extra_properties(tmp_path):
         axis_types=["space", "space"],
     )
     metadata = GeffMetadata(
-        geff_version="0.3.0", directed=False, axes=axes, foo="bar", bar={"baz": "qux"}
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        extra={"foo": "bar", "bar": {"baz": "qux"}},
     )
     path = tmp_path / "extra_properties_test.zarr"
 
     geff.write_nx(graph, path, metadata=metadata)
     _, compare = geff.read_nx(path)
-    assert compare.foo == "bar"
-    assert compare.bar == {"baz": "qux"}
+    assert compare.extra["foo"] == "bar"
+    assert compare.extra["bar"]["baz"] == "qux"
 
 
 def test_write_nx_metadata_override_precedence(tmp_path):

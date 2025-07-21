@@ -115,15 +115,14 @@ class TestMetadataModel:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
-            foo="bar",
-            bar={"baz": "qux"},
+            extra={"foo": "bar", "bar": {"baz": "qux"}},
         )
         zpath = tmp_path / "test.zarr"
         group = zarr.open(zpath, mode="a")
         meta.write(group)
         compare = GeffMetadata.read(group)
-        assert compare.foo == "bar"
-        assert compare.bar == {"baz": "qux"}
+        assert compare.extra["foo"] == "bar"
+        assert compare.extra["bar"]["baz"] == "qux"
 
 
 class TestAxis:

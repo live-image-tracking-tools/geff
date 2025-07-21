@@ -1,3 +1,4 @@
+import shutil
 from itertools import product
 from pathlib import Path
 
@@ -18,7 +19,7 @@ def big_graph():
 
     nodes = np.arange(N_NODES)  # int
     positions = np.random.uniform(size=(N_NODES, 4))  # float
-    for node, pos in zip(nodes, positions):
+    for node, pos in zip(nodes, positions, strict=False):
         t, z, y, x = pos.tolist()
         graph.add_node(node.item(), t=t, z=z, y=y, x=x)
 
@@ -48,6 +49,7 @@ def test_write(benchmark, tmp_path, big_graph):
         geff_nx.write_nx,
         kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "path": path},
         rounds=ROUNDS,
+        setup=lambda: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
     )
 
 
