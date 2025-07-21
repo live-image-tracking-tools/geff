@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import json
 import warnings
+from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+from typing import Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
