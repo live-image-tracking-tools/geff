@@ -9,6 +9,7 @@ import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
+from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
@@ -123,6 +124,7 @@ class GeffMetadata(BaseModel):
     )
     directed: bool
     axes: Sequence[Axis] | None = None
+    affine: Affine | None = None
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
