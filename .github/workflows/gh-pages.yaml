@@ -8,6 +8,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   deployments: write
@@ -19,9 +23,6 @@ env:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -66,7 +67,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: Report benchmarks on gh-pages
     runs-on: ubuntu-latest
-    needs: push-docs
+    needs:
+      - push-docs
     steps:
       - uses: actions/checkout@v4
 
