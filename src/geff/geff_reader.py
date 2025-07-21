@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import numpy as np
 import zarr
 from numpy.typing import NDArray
@@ -47,6 +50,11 @@ class GeffReader:
                 geff file before loading into memory. If set to False and there are
                 format issues, will likely fail with a cryptic error. Defaults to True.
         """
+        if isinstance(source, str | Path):
+            source_str = str(source)
+            if "~" in source_str:
+                source = os.path.expanduser(source_str)
+
         if validate:
             utils.validate(source)
         self.group = zarr.open_group(source, mode="r")
@@ -208,6 +216,7 @@ def read_to_dict(
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
+
     file_reader = GeffReader(source, validate)
 
     file_reader.read_node_props(node_props)

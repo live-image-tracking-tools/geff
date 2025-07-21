@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import warnings
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
@@ -128,6 +130,11 @@ def write_nx(
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
     """
+    if isinstance(store, str | Path):
+        store_str = str(store)
+        if "~" in store_str:
+            store = os.path.expanduser(store_str)
+
     # open/create zarr container
     if zarr.__version__.startswith("3"):
         group = zarr.open_group(store, mode="a", zarr_format=zarr_format)

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import warnings
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
@@ -58,6 +60,12 @@ def write_sg(
 
             The version of zarr to write. Defaults to 2.
     """
+
+    if isinstance(store, str | Path):
+        store_str = str(store)
+        if "~" in store_str:
+            store = os.path.expanduser(store_str)
+
     if len(graph) == 0:
         warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
         return
