@@ -18,7 +18,7 @@ def big_graph():
 
     nodes = np.arange(N_NODES)  # int
     positions = np.random.uniform(size=(N_NODES, 4))  # float
-    for node, pos in zip(nodes, positions):
+    for node, pos in zip(nodes, positions, strict=False):
         t, z, y, x = pos.tolist()
         graph.add_node(node.item(), t=t, z=z, y=y, x=x)
 
