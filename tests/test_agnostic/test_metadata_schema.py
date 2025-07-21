@@ -253,7 +253,6 @@ class TestAffineTransformation:
         # Simple translation
         affine_matrix = np.array([[1.2, 0.8, 2.0], [0.3, 1.6, 3.0], [0.0, 0.0, 1.0]])
         affine = Affine(matrix=affine_matrix)
-        from numpy.linalg import inv
 
         inv_affine_matrix = inv(affine.numpy())
         inv_affine = Affine(matrix=inv_affine_matrix)
