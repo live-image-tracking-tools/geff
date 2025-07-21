@@ -132,7 +132,7 @@ class GeffMetadata(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _validate_model_before(cls, values: dict) -> dict:
-        if "geff_version" not in values:
+        if values.get("geff_version") is None:
             values["geff_version"] = version("geff")
         return values
 
