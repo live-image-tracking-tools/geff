@@ -17,6 +17,7 @@ dependencies = [
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
     "networkx",
 ]
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: MIT License",
@@ -28,6 +29,9 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 
+[project.optional-dependencies]
+spatial-graph = ["spatial-graph"]
+
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
 dev = [
@@ -37,6 +41,7 @@ dev = [
     "ruff",
     "ipython",
     "types-PyYAML",
+    "spatial-graph",
 ]
 docs = [
     "mkdocs-material",
@@ -55,7 +60,6 @@ bench = [
     "pandas",
     "typer",
 ]
-
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -78,7 +82,7 @@ bench = { features = ["dev", "bench"], solve-group = "default" }
 update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
-test = "pytest tests"
+test = "coverage run -m pytest"
 benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.bench.tasks]
@@ -91,8 +95,7 @@ build = "*"
 build = "python -m build"
 
 [tool.pixi.feature.docs.tasks]
-preview-docs = { cmd = "mkdocs serve", depends-on = "schema-docs" }
-schema-docs = "generate-schema-doc geff-schema.json docs/schema/schema.html"
+preview-docs = {cmd = "mkdocs serve"}
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
@@ -139,6 +142,7 @@ testpaths = ["tests"]
 pythonpath = ["tests"]
 filterwarnings = [
     "error",
+    "ignore:'cgi' is deprecated and slated for removal in Python 3.13",
     # if needed, add global ignores here, for example:
     # "ignore:Some message:SomeCategory",
 ]

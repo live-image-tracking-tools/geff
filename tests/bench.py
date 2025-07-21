@@ -1,3 +1,4 @@
+import shutil
 from itertools import product
 from pathlib import Path
 
@@ -48,6 +49,7 @@ def test_write(benchmark, tmp_path, big_graph):
         geff_nx.write_nx,
         kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "path": path},
         rounds=ROUNDS,
+        setup=lambda: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
     )
 
 
