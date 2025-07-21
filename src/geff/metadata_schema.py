@@ -138,7 +138,7 @@ class RelatedObject(BaseModel):
     label_prop: str | None = Field(
         None,
         description=(
-            "Property name for label objects. This is the property that will be used "
+            "Property name for label objects. This is the node property that will be used "
             "to identify the labels in the related object. "
             "This is only valid for type 'labels'."
         ),
