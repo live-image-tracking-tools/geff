@@ -34,4 +34,4 @@
 
 ## Writing Helpers
 
-::: geff.writer_helper.write_props
+::: geff.write_arrays.write_arrays
