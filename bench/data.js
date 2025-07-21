@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753116739013,
+  "lastUpdate": 1753119829767,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2205,6 +2205,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.47890913246296624",
             "extra": "mean: 15.474317567333335 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "funkej@janelia.hhmi.org",
+            "name": "Jan Funke",
+            "username": "funkey"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e9a7e4a058143fd6a30789bded6d812a4f389d23",
+          "message": "Use array/dict IO helper functions and add SpatialGraph (#169)\n\n# Proposed Change\nThis PR supersedes\nhttps://github.com/live-image-tracking-tools/geff/pull/123 and\nhttps://github.com/live-image-tracking-tools/geff/pull/148. Those were\nmutually depending on each other, so this is an attempt to merge both\ninto a consistent state.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n- New feature or enhancement\n- Documentation update\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- `networkx` implementation\n- `spatial_graph` implementation\n\n# Checklist\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly.\n\n## If you have added or changed an implementation\n- [x] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [x] I updated pyproject.toml with new dependencies if needed.\n- [ ] I added a function to tests/bench.py to benchmark the new\nimplementation.\n\n---------\n\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>\nCo-authored-by: Teun Huijben <teun.huijben@czbiohub.org>\nCo-authored-by: Teun Huijben <45037215+TeunHuijben@users.noreply.github.com>\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>\nCo-authored-by: Talley Lambert <talley.lambert@gmail.com>",
+          "timestamp": "2025-07-21T13:41:18-04:00",
+          "tree_id": "7f86dd9730bd658de5d15a4d9507bea09f91df3f",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/e9a7e4a058143fd6a30789bded6d812a4f389d23"
+        },
+        "date": 1753119829291,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11082379229430092,
+            "unit": "iter/sec",
+            "range": "stddev: 1.4165692861278198",
+            "extra": "mean: 9.023333160666661 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 18.83950980801092,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0009955734842864961",
+            "extra": "mean: 53.0799373333366 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06453164994045288,
+            "unit": "iter/sec",
+            "range": "stddev: 0.6344430877150187",
+            "extra": "mean: 15.496271998666677 sec\nrounds: 3"
           }
         ]
       }
