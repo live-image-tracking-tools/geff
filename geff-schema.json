@@ -61,6 +61,52 @@
       "title": "Axis",
       "type": "object"
     },
+    "DisplayHint": {
+      "properties": {
+        "display_horizontal": {
+          "description": "Which spatial axis to use for horizontal display",
+          "title": "Display Horizontal",
+          "type": "string"
+        },
+        "display_vertical": {
+          "description": "Which spatial axis to use for vertical display",
+          "title": "Display Vertical",
+          "type": "string"
+        },
+        "display_depth": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, which spatial axis to use for depth display",
+          "title": "Display Depth"
+        },
+        "display_time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, which temporal axis to use for time",
+          "title": "Display Time"
+        }
+      },
+      "required": [
+        "display_horizontal",
+        "display_vertical"
+      ],
+      "title": "DisplayHint",
+      "type": "object"
+    },
     "GeffMetadata": {
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
@@ -88,6 +134,17 @@
           ],
           "default": null,
           "title": "Axes"
+        },
+        "display_hints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DisplayHint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
