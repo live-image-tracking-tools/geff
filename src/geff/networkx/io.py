@@ -36,8 +36,14 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
     """
     _min = None
     _max = None
-    for _, data in graph.nodes(data=True):
-        pos = np.array([data[name] for name in axis_names])
+    for node, data in graph.nodes(data=True):
+        try:
+            pos = np.array([data[name] for name in axis_names])
+        except KeyError as e:
+            missing_names = {name for name in axis_names if name not in data}
+            raise ValueError(
+                f"Spatiotemporal properties {missing_names} not found in node {node}"
+            ) from e
         if _min is None or _max is None:
             _min = pos
             _max = pos
@@ -99,7 +105,7 @@ def write_nx(
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
     axis_types: list[str | None] | None = None,
-    zarr_format: Literal[2, 3] | None = 2,
+    zarr_format: Literal[2, 3] = 2,
 ):
     """Write a networkx graph to the geff file format
 
@@ -119,7 +125,7 @@ def write_nx(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
-        zarr_format (int, optional): The version of zarr to write.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
     """
     # open/create zarr container

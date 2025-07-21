@@ -14,6 +14,8 @@ def write_arrays(
     edge_ids: np.ndarray,
     edge_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
     metadata: GeffMetadata,
+    node_props_unsquish: dict[str, list[str]] | None = None,
+    edge_props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ):
     """Write a geff file from already constructed arrays of node and edge ids and props
@@ -37,12 +39,24 @@ def write_arrays(
         metadata (GeffMetadata): The metadata of the graph.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
+        node_props_unsquish (dict[str, list[str]] | None): a dictionary
+            indicication how to "unsquish" a property into individual scalars
+            (e.g.: `{"pos": ["z", "y", "x"]}` will store the position property
+            as three individual properties called "z", "y", and "x".
+        edge_props_unsquish (dict[str, list[str]] | None): a dictionary
+            indicication how to "unsquish" a property into individual scalars
+            (e.g.: `{"pos": ["z", "y", "x"]}` will store the position property
+            as three individual properties called "z", "y", and "x".
     """
     write_id_arrays(geff_store, node_ids, edge_ids)
     if node_props is not None:
-        write_props_arrays(geff_store, "nodes", node_props, zarr_format=zarr_format)
+        write_props_arrays(
+            geff_store, "nodes", node_props, node_props_unsquish, zarr_format=zarr_format
+        )
     if edge_props is not None:
-        write_props_arrays(geff_store, "edges", edge_props, zarr_format=zarr_format)
+        write_props_arrays(
+            geff_store, "edges", edge_props, edge_props_unsquish, zarr_format=zarr_format
+        )
     metadata.write(geff_store)
 
 
@@ -82,6 +96,7 @@ def write_props_arrays(
     geff_store: StoreLike,
     group: str,
     props: dict[str, tuple[np.ndarray, np.ndarray | None]],
+    props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """Writes a set of properties to a geff nodes or edges group.
@@ -94,6 +109,10 @@ def write_props_arrays(
         group (str): "nodes" or "edges"
         props (dict[str, tuple[np.ndarray, np.ndarray | None]]): a dictionary from
             attr name to (attr_values, attr_missing) arrays.
+        props_unsquish (dict[str, list[str]] | None): a dictionary indicication
+            how to "unsquish" a property into individual scalars (e.g.:
+            `{"pos": ["z", "y", "x"]}` will store the position property as
+            three individual properties called "z", "y", and "x".
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
     Raises:
@@ -102,6 +121,17 @@ def write_props_arrays(
     """
     if group not in ["nodes", "edges"]:
         raise ValueError(f"Group must be a 'nodes' or 'edges' group. Found {group}")
+
+    if props_unsquish is not None:
+        for name, replace_names in props_unsquish.items():
+            array, missing = props[name]
+            assert len(array.shape) == 2, "Can only unsquish 2D arrays."
+            replace_arrays = {
+                replace_name: (array[:, i], None if not missing else missing[:, i])
+                for i, replace_name in enumerate(replace_names)
+            }
+            del props[name]
+            props.update(replace_arrays)
 
     if zarr.__version__.startswith("3"):
         geff_root = zarr.open(

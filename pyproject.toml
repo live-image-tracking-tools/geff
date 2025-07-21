@@ -17,6 +17,7 @@ dependencies = [
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
     "networkx",
 ]
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: MIT License",
@@ -28,6 +29,9 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 
+[project.optional-dependencies]
+spatial-graph = ["spatial-graph"]
+
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
 dev = [
@@ -37,25 +41,25 @@ dev = [
     "ruff",
     "ipython",
     "types-PyYAML",
+    "spatial-graph",
 ]
 docs = [
     "mkdocs-material",
-    "mkdocstrings[python]", 
+    "mkdocstrings[python]",
     "mkdocs-api-autonav",
     "mkdocs-include-markdown-plugin",
     "mike",
     "json-schema-for-humans",
-    "typing-extensions",  # Required for json-schema-for-humans
-    "ruff",  # to format the source code signatures
+    "typing-extensions",              # Required for json-schema-for-humans
+    "ruff",                           # to format the source code signatures
 ]
 bench = [
     { include-group = "test" },
     "pytest-benchmark",
     "tabulate",
     "pandas",
-    "typer"
+    "typer",
 ]
-
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -71,7 +75,7 @@ python = "3.12.*"
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default"}
+docs = { features = ["docs"], solve-group = "default" }
 bench = { features = ["dev", "bench"], solve-group = "default" }
 
 [tool.pixi.tasks]
@@ -91,18 +95,19 @@ build = "*"
 build = "python -m build"
 
 [tool.pixi.feature.docs.tasks]
-preview-docs = {cmd = "mkdocs serve", depends-on = "schema-docs"}
-schema-docs = "generate-schema-doc geff-schema.json docs/schema/schema.html"
+preview-docs = {cmd = "mkdocs serve"}
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
 homepage = "https://github.com/live-image-tracking-tools/geff"
 
-# https://github.com/charliermarsh/ruff
+# https://docs.astral.sh/ruff/rules/
 [tool.ruff]
 line-length = 100
-target-version = "py38"
-# https://beta.ruff.rs/docs/rules/
+target-version = "py310"
+fix = true
+
+[tool.ruff.lint]
 extend-select = [
     "E",    # style errors
     "W",    # style warnings
@@ -114,7 +119,7 @@ extend-select = [
     "A001", # flake8-builtins
     "RUF",  # ruff-specific rules
     "TID",  # tidy imports
-    "TCH",  # type checking
+    "TC",   # type checking
     "D102", # undocumented public method
     "D103", # undocumented public function
     "D300", # enforces triple double quotes on docstrings
@@ -122,11 +127,11 @@ extend-select = [
     "D417", # undocumented parameter
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"]  # unused imports in init files
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"] # unused imports in init files
 "tests/*.py" = ["D"]
 "scripts/*.py" = ["D"]
 
@@ -137,6 +142,7 @@ testpaths = ["tests"]
 pythonpath = ["tests"]
 filterwarnings = [
     "error",
+    "ignore:'cgi' is deprecated and slated for removal in Python 3.13",
     # if needed, add global ignores here, for example:
     # "ignore:Some message:SomeCategory",
 ]

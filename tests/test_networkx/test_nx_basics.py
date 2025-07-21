@@ -72,7 +72,7 @@ def test_read_write_no_spatial(
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_id_dtype)
     props = np.array([4, 9, 10, 2, 8], dtype=node_prop_dtypes["position"])
-    for node, pos in zip(nodes, props):
+    for node, pos in zip(nodes, props, strict=False):
         graph.add_node(node.item(), attr=pos)
 
     edges = np.array(
@@ -86,7 +86,7 @@ def test_read_write_no_spatial(
     )
     scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
     colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
-    for edge, score, color in zip(edges, scores, colors):
+    for edge, score, color in zip(edges, scores, colors, strict=False):
         graph.add_edge(*edge.tolist(), score=score.item(), color=color.item())
 
     path = tmp_path / "rw_consistency.zarr/graph"

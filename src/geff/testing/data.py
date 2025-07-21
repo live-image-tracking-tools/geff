@@ -1,4 +1,4 @@
-from typing import Any, Literal, Optional, TypedDict, cast
+from typing import Any, Literal, TypedDict, cast
 
 import networkx as nx
 import numpy as np
@@ -43,7 +43,7 @@ def create_dummy_graph_props(
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: Optional[list[dict[str, DTypeStr]]] = None,
+    extra_node_props: list[dict[str, DTypeStr]] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
@@ -210,7 +210,7 @@ def create_memory_mock_geff(
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: Optional[list[dict[str, DTypeStr]]] = None,
+    extra_node_props: list[dict[str, DTypeStr]] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
