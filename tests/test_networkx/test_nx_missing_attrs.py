@@ -97,8 +97,9 @@ def test_missing_pos_prop(tmp_path):
     zarr_path = Path(tmp_path) / "test.zarr"
     graph, _ = graph_sparse_node_props()
     # wrong property name
-    with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
-        geff.write_nx(graph, axis_names=["t", "y", "z"], path=zarr_path)
+    with pytest.raises(UserWarning, match="Property .* is not present on any graph elements"):
+        with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
+            geff.write_nx(graph, axis_names=["t", "y", "z"], path=zarr_path)
     # missing property
     del graph.nodes[1]["t"]
     print(graph.nodes[1])
