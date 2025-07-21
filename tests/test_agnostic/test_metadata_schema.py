@@ -1,10 +1,12 @@
 import re
 
+import numpy as np
 import pydantic
 import pytest
 import zarr
 
-from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, Shape, write_metadata_schema
+from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, write_metadata_schema
+from geff.shapes import Shape, Sphere, Ellipsoid, ShapeType
 
 
 class TestMetadataModel:
@@ -155,24 +157,58 @@ class TestAxis:
             Axis(name="test", min=0, max=-10)
 
 
-class TestShape:
+# class TestShape:
+#     def test_valid(self):
+#         # Minial fields for each type
+#         Shape(name="radius", type="sphere")
+#         Shape(name="covariance2d", type="ellipsoid")
+#         Shape(name="covariance3d", type="ellipsoid")
+
+#     def test_no_name(self):
+#         with pytest.raises(pydantic.ValidationError):
+#             Shape(type="sphere")
+
+#     def test_no_type(self):
+#         with pytest.raises(pydantic.ValidationError):
+#             Shape(name="radius")
+
+#     def test_bad_type(self):
+#         with pytest.warns(UserWarning, match=r"Type .* not in valid types"):
+#             Shape(name="test", type="other")
+
+
+class TestSphere:
     def test_valid(self):
-        # Minial fields for each type
-        Shape(name="radius", type="sphere")
-        Shape(name="covariance2d", type="ellipsoid")
-        Shape(name="covariance3d", type="ellipsoid")
+        Sphere(name="radius")
 
-    def test_no_name(self):
-        with pytest.raises(pydantic.ValidationError):
-            Shape(type="sphere")
+    # def test_invalid_radius(self):
+    #     with pytest.raises(ValueError, match=r"Radius must be positive"):
+    #         Sphere(name="radius", radius=-1)
 
-    def test_no_type(self):
-        with pytest.raises(pydantic.ValidationError):
-            Shape(name="radius")
+    #     with pytest.raises(ValueError, match=r"Radius must be positive"):
+    #         Sphere(name="radius", radius=0)
 
-    def test_bad_type(self):
-        with pytest.warns(UserWarning, match=r"Type .* not in valid types"):
-            Shape(name="test", type="other")
+
+class TestEllipsoid:
+    def test_valid(self):
+        Ellipsoid(name="covariance2d")
+
+    # def test_invalid_covariance(self):
+    #     # Not a numpy array
+    #     with pytest.raises(TypeError, match=r"Covariance must be a numpy array"):
+    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 0], [0, 1]]))
+
+    #     # Not square
+    #     with pytest.raises(ValueError, match=r"Covariance must be a square matrix"):
+    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 0], [0, 1], [0, 0]]))
+
+    #     # Not symmetric
+    #     with pytest.raises(ValueError, match=r"Covariance matrix must be symmetric"):
+    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 2], [3, 4]]))
+
+    #     # Not positive-semidefinite
+    #     with pytest.raises(ValueError, match=r"Covariance matrix must be positive-semidefinite"):
+    #         Ellipsoid(name="covariance2d", covariance=np.array([[1, 2], [2, -1]]))
 
 
 def test_write_schema(tmp_path):

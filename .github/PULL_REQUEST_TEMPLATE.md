@@ -23,7 +23,7 @@ Put an x in the boxes that apply. You can also fill these out after creating the
 
 ## If you changed the specification
 - [ ] I have checked that any validation functions and tests reflect the changes.
-- [ ] I have updated the GeffMetadata and the json schema using `pixi run update-schema` if necessary.
+- [ ] I have updated the GeffMetadata and the json schema using `pixi run update-json` if necessary.
 - [ ] I have updated docs/specification.md to reflect the change.
 - [ ] I have updated implementations to reflect the change. (This can happen in separate PRs on a feature branch, but must be complete before merging into main.)
 

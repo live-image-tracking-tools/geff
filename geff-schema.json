@@ -61,6 +61,26 @@
       "title": "Axis",
       "type": "object"
     },
+    "Ellipsoid": {
+      "description": "Ellipsoid shape with a covariance matrix",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "const": "ellipsoid",
+          "default": "ellipsoid",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Ellipsoid",
+      "type": "object"
+    },
     "GeffMetadata": {
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
@@ -88,6 +108,36 @@
           ],
           "default": null,
           "title": "Axes"
+        },
+        "sphere": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Sphere"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sphere"
+        },
+        "ellipsoid": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Ellipsoid"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ellipsoid"
         }
       },
       "required": [
@@ -95,6 +145,26 @@
         "directed"
       ],
       "title": "geff_metadata",
+      "type": "object"
+    },
+    "Sphere": {
+      "description": "Hypersphere shape with a radius",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "const": "sphere",
+          "default": "sphere",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Sphere",
       "type": "object"
     }
   },

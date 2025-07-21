@@ -118,12 +118,9 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
         ],
-        "shapes" : [ # optional. They are spatial
-            {'name': "radius", 'type': "sphere"}, # name + type mandatory
-            {'name': "covariance3d", 'type': "ellipsoid"},
-            # Checks on matrix (symmetric, positive-semidefinite) in validator. Specify in spec the defintiion.
-            # Implicit assumptions on axis and units, specify in spec
-        ],
+        "sphere": {'name': "radius"}, # optional
+        "ellipsoid": {'name': "covariance3d"}, # optional
+        # TODO Implicit assumptions on axis and units, specify in spec
     }
     ... # custom other things are allowed and ignored by geff
 }

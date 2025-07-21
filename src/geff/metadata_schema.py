@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence
+from typing import Sequence
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -17,9 +17,7 @@ from .units import (
     validate_space_unit,
     validate_time_unit,
 )
-
-if TYPE_CHECKING:
-    from .shapes import Shape
+from .shapes import Ellipsoid, Sphere
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
@@ -126,7 +124,8 @@ class GeffMetadata(BaseModel):
     )
     directed: bool
     axes: Sequence[Axis] | None = None
-    shapes: Sequence[Shape] | None = None
+    sphere: Sequence[Sphere] | None = None
+    ellipsoid: Sequence[Ellipsoid] | None = None
 
     @model_validator(mode="after")
     def _validate_model(self) -> GeffMetadata:
