@@ -53,6 +53,8 @@ jobs:
         if: github.event_name == 'pull_request'
         run: mkdocs build --strict
 
+      # it's too hard (from a security perspective) to host previews from fork PRs
+      # so we skip unless it's a PR from a branch in the same repository
       - name: Deploy gh-pages preview # https://github.com/rossjrw/pr-preview-action
         if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed' && github.event.pull_request.head.repo.full_name != github.repository
         uses: rossjrw/pr-preview-action@v1
