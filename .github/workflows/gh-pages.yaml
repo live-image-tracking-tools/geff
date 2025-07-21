@@ -1,4 +1,4 @@
-name: Push gh-pages updates update
+name: Docs
 
 # push to the gh-pages branch whenever there is a new push to main or a new tag
 on:
@@ -17,7 +17,7 @@ env:
   SETUPTOOLS_SCM_PRETEND_VERSION: "0.0"
 
 jobs:
-  push-docs:
+  build-docs:
     runs-on: ubuntu-latest
     concurrency:
       group: gh-pages
