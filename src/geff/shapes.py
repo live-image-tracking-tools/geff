@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Literal
 
-import numpy as np
-import numpy.typing as npt
-from pydantic import BaseModel, field_serializer, model_validator
-from pydantic_core import core_schema
+from pydantic import BaseModel
 
 
 class Shape(BaseModel):

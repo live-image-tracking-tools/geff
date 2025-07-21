@@ -1,12 +1,11 @@
 import re
 
-import numpy as np
 import pydantic
 import pytest
 import zarr
 
 from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, write_metadata_schema
-from geff.shapes import Shape, Sphere, Ellipsoid, ShapeType
+from geff.shapes import Ellipsoid, Sphere
 
 
 class TestMetadataModel:

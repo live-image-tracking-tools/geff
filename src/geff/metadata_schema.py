@@ -5,6 +5,7 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -18,7 +19,9 @@ from .units import (
     validate_space_unit,
     validate_time_unit,
 )
-from .shapes import Ellipsoid, Sphere
+
+if TYPE_CHECKING:
+    from .shapes import Ellipsoid, Sphere
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
