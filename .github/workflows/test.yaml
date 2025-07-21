@@ -47,7 +47,9 @@ jobs:
           python -m pip list
 
       - name: Test
-        run: pytest --color=yes --cov --cov-report=xml --cov-report=term-missing ${{ inputs.test-target }}
+        run: |
+          coverage run -m pytest --color=yes ${{ inputs.test-target }}
+          coverage xml
 
       - name: Coverage
         uses: codecov/codecov-action@v5
