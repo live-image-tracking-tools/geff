@@ -45,6 +45,7 @@ jobs:
 
       - name: Get witty cache directory
         id: cache-path
+        shell: bash
         run: |
           dir=$(python -c 'import witty; print(witty.get_witty_cache_dir())')
           echo "path=$dir" >> "$GITHUB_OUTPUT"
