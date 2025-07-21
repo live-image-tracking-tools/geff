@@ -49,7 +49,7 @@ def create_dummy_graph_props(
     include_x: bool = True,
 ) -> GraphAttrs:
     """Create dummy graph properties for testing.
-    
+
     Args:
         node_id_dtype: Data type for node IDs
         node_prop_dtypes: Dictionary specifying dtypes for node properties
@@ -62,7 +62,7 @@ def create_dummy_graph_props(
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
         include_x: Whether to include x dimension
-        
+
     Returns:
         Dictionary containing all graph properties
     """
@@ -142,26 +142,35 @@ def create_dummy_graph_props(
         # Validate input is a list
         if not isinstance(extra_node_props, list):
             raise ValueError(f"extra_node_props must be a list, got {type(extra_node_props)}")
-        
+
         # Validate each item is a dict
         for i, prop_spec in enumerate(extra_node_props):
             if not isinstance(prop_spec, dict):
                 raise ValueError(f"extra_node_props[{i}] must be a dict, got {type(prop_spec)}")
-            
+
             # Validate dict contains only string keys and valid dtype values
             for prop_name, prop_dtype in prop_spec.items():
                 if not isinstance(prop_name, str):
-                    raise ValueError(f"extra_node_props[{i}] keys must be strings, got {type(prop_name)}")
-                
+                    raise ValueError(
+                        f"extra_node_props[{i}] keys must be strings, got {type(prop_name)}"
+                    )
+
                 if not isinstance(prop_dtype, str):
-                    raise ValueError(f"extra_node_props[{i}][{prop_name}] must be a string dtype, got {type(prop_dtype)}")
-                
+                    raise ValueError(
+                        f"extra_node_props[{i}][{prop_name}] must be a string dtype, "
+                        f"got {type(prop_dtype)}"
+                    )
+
                 # Validate dtype is supported using DTypeStr
                 from typing import get_args
+
                 valid_dtypes = get_args(DTypeStr)
                 if prop_dtype not in valid_dtypes:
-                    raise ValueError(f"extra_node_props[{i}][{prop_name}] dtype '{prop_dtype}' not supported. Valid dtypes: {valid_dtypes}")
-                
+                    raise ValueError(
+                        f"extra_node_props[{i}][{prop_name}] dtype '{prop_dtype}' not supported. "
+                        f"Valid dtypes: {valid_dtypes}"
+                    )
+
                 # Generate different patterns for different property types
                 if prop_dtype == "str":
                     extra_node_props_dict[prop_name] = np.array(
@@ -207,7 +216,7 @@ def create_memory_mock_geff(
     include_x: bool = True,
 ) -> tuple[Path, GraphAttrs]:
     """Create a mock geff graph in memory and return the path and graph properties.
-    
+
     Args:
         node_id_dtype: Data type for node IDs
         node_prop_dtypes: Dictionary specifying dtypes for node properties
@@ -220,16 +229,16 @@ def create_memory_mock_geff(
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
         include_x: Whether to include x dimension
-        
+
     Returns:
         Tuple of (path to geff file, graph properties dictionary)
     """
-    import tempfile
     import shutil
-    
+    import tempfile
+
     # Create a temporary directory
     temp_dir = Path(tempfile.mkdtemp())
-    
+
     try:
         graph_props = create_dummy_graph_props(
             node_id_dtype=node_id_dtype,
@@ -283,7 +292,7 @@ def create_memory_mock_geff(
         )
 
         return path, graph_props
-        
+
     except Exception:
         # Clean up on error
         shutil.rmtree(temp_dir)
