@@ -22,12 +22,18 @@ def write_arrays(
     as an optional flag.
 
     Args:
-        geff_path (Path | str): _description_
-        node_ids (np.ndarray): _description_
-        node_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): _description_
-        edge_ids (np.ndarray): _description_
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): _description_
-        metadata (GeffMetadata): _description_
+        geff_path (Path | str): The path to the zarr group where the graph will be written
+        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+            edge_ids.
+        node_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): A dictionary
+            from node property names to (values, missing) arrays, which should have same
+            length as node_ids.
+        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+            as node_ids.
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray  |  None]] | None): A dictionary
+            from edge property names to (values, missing) arrays, which should have same
+            length as edge_ids.
+        metadata (GeffMetadata): The metadata of the graph.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
     """
