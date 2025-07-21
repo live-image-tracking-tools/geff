@@ -85,7 +85,7 @@
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
         "geff_version": {
-          "description": "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).",
+          "description": "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).\nIf not provided, the version will be set to the current geff package version.",
           "pattern": "^\\d+\\.\\d+(?:\\.\\d+)?(?:\\.dev\\d+)?(?:\\+[a-zA-Z0-9]+)?",
           "title": "Geff Version",
           "type": "string"
