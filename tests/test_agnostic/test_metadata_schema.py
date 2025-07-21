@@ -158,7 +158,7 @@ class TestAxis:
 
 # class TestShape:
 #     def test_valid(self):
-#         # Minial fields for each type
+#         # Minimal fields for each type
 #         Shape(name="radius", type="sphere")
 #         Shape(name="covariance2d", type="ellipsoid")
 #         Shape(name="covariance3d", type="ellipsoid")
