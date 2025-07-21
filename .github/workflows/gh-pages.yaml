@@ -3,9 +3,9 @@ name: Push gh-pages updates update
 # push to the gh-pages branch whenever there is a new push to main or a new tag
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     tags: ["*"]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -31,8 +31,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          pip install -e . --group docs
+        run: pip install -e . --group docs
 
       - id: get_version
         uses: battila7/get-version-action@v2
@@ -43,8 +42,21 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git fetch origin gh-pages --depth=1
 
+      # if this workflow is triggered by a push event, deploy the docs to gh-pages
       - name: Push changes to gh-pages branch
+        if: github.event_name == 'push'
         run: mike deploy ${{ steps.get_version.outputs.version }} $TAG -u -p
+
+      # if triggered by a pull request, build the docs and upload them as an artifact
+      - name: Build docs
+        if: github.event_name == 'pull_request'
+        run: mkdocs build --strict
+        
+      - name: Deploy gh-pages preview  # https://github.com/rossjrw/pr-preview-action
+        if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed'
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: ./site/
 
   benchmark:
     name: Report benchmarks on gh-pages
@@ -74,7 +86,7 @@ jobs:
         uses: benchmark-action/github-action-benchmark@v1
         with:
           name: Python Benchmark with pytest-benchmark
-          tool: 'pytest'
+          tool: "pytest"
           output-file-path: output.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
