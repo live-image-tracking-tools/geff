@@ -3,6 +3,7 @@ import pytest
 
 from geff.geff_reader import GeffReader
 from geff.networkx.io import _ingest_dict_nx
+from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_prop_dtypes = [
@@ -20,13 +21,12 @@ edge_prop_dtypes = [
 @pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
 def test_build_w_masked_nodes(
-    path_w_expected_graph_props,
     node_id_dtype,
     node_prop_dtypes,
     edge_prop_dtypes,
     directed,
 ):
-    path, graph_props = path_w_expected_graph_props(
+    path, graph_props = create_memory_mock_geff(
         node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
     file_reader = GeffReader(path)
@@ -52,13 +52,12 @@ def test_build_w_masked_nodes(
 @pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
 def test_build_w_masked_edges(
-    path_w_expected_graph_props,
     node_id_dtype,
     node_prop_dtypes,
     edge_prop_dtypes,
     directed,
 ):
-    path, graph_props = path_w_expected_graph_props(
+    path, graph_props = create_memory_mock_geff(
         node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
     file_reader = GeffReader(path)
@@ -80,13 +79,12 @@ def test_build_w_masked_edges(
 @pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
 def test_build_w_masked_nodes_edges(
-    path_w_expected_graph_props,
     node_id_dtype,
     node_prop_dtypes,
     edge_prop_dtypes,
     directed,
 ):
-    path, graph_props = path_w_expected_graph_props(
+    path, graph_props = create_memory_mock_geff(
         node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
     file_reader = GeffReader(path)
@@ -117,8 +115,8 @@ def test_build_w_masked_nodes_edges(
     _ = _ingest_dict_nx(graph_dict)
 
 
-def test_read_node_props(path_w_expected_graph_props):
-    path, graph_props = path_w_expected_graph_props(
+def test_read_node_props():
+    path, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
         node_prop_dtypes={"position": "double", "time": "double"},
         edge_prop_dtypes={"score": "float64", "color": "uint8"},
@@ -146,8 +144,8 @@ def test_read_node_props(path_w_expected_graph_props):
     _ = _ingest_dict_nx(graph_dict)
 
 
-def test_read_edge_props(path_w_expected_graph_props):
-    path, graph_props = path_w_expected_graph_props(
+def test_read_edge_props():
+    path, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
         node_prop_dtypes={"position": "double", "time": "double"},
         edge_prop_dtypes={"score": "float64", "color": "uint8"},

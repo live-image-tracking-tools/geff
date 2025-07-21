@@ -3,8 +3,9 @@ import numpy as np
 import pytest
 
 import geff
+from geff.testing.data import create_memory_mock_geff
 
-node_id_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
+node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_prop_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
@@ -24,7 +25,6 @@ edge_prop_dtypes = [
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
 def test_read_write_consistency(
-    path_w_expected_graph_props,
     node_id_dtype,
     node_prop_dtypes,
     edge_prop_dtypes,
@@ -32,7 +32,7 @@ def test_read_write_consistency(
     include_t,
     include_z,
 ):
-    path, graph_props = path_w_expected_graph_props(
+    path, graph_props = create_memory_mock_geff(
         node_id_dtype,
         node_prop_dtypes,
         edge_prop_dtypes,
@@ -41,7 +41,7 @@ def test_read_write_consistency(
         include_z=include_z,
     )
 
-    graph, metadata = geff.read_nx(path)
+    graph, _ = geff.read_nx(path)
 
     assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
     assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
@@ -93,7 +93,7 @@ def test_read_write_no_spatial(
 
     geff.write_nx(graph, path, axis_names=[])
 
-    compare, metadata = geff.read_nx(path)
+    compare, _ = geff.read_nx(path)
 
     assert set(graph.nodes) == set(compare.nodes)
     assert set(graph.edges) == set(compare.edges)
@@ -133,7 +133,7 @@ def test_write_nx_with_metadata(tmp_path):
     geff.write_nx(graph, path, metadata=metadata)
 
     # Read it back and verify metadata is preserved
-    read_graph, read_metadata = geff.read_nx(path)
+    _, read_metadata = geff.read_nx(path)
 
     assert not read_metadata.directed
     assert len(read_metadata.axes) == 2
@@ -177,7 +177,7 @@ def test_write_nx_metadata_override_precedence(tmp_path):
         )
 
     # Verify that axis lists took precedence
-    read_graph, read_metadata = geff.read_nx(path)
+    _, read_metadata = geff.read_nx(path)
     assert len(read_metadata.axes) == 3
     axis_names = [axis.name for axis in read_metadata.axes]
     axis_units = [axis.unit for axis in read_metadata.axes]

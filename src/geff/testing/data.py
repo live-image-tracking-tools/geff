@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, TypedDict, cast
+from typing import Any, Literal, Optional, TypedDict, cast
 
 import networkx as nx
 import numpy as np
-import pytest
 from numpy.typing import NDArray
 
 import geff
@@ -29,7 +28,6 @@ class GraphAttrs(TypedDict):
 class ExampleNodePropsDtypes(TypedDict):
     position: DTypeStr
     time: DTypeStr
-    extra: DTypeStr
 
 
 class ExampleEdgePropsDtypes(TypedDict):
@@ -50,6 +48,24 @@ def create_dummy_graph_props(
     include_y: bool = True,
     include_x: bool = True,
 ) -> GraphAttrs:
+    """Create dummy graph properties for testing.
+    
+    Args:
+        node_id_dtype: Data type for node IDs
+        node_prop_dtypes: Dictionary specifying dtypes for node properties
+        edge_prop_dtypes: Dictionary specifying dtypes for edge properties
+        directed: Whether the graph is directed
+        num_nodes: Number of nodes to generate
+        num_edges: Number of edges to generate
+        extra_node_props: List of extra node properties to include
+        include_t: Whether to include time dimension
+        include_z: Whether to include z dimension
+        include_y: Whether to include y dimension
+        include_x: Whether to include x dimension
+        
+    Returns:
+        Dictionary containing all graph properties
+    """
     # Build axis_names and axis_units based on which dimensions to include
     axis_names_list = []
     axis_units_list = []
@@ -82,34 +98,22 @@ def create_dummy_graph_props(
     t = (
         np.linspace(0.1, 0.5, num_nodes, dtype=node_prop_dtypes["time"])
         if include_t
-        else np.array(
-            [], dtype="float64"
-        )  # Default dtype when time not included, type doesn't matter
-        # because node properties are not written to nodes when length is 0
+        else np.array([], dtype="float64")  # Default dtype when time not included
     )
     z = (
         np.linspace(0.5, 0.1, num_nodes, dtype=node_prop_dtypes["position"])
         if include_z
-        else np.array(
-            [], dtype="float64"
-        )  # Default dtype when position not included, type doesn't matter
-        # because node properties are not written to nodes when length is 0
+        else np.array([], dtype="float64")  # Default dtype when position not included
     )
     y = (
         np.linspace(100.0, 500.0, num_nodes, dtype=node_prop_dtypes["position"])
         if include_y
-        else np.array(
-            [], dtype="float64"
-        )  # Default dtype when position not included, type doesn't matter
-        # because node properties are not written to nodes when length is 0
+        else np.array([], dtype="float64")  # Default dtype when position not included
     )
     x = (
         np.linspace(1.0, 0.1, num_nodes, dtype=node_prop_dtypes["position"])
         if include_x
-        else np.array(
-            [], dtype="float64"
-        )  # Default dtype when position not included, type doesn't matter
-        # because node properties are not written to nodes when length is 0
+        else np.array([], dtype="float64")  # Default dtype when position not included
     )
 
     # Generate edges with flexible count (ensure we don't exceed possible edges)
@@ -135,8 +139,30 @@ def create_dummy_graph_props(
     # Generate extra node properties
     extra_node_props_dict = {}
     if extra_node_props is not None:
+        # Validate input is a list
+        if not isinstance(extra_node_props, list):
+            raise ValueError(f"extra_node_props must be a list, got {type(extra_node_props)}")
+        
+        # Validate each item is a dict
         for i, prop_spec in enumerate(extra_node_props):
+            if not isinstance(prop_spec, dict):
+                raise ValueError(f"extra_node_props[{i}] must be a dict, got {type(prop_spec)}")
+            
+            # Validate dict contains only string keys and valid dtype values
             for prop_name, prop_dtype in prop_spec.items():
+                if not isinstance(prop_name, str):
+                    raise ValueError(f"extra_node_props[{i}] keys must be strings, got {type(prop_name)}")
+                
+                if not isinstance(prop_dtype, str):
+                    raise ValueError(f"extra_node_props[{i}][{prop_name}] must be a string dtype, got {type(prop_dtype)}")
+                
+                # Validate dtype is supported using DTypeStr
+                from typing import get_args
+                valid_dtypes = get_args(DTypeStr)
+                if prop_dtype not in valid_dtypes:
+                    raise ValueError(f"extra_node_props[{i}][{prop_name}] dtype '{prop_dtype}' not supported. Valid dtypes: {valid_dtypes}")
+                
+                # Generate different patterns for different property types
                 if prop_dtype == "str":
                     extra_node_props_dict[prop_name] = np.array(
                         [f"{prop_name}_{i}" for i in range(num_nodes)], dtype=prop_dtype
@@ -167,50 +193,44 @@ def create_dummy_graph_props(
     }
 
 
-# Using a fixture instead of a function so the tmp_path fixture is automatically passed
-# Implemented as a closure where tmp_path is the bound variable
-@pytest.fixture
-def path_w_expected_graph_props(
-    tmp_path,
-) -> Callable[
-    [
-        DTypeStr,
-        ExampleNodePropsDtypes,
-        ExampleEdgePropsDtypes,
-        bool,
-        int,
-        int,
-        list[dict[str, DTypeStr]],
-        bool,
-        bool,
-        bool,
-        bool,
-    ],
-    tuple[Path, GraphAttrs],
-]:
-    def func(
-        node_id_dtype: DTypeStr,
-        node_prop_dtypes: ExampleNodePropsDtypes,
-        edge_prop_dtypes: ExampleEdgePropsDtypes,
-        directed: bool,
-        num_nodes: int = 5,
-        num_edges: int = 4,
-        extra_node_props: Optional[list[dict[str, DTypeStr]]] = None,
-        include_t: bool = True,
-        include_z: bool = True,
-        include_y: bool = True,
-        include_x: bool = True,
-    ) -> tuple[Path, GraphAttrs]:
-        """
-        Fixture to a geff graph path saved on disk with the expected graph properties.
-
-        Returns:
-        Path
-            Path to the example graph.
-        GraphAttrs
-            The expected graph properties in a dictionary.
-        """
-
+def create_memory_mock_geff(
+    node_id_dtype: DTypeStr,
+    node_prop_dtypes: ExampleNodePropsDtypes,
+    edge_prop_dtypes: ExampleEdgePropsDtypes,
+    directed: bool,
+    num_nodes: int = 5,
+    num_edges: int = 4,
+    extra_node_props: Optional[list[dict[str, DTypeStr]]] = None,
+    include_t: bool = True,
+    include_z: bool = True,
+    include_y: bool = True,
+    include_x: bool = True,
+) -> tuple[Path, GraphAttrs]:
+    """Create a mock geff graph in memory and return the path and graph properties.
+    
+    Args:
+        node_id_dtype: Data type for node IDs
+        node_prop_dtypes: Dictionary specifying dtypes for node properties
+        edge_prop_dtypes: Dictionary specifying dtypes for edge properties
+        directed: Whether the graph is directed
+        num_nodes: Number of nodes to generate
+        num_edges: Number of edges to generate
+        extra_node_props: List of extra node properties to include
+        include_t: Whether to include time dimension
+        include_z: Whether to include z dimension
+        include_y: Whether to include y dimension
+        include_x: Whether to include x dimension
+        
+    Returns:
+        Tuple of (path to geff file, graph properties dictionary)
+    """
+    import tempfile
+    import shutil
+    
+    # Create a temporary directory
+    temp_dir = Path(tempfile.mkdtemp())
+    
+    try:
         graph_props = create_dummy_graph_props(
             node_id_dtype=node_id_dtype,
             node_prop_dtypes=node_prop_dtypes,
@@ -253,7 +273,7 @@ def path_w_expected_graph_props(
             }
             graph.add_edge(*edge.tolist(), **props)
 
-        path = tmp_path / "rw_consistency.zarr/graph"
+        path = temp_dir / "rw_consistency.zarr/graph"
 
         geff.write_nx(
             graph,
@@ -263,5 +283,8 @@ def path_w_expected_graph_props(
         )
 
         return path, graph_props
-
-    return func
+        
+    except Exception:
+        # Clean up on error
+        shutil.rmtree(temp_dir)
+        raise
