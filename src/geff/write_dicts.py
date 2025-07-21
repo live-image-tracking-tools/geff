@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import numpy as np
+import warnings
 
 from .write_arrays import write_id_arrays, write_props_arrays
 
@@ -70,6 +71,44 @@ def write_dicts(
     write_props_arrays(geff_path, "edges", edge_props_dict)
 
 
+def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
+    """Determine default value to fill in missing values
+
+    Find the first non-missing value and then uses the following heuristics:
+    - Native python numerical types (int, float) -> 0
+    - Native python string -> ""
+    - Otherwise, return the  value, which is definitely the right type and
+    shape, but is potentially both confusing and inefficient. Should reconsider in
+    the future.
+
+    If there are no non-missing values, warns and then returns 0.
+
+    Args:
+        data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of elements and a dictionary
+            holding the properties of that element
+        prop_name (str): The property to get the default value for
+
+    Returns:
+        Any: A value to use as the default that is the same dtype and shape as the rest
+            of the values, for casting to a numpy array without errors.
+    """
+    for _, data_dict in data:
+        # find first non-missing value
+        if prop_name in data_dict:
+            value = data_dict[prop_name]
+            if isinstance(value, int | float):
+                return 0
+            elif isinstance(value, str):
+                return ""
+            else:
+                return value
+    warnings.warn(
+        f"Property {prop_name} is not present on any graph elements. Using 0 as the default.",
+        stacklevel=2,
+    )
+    return 0
+
+
 def dict_props_to_arr(
     data: Sequence[tuple[Any, dict[str, Any]]],
     prop_names: Sequence[str],
@@ -94,12 +133,16 @@ def dict_props_to_arr(
         missing = []
         # iterate over the data and checks for missing content
         missing_any = False
+        # to ensure valid dtype of missing, take first non-missing value
+        default_val = None
         for _, data_dict in data:
             if name in data_dict:
                 values.append(data_dict[name])
                 missing.append(False)
             else:
-                values.append(0)  # this fails to non-scalar properties
+                if default_val is None:
+                    default_val = _determine_default_value(data, name)
+                values.append(default_val)
                 missing.append(True)
                 missing_any = True
         values_arr = np.asarray(values)

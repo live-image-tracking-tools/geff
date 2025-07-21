@@ -44,3 +44,6 @@ class TestWriteArrays:
         assert "geff" in root.attrs
         assert root.attrs["geff"]["geff_version"] == "0.0.1"
         assert root.attrs["geff"]["directed"] is True
+
+    # TODO: test properties helper. It's covered by networkx tests now, so I'm okay merging,
+    # but we should do it when we have time.
