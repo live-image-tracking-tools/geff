@@ -1,3 +1,4 @@
+import shutil
 from itertools import product
 from pathlib import Path
 
@@ -19,8 +20,9 @@ def big_graph():
 
     nodes = np.arange(N_NODES)  # int
     positions = np.random.uniform(size=(N_NODES, 4))  # float
-    for node, pos in zip(nodes, positions):
-        graph.add_node(node.item(), position=pos.tolist())
+    for node, pos in zip(nodes, positions, strict=False):
+        t, z, y, x = pos.tolist()
+        graph.add_node(node.item(), t=t, z=z, y=y, x=x)
 
     float_prop = np.random.uniform(size=(N_NODES * N_NODES))
     int_prop = np.arange(N_NODES * N_NODES)
@@ -37,7 +39,7 @@ def big_graph():
 @pytest.fixture(scope="session")
 def big_graph_path(tmpdir_factory, big_graph):
     tmp_path = Path(tmpdir_factory.mktemp("data").join("test.zarr"))
-    geff_nx.write_nx(graph=big_graph, path=tmp_path, position_prop="position")
+    geff_nx.write_nx(graph=big_graph, path=tmp_path, axis_names=["t", "z", "y", "x"])
     return tmp_path
 
 
@@ -46,8 +48,9 @@ def test_write(benchmark, tmp_path, big_graph):
 
     benchmark.pedantic(
         geff_nx.write_nx,
-        kwargs={"graph": big_graph, "position_prop": "position", "path": path},
+        kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "path": path},
         rounds=ROUNDS,
+        setup=lambda: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
     )
 
 

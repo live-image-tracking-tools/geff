@@ -16,14 +16,14 @@ def test_validate(tmp_path):
     z = zarr.open(zpath)
 
     # Missing metadata
-    with pytest.raises(ValueError, match="No geff_version found in"):
+    with pytest.raises(ValueError, match="No geff key found in"):
         validate(zpath)
-    z.attrs["geff_version"] = "v0.0.1"
-    z.attrs["directed"] = True
-    z.attrs["position_prop"] = "position"
-    z.attrs["roi_min"] = [0, 0]
-    z.attrs["roi_max"] = [100, 100]
-
+    z.attrs["geff"] = {
+        "geff_version": "0.0.1",
+        "directed": True,
+        "roi_min": [0, 0],
+        "roi_max": [100, 100],
+    }
     # No nodes
     with pytest.raises(AssertionError, match="graph group must contain a nodes group"):
         validate(zpath)
@@ -35,23 +35,17 @@ def test_validate(tmp_path):
     n_node = 10
     z["nodes/ids"] = np.zeros(n_node)
 
-    # Nodes missing position props
+    # Nodes must have a props group
     with pytest.raises(AssertionError, match="nodes group must contain a props group"):
         validate(zpath)
     z["nodes"].create_group("props")
-    with pytest.raises(AssertionError, match="nodes group must contain a props/position group"):
-        validate(zpath)
-    z["nodes"].create_group("props/position")
-    with pytest.raises(AssertionError, match="node property group position must have values group"):
-        validate(zpath)
-    z["nodes/props/position/values"] = np.zeros(n_node)
-    validate(zpath)
 
-    # valid and invalid "missing" arrays for position property
-    z["nodes/props/position/missing"] = np.zeros((n_node), dtype=bool)
-    with pytest.raises(AssertionError, match="position group cannot have missing values"):
+    # Subgroups in props must have values
+    z["nodes"].create_group("props/score")
+    with pytest.raises(AssertionError, match="node property group score must have values group"):
         validate(zpath)
-    del z["nodes/props/position"]["missing"]
+    z["nodes/props/score/values"] = np.zeros(n_node)
+    validate(zpath)
 
     # Property shape mismatch
     z["nodes/props/badshape/values"] = np.zeros(n_node * 2)
