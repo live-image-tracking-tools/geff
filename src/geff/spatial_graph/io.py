@@ -197,7 +197,8 @@ def read_sg(
     node_attr_dtypes[position_attr] = get_dtype_str(position)
 
     # create graph
-    graph = sg.SpatialGraph(
+    create_graph = getattr(sg, 'create_graph', sg.SpatialGraph)
+    graph = create_graph(
         ndims=ndims,
         node_dtype=node_dtype,
         node_attr_dtypes=node_attr_dtypes,

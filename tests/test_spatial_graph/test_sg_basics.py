@@ -49,7 +49,8 @@ def test_read_write_consistency(
 
 
 def test_write_empty_graph():
-    graph = sg.SpatialGraph(
+    create_graph = getattr(sg, 'create_graph', sg.SpatialGraph)
+    graph = create_graph(
         ndims=3,
         node_dtype="uint64",
         node_attr_dtypes={"pos": "float32[3]"},
