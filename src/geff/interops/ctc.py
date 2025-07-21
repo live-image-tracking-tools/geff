@@ -37,12 +37,6 @@ def from_ctc_to_geff(
     if not ctc_path.exists():
         raise FileNotFoundError(f"CTC file {ctc_path} does not exist")
 
-    if geff_path.exists() and not overwrite:
-        raise FileExistsError(f"GEFF file {geff_path} already exists")
-
-    if geff_path.exists() and overwrite:
-        shutil.rmtree(geff_path)
-
     tracks_file_found = False
 
     for tracks_file in ["man_track.txt", "res_track.txt"]:
@@ -55,6 +49,12 @@ def from_ctc_to_geff(
         raise FileNotFoundError(
             f"Tracks file {ctc_path}/man_track.txt or {ctc_path}/res_track.txt does not exist"
         )
+
+    if geff_path.exists() and not overwrite:
+        raise FileExistsError(f"GEFF file {geff_path} already exists")
+
+    if geff_path.exists() and overwrite:
+        shutil.rmtree(geff_path)
 
     tracks: dict[int, list[int]] = {}
     nodes = []
@@ -89,10 +89,10 @@ def from_ctc_to_geff(
             segm_array[t] = frame[expand_dims]
 
         for obj in regionprops(frame):
-            track_id = obj.label
+            tracklet_id = obj.label
             node_dict = {
                 "id": node_id,
-                "track_id": track_id,
+                "tracklet_id": tracklet_id,
                 "t": t,
             }
             # using y,x for 2d and z,y,x for 3d
@@ -101,10 +101,10 @@ def from_ctc_to_geff(
 
             nodes.append(node_dict)
 
-            if track_id not in tracks:
-                tracks[track_id] = []
+            if tracklet_id not in tracks:
+                tracks[tracklet_id] = []
 
-            tracks[track_id].append(node_id)
+            tracks[tracklet_id].append(node_id)
             node_id += 1
 
     if len(nodes) == 0:
