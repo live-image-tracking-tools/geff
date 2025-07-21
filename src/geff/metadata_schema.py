@@ -145,17 +145,11 @@ class RelatedObject(BaseModel):
     )
 
     @model_validator(mode="after")
-    def _validate_model(self) -> Axis:
+    def _validate_model(self) -> RelatedObject:
         if self.type != "labels" and self.label_prop is not None:
             raise ValueError(
                 f"label_prop {self.label_prop} is only valid for type 'labels', "
                 f"but got type {self.type}."
-            )
-        elif self.type == "labels" and self.label_prop is None:
-            raise ValueError(
-                "label_prop must be specified for type 'labels'. "
-                "This is the property that will be used to identify"
-                " the labels in the related object."
             )
         return self
 
@@ -184,7 +178,16 @@ class GeffMetadata(BaseModel):
     axes: Sequence[Axis] | None = None
     related_objects: Sequence[RelatedObject] | None = Field(
         None,
-        description=("A list of dictionaries of related objects such as labels or images."),
+        description=(
+            "A list of dictionaries of related objects such as labels or images. "
+            "Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. "
+            "The 'type' must be either 'labels' or 'image'. "
+            "The 'path' should be relative to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group. "
+            "The 'label_prop' is only valid for type 'labels' and specifies the node property "
+            "that will be used to identify the labels in the related object. "
+        ),
     )
 
     @model_validator(mode="before")
