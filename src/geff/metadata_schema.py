@@ -92,6 +92,18 @@ def axes_from_lists(
     axes: list[Axis] = []
     if axis_names is None:
         return axes
+
+    dims = len(axis_names)
+    if axis_types is not None:
+        assert len(axis_types) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
+    if axis_units is not None:
+        assert len(axis_units) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
     for i in range(len(axis_names)):
         axes.append(
             Axis(

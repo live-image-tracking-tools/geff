@@ -66,20 +66,6 @@ def write_sg(
             "For SpatialGraphs with more than 4 dimension, axis_names has to be provided."
         )
         axis_names = ["t", "z", "y", "x"][-graph.dims :]
-    else:
-        assert len(axis_names) == graph.dims, (
-            "The number of axis names has to match the dimensionality of the SpatialGraph"
-        )
-
-    if axis_types is not None:
-        assert len(axis_types) == graph.dims, (
-            "The number of axis types has to match the dimensionality of the SpatialGraph"
-        )
-
-    if axis_units is not None:
-        assert len(axis_units) == graph.dims, (
-            "The number of axis types has to match the dimensionality of the SpatialGraph"
-        )
 
     # create metadata
     roi_min, roi_max = graph.roi
@@ -197,7 +183,7 @@ def read_sg(
     node_attr_dtypes[position_attr] = get_dtype_str(position)
 
     # create graph
-    create_graph = getattr(sg, 'create_graph', sg.SpatialGraph)
+    create_graph = getattr(sg, "create_graph", sg.SpatialGraph)
     graph = create_graph(
         ndims=ndims,
         node_dtype=node_dtype,
