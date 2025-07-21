@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import warnings
 import copy
+import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
 import json
 import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
+from typing import Any
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -129,7 +129,6 @@ class GeffMetadata(BaseModel):
         title="geff_metadata",
         validate_assignment=True,
     )
-
 
     geff_version: str = Field(
         ...,
