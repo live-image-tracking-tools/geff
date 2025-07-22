@@ -6,8 +6,6 @@ Validate the schema for the GEFF file.
 
 ```bash
 uvx geff validate /path/to/geff.geff
-# Or maybe you need the following for Zarr 3
-# uvx --with zarr==3.1.0 geff validate /path/to/geff.geff
 ```
 
 ## Show info
@@ -16,6 +14,13 @@ Show GEFF metadata as a JSON.
 
 ```bash
 uvx geff info /path/to/geff.geff
-# Or maybe you need the following for Zarr 3
-# uvx --with zarr==3.1.0 geff info /path/to/geff.geff
+```
+
+# Running command with a developmental build
+
+In a development environment, please run, for example, 
+
+```bash
+pixi run build
+uvx --from dist/geff-0.3 ... .whl validate tracks.geff
 ```
