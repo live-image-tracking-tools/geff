@@ -159,6 +159,7 @@ class GeffMetadata(BaseModel):
             "A lineage is defined as a weakly connected component on the graph.\n"
             "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
         ),
+    )
     affine: Affine | None = Field(
         None,
         description="Affine transformation matrix to transform the graph coordinates to the "

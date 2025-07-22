@@ -117,6 +117,15 @@
                 ]
               },
               "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Node properties denoting tracklet and/or lineage IDs.\nA tracklet is defined as a simple path of connected nodes where the terminating node has incoming degree 1 and any outgoing degree, and other nodes along the path have in/out degree of at most 1.\nA lineage is defined as a weakly connected component on the graph.\nThe dictionary can store one or both of 'tracklet' or 'lineage' keys.",
+          "title": "Track Node Properties"
+        },
         "affine": {
           "anyOf": [
             {
@@ -127,8 +136,6 @@
             }
           ],
           "default": null,
-          "description": "Node properties denoting tracklet and/or lineage IDs.\nA tracklet is defined as a simple path of connected nodes where the terminating node has incoming degree 1 and any outgoing degree, and other nodes along the path have in/out degree of at most 1.\nA lineage is defined as a weakly connected component on the graph.\nThe dictionary can store one or both of 'tracklet' or 'lineage' keys.",
-          "title": "Track Node Properties"
           "description": "Affine transformation matrix to transform the graph coordinates to the physical coordinates. The matrix must have the same number of dimensions as the number of axes in the graph."
         }
       },
