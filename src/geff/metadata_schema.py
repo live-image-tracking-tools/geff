@@ -5,7 +5,6 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
-from typing import Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -120,10 +119,12 @@ def axes_from_lists(
 
 
 class RelatedObject(BaseModel):
-    type: Literal["labels", "image"] = Field(
+    type: str = Field(
         ...,
         description=(
-            "Type of the related object. 'labels' for label objects, 'image' for image objects."
+            "Type of the related object. 'labels' for label objects, "
+            "'image' for image objects. Other types are also allowed, but may not be "
+            "recognized by reader applications. "
         ),
     )
     path: str = Field(
@@ -181,7 +182,8 @@ class GeffMetadata(BaseModel):
         description=(
             "A list of dictionaries of related objects such as labels or images. "
             "Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. "
-            "The 'type' must be either 'labels' or 'image'. "
+            "The 'type' represents the data type. 'labels' and 'image' should "
+            "be used for label and image objects, respectively. Other types are also allowed, "
             "The 'path' should be relative to the geff zarr-attributes file. "
             "It is strongly recommended all related objects are stored as siblings "
             "of the geff group within the top-level zarr group. "
