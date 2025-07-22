@@ -10,7 +10,7 @@ node_attr_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
 ]
-edge_attr_dtypes = [
+extra_edge_props = [
     {"score": "float64", "color": "uint8"},
     {"score": "float32", "color": "int16"},
 ]
@@ -18,16 +18,19 @@ edge_attr_dtypes = [
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
 @pytest.mark.parametrize("node_attr_dtypes", node_attr_dtypes)
-@pytest.mark.parametrize("edge_attr_dtypes", edge_attr_dtypes)
+@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_consistency(
     node_dtype,
     node_attr_dtypes,
-    edge_attr_dtypes,
+    extra_edge_props,
     directed,
 ):
     store, graph_attrs = create_memory_mock_geff(
-        node_dtype, node_attr_dtypes, edge_attr_dtypes, directed
+        node_id_dtype=node_dtype,
+        node_axis_dtypes=node_attr_dtypes,
+        extra_edge_props=extra_edge_props,
+        directed=directed,
     )
     # with pytest.warns(UserWarning, match="Potential missing values for attr"):
     # TODO: make sure test data has missing values, otherwise this warning will
@@ -44,7 +47,7 @@ def test_read_write_consistency(
         )
 
     for idx, edge in enumerate(graph_attrs["edges"]):
-        for name, values in graph_attrs["edge_props"].items():
+        for name, values in graph_attrs["extra_edge_props"].items():
             assert getattr(graph.edge_attrs[edge], name) == values[idx].item()
 
 

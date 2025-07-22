@@ -7,11 +7,11 @@ import geff
 from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
-node_prop_dtypes = [
+node_axis_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
 ]
-edge_prop_dtypes = [
+extra_edge_props = [
     {"score": "float64", "color": "uint8"},
     {"score": "float32", "color": "int16"},
 ]
@@ -20,23 +20,23 @@ edge_prop_dtypes = [
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
-@pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
+@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
+@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
 @pytest.mark.parametrize("directed", [True, False])
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
 def test_read_write_consistency(
     node_id_dtype,
-    node_prop_dtypes,
-    edge_prop_dtypes,
+    node_axis_dtypes,
+    extra_edge_props,
     directed,
     include_t,
     include_z,
 ):
     store, graph_props = create_memory_mock_geff(
         node_id_dtype,
-        node_prop_dtypes,
-        edge_prop_dtypes,
+        node_axis_dtypes,
+        extra_edge_props=extra_edge_props,
         directed=directed,
         include_t=include_t,
         include_z=include_z,
@@ -54,7 +54,7 @@ def test_read_write_consistency(
         # TODO: test other dimensions
 
     for idx, edge in enumerate(graph_props["edges"]):
-        for name, values in graph_props["edge_props"].items():
+        for name, values in graph_props["extra_edge_props"].items():
             assert graph.edges[edge.tolist()][name] == values[idx].item()
 
     # TODO: test metadata
@@ -63,16 +63,16 @@ def test_read_write_consistency(
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
-@pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
+@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
+@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_no_spatial(
-    tmp_path, node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
+    tmp_path, node_id_dtype, node_axis_dtypes, extra_edge_props, directed
 ):
     graph = nx.DiGraph() if directed else nx.Graph()
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_id_dtype)
-    props = np.array([4, 9, 10, 2, 8], dtype=node_prop_dtypes["position"])
+    props = np.array([4, 9, 10, 2, 8], dtype=node_axis_dtypes["position"])
     for node, pos in zip(nodes, props, strict=False):
         graph.add_node(node.item(), attr=pos)
 
@@ -85,8 +85,8 @@ def test_read_write_no_spatial(
         ],
         dtype=node_id_dtype,
     )
-    scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
-    colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
+    scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=extra_edge_props["score"])
+    colors = np.array([1, 2, 3, 4], dtype=extra_edge_props["color"])
     for edge, score, color in zip(edges, scores, colors, strict=False):
         graph.add_edge(*edge.tolist(), score=score.item(), color=color.item())
 
@@ -285,16 +285,19 @@ def test_create_memory_mock_geff_with_extra_node_props():
     from geff.testing.data import create_memory_mock_geff
 
     # Test with various extra node properties
-    extra_node_props = [
-        {"label": "str", "confidence": "float64"},
-        {"category": "int8", "priority": "uint16"},
-        {"status": "str", "weight": "float32"},
-    ]
+    extra_node_props = {
+        "label": "str",
+        "confidence": "float64",
+        "category": "int8",
+        "priority": "uint16",
+        "status": "str",
+        "weight": "float32",
+    }
 
     store, _ = create_memory_mock_geff(
         node_id_dtype="int",
-        node_prop_dtypes={"position": "float64", "time": "float64"},
-        edge_prop_dtypes={"score": "float64", "color": "int"},
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        extra_edge_props={"score": "float64", "color": "int"},
         directed=False,
         num_nodes=5,
         num_edges=4,
@@ -338,8 +341,8 @@ def test_create_memory_mock_geff_with_no_extra_node_props():
 
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="int",
-        node_prop_dtypes={"position": "float64", "time": "float64"},
-        edge_prop_dtypes={"score": "float64", "color": "int"},
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        extra_edge_props={"score": "float64", "color": "int"},
         directed=False,
         num_nodes=5,
         num_edges=4,
@@ -364,51 +367,40 @@ def test_create_memory_mock_geff_extra_node_props_validation():
     from geff.testing.data import create_memory_mock_geff
 
     # Test with invalid input types
-    with pytest.raises(ValueError, match="extra_node_props must be a list"):
+    with pytest.raises(ValueError, match="extra_node_props must be a dict"):
         create_memory_mock_geff(
             node_id_dtype="int",
-            node_prop_dtypes={"position": "float64", "time": "float64"},
-            edge_prop_dtypes={"score": "float64", "color": "int"},
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            extra_edge_props={"score": "float64", "color": "int"},
             directed=False,
-            extra_node_props="not_a_list",  # Should be a list
+            extra_node_props="not_a_dict",  # Should be a dict
         )
 
-    with pytest.raises(ValueError, match="extra_node_props\\[0\\] must be a dict"):
+    with pytest.raises(ValueError, match="extra_node_props keys must be strings"):
         create_memory_mock_geff(
             node_id_dtype="int",
-            node_prop_dtypes={"position": "float64", "time": "float64"},
-            edge_prop_dtypes={"score": "float64", "color": "int"},
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            extra_edge_props={"score": "float64", "color": "int"},
             directed=False,
-            extra_node_props=["not_a_dict"],  # Should be a list of dicts
+            extra_node_props={123: "str"},  # Key should be string
         )
 
-    with pytest.raises(ValueError, match="extra_node_props\\[0\\] keys must be strings"):
+    with pytest.raises(ValueError, match="extra_node_props\\[label\\] must be a string dtype"):
         create_memory_mock_geff(
             node_id_dtype="int",
-            node_prop_dtypes={"position": "float64", "time": "float64"},
-            edge_prop_dtypes={"score": "float64", "color": "int"},
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            extra_edge_props={"score": "float64", "color": "int"},
             directed=False,
-            extra_node_props=[{123: "str"}],  # Key should be string
-        )
-
-    with pytest.raises(
-        ValueError, match="extra_node_props\\[0\\]\\[label\\] must be a string dtype"
-    ):
-        create_memory_mock_geff(
-            node_id_dtype="int",
-            node_prop_dtypes={"position": "float64", "time": "float64"},
-            edge_prop_dtypes={"score": "float64", "color": "int"},
-            directed=False,
-            extra_node_props=[{"label": 123}],  # Value should be string dtype
+            extra_node_props={"label": 123},  # Value should be string dtype
         )
 
     with pytest.raises(ValueError, match="dtype 'invalid_dtype' not supported"):
         create_memory_mock_geff(
             node_id_dtype="int",
-            node_prop_dtypes={"position": "float64", "time": "float64"},
-            edge_prop_dtypes={"score": "float64", "color": "int"},
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            extra_edge_props={"score": "float64", "color": "int"},
             directed=False,
-            extra_node_props=[{"label": "invalid_dtype"}],  # Invalid dtype
+            extra_node_props={"label": "invalid_dtype"},  # Invalid dtype
         )
 
 
@@ -417,21 +409,21 @@ def test_create_memory_mock_geff_extra_node_props_different_dtypes():
     from geff.testing.data import create_memory_mock_geff
 
     # Test all supported dtypes
-    extra_node_props = [
-        {"str_prop": "str"},
-        {"int_prop": "int"},
-        {"int8_prop": "int8"},
-        {"uint8_prop": "uint8"},
-        {"int16_prop": "int16"},
-        {"uint16_prop": "uint16"},
-        {"float32_prop": "float32"},
-        {"float64_prop": "float64"},
-    ]
+    extra_node_props = {
+        "str_prop": "str",
+        "int_prop": "int",
+        "int8_prop": "int8",
+        "uint8_prop": "uint8",
+        "int16_prop": "int16",
+        "uint16_prop": "uint16",
+        "float32_prop": "float32",
+        "float64_prop": "float64",
+    }
 
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="int",
-        node_prop_dtypes={"position": "float64", "time": "float64"},
-        edge_prop_dtypes={"score": "float64", "color": "int"},
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        extra_edge_props={"score": "float64", "color": "int"},
         directed=False,
         num_nodes=3,
         num_edges=2,
@@ -464,15 +456,16 @@ def test_create_dummy_graph_props_extra_node_props():
     """Test create_dummy_graph_props with extra node properties"""
     from geff.testing.data import create_dummy_graph_props
 
-    extra_node_props = [
-        {"label": "str", "confidence": "float64"},
-        {"category": "int8"},
-    ]
+    extra_node_props = {
+        "label": "str",
+        "confidence": "float64",
+        "category": "int8",
+    }
 
     graph_props = create_dummy_graph_props(
         node_id_dtype="int",
-        node_prop_dtypes={"position": "float64", "time": "float64"},
-        edge_prop_dtypes={"score": "float64", "color": "int"},
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        extra_edge_props={"score": "float64", "color": "int"},
         directed=False,
         num_nodes=5,
         num_edges=4,

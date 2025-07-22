@@ -15,12 +15,13 @@ Examples:
     # Advanced usage with full control
     >>> store, props = create_memory_mock_geff(
     ...     node_id_dtype="str",
-    ...     node_prop_dtypes={"position": "float64", "time": "float32"},
-    ...     edge_prop_dtypes={"score": "float64", "color": "uint8"},
+    ...     node_axis_dtypes={"position": "float64", "time": "float32"},
     ...     directed=True,
     ...     num_nodes=5,
     ...     num_edges=8,
-    ...     extra_node_props=[{"label": "str", "confidence": "float64"}],
+    ...     extra_node_props={"label": "str", "confidence": "float64"},
+    ...     extra_edge_props={"score": "float64", "color": "uint8",
+    ...           "weight": "float64", "type": "str"},
     ...     include_t=True,
     ...     include_z=False,  # 2D only
     ...     include_y=True,
@@ -57,30 +58,25 @@ class GraphAttrs(TypedDict):
     y: NDArray[Any]
     x: NDArray[Any]
     extra_node_props: dict[str, NDArray[Any]]
-    edge_props: dict[str, NDArray[Any]]
+    extra_edge_props: dict[str, NDArray[Any]]
     directed: bool
     axis_names: tuple[Axes, ...]
     axis_units: tuple[str, ...]
 
 
-class ExampleNodePropsDtypes(TypedDict):
+class ExampleNodeAxisPropsDtypes(TypedDict):
     position: DTypeStr
     time: DTypeStr
 
 
-class ExampleEdgePropsDtypes(TypedDict):
-    score: DTypeStr
-    color: DTypeStr
-
-
 def create_dummy_graph_props(
     node_id_dtype: DTypeStr,
-    node_prop_dtypes: ExampleNodePropsDtypes,
-    edge_prop_dtypes: ExampleEdgePropsDtypes,
+    node_axis_dtypes: ExampleNodeAxisPropsDtypes,
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: list[dict[str, DTypeStr]] | None = None,
+    extra_node_props: dict[str, DTypeStr] | None = None,
+    extra_edge_props: dict[str, DTypeStr] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
@@ -90,12 +86,12 @@ def create_dummy_graph_props(
 
     Args:
         node_id_dtype: Data type for node IDs
-        node_prop_dtypes: Dictionary specifying dtypes for node properties
-        edge_prop_dtypes: Dictionary specifying dtypes for edge properties
+        node_axis_dtypes: Dictionary specifying dtypes for node axis properties (space and time)
         directed: Whether the graph is directed
         num_nodes: Number of nodes to generate
         num_edges: Number of edges to generate
-        extra_node_props: List of extra node properties to include
+        extra_node_props: Dict mapping property names to dtypes for extra node properties
+        extra_edge_props: Dict mapping property names to dtypes for extra edge properties
         include_t: Whether to include time dimension
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
@@ -134,22 +130,22 @@ def create_dummy_graph_props(
 
     # Generate spatiotemporal coordinates with flexible dimensions
     t = (
-        np.linspace(1, 5, num_nodes, dtype=node_prop_dtypes["time"])
+        np.linspace(1, 5, num_nodes, dtype=node_axis_dtypes["time"])
         if include_t
         else np.array([], dtype="float64")  # Default dtype when time not included
     )
     z = (
-        np.linspace(0.5, 0.1, num_nodes, dtype=node_prop_dtypes["position"])
+        np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
         if include_z
         else np.array([], dtype="float64")  # Default dtype when position not included
     )
     y = (
-        np.linspace(100.0, 500.0, num_nodes, dtype=node_prop_dtypes["position"])
+        np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"])
         if include_y
         else np.array([], dtype="float64")  # Default dtype when position not included
     )
     x = (
-        np.linspace(1.0, 0.1, num_nodes, dtype=node_prop_dtypes["position"])
+        np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
         if include_x
         else np.array([], dtype="float64")  # Default dtype when position not included
     )
@@ -202,53 +198,80 @@ def create_dummy_graph_props(
     # Generate extra node properties
     extra_node_props_dict = {}
     if extra_node_props is not None:
-        # Validate input is a list
-        if not isinstance(extra_node_props, list):
-            raise ValueError(f"extra_node_props must be a list, got {type(extra_node_props)}")
+        # Validate input is a dict
+        if not isinstance(extra_node_props, dict):
+            raise ValueError(f"extra_node_props must be a dict, got {type(extra_node_props)}")
 
-        # Validate each item is a dict
-        for i, prop_spec in enumerate(extra_node_props):
-            if not isinstance(prop_spec, dict):
-                raise ValueError(f"extra_node_props[{i}] must be a dict, got {type(prop_spec)}")
+        # Validate dict contains only string keys and valid dtype values
+        for prop_name, prop_dtype in extra_node_props.items():
+            if not isinstance(prop_name, str):
+                raise ValueError(f"extra_node_props keys must be strings, got {type(prop_name)}")
 
-            # Validate dict contains only string keys and valid dtype values
-            for prop_name, prop_dtype in prop_spec.items():
-                if not isinstance(prop_name, str):
-                    raise ValueError(
-                        f"extra_node_props[{i}] keys must be strings, got {type(prop_name)}"
-                    )
+            if not isinstance(prop_dtype, str):
+                raise ValueError(
+                    f"extra_node_props[{prop_name}] must be a string dtype, got {type(prop_dtype)}"
+                )
 
-                if not isinstance(prop_dtype, str):
-                    raise ValueError(
-                        f"extra_node_props[{i}][{prop_name}] must be a string dtype, "
-                        f"got {type(prop_dtype)}"
-                    )
+            # Validate dtype is supported using DTypeStr
+            from typing import get_args
 
-                # Validate dtype is supported using DTypeStr
-                from typing import get_args
+            valid_dtypes = get_args(DTypeStr)
+            if prop_dtype not in valid_dtypes:
+                raise ValueError(
+                    f"extra_node_props[{prop_name}] dtype '{prop_dtype}' not supported. "
+                    f"Valid dtypes: {valid_dtypes}"
+                )
 
-                valid_dtypes = get_args(DTypeStr)
-                if prop_dtype not in valid_dtypes:
-                    raise ValueError(
-                        f"extra_node_props[{i}][{prop_name}] dtype '{prop_dtype}' not supported. "
-                        f"Valid dtypes: {valid_dtypes}"
-                    )
-
-                # Generate different patterns for different property types
-                if prop_dtype == "str":
-                    extra_node_props_dict[prop_name] = np.array(
-                        [f"{prop_name}_{i}" for i in range(num_nodes)], dtype=prop_dtype
-                    )
-                elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
-                    extra_node_props_dict[prop_name] = np.arange(num_nodes, dtype=prop_dtype)
-                else:  # float types
-                    extra_node_props_dict[prop_name] = np.linspace(
-                        0.1, 1.0, num_nodes, dtype=prop_dtype
-                    )
+            # Generate different patterns for different property types
+            if prop_dtype == "str":
+                extra_node_props_dict[prop_name] = np.array(
+                    [f"{prop_name}_{i}" for i in range(num_nodes)], dtype=prop_dtype
+                )
+            elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
+                extra_node_props_dict[prop_name] = np.arange(num_nodes, dtype=prop_dtype)
+            else:  # float types
+                extra_node_props_dict[prop_name] = np.linspace(
+                    0.1, 1.0, num_nodes, dtype=prop_dtype
+                )
 
     # Generate edge properties
-    scores = np.linspace(0.1, 0.4, len(edges), dtype=edge_prop_dtypes["score"])
-    colors = np.arange(len(edges), dtype=edge_prop_dtypes["color"])
+    edge_props_dict = {}
+
+    # Generate edge properties from extra_edge_props
+    if extra_edge_props is not None:
+        # Validate input is a dict
+        if not isinstance(extra_edge_props, dict):
+            raise ValueError(f"extra_edge_props must be a dict, got {type(extra_edge_props)}")
+
+        # Validate dict contains only string keys and valid dtype values
+        for prop_name, prop_dtype in extra_edge_props.items():
+            if not isinstance(prop_name, str):
+                raise ValueError(f"extra_edge_props keys must be strings, got {type(prop_name)}")
+
+            if not isinstance(prop_dtype, str):
+                raise ValueError(
+                    f"extra_edge_props[{prop_name}] must be a string dtype, got {type(prop_dtype)}"
+                )
+
+            # Validate dtype is supported using DTypeStr
+            from typing import get_args
+
+            valid_dtypes = get_args(DTypeStr)
+            if prop_dtype not in valid_dtypes:
+                raise ValueError(
+                    f"extra_edge_props[{prop_name}] dtype '{prop_dtype}' not supported. "
+                    f"Valid dtypes: {valid_dtypes}"
+                )
+
+            # Generate different patterns for different property types
+            if prop_dtype == "str":
+                edge_props_dict[prop_name] = np.array(
+                    [f"{prop_name}_{i}" for i in range(len(edges))], dtype=prop_dtype
+                )
+            elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
+                edge_props_dict[prop_name] = np.arange(len(edges), dtype=prop_dtype)
+            else:  # float types
+                edge_props_dict[prop_name] = np.linspace(0.1, 1.0, len(edges), dtype=prop_dtype)
 
     return {
         "nodes": nodes,
@@ -258,7 +281,7 @@ def create_dummy_graph_props(
         "y": y,
         "x": x,
         "extra_node_props": extra_node_props_dict,
-        "edge_props": {"score": scores, "color": colors},
+        "extra_edge_props": edge_props_dict,
         "directed": directed,
         "axis_names": axis_names,
         "axis_units": axis_units,
@@ -267,12 +290,12 @@ def create_dummy_graph_props(
 
 def create_memory_mock_geff(
     node_id_dtype: DTypeStr,
-    node_prop_dtypes: ExampleNodePropsDtypes,
-    edge_prop_dtypes: ExampleEdgePropsDtypes,
+    node_axis_dtypes: ExampleNodeAxisPropsDtypes,
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: list[dict[str, DTypeStr]] | None = None,
+    extra_node_props: dict[str, DTypeStr] | None = None,
+    extra_edge_props: dict[str, DTypeStr] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
@@ -282,12 +305,12 @@ def create_memory_mock_geff(
 
     Args:
         node_id_dtype: Data type for node IDs
-        node_prop_dtypes: Dictionary specifying dtypes for node properties
-        edge_prop_dtypes: Dictionary specifying dtypes for edge properties
+        node_axis_dtypes: Dictionary specifying dtypes for node axis properties (space and time)
         directed: Whether the graph is directed
         num_nodes: Number of nodes to generate
         num_edges: Number of edges to generate
-        extra_node_props: List of extra node properties to include
+        extra_node_props: Dict mapping property names to dtypes for extra node properties
+        extra_edge_props: Dict mapping property names to dtypes for extra edge properties
         include_t: Whether to include time dimension
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
@@ -298,12 +321,12 @@ def create_memory_mock_geff(
     """
     graph_props = create_dummy_graph_props(
         node_id_dtype=node_id_dtype,
-        node_prop_dtypes=node_prop_dtypes,
-        edge_prop_dtypes=edge_prop_dtypes,
+        node_axis_dtypes=node_axis_dtypes,
         directed=directed,
         num_nodes=num_nodes,
         num_edges=num_edges,
         extra_node_props=extra_node_props,
+        extra_edge_props=extra_edge_props,
         include_t=include_t,
         include_z=include_z,
         include_y=include_y,
@@ -332,7 +355,9 @@ def create_memory_mock_geff(
         graph.add_node(node, **node_attrs, **props)
 
     for idx, edge in enumerate(graph_props["edges"]):
-        props = {name: prop_array[idx] for name, prop_array in graph_props["edge_props"].items()}
+        props = {
+            name: prop_array[idx] for name, prop_array in graph_props["extra_edge_props"].items()
+        }
         graph.add_edge(*edge.tolist(), **props)
 
     # Create memory store and write graph to it
@@ -387,11 +412,11 @@ def create_simple_2d_geff(
     """
     return create_memory_mock_geff(
         node_id_dtype="int",
-        node_prop_dtypes={"position": "float64", "time": "float64"},
-        edge_prop_dtypes={"score": "float64", "color": "int"},
+        node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
         num_nodes=num_nodes,
         num_edges=num_edges,
+        extra_edge_props={"score": "float64", "color": "int"},
         include_t=True,
         include_z=False,  # 2D only
         include_y=True,
@@ -446,11 +471,11 @@ def create_simple_3d_geff(
     """
     return create_memory_mock_geff(
         node_id_dtype="int",
-        node_prop_dtypes={"position": "float64", "time": "float64"},
-        edge_prop_dtypes={"score": "float64", "color": "int"},
+        node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
         num_nodes=num_nodes,
         num_edges=num_edges,
+        extra_edge_props={"score": "float64", "color": "int"},
         include_t=True,
         include_z=True,  # 3D includes z
         include_y=True,

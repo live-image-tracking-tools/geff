@@ -6,28 +6,31 @@ from geff.networkx.io import _ingest_dict_nx
 from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
-node_prop_dtypes = [
+node_axis_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
 ]
-edge_prop_dtypes = [
+extra_edge_props = [
     {"score": "float64", "color": "uint8"},
     {"score": "float32", "color": "int16"},
 ]
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
-@pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
+@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
+@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
 @pytest.mark.parametrize("directed", [True, False])
 def test_build_w_masked_nodes(
     node_id_dtype,
-    node_prop_dtypes,
-    edge_prop_dtypes,
+    node_axis_dtypes,
+    extra_edge_props,
     directed,
 ):
     store, graph_props = create_memory_mock_geff(
-        node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
+        node_id_dtype=node_id_dtype,
+        node_axis_dtypes=node_axis_dtypes,
+        extra_edge_props=extra_edge_props,
+        directed=directed,
     )
 
     file_reader = GeffReader(store)
@@ -49,17 +52,20 @@ def test_build_w_masked_nodes(
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
-@pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
+@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
+@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
 @pytest.mark.parametrize("directed", [True, False])
 def test_build_w_masked_edges(
     node_id_dtype,
-    node_prop_dtypes,
-    edge_prop_dtypes,
+    node_axis_dtypes,
+    extra_edge_props,
     directed,
 ):
     store, graph_props = create_memory_mock_geff(
-        node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
+        node_id_dtype=node_id_dtype,
+        node_axis_dtypes=node_axis_dtypes,
+        extra_edge_props=extra_edge_props,
+        directed=directed,
     )
     file_reader = GeffReader(store)
 
@@ -76,17 +82,20 @@ def test_build_w_masked_edges(
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
-@pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
+@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
+@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
 @pytest.mark.parametrize("directed", [True, False])
 def test_build_w_masked_nodes_edges(
     node_id_dtype,
-    node_prop_dtypes,
-    edge_prop_dtypes,
+    node_axis_dtypes,
+    extra_edge_props,
     directed,
 ):
     store, graph_props = create_memory_mock_geff(
-        node_id_dtype, node_prop_dtypes, edge_prop_dtypes, directed
+        node_id_dtype=node_id_dtype,
+        node_axis_dtypes=node_axis_dtypes,
+        extra_edge_props=extra_edge_props,
+        directed=directed,
     )
     file_reader = GeffReader(store)
 
@@ -119,8 +128,8 @@ def test_build_w_masked_nodes_edges(
 def test_read_node_props():
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
-        node_prop_dtypes={"position": "double", "time": "double"},
-        edge_prop_dtypes={"score": "float64", "color": "uint8"},
+        node_axis_dtypes={"position": "double", "time": "double"},
+        extra_edge_props={"score": "float64", "color": "uint8"},
         directed=True,
     )
 
@@ -148,8 +157,8 @@ def test_read_node_props():
 def test_read_edge_props():
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
-        node_prop_dtypes={"position": "double", "time": "double"},
-        edge_prop_dtypes={"score": "float64", "color": "uint8"},
+        node_axis_dtypes={"position": "double", "time": "double"},
+        extra_edge_props={"score": "float64", "color": "uint8"},
         directed=True,
     )
 
@@ -166,7 +175,7 @@ def test_read_edge_props():
     file_reader.read_edge_props(["score"])
     graph_dict = file_reader.build(edge_mask=edge_mask)
     np.testing.assert_allclose(
-        graph_props["edge_props"]["score"][edge_mask],
+        graph_props["extra_edge_props"]["score"][edge_mask],
         graph_dict["edge_props"]["score"]["values"],
     )
 
