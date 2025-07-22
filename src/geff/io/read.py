@@ -12,6 +12,11 @@ from .supported_backends import SupportedBackend
 
 R = TypeVar("R", covariant=True)
 
+# !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
+
+# When the GRAPH_DICT option is removed from SupportedBackend enum this can be removed.
+# Currently need 2 options for the overloads to work properly
+
 
 class ConstructFunc(Protocol[R]):
     """A protocol for callables that convert a `GraphDict` to different backends."""
@@ -31,11 +36,7 @@ class ConstructFunc(Protocol[R]):
         ...
 
 
-# !!! When a new backend is added new overloads for `read` should be added !!!
-
-
-# When the GRAPH_DICT option is removed from SupportedBackend enum this can be removed.
-# Currently need 2 options for the overloads to work properly
+# temporary dummy construct func
 def construct_identity(graph_dict: GraphDict) -> tuple[GraphDict, GeffMetadata]:
     """
     This functional is essentially the identity.
@@ -48,6 +49,18 @@ def construct_identity(graph_dict: GraphDict) -> tuple[GraphDict, GeffMetadata]:
         (GeffMetadata): The GEFF metadata.
     """
     return graph_dict, graph_dict["metadata"]
+
+
+@overload
+def get_construct_func(
+    backend: Literal[SupportedBackend.NETWORKX],
+) -> ConstructFunc[nx.Graph | nx.DiGraph]: ...
+
+
+@overload
+def get_construct_func(
+    backend: Literal[SupportedBackend.GRAPH_DICT],
+) -> ConstructFunc[GraphDict]: ...
 
 
 def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
@@ -97,7 +110,11 @@ def read(
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-    backend: SupportedBackend = SupportedBackend.NETWORKX,
+    # using Literal because mypy can't seem to narrow the enum type when chaining functions
+    backend: Literal[
+        SupportedBackend.NETWORKX,
+        SupportedBackend.GRAPH_DICT,
+    ] = SupportedBackend.NETWORKX,
     backend_kwargs: dict[str, Any] | None = None,
 ) -> tuple[Any, GeffMetadata]:
     """
