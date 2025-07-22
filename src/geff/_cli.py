@@ -1,6 +1,7 @@
 import argparse
 
-import utils
+from . import utils
+from .metadata_schema import GeffMetadata
 
 
 def validate() -> None:
@@ -10,3 +11,13 @@ def validate() -> None:
     args = parser.parse_args()
     utils.validate(args.input_path)
     print(f"{args.input_path} is valid")
+
+
+def info() -> None:
+    """Command-line interface for displaying information about a GEFF file."""
+    parser = argparse.ArgumentParser(description="Display information about a GEFF file")
+    parser.add_argument("input_path", help="Path to the GEFF file")
+    args = parser.parse_args()
+    metadata = GeffMetadata.read(args.input_path)
+    # Assuming utils has a function to get metadata
+    print(metadata.to_dict())  # Convert metadata to dict for display
