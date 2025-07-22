@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753197640314,
+  "lastUpdate": 1753203976470,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2520,6 +2520,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5171585957836933",
             "extra": "mean: 15.686613567 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "funkej@janelia.hhmi.org",
+            "name": "Jan Funke",
+            "username": "funkey"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c557fde879fcd6e2fb8db3c60ef1acaa9679daeb",
+          "message": "Add display_hints to geff schema (#155)\n\n# Proposed Change\nAdd `display_hints` to `geff` metadata.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n\n# Checklist\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n\n## If you changed the specification\n- [ ] I have checked that any validation functions and tests reflect the\nchanges.\n- [x] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [x] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>\nCo-authored-by: Ilan <ilan.silva@czbiohub.org>",
+          "timestamp": "2025-07-22T13:03:46-04:00",
+          "tree_id": "07b708ad691822cd7839990bd04c31e5b973b21b",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/c557fde879fcd6e2fb8db3c60ef1acaa9679daeb"
+        },
+        "date": 1753203975876,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11837844573366639,
+            "unit": "iter/sec",
+            "range": "stddev: 1.3040977558875047",
+            "extra": "mean: 8.447483777999999 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.131500778740893,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00183288677836982",
+            "extra": "mean: 52.26981466666795 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06477221994586026,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5565154407949987",
+            "extra": "mean: 15.438717413666666 sec\nrounds: 3"
           }
         ]
       }
