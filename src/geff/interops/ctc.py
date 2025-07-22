@@ -13,6 +13,32 @@ from geff.metadata_schema import Axis, GeffMetadata
 from geff.write_arrays import write_arrays
 
 
+def ctc_tiffs_to_zarr(
+    ctc_path: Path,
+    output_store: StoreLike,
+    ctzyx: bool = False,
+    overwrite: bool = False,
+) -> None:
+    """
+    Convert a CTC file to a Zarr file.
+
+    Args:
+        ctc_path: The path to the CTC file.
+        output_store: The path to the Zarr file.
+        ctzyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
+        overwrite: Whether to overwrite the Zarr file if it already exists.
+    """
+    from dask.array.image import imread
+
+    array = imread(str(ctc_path / "*.tif"))
+    if ctzyx:
+        n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)
+        expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
+        array = array[expand_dims]
+
+    array.to_zarr(url=output_store, overwrite=overwrite)
+
+
 def from_ctc_to_geff(
     ctc_path: Path,
     geff_path: Path,

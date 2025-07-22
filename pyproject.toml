@@ -32,10 +32,12 @@ classifiers = [
 
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
+ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
 ctc = [
+    "dask",
     "scikit-image",
     "tifffile",
     "imagecodecs",

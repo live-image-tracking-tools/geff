@@ -6,7 +6,7 @@ import pytest
 import zarr
 from typer.testing import CliRunner
 
-from geff.interops.ctc import app, from_ctc_to_geff
+from geff.interops.ctc import app, ctc_tiffs_to_zarr, from_ctc_to_geff
 from geff.networkx.io import read_nx
 
 tifffile = pytest.importorskip("tifffile")
@@ -112,9 +112,22 @@ def test_ctc_to_geff(
     if tczyx:
         assert segm.ndim == 5
 
-    for t in range(expected_segm.shape[0]):
-        np.testing.assert_array_equal(
-            np.squeeze(segm[t]),
-            expected_segm[t],
-            err_msg=f"t={t}",
-        )
+    segm = np.squeeze(segm)
+    np.testing.assert_array_equal(segm, expected_segm)
+
+
+@pytest.mark.parametrize("ctzyx", [True, False])
+def test_ctc_image_to_zarr(tmp_path: Path, ctzyx: bool) -> None:
+    ctc_path = create_mock_data(tmp_path, is_gt=False)
+    zarr_path = tmp_path / "segm.zarr"
+
+    ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=ctzyx)
+
+    expected_arr = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+    copied_arr = zarr.open(zarr_path, mode="r")
+
+    if ctzyx:
+        assert copied_arr.ndim == 5
+
+    copied_arr = np.squeeze(copied_arr)
+    np.testing.assert_array_equal(copied_arr, expected_arr)
