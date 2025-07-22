@@ -4,7 +4,7 @@
 
 Validate the schema for the GEFF file. 
 
-```python
+```bash
 uvx geff validate /path/to/geff.geff
 # Or maybe you need the following for Zarr 3
 # uvx --with zarr==3.1.0 geff validate /path/to/geff.geff
