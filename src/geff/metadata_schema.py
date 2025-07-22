@@ -191,20 +191,18 @@ class GeffMetadata(BaseModel):
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
-    related_objects: Sequence[RelatedObject] | None = (
-        Field(
-            None,
-            description=(
-                "A list of dictionaries of related objects such as labels or images. "
-                "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
-                "properties. The 'type' represents the data type. 'labels' and 'image' should "
-                "be used for label and image objects, respectively. Other types are also allowed, "
-                "The 'path' should be relative to the geff zarr-attributes file. "
-                "It is strongly recommended all related objects are stored as siblings "
-                "of the geff group within the top-level zarr group. "
-                "The 'label_prop' is only valid for type 'labels' and specifies the node property "
-                "that will be used to identify the labels in the related object. "
-            ),
+    related_objects: Sequence[RelatedObject] | None = Field(
+        None,
+        description=(
+            "A list of dictionaries of related objects such as labels or images. "
+            "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
+            "properties. The 'type' represents the data type. 'labels' and 'image' should "
+            "be used for label and image objects, respectively. Other types are also allowed, "
+            "The 'path' should be relative to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group. "
+            "The 'label_prop' is only valid for type 'labels' and specifies the node property "
+            "that will be used to identify the labels in the related object. "
         ),
     )
     affine: Affine | None = Field(
