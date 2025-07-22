@@ -197,8 +197,10 @@ class GeffMetadata(BaseModel):
         description=(
             "Node properties denoting tracklet and/or lineage IDs.\n"
             "A tracklet is defined as a simple path of connected nodes "
-            "where the terminating node has incoming degree 1 and any outgoing degree, "
-            "and other nodes along the path have in/out degree of at most 1.\n"
+            "where the initiating node has any incoming degree and outgoing degree at most 1,"
+            "and the terminating node has incoming degree at most 1 and any outgoing degree, "
+            "and other nodes along the path have in/out degree of 1. Each tracklet must contain "
+            "the maximal set of connected nodes that match this definition - no sub-tracklets.\n"
             "A lineage is defined as a weakly connected component on the graph.\n"
             "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
         ),
