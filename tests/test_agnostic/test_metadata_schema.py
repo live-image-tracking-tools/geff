@@ -70,16 +70,6 @@ class TestMetadataModel:
         )
         assert len(model.related_objects) == 2
 
-        # Invalid related object type
-        with pytest.raises(
-            pydantic.ValidationError, match=".*Input should be 'labels' or 'image'.*"
-        ):
-            GeffMetadata(
-                geff_version="0.0.1",
-                directed=True,
-                related_objects=[{"type": "invalid_type", "path": "invalid/"}],
-            )
-
         # Invalid combination of type and label_prop
         with pytest.raises(
             pydantic.ValidationError, match=".*label_prop .+ is only valid for type 'labels'.*"

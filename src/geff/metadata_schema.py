@@ -152,6 +152,12 @@ class RelatedObject(BaseModel):
                 f"label_prop {self.label_prop} is only valid for type 'labels', "
                 f"but got type {self.type}."
             )
+        if self.type not in ["labels", "image"]:
+            warnings.warn(
+                f"Got type {self.type} for related object, "
+                "which might not be recognized by reader applications. ",
+                stacklevel=2,
+            )
         return self
 
 
@@ -183,6 +189,7 @@ class GeffMetadata(BaseModel):
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+    )
     related_objects: Sequence[RelatedObject] | None = Field(
         None,
         description=(
