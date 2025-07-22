@@ -34,9 +34,10 @@ spatial-graph = ["spatial-graph"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
-trackmate = ["lxml", "typer"]
+trackmate_xml = ["lxml", "typer"]
 dev = [
     { include-group = "test" },
+    { include-group = "trackmate_xml" },
     "mypy",
     "pre-commit",
     "ruff",
