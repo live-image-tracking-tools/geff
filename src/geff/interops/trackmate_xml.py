@@ -136,6 +136,9 @@ def _convert_attributes(
         information on the expected data types for each attribute.
         attr_type (str): The type of the attribute to convert (node, edge, or lineage).
 
+    Raises:
+        ValueError: If an attribute value cannot be converted to the expected type.
+
     Warns:
         UserWarning: If an attribute is not found in the attributes metadata.
     """
@@ -470,13 +473,15 @@ def _parse_model_tag(
         # Adding the spots as nodes.
         if element.tag == "AllSpots" and event == "start":
             # TODO: segmentation will be used when GEFF supports polygons.
-            segmentation = _add_all_nodes(it, element, attrs_md, graph)
+            # segmentation = _add_all_nodes(it, element, attrs_md, graph)
+            _add_all_nodes(it, element, attrs_md, graph)
             root.clear()
 
         # Adding the tracks as edges.
         if element.tag == "AllTracks" and event == "start":
             # TODO: implement storage of track attributes.
-            tracks_attrs = _build_tracks(it, element, attrs_md, graph)
+            # tracks_attrs = _build_tracks(it, element, attrs_md, graph)
+            _build_tracks(it, element, attrs_md, graph)
             root.clear()
 
             # Removal of filtered spots / nodes.
