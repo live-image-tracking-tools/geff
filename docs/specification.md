@@ -25,7 +25,7 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 ## The `nodes` group
 The nodes group will contain an `ids` array and optionally a `props` group. 
 ### The `ids` array
-The `nodes\ids` array is a 1D array of node IDs of length `N` >= 0, where `N` is the number of nodes in the graph. Node ids must be unique. Node IDs can have any type supported by zarr (except floats), but we recommend integer dtypes. For large graphs, `uint64` might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the `ids` array will be present but empty. 
+The `nodes\ids` array is a 1D array of node IDs of length `N` >= 0, where `N` is the number of nodes in the graph. Node ids must be unique. Node IDs need to be `uint64` to provide enough range for every node to have a unique ID. If node IDs are originally represented as text and need to be preserved, they should be stored in the optional property `nodes\props\name`. In the minimal case of an empty graph, the `ids` array will be present but empty. 
 
 
 ### The `props` group and `node property` groups
@@ -47,7 +47,7 @@ The `nodes\props` group is optional and will contain one or more `node property`
 Similar to the `nodes` group, the `edges` group will contain an `ids` array and an optional `props` group.
 
 ### The `ids` array
-The `edges\ids` array is a 2D array with the same dtype as the `nodes\ids` array. It has shape `(E, 2)`, where `E` is the number of edges in the graph. If there are no edges in the graph, the edge group and `ids` array must be present with shape `(0, 2)`.  All elements in the `edges\ids` array must also be present in the `nodes\ids` array, and the data types of the two id arrays must match.
+The `edges\ids` array is a 2D array with the same dtype as the `nodes\ids` array. It has shape `(E, 2)`, where `E` is the number of edges in the graph. If there are no edges in the graph, the edge group and `ids` array must be present with shape `(0, 2)`.  All elements in the `edges\ids` array must also be present in the `nodes\ids` array, and both ID arrays must have the data type `uint64`. If you want to store string IDs, you can optionally store them in the `edges\props\name` property. See details the `props` section below.
 Each row represents an edge between two nodes. For directed graphs, the first column is the source nodes and the second column holds the target nodes. For undirected graphs, the order is arbitrary.
 Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.
 
@@ -58,6 +58,11 @@ The `edges\props` group will contain zero or more `edge property` groups, each w
 - The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A `1` at an index in the `missing` array indicates that the `value` of that property for the edge at that index is missing, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all edges have values for the property.
 
 The `edges/props` is optional. If you do not have any edge properties, the `edges\props` can be absent. 
+
+### The `name` property
+The `name` property is an optional property that can be present in both the `nodes\props` and `edges\props` groups. The `name` property is used to store human-readable names for nodes and edges, which can be useful for visualization and analysis. If the `name` property is not present, it is assumed that the nodes and edges do not have names.
+
+The `name` property is a 2D array of strings with shape `(N, <max_length>)` for nodes and `(E, <max_length>)` for edges, where `<max_length>` is the maximum length of the strings in bytes. The dtype of the `name` property is `uint8` to ensure interoperability with other libraries (e.g. [JZarr](https://jzarr.readthedocs.io/) used in [geff-java](https://github.com/mastodon-sc/geff-java)).
 
 ## Example file structure and metadata
 Here is a schematic of the expected file structure.
@@ -79,6 +84,8 @@ Here is a schematic of the expected file structure.
                 color/
                     values # shape: (N, 4) dtype: float16
                     missing # shape: (N,) dtype: bool
+                name/
+                    values # shape: (N, <max_length>) dtype: uint8
 	    edges/
             ids  # shape: (E, 2) dtype: uint64
             props/
@@ -87,6 +94,8 @@ Here is a schematic of the expected file structure.
                 score/
                     values # shape: (E,) dtype: float16
                     missing # shape: (E,) dtype: bool
+                name/
+                    values # shape: (E, <max_length>) dtype: uint8
     # optional:
     /segmentation 
     

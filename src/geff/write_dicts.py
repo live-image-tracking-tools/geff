@@ -75,6 +75,73 @@ def write_dicts(
     write_props_arrays(geff_path, "edges", edge_props_dict, zarr_format=zarr_format)
 
 
+def _get_max_length_in_bytes(data: Sequence[Any] | str) -> int:
+    """Recursively get the maximum length of strings in bytes in a nested sequence
+
+    Args:
+        data (Sequence[Any]): A sequence that may contain nested sequences or strings
+
+    Returns:
+        int: The maximum length of the strings in bytes
+    """
+    if isinstance(data, str):
+        return len(data.encode("utf-8"))
+    max_length = 0
+    for item in data:
+        if isinstance(item, Sequence):
+            max_length = max(max_length, _get_max_length_in_bytes(item))
+    return max_length
+
+
+def _to_padded_utf8_bytes(
+    data: Sequence[Any] | str,
+    length: int,
+) -> np.ndarray:
+    """Convert a string or sequence of strings to a padded UTF-8 byte array.
+
+    Args:
+        data (Sequence[Any] | str): The data to convert, which can be a string or a
+        sequence of strings.
+        length (int): The length to pad the byte array to.
+    Returns:
+        np.ndarray: A numpy array of type `uint8` containing the padded UTF-8 bytes.
+    Raises:
+        TypeError: If the data is not a string or a sequence of strings.
+    """
+    if isinstance(data, str):
+        encoded_bytes = np.frombuffer(data.encode("utf-8"), dtype=np.uint8)
+        padded = np.zeros(length, dtype=np.uint8)
+        padded[: len(encoded_bytes)] = encoded_bytes
+        return padded
+    elif isinstance(data, Sequence):
+        return [_to_padded_utf8_bytes(item, length) for item in data]
+    else:
+        raise TypeError("Data must be a string or a sequence of strings.")
+
+
+def _determine_value_type(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
+    """Determine the type of the property values
+
+    Find the first non-missing value and returns its type. If there are no non-missing
+    values, returns None.
+
+    Args:
+        data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of elements and a dictionary
+            holding the properties of that element
+        prop_name (str): The property to get the type for
+
+    Returns:
+        Any: The type of the property values, or None if no non-missing values are found.
+    """
+    for _, data_dict in data:
+        if prop_name in data_dict:
+            value = data_dict[prop_name]
+            while isinstance(value, list | tuple):
+                value = value[0]
+            return type(value)
+    return None
+
+
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
     """Determine default value to fill in missing values
 
@@ -149,6 +216,9 @@ def dict_props_to_arr(
                 values.append(default_val)
                 missing.append(True)
                 missing_any = True
+        if _determine_value_type(data, name) is str:
+            max_length = _get_max_length_in_bytes(values)
+            values = [_to_padded_utf8_bytes(v, max_length) for v in values]
         values_arr = np.asarray(values)
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
         props_dict[name] = (values_arr, missing_arr)

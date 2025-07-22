@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.write_dicts import dict_props_to_arr
+from geff.write_dicts import _get_max_length_in_bytes, _to_padded_utf8_bytes, dict_props_to_arr
 
 
 @pytest.fixture
@@ -28,6 +28,9 @@ def test_dict_prop_to_arr(data, data_type, expected):
     print(props_dict)
     values, missing = props_dict[data_type]
     ex_values, ex_missing = expected
+    if "str" in data_type:
+        max_length = _get_max_length_in_bytes(ex_values)
+        ex_values = [_to_padded_utf8_bytes(v, max_length) for v in ex_values]
     ex_values = np.array(ex_values)
     ex_missing = np.array(ex_missing, dtype=bool) if ex_missing is not None else None
 
