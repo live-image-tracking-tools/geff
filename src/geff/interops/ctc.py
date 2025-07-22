@@ -61,7 +61,7 @@ def from_ctc_to_geff(
         overwrite: Whether to overwrite the GEFF file if it already exists.
     """
     ctc_path = Path(ctc_path)
-    geff_path = Path(geff_path)
+    geff_path = Path(geff_path).with_suffix(".geff")
 
     if not ctc_path.exists():
         raise FileNotFoundError(f"CTC file {ctc_path} does not exist")
