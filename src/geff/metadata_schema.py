@@ -120,6 +120,49 @@ def axes_from_lists(
     return axes
 
 
+class RelatedObject(BaseModel):
+    type: str = Field(
+        ...,
+        description=(
+            "Type of the related object. 'labels' for label objects, "
+            "'image' for image objects. Other types are also allowed, but may not be "
+            "recognized by reader applications. "
+        ),
+    )
+    path: str = Field(
+        ...,
+        description=(
+            "Path of the related object within the zarr group, relative "
+            "to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group."
+        ),
+    )
+    label_prop: str | None = Field(
+        None,
+        description=(
+            "Property name for label objects. This is the node property that will be used "
+            "to identify the labels in the related object. "
+            "This is only valid for type 'labels'."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> RelatedObject:
+        if self.type != "labels" and self.label_prop is not None:
+            raise ValueError(
+                f"label_prop {self.label_prop} is only valid for type 'labels', "
+                f"but got type {self.type}."
+            )
+        if self.type not in ["labels", "image"]:
+            warnings.warn(
+                f"Got type {self.type} for related object, "
+                "which might not be recognized by reader applications. ",
+                stacklevel=2,
+            )
+        return self
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -158,6 +201,20 @@ class GeffMetadata(BaseModel):
             "and other nodes along the path have in/out degree of at most 1.\n"
             "A lineage is defined as a weakly connected component on the graph.\n"
             "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
+        ),
+    )
+    related_objects: Sequence[RelatedObject] | None = Field(
+        None,
+        description=(
+            "A list of dictionaries of related objects such as labels or images. "
+            "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
+            "properties. The 'type' represents the data type. 'labels' and 'image' should "
+            "be used for label and image objects, respectively. Other types are also allowed, "
+            "The 'path' should be relative to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group. "
+            "The 'label_prop' is only valid for type 'labels' and specifies the node property "
+            "that will be used to identify the labels in the related object. "
         ),
     )
     affine: Affine | None = Field(
