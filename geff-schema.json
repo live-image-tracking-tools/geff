@@ -75,6 +75,53 @@
       "title": "Axis",
       "type": "object"
     },
+    "DisplayHint": {
+      "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer",
+      "properties": {
+        "display_horizontal": {
+          "description": "Which spatial axis to use for horizontal display",
+          "title": "Display Horizontal",
+          "type": "string"
+        },
+        "display_vertical": {
+          "description": "Which spatial axis to use for vertical display",
+          "title": "Display Vertical",
+          "type": "string"
+        },
+        "display_depth": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, which spatial axis to use for depth display",
+          "title": "Display Depth"
+        },
+        "display_time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, which temporal axis to use for time",
+          "title": "Display Time"
+        }
+      },
+      "required": [
+        "display_horizontal",
+        "display_vertical"
+      ],
+      "title": "DisplayHint",
+      "type": "object"
+    },
     "GeffMetadata": {
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
@@ -132,6 +179,18 @@
           ],
           "default": null,
           "description": "Affine transformation matrix to transform the graph coordinates to the physical coordinates. The matrix must have the same number of dimensions as the number of axes in the graph."
+        },
+        "display_hints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DisplayHint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer"
         }
       },
       "required": [
