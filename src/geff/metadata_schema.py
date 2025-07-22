@@ -106,6 +106,8 @@ def axes_from_lists(
 
 
 class DisplayHint(BaseModel):
+    """Metadata indicating how spatiotemporal axes are displayed by a viewer"""
+
     display_horizontal: str = Field(
         ..., description="Which spatial axis to use for horizontal display"
     )
