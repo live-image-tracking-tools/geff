@@ -71,6 +71,7 @@
           "type": "string"
         },
         "directed": {
+          "description": "True if the graph is directed, otherwise False.",
           "title": "Directed",
           "type": "boolean"
         },
@@ -87,6 +88,7 @@
             }
           ],
           "default": null,
+          "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
           "title": "Axes"
         },
         "related_objects": {
