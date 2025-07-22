@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753203976470,
+  "lastUpdate": 1753207259728,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2565,6 +2565,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5565154407949987",
             "extra": "mean: 15.438717413666666 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "17995243+DragaDoncila@users.noreply.github.com",
+            "name": "Draga Doncila Pop",
+            "username": "DragaDoncila"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d99e2a447eb90df5b21aaecc083221b029c95220",
+          "message": "Add track-level node properties schema (#192)\n\n# Proposed Change\nCloses #151 \n\nThis PR adds a new, optional, `track_node_props` key to the geff\nmetadata that defines the node properties containing `tracklet` ID\nand/or `lineage` ID information. It also explicitly defines what is\nmeant by a `tracklet` and a `lineage`.\n\n# Types of Changes\n- New feature or enhancement\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n## If you changed the specification\n- [x] I have checked that any validation functions and tests reflect the\nchanges.\n- [x] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [x] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n---------\n\nCo-authored-by: Draga Doncila <ddon0001@student.monash.edu>",
+          "timestamp": "2025-07-22T13:58:32-04:00",
+          "tree_id": "6e1daa2e6c37354e075ecfc34a6bf5726ac93f16",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/d99e2a447eb90df5b21aaecc083221b029c95220"
+        },
+        "date": 1753207259188,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12053332974956142,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2208358602867921",
+            "extra": "mean: 8.296460423666664 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.3335461140482,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0014467361396084902",
+            "extra": "mean: 51.7235686666595 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06425595652197026,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5437095769890301",
+            "extra": "mean: 15.562759534333319 sec\nrounds: 3"
           }
         ]
       }
