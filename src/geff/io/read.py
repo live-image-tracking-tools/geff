@@ -6,15 +6,15 @@ import networkx as nx
 from geff.dict_representation import GraphDict
 from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata
-from geff.networkx.io import _ingest_dict_nx
+from geff.networkx.io import construct_nx
 
 from .supported_backends import SupportedBackend
 
 R = TypeVar("R", covariant=True)
 
 
-class IngestFunc(Protocol[R]):
-    """A protocol for callables that ingest a `GraphDict` to different backends."""
+class ConstructFunc(Protocol[R]):
+    """A protocol for callables that convert a `GraphDict` to different backends."""
 
     def __call__(self, graph_dict: GraphDict, *args: Any, **kwargs: Any) -> tuple[R, GeffMetadata]:
         """
@@ -36,31 +36,35 @@ class IngestFunc(Protocol[R]):
 
 # When the GRAPH_DICT option is removed from SupportedBackend enum this can be removed.
 # Currently need 2 options for the overloads to work properly
-def ingest_graph_dict(graph_dict: GraphDict) -> tuple[GraphDict, GeffMetadata]:
+def construct_identity(graph_dict: GraphDict) -> tuple[GraphDict, GeffMetadata]:
     """
     This functional is essentially the identity.
 
     Args:
-        graph_dict (GraphDict): A graph representation of the GEFF data.
+        graph_dict (GraphDict): A dictionary representation of the GEFF data.
+
+    Returns:
+        (GraphDict): A dictionary representation of the GEFF data.
+        (GeffMetadata): The GEFF metadata.
     """
     return graph_dict, graph_dict["metadata"]
 
 
-def get_ingest_func(backend: SupportedBackend) -> IngestFunc[Any]:
+def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
     """
-    Get the ingest function for different backends.
+    Get the construct function for different backends.
 
     Args:
         backend (SupportedBackend): Flag for the chosen backend.
 
     Returns:
-        IngestFunc: A function to ingest a `GraphDict` to the chosen backend.
+        ConstructFunc: A function to convert a `GraphDict` to the chosen backend.
     """
     match backend:
         case SupportedBackend.NETWORKX:
-            return _ingest_dict_nx
+            return construct_nx
         case SupportedBackend.GRAPH_DICT:
-            return ingest_graph_dict
+            return construct_identity
         # Add cases for new backends, remember to add overloads
         case _:
             raise ValueError(f"Unsupported backend chosen: '{backend.value}'")
@@ -117,7 +121,7 @@ def read(
         graph (Any): Graph object of the chosen backend.
         metadata (GeffMetadata): The GEFF metadata.
     """
-    ingest_func = get_ingest_func(backend)
+    ingest_func = get_construct_func(backend)
     if backend_kwargs is None:
         backend_kwargs = {}
     graph_dict = read_to_dict(path, validate, node_props, edge_props)

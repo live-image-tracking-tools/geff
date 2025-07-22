@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from geff.geff_reader import GeffReader
-from geff.networkx.io import _ingest_dict_nx
+from geff.networkx.io import construct_nx
 
 node_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
 node_prop_dtypes = [
@@ -44,7 +44,7 @@ def test_build_w_masked_nodes(
     assert np.isin(graph_dict["nodes"], graph_dict["edges"]).all()
 
     # make sure graph dict can be ingested
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(graph_dict)
 
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
@@ -72,7 +72,7 @@ def test_build_w_masked_edges(
     np.testing.assert_array_equal(graph_props["edges"][edge_mask], graph_dict["edges"])
 
     # make sure graph dict can be ingested
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(graph_dict)
 
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
@@ -114,7 +114,7 @@ def test_build_w_masked_nodes_edges(
     assert (output_edges[:, :, np.newaxis] == masked_edges).all(axis=1).any(axis=1).all()
 
     # make sure graph dict can be ingested
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(graph_dict)
 
 
 def test_read_node_props(path_w_expected_graph_props):
@@ -143,7 +143,7 @@ def test_read_node_props(path_w_expected_graph_props):
         graph_dict["node_props"]["t"]["values"],
     )
 
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(graph_dict)
 
 
 def test_read_edge_props(path_w_expected_graph_props):
@@ -171,4 +171,4 @@ def test_read_edge_props(path_w_expected_graph_props):
         graph_dict["edge_props"]["score"]["values"],
     )
 
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(graph_dict)

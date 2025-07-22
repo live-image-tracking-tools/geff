@@ -210,7 +210,17 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def _ingest_dict_nx(graph_dict: GraphDict):
+def construct_nx(graph_dict: GraphDict) -> tuple[nx.Graph | nx.DiGraph, GeffMetadata]:
+    """
+    Construct a `networkx` graph instance from a dictionary representation of the GEFF data.
+
+    Args:
+        graph_dict (GraphDict): A dictionary representation of the GEFF data.
+
+    Returns:
+        (nx.Graph | nx.DiGraph): A `networkx` graph object.
+        (GeffMetadata): The GEFF metadata.
+    """
     metadata = graph_dict["metadata"]
 
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
@@ -252,6 +262,6 @@ def read_nx(
         A networkx graph containing the graph that was stored in the geff file format
     """
     graph_dict = read_to_dict(path, validate, node_props, edge_props)
-    graph, metadata = _ingest_dict_nx(graph_dict)
+    graph, metadata = construct_nx(graph_dict)
 
     return graph, metadata
