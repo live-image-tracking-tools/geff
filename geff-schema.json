@@ -1,5 +1,19 @@
 {
   "$defs": {
+    "Affine": {
+      "description": "Affine transformation class following scipy conventions.\n\nInternally stores transformations as homogeneous coordinate matrices (N+1, N+1).\nThe transformation matrix follows scipy.ndimage.affine_transform convention\nwhere the matrix maps output coordinates to input coordinates (inverse/pull transformation).\n\nFor a point p_out in output space, the corresponding input point p_in is computed as:\np_in_homo = matrix @ p_out_homo\nwhere p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]\n\nAttributes:\n    matrix: Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)",
+      "properties": {
+        "matrix": {
+          "description": "Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)",
+          "title": "Matrix"
+        }
+      },
+      "required": [
+        "matrix"
+      ],
+      "title": "Affine",
+      "type": "object"
+    },
     "Axis": {
       "properties": {
         "name": {
@@ -61,6 +75,53 @@
       "title": "Axis",
       "type": "object"
     },
+    "DisplayHint": {
+      "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer",
+      "properties": {
+        "display_horizontal": {
+          "description": "Which spatial axis to use for horizontal display",
+          "title": "Display Horizontal",
+          "type": "string"
+        },
+        "display_vertical": {
+          "description": "Which spatial axis to use for vertical display",
+          "title": "Display Vertical",
+          "type": "string"
+        },
+        "display_depth": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, which spatial axis to use for depth display",
+          "title": "Display Depth"
+        },
+        "display_time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, which temporal axis to use for time",
+          "title": "Display Time"
+        }
+      },
+      "required": [
+        "display_horizontal",
+        "display_vertical"
+      ],
+      "title": "DisplayHint",
+      "type": "object"
+    },
     "GeffMetadata": {
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
@@ -71,6 +132,7 @@
           "type": "string"
         },
         "directed": {
+          "description": "True if the graph is directed, otherwise False.",
           "title": "Directed",
           "type": "boolean"
         },
@@ -87,7 +149,48 @@
             }
           ],
           "default": null,
+          "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
           "title": "Axes"
+        },
+        "related_objects": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/RelatedObject"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. The 'type' represents the data type. 'labels' and 'image' should be used for label and image objects, respectively. Other types are also allowed, The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The 'label_prop' is only valid for type 'labels' and specifies the node property that will be used to identify the labels in the related object. ",
+          "title": "Related Objects"
+        },
+        "affine": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Affine"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Affine transformation matrix to transform the graph coordinates to the physical coordinates. The matrix must have the same number of dimensions as the number of axes in the graph."
+        },
+        "display_hints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DisplayHint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer"
         },
         "extra": {
           "description": "Extra metadata that is not part of the schema",
@@ -99,6 +202,39 @@
         "directed"
       ],
       "title": "geff_metadata",
+      "type": "object"
+    },
+    "RelatedObject": {
+      "properties": {
+        "type": {
+          "description": "Type of the related object. 'labels' for label objects, 'image' for image objects. Other types are also allowed, but may not be recognized by reader applications. ",
+          "title": "Type",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path of the related object within the zarr group, relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group.",
+          "title": "Path",
+          "type": "string"
+        },
+        "label_prop": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Property name for label objects. This is the node property that will be used to identify the labels in the related object. This is only valid for type 'labels'.",
+          "title": "Label Prop"
+        }
+      },
+      "required": [
+        "type",
+        "path"
+      ],
+      "title": "RelatedObject",
       "type": "object"
     }
   },
