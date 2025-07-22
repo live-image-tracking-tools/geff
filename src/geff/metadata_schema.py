@@ -245,6 +245,13 @@ class GeffMetadata(BaseModel):
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
 
+            if self.affine is not None:
+                if self.affine.ndim != len(self.axes):
+                    raise ValueError(
+                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
+                        f"got {self.affine.ndim}"
+                    )
+
         # Display hint axes match names in axes
         if self.axes is not None and self.display_hints is not None:
             ax_names = [ax.name for ax in self.axes]
@@ -274,13 +281,6 @@ class GeffMetadata(BaseModel):
                     f"Display hint display_depth name {self.display_hints.display_depth} "
                     f"not found in axes {ax_names}"
                 )
-            if self.affine is not None:
-                if self.affine.ndim != len(self.axes):
-                    raise ValueError(
-                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
-                        f"got {self.affine.ndim}"
-                    )
-
         return self
 
     def write(self, group: zarr.Group | Path | str):
