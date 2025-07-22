@@ -140,7 +140,7 @@ class GeffMetadata(BaseModel):
             "If not provided, the version will be set to the current geff package version."
         ),
     )
-    directed: bool
+    directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: Sequence[Axis] | None = Field(
         None,
         description="Optional list of Axis objects defining the axes of each node in the graph.\n"
