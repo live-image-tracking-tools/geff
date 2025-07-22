@@ -10,6 +10,7 @@ import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
+from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
@@ -147,6 +148,12 @@ class GeffMetadata(BaseModel):
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
+    affine: Affine | None = Field(
+        None,
+        description="Affine transformation matrix to transform the graph coordinates to the "
+        "physical coordinates. The matrix must have the same number of dimensions as the number of "
+        "axes in the graph.",
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -162,6 +169,14 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
+
+            if self.affine is not None:
+                if self.affine.ndim != len(self.axes):
+                    raise ValueError(
+                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
+                        f"got {self.affine.ndim}"
+                    )
+
         return self
 
     def write(self, group: zarr.Group | Path | str):
