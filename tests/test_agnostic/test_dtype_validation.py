@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
+from geff.metadata_schema import GeffMetadata
 from geff.units import validate_data_type
 from geff.write_arrays import write_arrays
-from geff.metadata_schema import GeffMetadata
 
 
 # -----------------------------------------------------------------------------
@@ -27,13 +27,7 @@ def test_validate_data_type_allowed(dtype_in):
 
 @pytest.mark.parametrize(
     "dtype_in",
-    [
-        "float16",
-        np.float16,
-        "complex64",
-        np.dtype("complex128"),
-        ">f2"
-    ],
+    ["float16", np.float16, "complex64", np.dtype("complex128"), ">f2"],
 )
 def test_validate_data_type_disallowed(dtype_in):
     """All disallowed dtypes should return *False*."""
@@ -43,6 +37,7 @@ def test_validate_data_type_disallowed(dtype_in):
 # -----------------------------------------------------------------------------
 # Integration tests for write_arrays
 # -----------------------------------------------------------------------------
+
 
 def _tmp_metadata():
     """Return minimal valid GeffMetadata object for tests."""
@@ -88,4 +83,4 @@ def test_write_arrays_rejects_disallowed_property_dtype(tmp_path):
             edge_ids=edge_ids,
             edge_props=None,
             metadata=_tmp_metadata(),
-        ) 
+        )
