@@ -5,6 +5,7 @@ import numpy as np
 import zarr
 
 from .metadata_schema import GeffMetadata
+from .units import validate_data_type
 
 
 def write_arrays(
@@ -80,6 +81,14 @@ def write_id_arrays(
         raise TypeError(
             f"Node ids and edge ids must have same dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
         )
+
+    # Disallow data types that cannot be consumed by Java-based Zarr readers
+    if not validate_data_type(node_ids.dtype):
+        raise TypeError(
+            "Java Zarr implementations do not support dtype "
+            f"{node_ids.dtype.name}. Please use a supported type."
+        )
+
     path = str(geff_path)
     if zarr.__version__.startswith("3"):
         geff_root = zarr.open(path, mode="a", zarr_format=zarr_format)  # zarr format defaulted to 2
@@ -136,8 +145,16 @@ def write_props_arrays(
         geff_root = zarr.open(path, mode="a")
     props_group = geff_root.require_group(f"{group}/props")
     for prop, arrays in props.items():
-        prop_group = props_group.create_group(prop)
+        # data-type validation - ensure this property can round-trip through
+        # Java Zarr readers before any data get written to disk.
         values, missing = arrays
+        if not validate_data_type(values.dtype):
+            raise TypeError(
+                f"Data type {values.dtype.name} for property '{prop}' is not supported "
+                "by Java Zarr implementations."
+            )
+
+        prop_group = props_group.create_group(prop)
         prop_group["values"] = values
         if missing is not None:
             prop_group["missing"] = missing
