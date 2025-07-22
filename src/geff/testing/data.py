@@ -131,7 +131,7 @@ def create_dummy_graph_props(
     # Generate spatiotemporal coordinates with flexible dimensions
     t = (
         np.array(
-            [(i // max(1, num_nodes // 5)) + 1 for i in range(num_nodes)],
+            [(i * 5 // num_nodes) + 1 for i in range(num_nodes)],
             dtype=node_axis_dtypes["time"],
         )
         if include_t
