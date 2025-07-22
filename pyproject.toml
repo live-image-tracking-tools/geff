@@ -29,6 +29,10 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 
+[project.scripts]
+validate = "geff.__main__:validate"
+info = "geff.__main__:info"
+
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
 
