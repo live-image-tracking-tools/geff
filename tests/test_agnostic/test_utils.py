@@ -5,7 +5,7 @@ import pytest
 import zarr
 
 from geff.metadata_schema import GeffMetadata
-from geff.utils import validate, validate_zarr_structure
+from geff.utils import validate, validate_axes_structure, validate_zarr_structure
 
 
 def test_validate(tmp_path):
@@ -82,15 +82,13 @@ def test_validate_zarr_structure(tmp_path):
     del z["nodes/props"]["badshape"]
 
     # Missing array must be boolean
-    z['nodes/props/missing_dtype/values'] = np.zeros(shape=(n_node))
-    z['nodes/props/missing_dtype/missing'] = np.zeros(shape=(n_node))
+    z["nodes/props/missing_dtype/values"] = np.zeros(shape=(n_node))
+    z["nodes/props/missing_dtype/missing"] = np.zeros(shape=(n_node))
     with pytest.raises(
-        AssertionError,
-        match="Missing array for property missing_dtype must be boolean"
+        AssertionError, match="Missing array for property missing_dtype must be boolean"
     ):
         validate_zarr_structure(z, meta)
-    del z['nodes/props']['missing_dtype']
-
+    del z["nodes/props"]["missing_dtype"]
 
     # No edge group is okay, if the graph has no edges
     z.create_group("edges")
@@ -140,3 +138,27 @@ def test_validate_zarr_structure(tmp_path):
 
     # everything passes
     validate_zarr_structure(z, meta)
+
+
+def test_validate_axes_structure(tmp_path):
+    meta = GeffMetadata(geff_version="0.1.0", directed=True, axes=[{"name": "x"}])
+
+    zpath = tmp_path / "test.zarr"
+    z = zarr.open_group(zpath)
+    z.create_group("nodes/props")
+
+    with pytest.raises(AssertionError, match="Axis x data is missing"):
+        validate_axes_structure(z, meta)
+    z.create_group("nodes/props/x")
+
+    # Values must be 1d
+    z["nodes/props/x/values"] = np.zeros((10, 2))
+    with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
+        validate_axes_structure(z, meta)
+    del z["nodes/props/x/values"]
+
+    # No missing values
+    z["nodes/props/x/values"] = np.zeros((10,))
+    z["nodes/props/x/missing"] = np.zeros((10,))
+    with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
+        validate_axes_structure(z, meta)

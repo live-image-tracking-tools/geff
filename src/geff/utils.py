@@ -69,6 +69,12 @@ def validate_zarr_structure(graph: zarr.Group, meta: GeffMetadata):
 
         if "props" in edges:
             validate_graph_group(edges, "edge")
+
+    # Metadata based validation
+    if meta.axes is not None:
+        validate_axes_structure(graph, meta)
+
+
 def validate_graph_group(group: zarr.Group, type: Literal["node", "edge"]):
     """Verify that either a group of nodes or edges has basic correct structure
 
@@ -98,4 +104,30 @@ def validate_graph_group(group: zarr.Group, type: Literal["node", "edge"]):
                 f"does not match id length {id_len}"
             )
             missing_dtype = prop_group["missing"].dtype
-            assert np.issubdtype(missing_dtype, np.bool_), f"Missing array for property {prop} must be boolean"
+            assert np.issubdtype(missing_dtype, np.bool_), (
+                f"Missing array for property {prop} must be boolean"
+            )
+
+
+def validate_axes_structure(graph: zarr.Group, meta: GeffMetadata):
+    """Verify that any metadata regarding axes is actually present in the data
+
+    - Property exists with name matching Axis name
+    - Data is 1D
+    - Missing values not allowed
+
+    Args:
+        graph (zarr.Group): The zarr group containing the geff metadata
+        meta (GeffMetadata): Metadata from geff
+    """
+    if meta.axes is not None:
+        node_prop_group = graph["nodes/props"]
+        for ax in meta.axes:
+            # Array must be present without missing values
+            assert f"{ax.name}/values" in node_prop_group, f"Axis {ax.name} data is missing"
+            assert f"{ax.name}/missing" not in node_prop_group, (
+                f"Axis {ax.name} has missing values which are not allowed"
+            )
+            # Only 1d data allowed, already checked length of first axis
+            ndim = len(node_prop_group[f"{ax.name}/values"].shape)
+            assert ndim == 1, f"Axis property {ax.name} has {ndim} dimensions, must be 1D"
