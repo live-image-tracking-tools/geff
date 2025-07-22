@@ -1,9 +1,11 @@
 import re
 
+import numpy as np
 import pydantic
 import pytest
 import zarr
 
+from geff.affine import Affine
 from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, write_metadata_schema
 
 
@@ -202,6 +204,84 @@ class TestAxis:
         # Min > max
         with pytest.raises(ValueError, match=r"Min .* is greater than max .*"):
             Axis(name="test", min=0, max=-10)
+
+
+class TestAffineTransformation:
+    """Comprehensive tests for Affine transformation functionality with metadata."""
+
+    def test_affine_integration_with_metadata(self):
+        """Test integration of Affine with GeffMetadata."""
+        # Create a simple affine transformation
+        affine = Affine.from_matrix_offset([[1.5, 0.0], [0.0, 1.5]], [10.0, 20.0])
+
+        # Create metadata with affine transformation
+        metadata = GeffMetadata(
+            geff_version="0.1.0",
+            directed=True,
+            axes=[
+                {"name": "x", "type": "space", "unit": "micrometer"},
+                {"name": "y", "type": "space", "unit": "micrometer"},
+            ],
+            affine=affine,
+        )
+
+        # Verify the affine is properly stored
+        assert metadata.affine is not None
+        assert metadata.affine.ndim == 2
+        np.testing.assert_array_almost_equal(
+            metadata.affine.linear_matrix, [[1.5, 0.0], [0.0, 1.5]]
+        )
+        np.testing.assert_array_almost_equal(metadata.affine.offset, [10.0, 20.0])
+
+    def test_unmatched_ndim(self):
+        """Test that an error is raised if the affine matrix and axes have different dimensions."""
+        with pytest.raises(
+            ValueError, match="Affine transformation matrix must have 3 dimensions, got 2"
+        ):
+            # Homogeneous matrix of a 2D affine transformation
+            matrix = np.diag([1.0, 1.0, 1.0])
+            affine = Affine(matrix=matrix)
+            GeffMetadata(
+                geff_version="0.1.0",
+                directed=True,
+                axes=[
+                    {"name": "x", "type": "space", "unit": "micrometer"},
+                    {"name": "y", "type": "space", "unit": "micrometer"},
+                    {"name": "z", "type": "space", "unit": "micrometer"},
+                ],
+                affine=affine,
+            )
+
+    def test_affine_serialization_with_metadata(self, tmp_path):
+        """Test that Affine transformations can be serialized and deserialized with metadata."""
+        # Create metadata with affine transformation
+        affine = Affine.from_matrix_offset(
+            [[2.0, 0.5], [-0.5, 2.0]],  # Scaling with rotation/shear
+            [100.0, -50.0],
+        )
+
+        original_metadata = GeffMetadata(
+            geff_version="0.1.0",
+            directed=False,
+            axes=[
+                {"name": "x", "type": "space", "unit": "micrometer"},
+                {"name": "y", "type": "space", "unit": "micrometer"},
+            ],
+            affine=affine,
+        )
+
+        # Write and read back
+        zpath = tmp_path / "test_affine.zarr"
+        group = zarr.open(zpath, mode="a")
+        original_metadata.write(group)
+        loaded_metadata = GeffMetadata.read(group)
+
+        # Verify everything matches
+        assert loaded_metadata == original_metadata
+        assert loaded_metadata.affine is not None
+        np.testing.assert_array_almost_equal(
+            loaded_metadata.affine.matrix, original_metadata.affine.matrix
+        )
 
 
 def test_write_schema(tmp_path):
