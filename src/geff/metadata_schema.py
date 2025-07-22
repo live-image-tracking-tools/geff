@@ -5,6 +5,7 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
+from typing import Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -140,6 +141,21 @@ class GeffMetadata(BaseModel):
     )
     directed: bool
     axes: Sequence[Axis] | None = None
+    track_node_properties: (
+        Sequence[dict[Literal["lineage", "tracklet", "tracklet_edge_mask_prop"], str]] | None
+    ) = Field(
+        None,
+        description=(
+            "Node properties denoting tracklet and/or lineage IDs.\n"
+            "A tracklet is defined as a simple path or a set of connected nodes"
+            " with in/out degree of at most 1.\n"
+            "A lineage is defined as a weakly connected component on the graph.\n"
+            "The properties are defined as a list of dictionaries. Each dictionary can store"
+            " either a 'tracklet' or 'lineage' key, with the value being the name of the property, "
+            "OR a pair of 'lineage' and 'tracklet', if the given 'lineage' property corresponds"
+            "to a set of tracklets defined by the 'tracklet' property.\n"
+        ),
+    )
 
     @model_validator(mode="before")
     @classmethod
