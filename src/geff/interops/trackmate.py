@@ -10,7 +10,6 @@ from lxml import etree as ET
 
 import geff
 from geff.metadata_schema import GeffMetadata
-from geff.networkx.io import write_nx
 
 # TODO: check docstrings consistency.
 
@@ -85,38 +84,6 @@ def _get_units(
     return units
 
 
-def _get_features_dict(
-    iterator: ET.iterparse,
-    ancestor: ET._Element,
-) -> list[dict[str, str]]:
-    """
-    Get all the features of ancestor and return them as a list.
-
-    The ancestor is either a SpotFeatures, EdgeFeatures or a TrackFeatures tag.
-
-    Parameters
-    ----------
-    iterator : ET.iterparse
-        An iterator over XML elements.
-    ancestor : ET._Element
-        The XML element that encompasses the information to be added.
-
-    Returns
-    -------
-    list[dict[str, str]]
-        A list of dictionaries, each representing a feature.
-    """
-    features = []
-    event, element = next(iterator)  # Feature.
-    while (event, element) != ("end", ancestor):
-        if element.tag == "Feature" and event == "start":
-            attribs = deepcopy(element.attrib)
-            features.append(attribs)
-        element.clear()
-        event, element = next(iterator)
-    return features
-
-
 def _get_features_metadata(
     it: ET.iterparse,
     ancestor: ET._Element,
@@ -160,191 +127,165 @@ def _get_features_metadata(
     return feat_md
 
 
-# def _convert_attributes(
-#     attributes: dict[str, str],
-#     features: dict[str, Feature],
-#     feature_type: str,
-# ) -> None:
-#     """
-#     Convert the values of `attributes` from string to the correct data type.
+def _convert_attributes(
+    attributes: dict[str, str],
+    feats_metadata: dict[str, dict[str, str]],
+    feat_type: str,
+) -> None:
+    """
+    Convert the values of `attributes` from string to the correct data type.
 
-#     The type to convert to is given by the features declaration that stores all
-#     the features info.
+    The type to convert to is given by the features metadata.
+    TrackMate features are either integers, floats or strings.
 
-#     Parameters
-#     ----------
-#     attributes : dict[str, str]
-#         The dictionary whose values we want to convert.
-#     features : dict[str, Feature]
-#         The dictionary of features that contains the information on how to convert
-#         the values of `attributes`.
-#     feature_type : str
-#         The type of the feature to convert (node, edge, or lineage).
+    Parameters
+    ----------
+    attributes : dict[str, str]
+        The dictionary whose values we want to convert.
+    feats_metadata : dict[str, dict[str, str]]
+        The features metadata containing information on the expected data types
+        for each feature.
+    feat_type : str
+        The type of the feature to convert (node, edge, or lineage).
 
-#     Raises
-#     ------
-#     ValueError
-#         If a feature has an invalid data_type (not "int", "float" nor "string").
-
-#     Warns
-#     -----
-#     UserWarning
-#         If a feature is not found in the features declaration.
-#     """
-#     # TODO: Rewrite this.
-#     for key in attributes:
-#         if key in features:
-#             match features[key].data_type:
-#                 case "int":
-#                     attributes[key] = int(attributes[key])  # type: ignore
-#                 case "float":
-#                     attributes[key] = float(attributes[key])  # type: ignore
-#                 case "string":
-#                     pass  # Nothing to do.
-#                 case _:
-#                     raise ValueError(f"Invalid data type: {features[key].data_type}")
-#         elif key == "ID":
-#             # IDs are always integers.
-#             attributes[key] = int(attributes[key])  # type: ignore
-#         elif key == "name":
-#             # "name" is a string so we don't need to convert it.
-#             pass
-#         elif key == "ROI_N_POINTS":
-#             # This attribute is a special case (stored as a tag text instead of tag
-#             # attribute) and will be converted later, in _add_ROI_coordinates().
-#             pass
-#         else:
-#             msg = (
-#                 f"{feature_type.capitalize()} feature {key} not found in the features declaration."
-#             )
-#             warnings.warn(msg, stacklevel=2)
-#             # In that case we add a stub version of the feature to the features
-#             # declaration. The user will need to manually update the feature later on.
-#             missing_feat = Feature(
-#                 name=key,
-#                 description="unknown",
-#                 provenance="unknown",
-#                 feat_type=feature_type,
-#                 lin_type="CellLineage",
-#                 data_type="unknown",
-#                 unit="unknown",
-#             )
-#             features[key] = missing_feat
+    Warns
+    -----
+    UserWarning
+        If a feature is not found in the features declaration.
+    """
+    for key in attributes:
+        if key in feats_metadata:
+            if feats_metadata[key]["isint"] == "true":
+                attributes[key] = int(attributes[key])
+            else:
+                try:
+                    attributes[key] = float(attributes[key])
+                except ValueError:
+                    # Can't be anything but a string.
+                    attributes[key] = str(attributes[key])
+        elif key == "ID" or key == "ROI_N_POINTS":
+            # IDs are always integers in TrackMate.
+            attributes[key] = int(attributes[key])
+        elif key == "name":
+            pass  # "name" is a string so we don't need to convert it.
+        else:
+            warnings.warn(
+                f"{feat_type.capitalize()} feature {key} not found in the features declaration.",
+                stacklevel=2,
+            )
 
 
-# def _convert_ROI_coordinates(
-#     element: ET._Element,
-#     attribs: dict[str, Any],
-# ) -> None:
-#     """
-#     Extract, format and add ROI coordinates to the attributes dict.
+def _convert_ROI_coordinates(
+    element: ET._Element,
+    attribs: dict[str, Any],
+) -> None:
+    """
+    Extract, format and add ROI coordinates to the attributes dict.
 
-#     Parameters
-#     ----------
-#     element : ET._Element
-#         Element from which to extract ROI coordinates.
-#     attribs : dict[str, Any]
-#         Attributes dict to update with ROI coordinates.
+    Parameters
+    ----------
+    element : ET._Element
+        Element from which to extract ROI coordinates.
+    attribs : dict[str, Any]
+        Attributes dict to update with ROI coordinates.
 
-#     Raises
-#     ------
-#     KeyError
-#         If the "ROI_N_POINTS" attribute is not found in the attributes dict.
-#     """
-#     if "ROI_N_POINTS" not in attribs:
-#         raise KeyError(
-#             f"No key 'ROI_N_POINTS' in the attributes of current element '{element.tag}'."
-#         )
-#     n_points = int(attribs["ROI_N_POINTS"])
-#     if element.text:
-#         points_coordinates = element.text.split()
-#         points_coordinates = [float(x) for x in points_coordinates]  # type: ignore
-#         points_dimension = len(points_coordinates) // n_points
-#         it = [iter(points_coordinates)] * points_dimension
-#         points_coordinates = list(zip(*it))  # type: ignore
-#         attribs["ROI_coords"] = points_coordinates
-#     else:
-#         attribs["ROI_coords"] = None
+    Raises
+    ------
+    KeyError
+        If the "ROI_N_POINTS" attribute is not found in the attributes dict.
+    """
+    if "ROI_N_POINTS" not in attribs:
+        raise KeyError(
+            f"No key 'ROI_N_POINTS' in the attributes of current element '{element.tag}'."
+        )
+    if element.text:
+        points_coordinates = element.text.split()
+        points_coordinates = [float(x) for x in points_coordinates]
+        points_dimension = len(points_coordinates) // attribs["ROI_N_POINTS"]
+        it = [iter(points_coordinates)] * points_dimension
+        points_coordinates = list(zip(*it))
+        attribs["ROI_coords"] = points_coordinates
+    else:
+        attribs["ROI_coords"] = None
 
 
-# def _add_all_nodes(
-#     it: ET.iterparse,
-#     ancestor: ET._Element,
-#     feat_md: list[dict[str, str]],
-#     graph: nx.DiGraph,
-# ) -> bool:
-#     """
-#     Add nodes and their attributes to a graph and return the presence of segmentation.
+def _add_all_nodes(
+    it: ET.iterparse,
+    ancestor: ET._Element,
+    feat_md: dict[str, dict[str, str]],
+    graph: nx.DiGraph,
+) -> bool:
+    """
+    Add nodes and their attributes to a graph and return the presence of segmentation.
 
-#     All the elements that are descendants of `ancestor` are explored.
+    All the elements that are descendants of `ancestor` are explored.
 
-#     Parameters
-#     ----------
-#     it : ET.iterparse
-#         An iterator over XML elements.
-#     ancestor : ET._Element
-#         The XML element that encompasses the information to be added.
-#     feat_md : list[dict[str, str]]
-#         The features metadata containing the expected node attributes.
-#     graph : nx.DiGraph
-#         Graph to add the nodes to.
+    Parameters
+    ----------
+    it : ET.iterparse
+        An iterator over XML elements.
+    ancestor : ET._Element
+        The XML element that encompasses the information to be added.
+    feat_md : dict[str, dict[str, str]]
+        The features metadata containing the expected node attributes.
+    graph : nx.DiGraph
+        The graph to which the nodes will be added.
 
-#     Returns
-#     -------
-#     bool
-#         True if the model has segmentation data, False otherwise
+    Returns
+    -------
+    bool
+        True if the model has segmentation data, False otherwise
 
-#     Raises
-#     ------
-#     ValueError
-#         If a node attribute cannot be converted to the expected type.
-#     KeyError
-#         If a node attribute is not found in the features declaration.
-#     """
-#     segmentation = False
-#     event, element = next(it)
-#     while (event, element) != ("end", ancestor):
-#         event, element = next(it)
-#         if element.tag == "Spot" and event == "end":
-#             # All items in element.attrib are parsed as strings but most
-#             # of them (if not all) are numbers. So we need to do a
-#             # conversion based on these attributes type (attribute `isint`)
-#             # as defined in the features declaration.
-#             attribs = deepcopy(element.attrib)
-#             try:
-#                 _convert_attributes(attribs, feat_md, "node")
-#             except ValueError as err:
-#                 print(f"ERROR: {err} Please check the XML file.")
-#                 raise
+    Raises
+    ------
+    ValueError
+        If a node attribute cannot be converted to the expected type.
+    KeyError
+        If a node attribute is not found in the features declaration.
+    """
+    segmentation = False
+    event, element = next(it)
+    while (event, element) != ("end", ancestor):
+        event, element = next(it)
+        if element.tag == "Spot" and event == "end":
+            # All items in element.attrib are parsed as strings but most
+            # of them (if not all) are numbers. So we need to do a
+            # conversion based on these attributes type (attribute `isint`)
+            # as defined in the features declaration.
+            attribs = deepcopy(element.attrib)
+            try:
+                _convert_attributes(attribs, feat_md, "node")
+            except ValueError as err:
+                print(f"ERROR: {err} Please check the XML file.")
+                raise
 
-#             # The ROI coordinates are not stored in a tag attribute but in
-#             # the tag text. So we need to extract then format them.
-#             # In case of a single-point detection, the `ROI_N_POINTS` attribute
-#             # is not present.
-#             if segmentation:
-#                 try:
-#                     _convert_ROI_coordinates(element, attribs)
-#                 except KeyError as err:
-#                     print(err)
-#             else:
-#                 if "ROI_N_POINTS" in attribs:
-#                     segmentation = True
-#                     _convert_ROI_coordinates(element, attribs)
+            # The ROI coordinates are not stored in a tag attribute but in
+            # the tag text. So we need to extract then format them.
+            # In case of a single-point detection, the `ROI_N_POINTS` attribute
+            # is not present.
+            if segmentation:
+                try:
+                    _convert_ROI_coordinates(element, attribs)
+                except KeyError as err:
+                    print(err)
+            else:
+                if "ROI_N_POINTS" in attribs:
+                    segmentation = True
+                    _convert_ROI_coordinates(element, attribs)
 
-#             # Now that all the node attributes have been updated, we can add
-#             # them to the graph.
-#             try:
-#                 graph.add_nodes_from([(int(attribs["ID"]), attribs)])
-#             except KeyError as err:
-#                 msg = (
-#                     f"No key {err} in the attributes of current element "
-#                     f"'{element.tag}'. Not adding this node to the graph."
-#                 )
-#                 warnings.warn(msg, stacklevel=2)
-#             finally:
-#                 element.clear()
+            # Adding the node and its attributes to the graph.
+            try:
+                graph.add_node(attribs["ID"], **attribs)
+            except KeyError as err:
+                warnings.warn(
+                    f"No key {err} in the attributes of current element "
+                    f"'{element.tag}'. Not adding this node to the graph.",
+                    stacklevel=2,
+                )
+            finally:
+                element.clear()
 
-#     return segmentation
+    return segmentation
 
 
 def _parse_model_tag(
@@ -399,12 +340,14 @@ def _parse_model_tag(
         if element.tag == "FeatureDeclarations" and event == "start":
             feat_md = _get_features_metadata(it, element)
             root.clear()
-            print(feat_md)
+            print(feat_md.keys())
 
         # Adding the spots as nodes.
-        # if element.tag == "AllSpots" and event == "start":
-        #     segmentation = _add_all_nodes(it, element, feat_md, graph)
-        #     root.clear()
+        if element.tag == "AllSpots" and event == "start":
+            segmentation = _add_all_nodes(it, element, feat_md, graph)
+            root.clear()
+
+    return graph
 
     #     # Adding the tracks as edges.
     #     if element.tag == "AllTracks" and event == "start":
@@ -499,11 +442,14 @@ def from_trackmate_xml_to_geff(
     _preliminary_checks(xml_path, geff_path, overwrite)
 
     # graph = _build_nx(xml_path)
-    _parse_model_tag(
+    graph = _parse_model_tag(
         xml_path=xml_path,
         keep_all_spots=keep_all_spots,
         keep_all_tracks=keep_all_tracks,
     )
+    print(graph)
+    print(graph.nodes[2004])
+
     # write_nx(
     #     graph,
     #     geff_path,
