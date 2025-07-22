@@ -1925,7 +1925,7 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
     <a href="#geff_track_node_props" onclick="anchorLink('geff_track_node_props')">track_node_props</a></div><h4>Track Node Props</h4> <span class="badge badge-success default-value">Default: null</span><br/>
 <div class="description collapse" id="collapseDescription_geff_track_node_props">
             <p>Node properties denoting tracklet and/or lineage IDs.<br />
-A tracklet is defined as a simple path of connected nodes where the terminating node has incoming degree 1 and any outgoing degree, and other nodes along the path have in/out degree of at most 1.<br />
+A tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1,and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.<br />
 A lineage is defined as a weakly connected component on the graph.<br />
 The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 
