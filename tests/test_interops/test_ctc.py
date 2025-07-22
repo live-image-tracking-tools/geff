@@ -73,7 +73,16 @@ def test_ctc_to_geff(
     segm_path = ctc_path / "segm.zarr"
 
     if cli:
-        cmd_args = [str(ctc_path), str(geff_path), "--segm-path", str(segm_path)]
+        cmd_args = [
+            str(ctc_path),
+            str(geff_path),
+            "--segm-path",
+            str(segm_path),
+            "--input-image-dir",
+            str(ctc_path),
+            "--output-image-path",
+            str(tmp_path / "output_image.zarr"),
+        ]
         if tczyx:
             cmd_args.append("--tczyx")
         result = CliRunner().invoke(app, cmd_args)
