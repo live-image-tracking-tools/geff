@@ -147,19 +147,16 @@ class GeffMetadata(BaseModel):
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
-    track_node_properties: (
-        Sequence[dict[Literal["lineage", "tracklet", "tracklet_edge_mask_prop"], str]] | None
-    ) = Field(
+    )
+    track_node_properties: dict[Literal["lineage", "tracklet"], str] | None = Field(
         None,
         description=(
             "Node properties denoting tracklet and/or lineage IDs.\n"
-            "A tracklet is defined as a simple path or a set of connected nodes"
-            " with in/out degree of at most 1.\n"
+            "A tracklet is defined as a simple path of connected nodes "
+            "where the terminating node has incoming degree 1 and any outgoing degree, "
+            "and other nodes along the path have in/out degree of at most 1.\n"
             "A lineage is defined as a weakly connected component on the graph.\n"
-            "The properties are defined as a list of dictionaries. Each dictionary can store"
-            " either a 'tracklet' or 'lineage' key, with the value being the name of the property, "
-            "OR a pair of 'lineage' and 'tracklet', if the given 'lineage' property corresponds"
-            "to a set of tracklets defined by the 'tracklet' property.\n"
+            "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
         ),
     )
 

@@ -106,25 +106,11 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
         ],
-        # node attributes corresponding to tracklet/lineage IDs
-        # tracklets are defined as "simple paths" or sets of adjacent nodes of in/out degree at most 1
-        # lineages are defined as sets of nodes defining weakly connected components of the graph
-        "track_node_props": [
-            {
-                # a pair of lineage & tracklet IDs can be declared together
-                # to indicate correspondence
-                "lineage": "ultrack_lineage_id",
-                "tracklet": "ultrack_id",
-                # optional
-                "edge_mask_prop": "is_ultrack_solution_1_edge"
-            },
-            {
-                "tracklet": "tracktour_id"
-            },
-            {
-                "lineage": "trackmate_id"
-            }
-        ]
+        # node attributes corresponding to tracklet and/or lineage IDs
+        "track_node_props": {
+            "lineage": "ultrack_lineage_id",
+            "tracklet": "ultrack_id"
+        }
     }
     ... # custom other things are allowed and ignored by geff
 }
