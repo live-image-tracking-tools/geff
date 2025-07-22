@@ -4,7 +4,8 @@ import numpy as np
 import pytest
 import zarr
 
-from geff.utils import validate
+from geff.metadata_schema import GeffMetadata
+from geff.utils import validate, validate_zarr_structure
 
 
 def test_validate(tmp_path):
@@ -24,28 +25,36 @@ def test_validate(tmp_path):
         "roi_min": [0, 0],
         "roi_max": [100, 100],
     }
+
+
+def test_validate_zarr_structure(tmp_path):
+    zpath = tmp_path / "test.zarr"
+    z = zarr.open_group(zpath)
+    meta = GeffMetadata(**{"geff_version": "0.0.1", "directed": True})
+
     # No nodes
     with pytest.raises(AssertionError, match="graph group must contain a nodes group"):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
     z.create_group("nodes")
 
     # Nodes missing ids
     with pytest.raises(AssertionError, match="nodes group must contain an ids array"):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
     n_node = 10
     z["nodes/ids"] = np.zeros(n_node)
 
-    # Nodes must have a props group
-    with pytest.raises(AssertionError, match="nodes group must contain a props group"):
-        validate(zpath)
-    z["nodes"].create_group("props")
+    # Node dtype must be integer like
+    with pytest.raises(AssertionError, match="node ids must have an integer dtype"):
+        validate_zarr_structure(z, meta)
+    z["nodes/ids"] = np.ones(n_node, dtype="int32")
 
     # Subgroups in props must have values
+    z["nodes"].create_group("props")
     z["nodes"].create_group("props/score")
     with pytest.raises(AssertionError, match="node property group score must have values group"):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
     z["nodes/props/score/values"] = np.zeros(n_node)
-    validate(zpath)
+    validate_zarr_structure(z, meta)
 
     # Property shape mismatch
     z["nodes/props/badshape/values"] = np.zeros(n_node * 2)
@@ -56,7 +65,7 @@ def test_validate(tmp_path):
             f"which does not match id length {n_node}"
         ),
     ):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
 
     del z["nodes/props"]["badshape"]
     # Property missing shape mismatch
@@ -69,7 +78,7 @@ def test_validate(tmp_path):
             f"which does not match id length {n_node}"
         ),
     ):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
     del z["nodes/props"]["badshape"]
 
     # No edge group is okay, if the graph has no edges
@@ -77,7 +86,7 @@ def test_validate(tmp_path):
 
     # Missing edge ids
     with pytest.raises(AssertionError, match="edge group must contain ids array"):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
 
     # ids array must have last dim size 2
     n_edges = 5
@@ -89,7 +98,7 @@ def test_validate(tmp_path):
             f"edges ids must have a last dimension of size 2, received shape {badshape}"
         ),
     ):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
     del z["edges"]["ids"]
     z["edges/ids"] = np.zeros((n_edges, 2))
 
@@ -102,7 +111,7 @@ def test_validate(tmp_path):
             f"which does not match id length {n_edges}"
         ),
     ):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
     del z["edges/props/badshape"]["values"]
 
     # Property missing shape mismatch
@@ -115,8 +124,8 @@ def test_validate(tmp_path):
             f"which does not match id length {n_edges}"
         ),
     ):
-        validate(zpath)
+        validate_zarr_structure(z, meta)
     del z["edges/props/badshape"]["missing"]
 
     # everything passes
-    validate(zpath)
+    validate_zarr_structure(z, meta)
