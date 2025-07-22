@@ -378,8 +378,55 @@ def _build_tracks(
     return tracks_attributes
 
 
+def _get_filtered_tracks_ID(
+    iterator: ET.iterparse,
+    ancestor: ET._Element,
+) -> list[int]:
+    """
+    Extract and return a list of track IDs identifying the tracks to keep.
+
+    Args:
+        iterator (ET.iterparse): An iterator over XML elements.
+        ancestor (ET._Element): The XML element that encompasses the information to be added.
+
+    Returns:
+        list[int]: List of tracks ID to identify the tracks to keep.
+
+    Warns:
+        UserWarning: If the "TRACK_ID" attribute is not found in the attributes.
+    """
+    filtered_tracks_ID = []
+    event, element = next(iterator)
+    attribs = deepcopy(element.attrib)
+    try:
+        filtered_tracks_ID.append(int(attribs["TRACK_ID"]))
+    except KeyError:
+        warnings.warn(
+            f"No key 'TRACK_ID' in the attributes of current element "
+            f"'{element.tag}'. Ignoring this track.",
+            stacklevel=2,
+        )
+
+    while (event, element) != ("end", ancestor):
+        event, element = next(iterator)
+        if element.tag == "TrackID" and event == "start":
+            attribs = deepcopy(element.attrib)
+            try:
+                filtered_tracks_ID.append(int(attribs["TRACK_ID"]))
+            except KeyError:
+                warnings.warn(
+                    f"No key 'TRACK_ID' in the attributes of current element "
+                    f"'{element.tag}'. Ignoring this track.",
+                    stacklevel=2,
+                )
+
+    return filtered_tracks_ID
+
+
 def _parse_model_tag(
     xml_path: Path,
+    discard_filtered_spots: bool = False,
+    discard_filtered_tracks: bool = False,
 ) -> nx.Graph:
     """Read an XML file and convert the model data into several graphs.
 
@@ -390,6 +437,10 @@ def _parse_model_tag(
 
     Args:
         xml_path (Path): Path of the XML file to process.
+        discard_filtered_spots (bool, optional): True to discard the spots
+            filtered out in TrackMate, False otherwise. False by default.
+        discard_filtered_tracks (bool, optional): True to discard the tracks
+            filtered out in TrackMate, False otherwise. False by default.
 
     Returns:
         nx.Graph: A NetworkX graph representing the TrackMate data.
@@ -430,71 +481,31 @@ def _parse_model_tag(
             tracks_attributes = _build_tracks(it, element, attrs_md, graph)
             root.clear()
 
+            # Removal of filtered spots / nodes.
+            if discard_filtered_spots:
+                # Those nodes belong to no tracks: they have a degree of 0.
+                lone_nodes = [n for n, d in graph.degree if d == 0]
+                graph.remove_nodes_from(lone_nodes)
+
+        # Filtering out tracks.
+        if element.tag == "FilteredTracks" and event == "start":
+            # Removal of filtered tracks.
+            id_to_keep = _get_filtered_tracks_ID(it, element)
+            if discard_filtered_tracks:
+                to_remove = [n for n, t in graph.nodes(data="TRACK_ID") if t not in id_to_keep]
+                graph.remove_nodes_from(to_remove)
+
+        if element.tag == "Model" and event == "end":
+            break  # We are not interested in the following data.
+
     return graph
-
-    #         # Removal of filtered spots / nodes.
-    #         if not keep_all_spots:
-    #             # Those nodes belong to no tracks: they have a degree of 0.
-    #             lone_nodes = [n for n, d in graph.degree if d == 0]
-    #             graph.remove_nodes_from(lone_nodes)
-
-    #     # Filtering out tracks and adding tracks attribute.
-    #     if element.tag == "FilteredTracks" and event == "start":
-    #         # Removal of filtered tracks.
-    #         id_to_keep = _get_filtered_tracks_ID(it, element)
-    #         if not keep_all_tracks:
-    #             to_remove = [n for n, t in graph.nodes(data="TRACK_ID") if t not in id_to_keep]
-    #             graph.remove_nodes_from(to_remove)
-
-    #     if element.tag == "Model" and event == "end":
-    #         break  # We are not interested in the following data.
-
-    # # We want one lineage per track, so we need to split the graph
-    # # into its connected components.
-    # lineages = _split_graph_into_lineages(graph, tracks_attributes)
-
-    # # For pycellin compatibility, some TrackMate features have to be renamed.
-    # # We only rename features that are either essential to the functioning of
-    # # pycellin or confusing (e.g. "name" is a spot and a track feature).
-    # _update_features_declaration(fd, units, segmentation)
-    # for lin in lineages:
-    #     for key_name, new_key in [
-    #         ("ID", "cell_ID"),  # mandatory
-    #         ("FRAME", "frame"),  # mandatory
-    #         ("name", "cell_name"),  # confusing
-    #     ]:
-    #         _update_node_feature_key(lin, key_name, new_key)
-    #     _update_lineage_feature_key(lin, "name", "lineage_name")
-    #     _update_TRACK_ID(lin)
-    #     _update_location_related_features(lin)
-
-    #     # Adding if each track was present in the 'FilteredTracks' tag
-    #     # because this info is needed when reconstructing TrackMate XMLs
-    #     # from graphs.
-    #     if lin.graph["lineage_ID"] in id_to_keep:
-    #         lin.graph["FilteredTrack"] = True
-    #     else:
-    #         lin.graph["FilteredTrack"] = False
-
-    # return units, fd, Data({lin.graph["lineage_ID"]: lin for lin in lineages})
-
-
-def _build_nx(xml_path: Path) -> nx.Graph:
-    """Build the NX file from the XML path.
-
-    Args:
-        xml_path (Path): The path to the TrackMate XML file.
-
-    Returns:
-        nx.Graph: A networkx graph representing the TrackMate data.
-    """
-
-    pass
 
 
 def from_trackmate_xml_to_geff(
     xml_path: Path | str,
     geff_path: Path | str,
+    discard_filtered_spots: bool = False,
+    discard_filtered_tracks: bool = False,
     tczyx: bool = False,
     overwrite: bool = False,
     zarr_format: Literal[2, 3] | None = 2,
@@ -505,6 +516,10 @@ def from_trackmate_xml_to_geff(
     Args:
         xml_path (Path | str): The path to the TrackMate XML file.
         geff_path (Path | str): The path to the GEFF file.
+        discard_filtered_spots (bool, optional): True to discard the spots
+            filtered out in TrackMate, False otherwise. False by default.
+        discard_filtered_tracks (bool, optional): True to discard the tracks
+            filtered out in TrackMate, False otherwise. False by default.
         tczyx (bool): Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
         zarr_format (int, optional): The version of zarr to write. Defaults to 2.
@@ -518,10 +533,12 @@ def from_trackmate_xml_to_geff(
     # graph = _build_nx(xml_path)
     graph = _parse_model_tag(
         xml_path=xml_path,
+        discard_filtered_spots=discard_filtered_spots,
+        discard_filtered_tracks=discard_filtered_tracks,
     )
     print(graph)
-    print(graph.nodes[2004])
-    print(graph.edges[2005, 2007])
+    # print(graph.nodes[2004])
+    # print(graph.edges[2005, 2007])
     # print(len(list(nx.weakly_connected_components(graph))))
 
     write_nx(
@@ -572,4 +589,10 @@ if __name__ == "__main__":
     geff_path = (
         "C:/Users/lxenard/Documents/Janelia_Cell_Trackathon/test_trackmate_to_geff/FakeTracks.geff"
     )
-    from_trackmate_xml_to_geff(xml_path, geff_path, overwrite=True)
+    from_trackmate_xml_to_geff(
+        xml_path,
+        geff_path,
+        discard_filtered_spots=True,
+        discard_filtered_tracks=True,
+        overwrite=True,
+    )
