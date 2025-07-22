@@ -10,6 +10,7 @@ from lxml import etree as ET
 
 import geff
 from geff.metadata_schema import GeffMetadata
+from geff.networkx.io import write_nx
 
 # Type aliases
 PropertyValue = str | int | float | list[float] | None
@@ -405,7 +406,6 @@ def _build_tracks(
                 raise KeyError(
                     f"No key TRACK_ID in the attributes of current element "
                     f"'{element.tag}'. Please check the XML file.",
-                    stacklevel=2,
                 ) from err
 
         # Edge creation.
@@ -569,11 +569,11 @@ def from_trackmate_xml_to_geff(
     print(graph.nodes[2004])
     print(graph.edges[2005, 2007])
 
-    # write_nx(
-    #     graph,
-    #     geff_path,
-    #     zarr_format=zarr_format,
-    # )
+    write_nx(
+        graph,
+        geff_path,
+        zarr_format=zarr_format,
+    )
     # TODO: add the following parameters (cf write_nx definition)
     #     metadata: GeffMetadata | None = None,
     #     axis_names: list[str] | None = None,
