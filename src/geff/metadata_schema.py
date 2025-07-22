@@ -5,6 +5,7 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
+from typing import Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -205,6 +206,19 @@ class GeffMetadata(BaseModel):
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+    )
+    track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
+        None,
+        description=(
+            "Node properties denoting tracklet and/or lineage IDs.\n"
+            "A tracklet is defined as a simple path of connected nodes "
+            "where the initiating node has any incoming degree and outgoing degree at most 1,"
+            "and the terminating node has incoming degree at most 1 and any outgoing degree, "
+            "and other nodes along the path have in/out degree of 1. Each tracklet must contain "
+            "the maximal set of connected nodes that match this definition - no sub-tracklets.\n"
+            "A lineage is defined as a weakly connected component on the graph.\n"
+            "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
+        ),
     )
     related_objects: Sequence[RelatedObject] | None = Field(
         None,
