@@ -13,10 +13,10 @@ from geff.metadata_schema import GeffMetadata
 from geff.networkx.io import write_nx
 
 # Type aliases
-PropertyValue = str | int | float | list[float] | None
+Attribute = str | int | float | list[float] | None
 
-# TODO: check docstrings consistency.
-# TODO: rename features by properties to fit geff vocabulary.
+# TODO: extract _preliminary_checks() to a common module since similar code is already
+# used in ctc_to_geff. Need to wait for CTC PR.
 
 
 def _preliminary_checks(
@@ -24,8 +24,7 @@ def _preliminary_checks(
     geff_path: Path,
     overwrite: bool,
 ) -> None:
-    """
-    Perform preliminary checks before conversion.
+    """Check the validity of input paths and clean up the output path if needed.
 
     Args:
         xml_path (Path): The path to the TrackMate XML file.
@@ -36,8 +35,6 @@ def _preliminary_checks(
         FileNotFoundError: If the XML file does not exist.
         FileExistsError: If the GEFF file exists and overwrite is False.
     """
-    # TODO: extract this to a common module since similar code is already
-    # used in ctc_to_geff. Need to wait for CTC PR.
     if not xml_path.exists():
         raise FileNotFoundError(f"TrackMate XML file {xml_path} does not exist")
 
@@ -51,22 +48,21 @@ def _preliminary_checks(
 def _get_units(
     element: ET._Element,
 ) -> dict[str, str]:
-    """
-    Extracts units information from an XML element and returns it as a dictionary.
+    """Extract units information from an XML element and return it as a dictionary.
 
     This function deep copies the attributes of the XML element into a dictionary,
     then clears the element to free up memory.
 
-    Parameters
-    ----------
-    element : ET._Element
-        The XML element holding the units information.
+    Args:
+        element (ET._Element): The XML element holding the units information.
 
-    Returns
-    -------
-    dict[str, str]
-        A dictionary where the keys are the attribute names and the values are the
-        corresponding attribute values (units information).
+    Returns:
+        dict[str, str]: A dictionary containing the units information.
+        Keys are 'spatialunits' and 'timeunits'.
+
+    Warns:
+        UserWarning: If the 'spatialunits' or 'timeunits' attributes are not found,
+            defaulting them to 'pixel' and 'frame', respectively.
     """
     units = {}  # type: dict[str, str]
     if element.attrib:
@@ -89,33 +85,27 @@ def _get_units(
     return units
 
 
-def _get_features_metadata(
+def _get_attributes_metadata(
     it: ET.iterparse,
     ancestor: ET._Element,
-) -> dict[str, dict[str, PropertyValue]]:
-    """
-    Add all the TrackMate model features to a FeaturesDeclaration object.
+) -> dict[str, dict[str, Attribute]]:
+    """Extract the TrackMate model features to a attributes dictionary.
 
     The model features are divided in 3 categories: SpotFeatures, EdgeFeatures and
     TrackFeatures. Those features are regrouped under the FeatureDeclarations tag.
     Some other features are used in the Spot and Track tags but are not declared in
     the FeatureDeclarations tag.
 
-    Parameters
-    ----------
-    it : ET.iterparse
-        An iterator over XML elements.
-    ancestor : ET._Element
-        The XML element that encompasses the information to be added.
+    Args:
+        it (ET.iterparse): An iterator over XML elements.
+        ancestor (ET._Element): The XML element that encompasses the information to be added.
 
-    Returns
-    -------
-    dict[str, dict[str, PropertyValue]]
-        A dictionary where the keys are the feature names and the values are
-        dictionaries containing the feature attributes as defined by TrackMate
+    Returns:
+        dict[str, dict[str, Attribute]]: A dictionary where the keys are the attributes names
+        and the values are dictionaries containing the attributes metadata as defined by TrackMate
         (name, shortname, dimension, isint).
     """
-    feat_md = {}
+    attrs_md = {}
     event, element = next(it)
     while (event, element) != ("end", ancestor):
         # Features stored in the FeatureDeclarations tag.
@@ -123,44 +113,39 @@ def _get_features_metadata(
         while (event, element) != ("end", ancestor):
             if element.tag == "Feature" and event == "start":
                 attribs = deepcopy(element.attrib)
-                feat_md[attribs["feature"]] = attribs
-                feat_md[attribs["feature"]].pop("feature", None)
+                attrs_md[attribs["feature"]] = attribs
+                attrs_md[attribs["feature"]].pop("feature", None)
             element.clear()
             event, element = next(it)
+    # TODO: check if we have ALL the nodes
     # element.clear()
     # event, element = next(it)
-    return feat_md
+    return attrs_md
 
 
 def _convert_attributes(
     attributes: dict[str, int | float | str],
-    feats_metadata: dict[str, dict[str, PropertyValue]],
-    feat_type: str,
+    attrs_metadata: dict[str, dict[str, Attribute]],
+    attr_type: str,
 ) -> None:
     """
     Convert the values of `attributes` from string to the correct data type.
 
-    The type to convert to is given by the features metadata.
-    TrackMate features are either integers, floats or strings.
+    TrackMate features are either integers, floats or strings. The type to
+    convert to is given by the attributes metadata.
 
-    Parameters
-    ----------
-    attributes : dict[str, int | float | str]
-        The dictionary whose values we want to convert.
-    feats_metadata : dict[str, dict[str, PropertyValue]]
-        The features metadata containing information on the expected data types
-        for each feature.
-    feat_type : str
-        The type of the feature to convert (node, edge, or lineage).
+    Args:
+        attributes (dict[str, int | float | str]): The dictionary whose values we want to convert.
+        attrs_metadata (dict[str, dict[str, Attribute]]): The attributes metadata containing
+        information on the expected data types for each attribute.
+        attr_type (str): The type of the attribute to convert (node, edge, or lineage).
 
-    Warns
-    -----
-    UserWarning
-        If a feature is not found in the features declaration.
+    Warns:
+        UserWarning: If an attribute is not found in the attributes metadata.
     """
     for key in attributes:
-        if key in feats_metadata:
-            if feats_metadata[key]["isint"] == "true":
+        if key in attrs_metadata:
+            if attrs_metadata[key]["isint"] == "true":
                 attributes[key] = int(attributes[key])
             else:
                 try:
@@ -175,29 +160,23 @@ def _convert_attributes(
             pass  # "name" is a string so we don't need to convert it.
         else:
             warnings.warn(
-                f"{feat_type.capitalize()} feature {key} not found in the features declaration.",
+                f"{attr_type.capitalize()} attribute {key} not found in the attributes metadata.",
                 stacklevel=2,
             )
 
 
 def _convert_ROI_coordinates(
     element: ET._Element,
-    attribs: dict[str, PropertyValue],
+    attribs: dict[str, Attribute],
 ) -> None:
-    """
-    Extract, format and add ROI coordinates to the attributes dict.
+    """Extract, format and add ROI coordinates to the attributes dict.
 
-    Parameters
-    ----------
-    element : ET._Element
-        Element from which to extract ROI coordinates.
-    attribs : dict[str, PropertyValue]
-        Attributes dict to update with ROI coordinates.
+    Args:
+        element (ET._Element): Element from which to extract ROI coordinates.
+        attribs (dict[str, Attribute]): Attributes dict to update with ROI coordinates.
 
-    Raises
-    ------
-    KeyError
-        If the "ROI_N_POINTS" attribute is not found in the attributes dict.
+    Raises:
+        KeyError: If the "ROI_N_POINTS" attribute is not found in the attributes dict.
     """
     if "ROI_N_POINTS" not in attribs:
         raise KeyError(
@@ -209,7 +188,7 @@ def _convert_ROI_coordinates(
         assert type(attribs["ROI_N_POINTS"]) is int, "ROI_N_POINTS should be an integer"
         points_dimension = len(points_coordinates) // attribs["ROI_N_POINTS"]
         it = [iter(points_coordinates)] * points_dimension
-        points_coordinates = list(zip(*it))
+        points_coordinates = list(zip(*it, strict=True))
         attribs["ROI_coords"] = points_coordinates
     else:
         attribs["ROI_coords"] = None
@@ -218,36 +197,29 @@ def _convert_ROI_coordinates(
 def _add_all_nodes(
     it: ET.iterparse,
     ancestor: ET._Element,
-    feat_md: dict[str, dict[str, PropertyValue]],
+    attrs_md: dict[str, dict[str, Attribute]],
     graph: nx.DiGraph,
 ) -> bool:
-    """
-    Add nodes and their attributes to a graph and return the presence of segmentation.
+    """Add nodes and their attributes to a graph and return the presence of segmentation.
 
     All the elements that are descendants of `ancestor` are explored.
 
-    Parameters
-    ----------
-    it : ET.iterparse
-        An iterator over XML elements.
-    ancestor : ET._Element
-        The XML element that encompasses the information to be added.
-    feat_md : dict[str, dict[str, PropertyValue]]
-        The features metadata containing the expected node attributes.
-    graph : nx.DiGraph
-        The graph to which the nodes will be added.
+    Args:
+        it (ET.iterparse): An iterator over XML elements.
+        ancestor (ET._Element): The XML element that encompasses the information to be added.
+        attrs_md (dict[str, dict[str, Attribute]]): The attributes metadata containing the
+            expected node attributes.
+        graph (nx.DiGraph): The graph to which the nodes will be added.
 
-    Returns
-    -------
-    bool
-        True if the model has segmentation data, False otherwise
+    Returns:
+        bool: True if the model has segmentation data, False otherwise.
 
-    Raises
-    ------
-    ValueError
-        If a node attribute cannot be converted to the expected type.
-    KeyError
-        If a node attribute is not found in the features declaration.
+    Raises:
+        ValueError: If a node attribute cannot be converted to the expected type.
+        KeyError: If a node attribute is not found in the attributes metadata.
+
+    Warns:
+        UserWarning: If a node cannot be added to the graph due to missing attributes.
     """
     segmentation = False
     event, element = next(it)
@@ -255,15 +227,11 @@ def _add_all_nodes(
         event, element = next(it)
         if element.tag == "Spot" and event == "end":
             # All items in element.attrib are parsed as strings but most
-            # of them are numbers. So we need to do a
-            # conversion based on these attributes type (attribute `isint`)
-            # as defined in the features declaration.
+            # of them are numbers. So we need to do a conversion based
+            # on these attributes type as defined in the attributes
+            # metadata (attribute `isint`).
             attribs = deepcopy(element.attrib)
-            try:
-                _convert_attributes(attribs, feat_md, "node")
-            except ValueError as err:
-                print(f"ERROR: {err} Please check the XML file.")
-                raise
+            _convert_attributes(attribs, attrs_md, "node")
 
             # The ROI coordinates are not stored in a tag attribute but in
             # the tag text. So we need to extract then format them.
@@ -282,9 +250,9 @@ def _add_all_nodes(
             # Adding the node and its attributes to the graph.
             try:
                 graph.add_node(attribs["ID"], **attribs)
-            except KeyError as err:
+            except KeyError:
                 warnings.warn(
-                    f"No key {err} in the attributes of current element "
+                    f"No key 'ID' in the attributes of current element "
                     f"'{element.tag}'. Not adding this node to the graph.",
                     stacklevel=2,
                 )
@@ -296,12 +264,11 @@ def _add_all_nodes(
 
 def _add_edge(
     element: ET._Element,
-    feat_md: dict[str, dict[str, PropertyValue]],
+    attrs_md: dict[str, dict[str, Attribute]],
     graph: nx.Graph,
     current_track_id: int,
 ) -> None:
-    """
-    Add an edge between two nodes in the graph based on the XML element.
+    """Add an edge between two nodes in the graph based on the XML element.
 
     This function extracts source and target node identifiers from the
     given XML element, along with any additional attributes defined
@@ -309,33 +276,30 @@ def _add_edge(
     graph. If the nodes have a 'TRACK_ID' attribute, it ensures consistency
     with the current track ID.
 
-    Parameters
-    ----------
-    element : ET._Element
-        The XML element containing edge information.
-    feat_md: dict[str, dict[str, PropertyValue]]
-        The features metadata containing the expected edge attributes.
-    graph : nx.Graph
-        The graph to which the edge and its attributes will be added.
-    current_track_id : int
-        Track ID of the track holding the edge.
+    Args:
+        element (ET._Element): The XML element containing edge information.
+        attrs_md (dict[str, dict[str, Attribute]]): The attributes metadata containing
+            the expected edge attributes.
+        graph (nx.Graph): The graph to which the edge and its attributes will be added.
+        current_track_id (int): Track ID of the track holding the edge.
 
-    Raises
-    ------
-    AssertionError
-        If the 'TRACK_ID' attribute of either the source or target node
-        does not match the current track ID, indicating an inconsistency
-        in track assignment.
+    Raises:
+        AssertionError: If the 'TRACK_ID' attribute of either the source or target node
+            does not match the current track ID, indicating an inconsistency in track
+            assignment.
+
+    Warns:
+        UserWarning: If an edge cannot be added due to missing required attributes.
     """
     attribs = deepcopy(element.attrib)
-    _convert_attributes(attribs, feat_md, "edge")
+    _convert_attributes(attribs, attrs_md, "edge")
     try:
         entry_node_id = int(attribs["SPOT_SOURCE_ID"])
         exit_node_id = int(attribs["SPOT_TARGET_ID"])
-    except KeyError as err:
+    except KeyError:
         warnings.warn(
-            f"No key {err} in the attributes of current element '{element.tag}'. "
-            f"Not adding this edge to the graph.",
+            f"No key 'SPOT_SOURCE_ID' or 'SPOT_TARGET_ID' in the attributes of "
+            f"current element '{element.tag}'. Not adding this edge to the graph.",
             stacklevel=2,
         )
     else:
@@ -362,11 +326,10 @@ def _add_edge(
 def _build_tracks(
     iterator: ET.iterparse,
     ancestor: ET._Element,
-    feat_md: dict[str, dict[str, PropertyValue]],
+    attrs_md: dict[str, dict[str, Attribute]],
     graph: nx.Graph,
-) -> list[dict[str, PropertyValue]]:
-    """
-    Add edges and their attributes to a graph based on the XML elements.
+) -> list[dict[str, Attribute]]:
+    """Add edges and their attributes to a graph based on the XML elements.
 
     This function explores all elements that are descendants of the
     specified `ancestor` element, adding edges and their attributes to
@@ -374,22 +337,19 @@ def _build_tracks(
     the provided iterator, extracting and processing relevant information
     to construct track attributes.
 
-    Parameters
-    ----------
-    iterator : ET.iterparse
-        An iterator over XML elements.
-    ancestor : ET._Element
-        The XML element that encompasses the information to be added.
-    feat_md: dict[str, dict[str, PropertyValue]]
-        The features metadata containing the expected edge attributes.
-    graph: nx.Graph
-        The graph to which the edges and their attributes will be added.
+    Args:
+        iterator (ET.iterparse): An iterator over XML elements.
+        ancestor (ET._Element): The XML element that encompasses the information to be added.
+        attrs_md (dict[str, dict[str, Attribute]]): The attributes metadata containing the
+            expected edge attributes.
+        graph (nx.Graph): The graph to which the edges and their attributes will be added.
 
-    Returns
-    -------
-    list[dict[str, PropertyValue]]
-        A list of dictionaries, each representing the attributes for a
-        track.
+    Returns:
+        list[dict[str, Attribute]]: A list of dictionaries, each representing the
+            attributes for a track.
+
+    Raises:
+        KeyError: If no TRACK_ID is found in the attributes of a Track element.
     """
     tracks_attributes = []
     current_track_id = None
@@ -398,20 +358,20 @@ def _build_tracks(
         # Saving the current track information.
         if element.tag == "Track" and event == "start":
             attribs = deepcopy(element.attrib)
-            _convert_attributes(attribs, feat_md, "lineage")
+            _convert_attributes(attribs, attrs_md, "lineage")
             tracks_attributes.append(attribs)
             try:
                 current_track_id = attribs["TRACK_ID"]
             except KeyError as err:
                 raise KeyError(
-                    f"No key TRACK_ID in the attributes of current element "
+                    f"No key 'TRACK_ID' in the attributes of current element "
                     f"'{element.tag}'. Please check the XML file.",
                 ) from err
 
         # Edge creation.
         if element.tag == "Edge" and event == "start":
             assert current_track_id is not None, "No current track ID."
-            _add_edge(element, feat_md, graph, current_track_id)
+            _add_edge(element, attrs_md, graph, current_track_id)
 
         event, element = next(iterator)
 
@@ -421,24 +381,18 @@ def _build_tracks(
 def _parse_model_tag(
     xml_path: Path,
 ) -> nx.Graph:
-    """
-    Read an XML file and convert the model data into several graphs.
+    """Read an XML file and convert the model data into several graphs.
 
-    Each TrackMate track and its associated data described in the XML file
-    are modeled as networkX directed graphs. Spots are modeled as graph
+    All TrackMate tracks and their associated data described in the XML file
+    are modeled as a networkX graph. Spots are modeled as graph
     nodes, and edges as graph edges. Spot, edge and track features are
     stored in node, edge and graph attributes, respectively.
 
-    Parameters
-    ----------
-    xml_path : str
-        Path of the XML file to process.
+    Args:
+        xml_path (Path): Path of the XML file to process.
 
-    Returns
-    -------
-    tuple[dict[str, str], FeaturesDeclaration, Data]
-        A tuple containing the space and time units, the features declaration
-        and the data of the model.
+    Returns:
+        nx.Graph: A NetworkX graph representing the TrackMate data.
     """
     graph = nx.Graph()
     metadata = GeffMetadata(geff_version=geff.__version__, directed=True)
@@ -460,20 +414,20 @@ def _parse_model_tag(
             # All the browsed subelements of `root` are deleted.
 
         # Get the spot, edge and track features and add them to the
-        # features declaration.
+        # attributes metadata.
         if element.tag == "FeatureDeclarations" and event == "start":
-            feat_md = _get_features_metadata(it, element)
+            attrs_md = _get_attributes_metadata(it, element)
             root.clear()
-            print(feat_md.keys())
+            print(attrs_md.keys())
 
         # Adding the spots as nodes.
         if element.tag == "AllSpots" and event == "start":
-            segmentation = _add_all_nodes(it, element, feat_md, graph)
+            segmentation = _add_all_nodes(it, element, attrs_md, graph)
             root.clear()
 
         # Adding the tracks as edges.
         if element.tag == "AllTracks" and event == "start":
-            tracks_attributes = _build_tracks(it, element, feat_md, graph)
+            tracks_attributes = _build_tracks(it, element, attrs_md, graph)
             root.clear()
 
     return graph
@@ -526,13 +480,13 @@ def _parse_model_tag(
 
 
 def _build_nx(xml_path: Path) -> nx.Graph:
-    """
-    Build the NX file from the XML path.
+    """Build the NX file from the XML path.
 
     Args:
-        xml_path : The path to the TrackMate XML file.
+        xml_path (Path): The path to the TrackMate XML file.
+
     Returns:
-        A networkx graph representing the TrackMate data.
+        nx.Graph: A networkx graph representing the TrackMate data.
     """
 
     pass
@@ -559,7 +513,7 @@ def from_trackmate_xml_to_geff(
         xml_path = Path(xml_path)
     if isinstance(geff_path, str):
         geff_path = Path(geff_path)
-    _preliminary_checks(xml_path, geff_path, overwrite)
+    _preliminary_checks(xml_path, geff_path, overwrite=overwrite)
 
     # graph = _build_nx(xml_path)
     graph = _parse_model_tag(
@@ -568,6 +522,7 @@ def from_trackmate_xml_to_geff(
     print(graph)
     print(graph.nodes[2004])
     print(graph.edges[2005, 2007])
+    # print(len(list(nx.weakly_connected_components(graph))))
 
     write_nx(
         graph,
@@ -617,4 +572,4 @@ if __name__ == "__main__":
     geff_path = (
         "C:/Users/lxenard/Documents/Janelia_Cell_Trackathon/test_trackmate_to_geff/FakeTracks.geff"
     )
-    from_trackmate_xml_to_geff(xml_path, geff_path)
+    from_trackmate_xml_to_geff(xml_path, geff_path, overwrite=True)
