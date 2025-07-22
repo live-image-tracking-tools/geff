@@ -73,7 +73,7 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_dtype)
     props = np.array([4, 9, 10, 2, 8], dtype=node_prop_dtypes["position"])
-    for node, pos in zip(nodes, props):
+    for node, pos in zip(nodes, props, strict=False):
         graph.add_node(node.item(), attr=pos)
 
     edges = np.array(
@@ -87,7 +87,7 @@ def test_read_write_no_spatial(tmp_path, node_dtype, node_prop_dtypes, edge_prop
     )
     scores = np.array([0.1, 0.2, 0.3, 0.4], dtype=edge_prop_dtypes["score"])
     colors = np.array([1, 2, 3, 4], dtype=edge_prop_dtypes["color"])
-    for edge, score, color in zip(edges, scores, colors):
+    for edge, score, color in zip(edges, scores, colors, strict=False):
         graph.add_edge(*edge.tolist(), score=score.item(), color=color.item())
 
     path = tmp_path / "rw_consistency.zarr/graph"
@@ -146,6 +146,33 @@ def test_write_nx_with_metadata(tmp_path):
     assert read_metadata.axes[1].type == "space"
     assert read_metadata.axes[0].min == 1.0 and read_metadata.axes[0].max == 3.0
     assert read_metadata.axes[1].min == 2.0 and read_metadata.axes[1].max == 4.0
+
+
+def test_write_nx_metadata_extra_properties(tmp_path):
+    from geff.metadata_schema import GeffMetadata, axes_from_lists
+
+    graph = nx.Graph()
+    graph.add_node(1, x=1.0, y=2.0)
+    graph.add_node(2, x=3.0, y=4.0)
+    graph.add_edge(1, 2, weight=0.5)
+
+    axes = axes_from_lists(
+        axis_names=["x", "y"],
+        axis_units=["micrometer", "micrometer"],
+        axis_types=["space", "space"],
+    )
+    metadata = GeffMetadata(
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        extra={"foo": "bar", "bar": {"baz": "qux"}},
+    )
+    path = tmp_path / "extra_properties_test.zarr"
+
+    geff.write_nx(graph, path, metadata=metadata)
+    _, compare = geff.read_nx(path)
+    assert compare.extra["foo"] == "bar"
+    assert compare.extra["bar"]["baz"] == "qux"
 
 
 def test_write_nx_metadata_override_precedence(tmp_path):

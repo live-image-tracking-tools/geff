@@ -10,9 +10,8 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 
 ## Geff metadata
 
-{%
-    include "schema/schema.html"
-%}
+<!-- GEFF-SCHEMA -->
+
 !!! note
 
     The axes dictionary is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
@@ -106,7 +105,26 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'z', 'type': "space", 'unit': "micrometers", 'min': 1523.36, 'max': 4398.1},
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
-        ]
+        ],
+        "display_hints": {
+            "display_horizontal": "x",
+            "display_vertical": "y",
+            "display_depth": "z",
+            "display_time": "t",
+        },
+        # node attributes corresponding to tracklet and/or lineage IDs
+        "track_node_props": {
+            "lineage": "ultrack_lineage_id",
+            "tracklet": "ultrack_id"
+        },
+        "related_objects": {
+            {
+                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id",
+            },
+            {
+                "type":"image", "path":"../raw/",
+            },
+        }
     }
     ... # custom other things are allowed and ignored by geff
 }
