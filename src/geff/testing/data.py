@@ -507,3 +507,51 @@ def create_simple_3d_geff(
         include_y=True,
         include_x=True,
     )
+
+
+def create_simple_temporal_geff(
+    num_nodes: int = 10,
+    num_edges: int = 15,
+    directed: bool = False,
+) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
+    """Create a simple geff graph with only time dimension (no spatial dimensions).
+
+    This function creates a graph with nodes, edges, and time coordinates,
+    but no spatial dimensions (x, y, z). Useful for temporal-only analysis.
+
+    Args:
+        num_nodes: Number of nodes to generate (default: 10)
+        num_edges: Number of edges to generate (default: 15)
+        directed: Whether the graph is directed (default: False)
+
+    Returns:
+        Tuple of (zarr store in memory, graph properties dictionary)
+
+    Examples:
+        Basic usage with defaults:
+            >>> store, props = create_simple_temporal_geff()
+            >>> # store is a zarr.MemoryStore with 10 nodes, 15 edges, time only
+
+        Custom graph size:
+            >>> store, props = create_simple_temporal_geff(num_nodes=5, num_edges=8)
+            >>> # store has 5 nodes, 8 edges, time only
+
+        Using with GeffReader:
+            >>> store, props = create_simple_temporal_geff()
+            >>> reader = GeffReader(store)
+            >>> graph = reader.read_nx()
+            >>> # graph is a networkx Graph with only time data
+            >>> # Each node has only 't' coordinate, no x, y, z
+    """
+    return create_memory_mock_geff(
+        node_id_dtype="int",
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        directed=directed,
+        num_nodes=num_nodes,
+        num_edges=num_edges,
+        extra_edge_props={"score": "float64", "color": "int"},
+        include_t=True,
+        include_z=False,  # No spatial dimensions
+        include_y=False,  # No spatial dimensions
+        include_x=False,  # No spatial dimensions
+    )
