@@ -79,6 +79,10 @@ def test_read(
 
     assert is_expected_type(graph, backend)
 
+    # nodes and edges correct
+    assert get_nodes(graph) == {*graph_props["nodes"].tolist()}
+    assert get_edges(graph) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
+
     # check node properties are correct
     spatial_node_properties = ["t", "z", "y", "x"]
     for name in spatial_node_properties:
