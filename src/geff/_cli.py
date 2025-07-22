@@ -1,3 +1,9 @@
+# /// script
+# dependencies = [
+#   "zarr>2,<4",
+# ]
+# ///
+
 import argparse
 import logging
 import sys
