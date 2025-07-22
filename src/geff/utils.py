@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from typing import TYPE_CHECKING
 
 import zarr
@@ -98,6 +99,9 @@ def check_equiv_geff(path_a, path_b):
     This tests focuses on maintaining shape and dtype consistency. It does not
     assert element wise equality. path_a is assumed to be the "correct" geff.
 
+    Missing arrays are not required to be present in both a and b because we allow
+    missing arrays where all values are present. We raise a warning if we see this.
+
     Args:
         path_a (str): Path to first zarr geff group
         path_b (str): Path to second zarr geff group
@@ -111,8 +115,14 @@ def check_equiv_geff(path_a, path_b):
         gb = zb[graph_group]
 
         # Check ids
-        assert ga["ids"].shape == gb["ids"].shape
-        assert ga["ids"].dtype == gb["ids"].dtype
+        a_shape, b_shape = ga["ids"].shape, gb["ids"].shape
+        assert a_shape == b_shape, (
+            f"{graph_group} ids shape: a {a_shape} does not match b {b_shape}"
+        )
+        a_dtype, b_dtype = ga["ids"].dtype, gb["ids"].dtype
+        assert a_dtype == b_dtype, (
+            f"{graph_group} ids dtype: a {a_dtype} does not match b {b_dtype}"
+        )
 
         ga_has_props = "props" in ga
         gb_has_props = "props" in gb
@@ -121,12 +131,51 @@ def check_equiv_geff(path_a, path_b):
 
         if ga_has_props:
             # Check that properties in each geff are the same
-            assert set(ga["props"]) == set(gb["props"])
+            a_props, b_props = set(ga["props"]), set(gb["props"])
+            assert a_props == b_props, (
+                f"{graph_group} properties: a ({a_props}) does not match b ({b_props})"
+            )
 
             # Check shape and dtype of each prop
-            for prop in ga["props"]:
+            for prop in a_props:
                 if "missing" in ga[f"props/{prop}"]:
-                    assert ga[f"props/{prop}/missing"].shape == gb[f"props/{prop}/missing"].shape
-                    assert ga[f"props/{prop}/missing"].dtype == gb[f"props/{prop}/missing"].dtype
-                assert ga[f"props/{prop}/values"].shape == gb[f"props/{prop}/values"].shape
-                assert ga[f"props/{prop}/values"].dtype == gb[f"props/{prop}/values"].dtype
+                    if "missing" not in gb[f"props/{prop}"]:
+                        warnings.warn(
+                            f"a {graph_group}/props/{prop} contains missing but b does not. "
+                            "This may be correct but should be verified.",
+                            stacklevel=2,
+                        )
+                    else:
+                        a_shape, b_shape = (
+                            ga[f"props/{prop}/missing"].shape,
+                            gb[f"props/{prop}/missing"].shape,
+                        )
+                        assert a_shape == b_shape, (
+                            f"{graph_group}/props/{prop}/missing shape: "
+                            "a {a_shape} does not match b {b_shape}"
+                        )
+                        a_dtype, b_dtype = (
+                            ga[f"props/{prop}/missing"].dtype,
+                            gb[f"props/{prop}/missing"].dtype,
+                        )
+                        assert a_dtype == b_dtype, (
+                            f"{graph_group}/props/{prop}/missing dtype: "
+                            "a {a_dtype} does not match b {b_dtype}"
+                        )
+
+                a_shape, b_shape = (
+                    ga[f"props/{prop}/values"].shape,
+                    gb[f"props/{prop}/values"].shape,
+                )
+                assert a_shape == b_shape, (
+                    f"{graph_group}/props/{prop}/values shape: "
+                    "a {a_shape} does not match b {b_shape}"
+                )
+                a_dtype, b_dtype = (
+                    ga[f"props/{prop}/values"].dtype,
+                    gb[f"props/{prop}/values"].dtype,
+                )
+                assert a_dtype == b_dtype, (
+                    f"{graph_group}/props/{prop}/values dtype: "
+                    "a {a_dtype} does not match b {b_dtype}"
+                )
