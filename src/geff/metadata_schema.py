@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import json
 import warnings
+from collections.abc import Sequence  # noqa: TC003
+from importlib.metadata import version
 from pathlib import Path
-from typing import Sequence
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
+from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
@@ -92,6 +94,18 @@ def axes_from_lists(
     axes: list[Axis] = []
     if axis_names is None:
         return axes
+
+    dims = len(axis_names)
+    if axis_types is not None:
+        assert len(axis_types) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
+    if axis_units is not None:
+        assert len(axis_units) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
     for i in range(len(axis_names)):
         axes.append(
             Axis(
@@ -111,26 +125,58 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(title="geff_metadata", validate_assignment=True)
+    model_config = ConfigDict(
+        title="geff_metadata",
+        validate_assignment=True,
+    )
 
     geff_version: str = Field(
         ...,
         pattern=VERSION_PATTERN,
         description=(
             "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
-            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18)."
+            "optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).\n"
+            "If not provided, the version will be set to the current geff package version."
         ),
     )
-    directed: bool
-    axes: Sequence[Axis] | None = None
+    directed: bool = Field(description="True if the graph is directed, otherwise False.")
+    axes: Sequence[Axis] | None = Field(
+        None,
+        description="Optional list of Axis objects defining the axes of each node in the graph.\n"
+        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
+        "must be one of `space`, `time` or `channel`, though readers may not use this information. "
+        "Each axis can additionally optionally define a `unit` key, which should match the valid"
+        "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+    )
+    affine: Affine | None = Field(
+        None,
+        description="Affine transformation matrix to transform the graph coordinates to the "
+        "physical coordinates. The matrix must have the same number of dimensions as the number of "
+        "axes in the graph.",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_model_before(cls, values: dict) -> dict:
+        if values.get("geff_version") is None:
+            values["geff_version"] = version("geff")
+        return values
 
     @model_validator(mode="after")
-    def _validate_model(self) -> GeffMetadata:
+    def _validate_model_after(self) -> GeffMetadata:
         # Axes names must be unique
         if self.axes is not None:
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
+
+            if self.affine is not None:
+                if self.affine.ndim != len(self.axes):
+                    raise ValueError(
+                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
+                        f"got {self.affine.ndim}"
+                    )
+
         return self
 
     def write(self, group: zarr.Group | Path | str):

@@ -19,7 +19,7 @@ Put an x in the boxes that apply. You can also fill these out after creating the
 - [ ] I have read the [developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING) docs.
 - [ ] I have added tests that prove that my feature works in various situations or tests the bugfix (if appropriate).
 - [ ] I have checked that I maintained or improved code coverage.
-- [ ] I have written docstrings and checked that they render correctly.
+- [ ] I have written docstrings and checked that they render correctly by looking at the docs preview (link left as a comment on the PR).
 
 ## If you changed the specification
 - [ ] I have checked that any validation functions and tests reflect the changes.

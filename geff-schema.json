@@ -1,5 +1,19 @@
 {
   "$defs": {
+    "Affine": {
+      "description": "Affine transformation class following scipy conventions.\n\nInternally stores transformations as homogeneous coordinate matrices (N+1, N+1).\nThe transformation matrix follows scipy.ndimage.affine_transform convention\nwhere the matrix maps output coordinates to input coordinates (inverse/pull transformation).\n\nFor a point p_out in output space, the corresponding input point p_in is computed as:\np_in_homo = matrix @ p_out_homo\nwhere p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]\n\nAttributes:\n    matrix: Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)",
+      "properties": {
+        "matrix": {
+          "description": "Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)",
+          "title": "Matrix"
+        }
+      },
+      "required": [
+        "matrix"
+      ],
+      "title": "Affine",
+      "type": "object"
+    },
     "Axis": {
       "properties": {
         "name": {
@@ -65,12 +79,13 @@
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
         "geff_version": {
-          "description": "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).",
+          "description": "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).\nIf not provided, the version will be set to the current geff package version.",
           "pattern": "^\\d+\\.\\d+(?:\\.\\d+)?(?:\\.dev\\d+)?(?:\\+[a-zA-Z0-9]+)?",
           "title": "Geff Version",
           "type": "string"
         },
         "directed": {
+          "description": "True if the graph is directed, otherwise False.",
           "title": "Directed",
           "type": "boolean"
         },
@@ -87,7 +102,20 @@
             }
           ],
           "default": null,
+          "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
           "title": "Axes"
+        },
+        "affine": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Affine"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Affine transformation matrix to transform the graph coordinates to the physical coordinates. The matrix must have the same number of dimensions as the number of axes in the graph."
         }
       },
       "required": [
