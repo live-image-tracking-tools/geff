@@ -1,9 +1,11 @@
+from os import write
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import zarr
+from zarr.storage import StoreLike
 
 import geff
 
@@ -11,54 +13,39 @@ if TYPE_CHECKING:
     import rustworkx as rx  # noqa: TC004
 
 from geff.metadata_schema import GeffMetadata
-from geff.writer_helper import write_props
+from geff.networkx.io import _get_graph_existing_metadata
+from geff.write_dicts import write_dicts
 
 
 def write_rx(
     graph: "rx.PyGraph",
-    path: str | Path,
+    store: StoreLike,
     node_id_dict: dict[int, int] | None = None,
     position_prop: str | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
-    zarr_format: int = 2,
-    validate: bool = True,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
     Write a rustworkx graph to the geff file format
 
     Args:
         graph: The rustworkx graph to write.
-        path: The path to the geff file.
+        store: The store to write the geff file to.
         node_id_dict: A dictionary mapping rx node indices to arbitrary indices.
         position_prop: The property name to use for the position.
         axis_names: The names of the axes.
         axis_units: The units of the axes.
         zarr_format: The zarr format to use.
-        validate: Whether to validate the geff file.
     """
     if graph.num_nodes() == 0:
-        warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
+        warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
         return
-
-    # open/create zarr container
-    if zarr.__version__.startswith("3"):
-        group = zarr.open(path, mode="a", zarr_format=zarr_format)
-    else:
-        group = zarr.open(path, mode="a")
 
     if node_id_dict is None:
         node_data = list(zip(graph.node_indices(), graph.nodes()))
     else:
         node_data = [(node_id_dict[i], d) for i, d in zip(graph.node_indices(), graph.nodes())]
-
-    write_props(
-        group=group.require_group("nodes"),
-        data=node_data,
-        prop_names=list({k for _, data in node_data for k in data}),
-        position_prop=position_prop,
-    )
-    del node_data
 
     if node_id_dict is None:
         edge_data = [((u, v), data) for u, v, data in graph.weighted_edge_list()]
@@ -67,26 +54,18 @@ def write_rx(
             ((node_id_dict[u], node_id_dict[v]), data) for u, v, data in graph.weighted_edge_list()
         ]
 
-    write_props(
-        group=group.require_group("edges"),
-        data=edge_data,
-        prop_names=list({k for _, data in edge_data for k in data}),
+    write_dicts(
+        geff_path=store,
+        node_data=node_data,
+        edge_data=edge_data,
+        node_prop_names=list({k for _, data in node_data for k in data}),
+        edge_prop_names=list({k for _, data in edge_data for k in data}),
+        axis_names=axis_names,
+        zarr_format=zarr_format,
     )
-    del edge_data
 
-    # TODO: roi and other stuff
-    # write metadata
-
-    metadata = GeffMetadata(
-        geff_version=geff.__version__,
-        directed=isinstance(graph, rx.PyDiGraph),
-        roi_min=None,  # FIXME
-        roi_max=None,  # FIXME
-        position_prop=position_prop,
-        axis_names=axis_names if axis_names is not None else graph.attrs.get("axis_names", None),
-        axis_units=axis_units if axis_units is not None else graph.attrs.get("axis_units", None),
-    )
-    metadata.write(group)
+    # TODO: define metadata
+    metadata.write(store)
 
 
 def _set_properties_values(

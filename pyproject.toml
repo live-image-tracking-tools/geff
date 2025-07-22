@@ -31,6 +31,7 @@ classifiers = [
 
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
+rx = ["rustworkx>=0.16.0"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -42,6 +43,7 @@ dev = [
     "ipython",
     "types-PyYAML",
     "spatial-graph",
+    "rustworkx",
 ]
 docs = [
     "mkdocs-material",
