@@ -120,6 +120,21 @@ def axes_from_lists(
     return axes
 
 
+class DisplayHint(BaseModel):
+    """Metadata indicating how spatiotemporal axes are displayed by a viewer"""
+
+    display_horizontal: str = Field(
+        ..., description="Which spatial axis to use for horizontal display"
+    )
+    display_vertical: str = Field(..., description="Which spatial axis to use for vertical display")
+    display_depth: str | None = Field(
+        None, description="Optional, which spatial axis to use for depth display"
+    )
+    display_time: str | None = Field(
+        None, description="Optional, which temporal axis to use for time"
+    )
+
+
 class RelatedObject(BaseModel):
     type: str = Field(
         ...,
@@ -225,6 +240,9 @@ class GeffMetadata(BaseModel):
         "physical coordinates. The matrix must have the same number of dimensions as the number of "
         "axes in the graph.",
     )
+    display_hints: DisplayHint | None = Field(
+        None, description="Metadata indicating how spatiotemporal axes are displayed by a viewer"
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -248,6 +266,35 @@ class GeffMetadata(BaseModel):
                         f"got {self.affine.ndim}"
                     )
 
+        # Display hint axes match names in axes
+        if self.axes is not None and self.display_hints is not None:
+            ax_names = [ax.name for ax in self.axes]
+            if self.display_hints.display_horizontal not in ax_names:
+                raise ValueError(
+                    f"Display hint display_horizontal name {self.display_hints.display_horizontal} "
+                    f"not found in axes {ax_names}"
+                )
+            if self.display_hints.display_vertical not in ax_names:
+                raise ValueError(
+                    f"Display hint display_vertical name {self.display_hints.display_vertical} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_time is not None
+                and self.display_hints.display_time not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_time name {self.display_hints.display_time} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_depth is not None
+                and self.display_hints.display_depth not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_depth name {self.display_hints.display_depth} "
+                    f"not found in axes {ax_names}"
+                )
         return self
 
     def write(self, group: zarr.Group | Path | str):

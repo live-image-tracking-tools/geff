@@ -145,6 +145,55 @@ class TestMetadataModel:
         with pytest.raises(pydantic.ValidationError):
             meta.geff_version = "abcde"
 
+    def test_display_hints(self):
+        meta = {
+            "geff_version": "0.0.1",
+            "directed": True,
+            "axes": [
+                {"name": "x"},
+                {"name": "y"},
+                {"name": "z"},
+                {"name": "t"},
+            ],
+        }
+        # Horizontal and vertical are required
+        with pytest.raises(pydantic.ValidationError, match=r"display_vertical"):
+            GeffMetadata(**{"display_hints": {"display_horizontal": "x"}, **meta})
+        with pytest.raises(pydantic.ValidationError, match=r"display_horizontal"):
+            GeffMetadata(**{"display_hints": {"display_vertical": "x"}, **meta})
+
+        # Names of axes in hint must be in axes
+        with pytest.raises(ValueError, match=r"display_horizontal .* not found in axes"):
+            GeffMetadata(
+                **{"display_hints": {"display_vertical": "y", "display_horizontal": "a"}, **meta}
+            )
+        with pytest.raises(ValueError, match=r"display_vertical .* not found in axes"):
+            GeffMetadata(
+                **{"display_hints": {"display_vertical": "a", "display_horizontal": "x"}, **meta}
+            )
+        with pytest.raises(ValueError, match=r"display_depth .* not found in axes"):
+            GeffMetadata(
+                **{
+                    "display_hints": {
+                        "display_vertical": "y",
+                        "display_horizontal": "x",
+                        "display_depth": "a",
+                    },
+                    **meta,
+                }
+            )
+        with pytest.raises(ValueError, match=r"display_time .* not found in axes"):
+            GeffMetadata(
+                **{
+                    "display_hints": {
+                        "display_vertical": "y",
+                        "display_horizontal": "x",
+                        "display_time": "a",
+                    },
+                    **meta,
+                }
+            )
+
 
 class TestAxis:
     def test_valid(self):
