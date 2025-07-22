@@ -1,9 +1,14 @@
 import argparse
+import logging
+import sys
 
 import zarr
 
 from . import utils
 from .metadata_schema import GeffMetadata
+
+logging.basicConfig(stream=sys.stderr, level=logging.WARNING, format="%(levelname)s: %(message)s")
+logging.captureWarnings(True)  # Capture warnings and log them
 
 
 def validate() -> None:
