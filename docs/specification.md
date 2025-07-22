@@ -116,9 +116,9 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
         ],
+        # predefined node attributes for storing detections as spheres or ellipsoids
         "sphere": "radius", # optional
         "ellipsoid": "covariance3d", # optional
-        # TODO Implicit assumptions on axis and units, make docs for this
         "display_hints": {
             "display_horizontal": "x",
             "display_vertical": "y",
