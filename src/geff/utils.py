@@ -30,7 +30,20 @@ def validate(path: str | Path):
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    GeffMetadata.read(graph)
+    meta = GeffMetadata.read(graph)
+
+    validate_zarr_structure(graph, meta)
+
+
+def validate_zarr_structure(graph: zarr.Group, meta: GeffMetadata):
+    """Check that the structure of the zarr conforms to geff specification
+
+    Also checks that any special properties match their spec
+
+    Args:
+        graph (zarr.Group): The zarr group containing the geff metadata
+        meta (GeffMetadata): Metadata from geff
+    """
 
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
