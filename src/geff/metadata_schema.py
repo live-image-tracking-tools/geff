@@ -10,6 +10,7 @@ import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
+from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
@@ -118,6 +119,64 @@ def axes_from_lists(
     return axes
 
 
+class DisplayHint(BaseModel):
+    """Metadata indicating how spatiotemporal axes are displayed by a viewer"""
+
+    display_horizontal: str = Field(
+        ..., description="Which spatial axis to use for horizontal display"
+    )
+    display_vertical: str = Field(..., description="Which spatial axis to use for vertical display")
+    display_depth: str | None = Field(
+        None, description="Optional, which spatial axis to use for depth display"
+    )
+    display_time: str | None = Field(
+        None, description="Optional, which temporal axis to use for time"
+    )
+
+
+class RelatedObject(BaseModel):
+    type: str = Field(
+        ...,
+        description=(
+            "Type of the related object. 'labels' for label objects, "
+            "'image' for image objects. Other types are also allowed, but may not be "
+            "recognized by reader applications. "
+        ),
+    )
+    path: str = Field(
+        ...,
+        description=(
+            "Path of the related object within the zarr group, relative "
+            "to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group."
+        ),
+    )
+    label_prop: str | None = Field(
+        None,
+        description=(
+            "Property name for label objects. This is the node property that will be used "
+            "to identify the labels in the related object. "
+            "This is only valid for type 'labels'."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> RelatedObject:
+        if self.type != "labels" and self.label_prop is not None:
+            raise ValueError(
+                f"label_prop {self.label_prop} is only valid for type 'labels', "
+                f"but got type {self.type}."
+            )
+        if self.type not in ["labels", "image"]:
+            warnings.warn(
+                f"Got type {self.type} for related object, "
+                "which might not be recognized by reader applications. ",
+                stacklevel=2,
+            )
+        return self
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -147,6 +206,29 @@ class GeffMetadata(BaseModel):
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
+    related_objects: Sequence[RelatedObject] | None = Field(
+        None,
+        description=(
+            "A list of dictionaries of related objects such as labels or images. "
+            "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
+            "properties. The 'type' represents the data type. 'labels' and 'image' should "
+            "be used for label and image objects, respectively. Other types are also allowed, "
+            "The 'path' should be relative to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group. "
+            "The 'label_prop' is only valid for type 'labels' and specifies the node property "
+            "that will be used to identify the labels in the related object. "
+        ),
+    )
+    affine: Affine | None = Field(
+        None,
+        description="Affine transformation matrix to transform the graph coordinates to the "
+        "physical coordinates. The matrix must have the same number of dimensions as the number of "
+        "axes in the graph.",
+    )
+    display_hints: DisplayHint | None = Field(
+        None, description="Metadata indicating how spatiotemporal axes are displayed by a viewer"
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -162,6 +244,43 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
+
+            if self.affine is not None:
+                if self.affine.ndim != len(self.axes):
+                    raise ValueError(
+                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
+                        f"got {self.affine.ndim}"
+                    )
+
+        # Display hint axes match names in axes
+        if self.axes is not None and self.display_hints is not None:
+            ax_names = [ax.name for ax in self.axes]
+            if self.display_hints.display_horizontal not in ax_names:
+                raise ValueError(
+                    f"Display hint display_horizontal name {self.display_hints.display_horizontal} "
+                    f"not found in axes {ax_names}"
+                )
+            if self.display_hints.display_vertical not in ax_names:
+                raise ValueError(
+                    f"Display hint display_vertical name {self.display_hints.display_vertical} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_time is not None
+                and self.display_hints.display_time not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_time name {self.display_hints.display_time} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_depth is not None
+                and self.display_hints.display_depth not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_depth name {self.display_hints.display_depth} "
+                    f"not found in axes {ax_names}"
+                )
         return self
 
     def write(self, group: zarr.Group | Path | str):

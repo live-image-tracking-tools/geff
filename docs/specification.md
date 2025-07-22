@@ -105,7 +105,25 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'z', 'type': "space", 'unit': "micrometers", 'min': 1523.36, 'max': 4398.1},
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
-        ]
+<<<<<<< HEAD
+        ],
+        "display_hints": {
+            "display_horizontal": "x",
+            "display_vertical": "y",
+            "display_depth": "z",
+            "display_time": "t",
+        },
+=======
+        ], 
+        "related_objects": {
+            {
+                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id",
+            },
+            {
+                "type":"image", "path":"../raw/",
+            },
+        }
+>>>>>>> origin/main
     }
     ... # custom other things are allowed and ignored by geff
 }
