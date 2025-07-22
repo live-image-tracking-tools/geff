@@ -145,6 +145,7 @@ filterwarnings = [
     "ignore:'cgi' is deprecated and slated for removal in Python 3.13",
     # if needed, add global ignores here, for example:
     # "ignore:Some message:SomeCategory",
+    "ignore:Property '.*' is a string array. Automatically casting it to bytes:UserWarning",
 ]
 
 

@@ -88,7 +88,10 @@ class GeffReader:
 
         for name in names:
             prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}", mode="r")
-            prop_dict: PropDictZArray = {"values": prop_group["values"]}
+            prop_dict: PropDictZArray = {
+                "values": prop_group["values"],
+                "dtype": prop_group.attrs.get("original_dtype", None),
+            }
             if "missing" in prop_group.keys():
                 prop_dict["missing"] = prop_group["missing"]
             self.node_props[name] = prop_dict
@@ -110,7 +113,10 @@ class GeffReader:
 
         for name in names:
             prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}", mode="r")
-            prop_dict: PropDictZArray = {"values": prop_group["values"]}
+            prop_dict: PropDictZArray = {
+                "values": prop_group["values"],
+                "dtype": prop_group.attrs.get("original_dtype", None),
+            }
             if "missing" in prop_group.keys():
                 prop_dict["missing"] = prop_group["missing"]
             self.edge_props[name] = prop_dict
@@ -140,7 +146,8 @@ class GeffReader:
         for name, props in self.node_props.items():
             node_props[name] = {
                 "values": np.array(
-                    props["values"][node_mask.tolist() if node_mask is not None else ...]
+                    props["values"][node_mask.tolist() if node_mask is not None else ...],
+                    dtype=props.get("dtype", None),
                 )
             }
             if "missing" in props:
@@ -163,7 +170,8 @@ class GeffReader:
         for name, props in self.edge_props.items():
             edge_props[name] = {
                 "values": np.array(
-                    props["values"][edge_mask.tolist() if edge_mask is not None else ...]
+                    props["values"][edge_mask.tolist() if edge_mask is not None else ...],
+                    dtype=props.get("dtype", None),
                 )
             }
             if "missing" in props:

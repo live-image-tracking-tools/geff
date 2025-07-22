@@ -12,6 +12,7 @@ node_prop_dtypes = [
 edge_prop_dtypes = [
     {"score": "float64", "color": "uint8"},
     {"score": "float32", "color": "int16"},
+    {"score": "float32", "color": "str"},
 ]
 
 # TODO: mixed dtypes?

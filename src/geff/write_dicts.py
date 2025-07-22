@@ -152,12 +152,6 @@ def dict_props_to_arr(
                 missing.append(True)
                 missing_any = True
         values_arr = np.asarray(values)
-        if values_arr.dtype.kind == "U":
-            warnings.warn(
-                f"Property {name} is a string array. Cast it to bytes",
-                stacklevel=2,
-            )
-            values_arr = values_arr.astype("S")  # casting to bytes
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
         props_dict[name] = (values_arr, missing_arr)
     return props_dict

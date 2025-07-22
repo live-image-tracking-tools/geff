@@ -29,6 +29,7 @@ class PropDictNpArray(TypedDict):
 class PropDictZArray(TypedDict):
     values: zarr.Array
     missing: NotRequired[zarr.Array]
+    dtype: NotRequired[str]
 
 
 # Intermediate dict format that can be injested to different backend types

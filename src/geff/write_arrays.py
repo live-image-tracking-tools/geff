@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import Literal
 
@@ -138,6 +139,13 @@ def write_props_arrays(
     for prop, arrays in props.items():
         prop_group = props_group.create_group(prop)
         values, missing = arrays
+        if values.dtype.kind == "U":
+            warnings.warn(
+                f"Property '{prop}' is a string array. Automatically casting it to bytes",
+                stacklevel=2,
+            )
+            values = values.astype("S")  # casting to bytes
+            prop_group.attrs["original_dtype"] = "U"
         prop_group["values"] = values
         if missing is not None:
             prop_group["missing"] = missing

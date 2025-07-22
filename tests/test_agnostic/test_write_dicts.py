@@ -18,11 +18,11 @@ def data():
     ("data_type", "expected"),
     [
         ("num", ([1, 5, 6], None)),
-        ("str", ([b"category", b"", b""], [0, 1, 1])),
+        ("str", (["category", "", ""], [0, 1, 1])),
         ("num_arr", ([[1, 2], [1, 2], [1, 2]], [1, 1, 0])),
         (
             "str_arr",
-            ([[b"test", b"string"], [b"test", b"string"], [b"test", b"string"]], [1, 0, 1]),
+            ([["test", "string"], ["test", "string"], ["test", "string"]], [1, 0, 1]),
         ),
     ],
 )
