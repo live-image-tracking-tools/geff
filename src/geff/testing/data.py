@@ -92,7 +92,7 @@ def create_geff_edge_error() -> zarr.Group:
     """
 
     node_ids = np.array([0,1,2], dtype=np.int8)
-    edge_ids = np.array([[0, 1], [1, 2], [2, 3]], dtype=np.int8)
+    edge_ids = np.array([[0, 1], [1, 2], [2, 3],[0, 0], [0, 1]], dtype=np.int8)
     t = np.array([0,1,2])
     axes_names = ['t', 'y', 'x']
 
