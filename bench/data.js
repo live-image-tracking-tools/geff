@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753207259728,
+  "lastUpdate": 1753212003088,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2610,6 +2610,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5437095769890301",
             "extra": "mean: 15.562759534333319 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "ilan.silva@czbiohub.org",
+            "name": "Ilan F. S. Theodoro",
+            "username": "ilan-theodoro"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f8cc42c6d70afd9da5937f9a10656d3ca979ac12",
+          "message": "Read/write ignored attributes to avoid losing them (#141)\n\n# Proposed Change\n`geff` allows extra attributes inside `zattrs`. However, they are simply\nignored. This PR solves it by storing the extra attributes. Closes #110.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n\n# Checklist\n\n- [x] I have read the [developer/contributing](../CONTRIBUTING) docs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n---------\n\nCo-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>",
+          "timestamp": "2025-07-22T15:17:23-04:00",
+          "tree_id": "397f51e4ff5ab1617e623e836b461069526a2857",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/f8cc42c6d70afd9da5937f9a10656d3ca979ac12"
+        },
+        "date": 1753212002487,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12051372890750689,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1458748826452625",
+            "extra": "mean: 8.297809793666664 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.198790814076474,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0015944264979458902",
+            "extra": "mean: 52.08661366666926 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06470100738271957,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4722995979358651",
+            "extra": "mean: 15.455709894666668 sec\nrounds: 3"
           }
         ]
       }
