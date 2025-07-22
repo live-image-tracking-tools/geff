@@ -152,6 +152,28 @@
           "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
           "title": "Axes"
         },
+        "track_node_props": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "propertyNames": {
+                "enum": [
+                  "lineage",
+                  "tracklet"
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Node properties denoting tracklet and/or lineage IDs.\nA tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1,and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.\nA lineage is defined as a weakly connected component on the graph.\nThe dictionary can store one or both of 'tracklet' or 'lineage' keys.",
+          "title": "Track Node Props"
+        },
         "related_objects": {
           "anyOf": [
             {
@@ -191,6 +213,10 @@
           ],
           "default": null,
           "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer"
+        },
+        "extra": {
+          "description": "Extra metadata that is not part of the schema",
+          "title": "Extra"
         }
       },
       "required": [
