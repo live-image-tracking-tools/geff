@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753196528763,
+  "lastUpdate": 1753197640314,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2475,6 +2475,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5004064089331546",
             "extra": "mean: 15.381828126000016 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "ysk@yfukai.net",
+            "name": "Yohsuke T. Fukai",
+            "username": "yfukai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3a71946b335c6619b163fc62e9be8cb3ba58d591",
+          "message": "Added specs for `related_objects` (#186)\n\n# Proposed Change\nAdded schema, docs and tests for the `related_objects` attr.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Documentation update\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly.\n\n## If you changed the specification\n- [x] I have checked that any validation functions and tests reflect the\nchanges.\n- [x] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [x] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n---------\n\nCo-authored-by: Draga Doncila Pop <17995243+DragaDoncila@users.noreply.github.com>\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2025-07-22T11:15:22-04:00",
+          "tree_id": "5ce9e10ea5ad189369fc25fdf814bdc579a0b8be",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/3a71946b335c6619b163fc62e9be8cb3ba58d591"
+        },
+        "date": 1753197639788,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12037927869484323,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1978449737582597",
+            "extra": "mean: 8.307077520666667 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.040289201177405,
+            "unit": "iter/sec",
+            "range": "stddev: 0.001543569085192997",
+            "extra": "mean: 52.52021066666165 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06374862208014766,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5171585957836933",
+            "extra": "mean: 15.686613567 sec\nrounds: 3"
           }
         ]
       }
