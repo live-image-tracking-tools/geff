@@ -2,7 +2,7 @@ import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import networkx as nx
 import typer
@@ -11,7 +11,11 @@ from lxml import etree as ET
 import geff
 from geff.metadata_schema import GeffMetadata
 
+# Type aliases
+PropertyValue = str | int | float | list[float] | None
+
 # TODO: check docstrings consistency.
+# TODO: rename features by properties to fit geff vocabulary.
 
 
 def _preliminary_checks(
@@ -87,7 +91,7 @@ def _get_units(
 def _get_features_metadata(
     it: ET.iterparse,
     ancestor: ET._Element,
-) -> dict[str, dict[str, str]]:
+) -> dict[str, dict[str, PropertyValue]]:
     """
     Add all the TrackMate model features to a FeaturesDeclaration object.
 
@@ -105,7 +109,7 @@ def _get_features_metadata(
 
     Returns
     -------
-    dict[str, dict[str, str]]
+    dict[str, dict[str, PropertyValue]]
         A dictionary where the keys are the feature names and the values are
         dictionaries containing the feature attributes as defined by TrackMate
         (name, shortname, dimension, isint).
@@ -128,8 +132,8 @@ def _get_features_metadata(
 
 
 def _convert_attributes(
-    attributes: dict[str, str],
-    feats_metadata: dict[str, dict[str, str]],
+    attributes: dict[str, int | float | str],
+    feats_metadata: dict[str, dict[str, PropertyValue]],
     feat_type: str,
 ) -> None:
     """
@@ -140,9 +144,9 @@ def _convert_attributes(
 
     Parameters
     ----------
-    attributes : dict[str, str]
+    attributes : dict[str, int | float | str]
         The dictionary whose values we want to convert.
-    feats_metadata : dict[str, dict[str, str]]
+    feats_metadata : dict[str, dict[str, PropertyValue]]
         The features metadata containing information on the expected data types
         for each feature.
     feat_type : str
@@ -177,7 +181,7 @@ def _convert_attributes(
 
 def _convert_ROI_coordinates(
     element: ET._Element,
-    attribs: dict[str, Any],
+    attribs: dict[str, PropertyValue],
 ) -> None:
     """
     Extract, format and add ROI coordinates to the attributes dict.
@@ -186,7 +190,7 @@ def _convert_ROI_coordinates(
     ----------
     element : ET._Element
         Element from which to extract ROI coordinates.
-    attribs : dict[str, Any]
+    attribs : dict[str, PropertyValue]
         Attributes dict to update with ROI coordinates.
 
     Raises
@@ -201,6 +205,7 @@ def _convert_ROI_coordinates(
     if element.text:
         points_coordinates = element.text.split()
         points_coordinates = [float(x) for x in points_coordinates]
+        assert type(attribs["ROI_N_POINTS"]) is int, "ROI_N_POINTS should be an integer"
         points_dimension = len(points_coordinates) // attribs["ROI_N_POINTS"]
         it = [iter(points_coordinates)] * points_dimension
         points_coordinates = list(zip(*it))
@@ -212,7 +217,7 @@ def _convert_ROI_coordinates(
 def _add_all_nodes(
     it: ET.iterparse,
     ancestor: ET._Element,
-    feat_md: dict[str, dict[str, str]],
+    feat_md: dict[str, dict[str, PropertyValue]],
     graph: nx.DiGraph,
 ) -> bool:
     """
@@ -226,7 +231,7 @@ def _add_all_nodes(
         An iterator over XML elements.
     ancestor : ET._Element
         The XML element that encompasses the information to be added.
-    feat_md : dict[str, dict[str, str]]
+    feat_md : dict[str, dict[str, PropertyValue]]
         The features metadata containing the expected node attributes.
     graph : nx.DiGraph
         The graph to which the nodes will be added.
@@ -249,7 +254,7 @@ def _add_all_nodes(
         event, element = next(it)
         if element.tag == "Spot" and event == "end":
             # All items in element.attrib are parsed as strings but most
-            # of them (if not all) are numbers. So we need to do a
+            # of them are numbers. So we need to do a
             # conversion based on these attributes type (attribute `isint`)
             # as defined in the features declaration.
             attribs = deepcopy(element.attrib)
@@ -288,10 +293,133 @@ def _add_all_nodes(
     return segmentation
 
 
+def _add_edge(
+    element: ET._Element,
+    feat_md: dict[str, dict[str, PropertyValue]],
+    graph: nx.Graph,
+    current_track_id: int,
+) -> None:
+    """
+    Add an edge between two nodes in the graph based on the XML element.
+
+    This function extracts source and target node identifiers from the
+    given XML element, along with any additional attributes defined
+    within. It then adds an edge between these nodes in the specified
+    graph. If the nodes have a 'TRACK_ID' attribute, it ensures consistency
+    with the current track ID.
+
+    Parameters
+    ----------
+    element : ET._Element
+        The XML element containing edge information.
+    feat_md: dict[str, dict[str, PropertyValue]]
+        The features metadata containing the expected edge attributes.
+    graph : nx.Graph
+        The graph to which the edge and its attributes will be added.
+    current_track_id : int
+        Track ID of the track holding the edge.
+
+    Raises
+    ------
+    AssertionError
+        If the 'TRACK_ID' attribute of either the source or target node
+        does not match the current track ID, indicating an inconsistency
+        in track assignment.
+    """
+    attribs = deepcopy(element.attrib)
+    _convert_attributes(attribs, feat_md, "edge")
+    try:
+        entry_node_id = int(attribs["SPOT_SOURCE_ID"])
+        exit_node_id = int(attribs["SPOT_TARGET_ID"])
+    except KeyError as err:
+        warnings.warn(
+            f"No key {err} in the attributes of current element '{element.tag}'. "
+            f"Not adding this edge to the graph.",
+            stacklevel=2,
+        )
+    else:
+        graph.add_edge(entry_node_id, exit_node_id)
+        nx.set_edge_attributes(graph, {(entry_node_id, exit_node_id): attribs})
+        # Adding the current track ID to the nodes of the newly created
+        # edge. This will be useful later to filter nodes by track and
+        # add the saved tracks attributes (as returned by this method).
+        err_msg = f"Incoherent track ID for nodes {entry_node_id} and {exit_node_id}."
+        entry_node = graph.nodes[entry_node_id]
+        if "TRACK_ID" not in entry_node:
+            entry_node["TRACK_ID"] = current_track_id
+        else:
+            assert entry_node["TRACK_ID"] == current_track_id, err_msg
+        exit_node = graph.nodes[exit_node_id]
+        if "TRACK_ID" not in exit_node:
+            exit_node["TRACK_ID"] = current_track_id
+        else:
+            assert exit_node["TRACK_ID"] == current_track_id, err_msg
+    finally:
+        element.clear()
+
+
+def _build_tracks(
+    iterator: ET.iterparse,
+    ancestor: ET._Element,
+    feat_md: dict[str, dict[str, PropertyValue]],
+    graph: nx.Graph,
+) -> list[dict[str, PropertyValue]]:
+    """
+    Add edges and their attributes to a graph based on the XML elements.
+
+    This function explores all elements that are descendants of the
+    specified `ancestor` element, adding edges and their attributes to
+    the provided graph. It iterates through the XML elements using
+    the provided iterator, extracting and processing relevant information
+    to construct track attributes.
+
+    Parameters
+    ----------
+    iterator : ET.iterparse
+        An iterator over XML elements.
+    ancestor : ET._Element
+        The XML element that encompasses the information to be added.
+    feat_md: dict[str, dict[str, PropertyValue]]
+        The features metadata containing the expected edge attributes.
+    graph: nx.Graph
+        The graph to which the edges and their attributes will be added.
+
+    Returns
+    -------
+    list[dict[str, PropertyValue]]
+        A list of dictionaries, each representing the attributes for a
+        track.
+    """
+    tracks_attributes = []
+    current_track_id = None
+    event, element = next(iterator)
+    while (event, element) != ("end", ancestor):
+        # Saving the current track information.
+        if element.tag == "Track" and event == "start":
+            attribs = deepcopy(element.attrib)
+            _convert_attributes(attribs, feat_md, "lineage")
+            tracks_attributes.append(attribs)
+            try:
+                current_track_id = attribs["TRACK_ID"]
+            except KeyError as err:
+                raise KeyError(
+                    f"No key TRACK_ID in the attributes of current element "
+                    f"'{element.tag}'. Please check the XML file.",
+                    stacklevel=2,
+                ) from err
+
+        # Edge creation.
+        if element.tag == "Edge" and event == "start":
+            assert current_track_id is not None, "No current track ID."
+            _add_edge(element, feat_md, graph, current_track_id)
+
+        event, element = next(iterator)
+
+    return tracks_attributes
+
+
 def _parse_model_tag(
     xml_path: Path,
-    keep_all_spots: bool,
-    keep_all_tracks: bool,
 ) -> nx.Graph:
     """
     Read an XML file and convert the model data into several graphs.
@@ -305,10 +433,6 @@ def _parse_model_tag(
     ----------
     xml_path : str
         Path of the XML file to process.
-    keep_all_spots : bool
-        True to keep the spots filtered out in TrackMate, False otherwise.
-    keep_all_tracks : bool
-        True to keep the tracks filtered out in TrackMate, False otherwise.
 
     Returns
     -------
@@ -347,12 +471,12 @@ def _parse_model_tag(
             segmentation = _add_all_nodes(it, element, feat_md, graph)
             root.clear()
 
-    return graph
+        # Adding the tracks as edges.
+        if element.tag == "AllTracks" and event == "start":
+            tracks_attributes = _build_tracks(it, element, feat_md, graph)
+            root.clear()
 
-    #     # Adding the tracks as edges.
-    #     if element.tag == "AllTracks" and event == "start":
-    #         tracks_attributes = _build_tracks(it, element, fd, graph)
-    #         root.clear()
+    return graph
 
     #         # Removal of filtered spots / nodes.
     #         if not keep_all_spots:
@@ -418,8 +542,6 @@ def from_trackmate_xml_to_geff(
     xml_path: Path | str,
     geff_path: Path | str,
     tczyx: bool = False,
-    keep_all_spots: bool = False,
-    keep_all_tracks: bool = False,
     overwrite: bool = False,
     zarr_format: Literal[2, 3] | None = 2,
 ) -> None:
@@ -430,8 +552,6 @@ def from_trackmate_xml_to_geff(
         xml_path (Path | str): The path to the TrackMate XML file.
         geff_path (Path | str): The path to the GEFF file.
         tczyx (bool): Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
-        keep_all_spots (bool): True to keep the spots filtered out in TrackMate, False otherwise.
-        keep_all_tracks (bool): True to keep the tracks filtered out in TrackMate, False otherwise.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
         zarr_format (int, optional): The version of zarr to write. Defaults to 2.
     """
@@ -444,11 +564,10 @@ def from_trackmate_xml_to_geff(
     # graph = _build_nx(xml_path)
     graph = _parse_model_tag(
         xml_path=xml_path,
-        keep_all_spots=keep_all_spots,
-        keep_all_tracks=keep_all_tracks,
     )
     print(graph)
     print(graph.nodes[2004])
+    print(graph.edges[2005, 2007])
 
     # write_nx(
     #     graph,
@@ -466,8 +585,6 @@ def from_trackmate_xml_to_geff_cli(
     xml_path: Path | str,
     geff_path: Path | str,
     tczyx: bool = False,
-    keep_all_spots: bool = False,
-    keep_all_tracks: bool = False,
     overwrite: bool = False,
     zarr_format: Literal[2, 3] | None = 2,
 ) -> None:
@@ -478,8 +595,6 @@ def from_trackmate_xml_to_geff_cli(
         xml_path (Path | str): The path to the TrackMate XML file.
         geff_path (Path | str): The path to the GEFF file.
         tczyx (bool): Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
-        keep_all_spots (bool): True to keep the spots filtered out in TrackMate, False otherwise.
-        keep_all_tracks (bool): True to keep the tracks filtered out in TrackMate, False otherwise.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
         zarr_format (int, optional): The version of zarr to write. Defaults to 2.
     """
