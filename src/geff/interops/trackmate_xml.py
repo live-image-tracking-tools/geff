@@ -87,7 +87,7 @@ def _get_units(
 def _get_attributes_metadata(
     it: ET.iterparse,
     ancestor: ET._Element,
-) -> dict[str, dict[str, Attribute]]:
+) -> dict[str, dict[str, str]]:
     """Extract the TrackMate model features to a attributes dictionary.
 
     The model features are divided in 3 categories: SpotFeatures, EdgeFeatures and
@@ -100,7 +100,7 @@ def _get_attributes_metadata(
         ancestor (ET._Element): The XML element that encompasses the information to be added.
 
     Returns:
-        dict[str, dict[str, Attribute]]: A dictionary where the keys are the attributes names
+        dict[str, dict[str, str]]: A dictionary where the keys are the attributes names
         and the values are dictionaries containing the attributes metadata as defined by TrackMate
         (name, shortname, dimension, isint).
     """
@@ -111,50 +111,47 @@ def _get_attributes_metadata(
         event, element = next(it)  # Feature.
         while (event, element) != ("end", ancestor):
             if element.tag == "Feature" and event == "start":
-                attribs = deepcopy(element.attrib)
-                attrs_md[attribs["feature"]] = attribs
-                attrs_md[attribs["feature"]].pop("feature", None)
+                attrs = deepcopy(element.attrib)
+                attrs_md[attrs["feature"]] = attrs
+                attrs_md[attrs["feature"]].pop("feature", None)
             element.clear()
             event, element = next(it)
-    # TODO: check if we have ALL the nodes
-    # element.clear()
-    # event, element = next(it)
     return attrs_md
 
 
 def _convert_attributes(
-    attributes: dict[str, int | float | str],
-    attrs_metadata: dict[str, dict[str, Attribute]],
+    attrs: dict[str, Attribute],
+    attrs_metadata: dict[str, dict[str, str]],
     attr_type: str,
 ) -> None:
     """
-    Convert the values of `attributes` from string to the correct data type.
+    Convert the values of the attributes from string to the correct data type.
 
     TrackMate features are either integers, floats or strings. The type to
     convert to is given by the attributes metadata.
 
     Args:
-        attributes (dict[str, int | float | str]): The dictionary whose values we want to convert.
-        attrs_metadata (dict[str, dict[str, Attribute]]): The attributes metadata containing
+        attrs (dict[str, Attribute): The dictionary whose values we want to convert.
+        attrs_metadata (dict[str, dict[str, str]]): The attributes metadata containing
         information on the expected data types for each attribute.
         attr_type (str): The type of the attribute to convert (node, edge, or lineage).
 
     Warns:
         UserWarning: If an attribute is not found in the attributes metadata.
     """
-    for key in attributes:
+    for key in attrs:
         if key in attrs_metadata:
             if attrs_metadata[key]["isint"] == "true":
-                attributes[key] = int(attributes[key])
+                attrs[key] = int(attrs[key])
             else:
                 try:
-                    attributes[key] = float(attributes[key])
+                    attrs[key] = float(attrs[key])
                 except ValueError:
                     # Can't be anything but a string.
-                    attributes[key] = str(attributes[key])
+                    attrs[key] = str(attrs[key])
         elif key == "ID" or key == "ROI_N_POINTS":
             # IDs are always integers in TrackMate.
-            attributes[key] = int(attributes[key])
+            attrs[key] = int(attrs[key])
         elif key == "name":
             pass  # "name" is a string so we don't need to convert it.
         else:
@@ -166,37 +163,37 @@ def _convert_attributes(
 
 def _convert_ROI_coordinates(
     element: ET._Element,
-    attribs: dict[str, Attribute],
+    attrs: dict[str, Attribute],
 ) -> None:
     """Extract, format and add ROI coordinates to the attributes dict.
 
     Args:
         element (ET._Element): Element from which to extract ROI coordinates.
-        attribs (dict[str, Attribute]): Attributes dict to update with ROI coordinates.
+        attrs (dict[str, Attribute]): Attributes dict to update with ROI coordinates.
 
     Raises:
         KeyError: If the "ROI_N_POINTS" attribute is not found in the attributes dict.
     """
-    if "ROI_N_POINTS" not in attribs:
+    if "ROI_N_POINTS" not in attrs:
         raise KeyError(
             f"No key 'ROI_N_POINTS' in the attributes of current element '{element.tag}'."
         )
     if element.text:
         points_coordinates = element.text.split()
         points_coordinates = [float(x) for x in points_coordinates]
-        assert type(attribs["ROI_N_POINTS"]) is int, "ROI_N_POINTS should be an integer"
-        points_dimension = len(points_coordinates) // attribs["ROI_N_POINTS"]
+        assert type(attrs["ROI_N_POINTS"]) is int, "ROI_N_POINTS should be an integer"
+        points_dimension = len(points_coordinates) // attrs["ROI_N_POINTS"]
         it = [iter(points_coordinates)] * points_dimension
         points_coordinates = list(zip(*it, strict=True))
-        attribs["ROI_coords"] = points_coordinates
+        attrs["ROI_coords"] = points_coordinates
     else:
-        attribs["ROI_coords"] = None
+        attrs["ROI_coords"] = None
 
 
 def _add_all_nodes(
     it: ET.iterparse,
     ancestor: ET._Element,
-    attrs_md: dict[str, dict[str, Attribute]],
+    attrs_md: dict[str, dict[str, str]],
     graph: nx.DiGraph,
 ) -> bool:
     """Add nodes and their attributes to a graph and return the presence of segmentation.
@@ -206,7 +203,7 @@ def _add_all_nodes(
     Args:
         it (ET.iterparse): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
-        attrs_md (dict[str, dict[str, Attribute]]): The attributes metadata containing the
+        attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected node attributes.
         graph (nx.DiGraph): The graph to which the nodes will be added.
 
@@ -229,8 +226,8 @@ def _add_all_nodes(
             # of them are numbers. So we need to do a conversion based
             # on these attributes type as defined in the attributes
             # metadata (attribute `isint`).
-            attribs = deepcopy(element.attrib)
-            _convert_attributes(attribs, attrs_md, "node")
+            attrs = deepcopy(element.attrib)
+            _convert_attributes(attrs, attrs_md, "node")
 
             # The ROI coordinates are not stored in a tag attribute but in
             # the tag text. So we need to extract then format them.
@@ -238,17 +235,17 @@ def _add_all_nodes(
             # is not present.
             if segmentation:
                 try:
-                    _convert_ROI_coordinates(element, attribs)
+                    _convert_ROI_coordinates(element, attrs)
                 except KeyError as err:
                     print(err)
             else:
-                if "ROI_N_POINTS" in attribs:
+                if "ROI_N_POINTS" in attrs:
                     segmentation = True
-                    _convert_ROI_coordinates(element, attribs)
+                    _convert_ROI_coordinates(element, attrs)
 
             # Adding the node and its attributes to the graph.
             try:
-                graph.add_node(attribs["ID"], **attribs)
+                graph.add_node(attrs["ID"], **attrs)
             except KeyError:
                 warnings.warn(
                     f"No key 'ID' in the attributes of current element "
@@ -263,7 +260,7 @@ def _add_all_nodes(
 
 def _add_edge(
     element: ET._Element,
-    attrs_md: dict[str, dict[str, Attribute]],
+    attrs_md: dict[str, dict[str, str]],
     graph: nx.Graph,
     current_track_id: int,
 ) -> None:
@@ -277,7 +274,7 @@ def _add_edge(
 
     Args:
         element (ET._Element): The XML element containing edge information.
-        attrs_md (dict[str, dict[str, Attribute]]): The attributes metadata containing
+        attrs_md (dict[str, dict[str, str]]): The attributes metadata containing
             the expected edge attributes.
         graph (nx.Graph): The graph to which the edge and its attributes will be added.
         current_track_id (int): Track ID of the track holding the edge.
@@ -290,11 +287,11 @@ def _add_edge(
     Warns:
         UserWarning: If an edge cannot be added due to missing required attributes.
     """
-    attribs = deepcopy(element.attrib)
-    _convert_attributes(attribs, attrs_md, "edge")
+    attrs = deepcopy(element.attrib)
+    _convert_attributes(attrs, attrs_md, "edge")
     try:
-        entry_node_id = int(attribs["SPOT_SOURCE_ID"])
-        exit_node_id = int(attribs["SPOT_TARGET_ID"])
+        entry_node_id = int(attrs["SPOT_SOURCE_ID"])
+        exit_node_id = int(attrs["SPOT_TARGET_ID"])
     except KeyError:
         warnings.warn(
             f"No key 'SPOT_SOURCE_ID' or 'SPOT_TARGET_ID' in the attributes of "
@@ -303,7 +300,7 @@ def _add_edge(
         )
     else:
         graph.add_edge(entry_node_id, exit_node_id)
-        nx.set_edge_attributes(graph, {(entry_node_id, exit_node_id): attribs})
+        nx.set_edge_attributes(graph, {(entry_node_id, exit_node_id): attrs})
         # Adding the current track ID to the nodes of the newly created
         # edge. This will be useful later to filter nodes by track and
         # add the saved tracks attributes (as returned by this method).
@@ -325,7 +322,7 @@ def _add_edge(
 def _build_tracks(
     iterator: ET.iterparse,
     ancestor: ET._Element,
-    attrs_md: dict[str, dict[str, Attribute]],
+    attrs_md: dict[str, dict[str, str]],
     graph: nx.Graph,
 ) -> list[dict[str, Attribute]]:
     """Add edges and their attributes to a graph based on the XML elements.
@@ -339,7 +336,7 @@ def _build_tracks(
     Args:
         iterator (ET.iterparse): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
-        attrs_md (dict[str, dict[str, Attribute]]): The attributes metadata containing the
+        attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected edge attributes.
         graph (nx.Graph): The graph to which the edges and their attributes will be added.
 
@@ -350,17 +347,17 @@ def _build_tracks(
     Raises:
         KeyError: If no TRACK_ID is found in the attributes of a Track element.
     """
-    tracks_attributes = []
+    tracks_attrs = []
     current_track_id = None
     event, element = next(iterator)
     while (event, element) != ("end", ancestor):
         # Saving the current track information.
         if element.tag == "Track" and event == "start":
-            attribs = deepcopy(element.attrib)
-            _convert_attributes(attribs, attrs_md, "lineage")
-            tracks_attributes.append(attribs)
+            attrs = deepcopy(element.attrib)
+            _convert_attributes(attrs, attrs_md, "lineage")
+            tracks_attrs.append(attrs)
             try:
-                current_track_id = attribs["TRACK_ID"]
+                current_track_id = attrs["TRACK_ID"]
             except KeyError as err:
                 raise KeyError(
                     f"No key 'TRACK_ID' in the attributes of current element "
@@ -374,7 +371,7 @@ def _build_tracks(
 
         event, element = next(iterator)
 
-    return tracks_attributes
+    return tracks_attrs
 
 
 def _get_filtered_tracks_ID(
@@ -396,9 +393,9 @@ def _get_filtered_tracks_ID(
     """
     filtered_tracks_ID = []
     event, element = next(iterator)
-    attribs = deepcopy(element.attrib)
+    attrs = deepcopy(element.attrib)
     try:
-        filtered_tracks_ID.append(int(attribs["TRACK_ID"]))
+        filtered_tracks_ID.append(int(attrs["TRACK_ID"]))
     except KeyError:
         warnings.warn(
             f"No key 'TRACK_ID' in the attributes of current element "
@@ -409,9 +406,9 @@ def _get_filtered_tracks_ID(
     while (event, element) != ("end", ancestor):
         event, element = next(iterator)
         if element.tag == "TrackID" and event == "start":
-            attribs = deepcopy(element.attrib)
+            attrs = deepcopy(element.attrib)
             try:
-                filtered_tracks_ID.append(int(attribs["TRACK_ID"]))
+                filtered_tracks_ID.append(int(attrs["TRACK_ID"]))
             except KeyError:
                 warnings.warn(
                     f"No key 'TRACK_ID' in the attributes of current element "
@@ -458,7 +455,6 @@ def _parse_model_tag(
     for event, element in it:
         if element.tag == "Model" and event == "start":
             units = _get_units(element)
-            print(f"Units: {units}")
             root.clear()  # Cleaning the tree to free up some memory.
             # All the browsed subelements of `root` are deleted.
 
@@ -467,7 +463,6 @@ def _parse_model_tag(
         if element.tag == "FeatureDeclarations" and event == "start":
             attrs_md = _get_attributes_metadata(it, element)
             root.clear()
-            print(attrs_md.keys())
 
         # Adding the spots as nodes.
         if element.tag == "AllSpots" and event == "start":
@@ -478,7 +473,7 @@ def _parse_model_tag(
         # Adding the tracks as edges.
         if element.tag == "AllTracks" and event == "start":
             # TODO: implement storage of track attributes.
-            tracks_attributes = _build_tracks(it, element, attrs_md, graph)
+            tracks_attrs = _build_tracks(it, element, attrs_md, graph)
             root.clear()
 
             # Removal of filtered spots / nodes.
