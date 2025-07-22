@@ -187,28 +187,53 @@ def create_dummy_graph_props(
                     edges.append([int(source_idx), int(target_idx)])
                 edge_count += 1
     else:
-        # For directed graphs, we can create more edges
+        # For directed graphs, we can create more edges efficiently
+        edges = []
         edge_count = 0
-        for i in range(actual_num_edges):
-            source_idx = i % num_nodes
-            target_idx = (i + 1) % num_nodes
-            if source_idx != target_idx:  # Avoid self-loops
-                if node_id_dtype == "str":
-                    edges.append([f"node_{source_idx}", f"node_{target_idx}"])
-                else:
-                    edges.append([int(source_idx), int(target_idx)])
-                edge_count += 1
 
-        # Add more edges if we haven't reached the target
-        if edge_count < actual_num_edges:
-            for i in range(actual_num_edges - edge_count):
-                source_idx = (i + 2) % num_nodes
-                target_idx = (i + 3) % num_nodes
+        # First create a chain of edges
+        for i in range(min(actual_num_edges, num_nodes - 1)):
+            source_idx = i
+            target_idx = i + 1
+            if node_id_dtype == "str":
+                edges.append([f"node_{source_idx}", f"node_{target_idx}"])
+            else:
+                edges.append([int(source_idx), int(target_idx)])
+            edge_count += 1
+
+        # Add remaining edges using different patterns
+        remaining_edges = actual_num_edges - edge_count
+        if remaining_edges > 0:
+            # Create edges with different offsets
+            for i in range(remaining_edges):
+                source_idx = i % num_nodes
+                target_idx = (i + 2) % num_nodes  # Skip one node
                 if source_idx != target_idx:
                     if node_id_dtype == "str":
                         edges.append([f"node_{source_idx}", f"node_{target_idx}"])
                     else:
                         edges.append([int(source_idx), int(target_idx)])
+                    edge_count += 1
+
+                    # Stop if we've reached the target
+                    if edge_count >= actual_num_edges:
+                        break
+
+            # If we still need more edges, use another pattern
+            if edge_count < actual_num_edges:
+                for i in range(actual_num_edges - edge_count):
+                    source_idx = i % num_nodes
+                    target_idx = (i + 3) % num_nodes  # Skip two nodes
+                    if source_idx != target_idx:
+                        if node_id_dtype == "str":
+                            edges.append([f"node_{source_idx}", f"node_{target_idx}"])
+                        else:
+                            edges.append([int(source_idx), int(target_idx)])
+                        edge_count += 1
+
+                        # Stop if we've reached the target
+                        if edge_count >= actual_num_edges:
+                            break
 
     edges = np.array(edges, dtype=object if node_id_dtype == "str" else node_id_dtype)
     # Generate extra node properties
