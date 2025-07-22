@@ -18,9 +18,12 @@ def data():
     ("data_type", "expected"),
     [
         ("num", ([1, 5, 6], None)),
-        ("str", (["category", "", ""], [0, 1, 1])),
+        ("str", ([b"category", b"", b""], [0, 1, 1])),
         ("num_arr", ([[1, 2], [1, 2], [1, 2]], [1, 1, 0])),
-        ("str_arr", ([["test", "string"], ["test", "string"], ["test", "string"]], [1, 0, 1])),
+        (
+            "str_arr",
+            ([[b"test", b"string"], [b"test", b"string"], [b"test", b"string"]], [1, 0, 1]),
+        ),
     ],
 )
 def test_dict_prop_to_arr(data, data_type, expected):

@@ -122,6 +122,8 @@ def dict_props_to_arr(
     Note: The order of the sequence of data should be the same as that used to write
     the ids, or this will not work properly.
 
+    Strings values are cast to bytes to ensure compatibility with non-python zarr libraries.
+
     Args:
         data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of elements and a dictionary
             holding the properties of that element
@@ -150,6 +152,12 @@ def dict_props_to_arr(
                 missing.append(True)
                 missing_any = True
         values_arr = np.asarray(values)
+        if values_arr.dtype.kind == "U":
+            warnings.warn(
+                f"Property {name} is a string array. Cast it to bytes",
+                stacklevel=2,
+            )
+            values_arr = values_arr.astype("S")  # casting to bytes
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
         props_dict[name] = (values_arr, missing_arr)
     return props_dict
