@@ -19,7 +19,6 @@ jobs:
     uses: ./.github/workflows/test.yaml
     with:
       test-target: "tests"
-      witty-cache: false
       install-group: "dev"
 
   schema:

@@ -19,7 +19,7 @@ def graph_sparse_node_props():
         [1, 7, 6],
     ]
     node_scores = [0.5, 0.2, None, None, 0.1]
-    for node, pos, score in zip(nodes, positions, node_scores):
+    for node, pos, score in zip(nodes, positions, node_scores, strict=False):
         t, y, x = pos
         if score is not None:
             graph.add_node(node, t=t, y=y, x=x, score=score)
@@ -36,7 +36,7 @@ def graph_sparse_edge_props():
         [2, 5],
     ]
     edge_scores = [0.1, None, 0.5]
-    for edge, score in zip(edges, edge_scores):
+    for edge, score in zip(edges, edge_scores, strict=False):
         if score is not None:
             graph.add_edge(edge[0], edge[1], score=score)
         else:
@@ -94,13 +94,14 @@ def test_sparse_edge_props(tmp_path):
 
 
 def test_missing_pos_prop(tmp_path):
-    zarr_path = Path(tmp_path) / "test.zarr"
+    zarr_path = Path(tmp_path) / "test1.zarr"
     graph, _ = graph_sparse_node_props()
     # wrong property name
-    with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
-        geff.write_nx(graph, axis_names=["t", "y", "z"], path=zarr_path)
+    with pytest.raises(UserWarning, match="Property .* is not present on any graph elements"):
+        with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
+            geff.write_nx(graph, axis_names=["t", "y", "z"], path=zarr_path)
     # missing property
     del graph.nodes[1]["t"]
     print(graph.nodes[1])
-    with pytest.raises(ValueError, match=r"Element '1' does not have position property"):
+    with pytest.raises(ValueError, match=r"Spatiotemporal property 't' not found in : \[1\]"):
         geff.write_nx(graph, axis_names=["t", "y", "x"], path=zarr_path)

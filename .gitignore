@@ -12,6 +12,7 @@ wheels/
 
 # Virtual environments
 .venv
+.python-version
 
 # pixi environments
 .pixi
@@ -25,6 +26,9 @@ docs/schema/*
 
 # Pytest coverage local files
 .coverage*
+coverage.xml
 
 uv.lock
 /.idea
+.vscode/
+site
