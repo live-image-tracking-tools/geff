@@ -135,8 +135,7 @@ def read(
             the backend when reading the data.
 
     Returns:
-        graph (Any): Graph object of the chosen backend.
-        metadata (GeffMetadata): The GEFF metadata.
+        tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
     """
     ingest_func = get_construct_func(backend)
     if backend_kwargs is None:

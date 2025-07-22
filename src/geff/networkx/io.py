@@ -218,8 +218,8 @@ def construct_nx(graph_dict: GraphDict) -> tuple[nx.Graph | nx.DiGraph, GeffMeta
         graph_dict (GraphDict): A dictionary representation of the GEFF data.
 
     Returns:
-        (nx.Graph | nx.DiGraph): A `networkx` graph object.
-        (GeffMetadata): The GEFF metadata.
+        tuple[nx.Graph | nx.DiGraph, GeffMetadata]: A `networkx` graph object, and its metadata.
+
     """
     metadata = graph_dict["metadata"]
 
