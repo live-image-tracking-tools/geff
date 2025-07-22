@@ -112,12 +112,12 @@ def from_ctc_to_geff(
                 n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
                 expand_dims = (np.newaxis,) * len(n_1_padding)
 
-            segm_array = zarr.create_array(
+            segm_array = zarr.open(
                 segmentation_store,
                 shape=(len(sorted_files), *n_1_padding, *frame.shape),
                 chunks=(1, *n_1_padding, *frame.shape),
                 dtype=frame.dtype,
-                overwrite=overwrite,
+                mode="w" if overwrite else "w-",
             )
 
         if segm_array is not None:
