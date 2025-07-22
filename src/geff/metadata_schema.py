@@ -149,7 +149,7 @@ class GeffMetadata(BaseModel):
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
-    track_node_properties: dict[Literal["lineage", "tracklet"], str] | None = Field(
+    track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
         None,
         description=(
             "Node properties denoting tracklet and/or lineage IDs.\n"
