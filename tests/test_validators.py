@@ -1,7 +1,8 @@
 import numpy as np
 import zarr
-from geff.validators.validators import validate_geff_edges, validate_no_self_edges, validate_no_repeated_edges
+from geff.validators.validators import validate_geff_edges, validate_no_self_edges, validate_no_repeated_edges, validate_tracklets
 from geff.testing.data import create_geff_correct, create_geff_edge_error
+import pytest
 
 
 def test_no_self_edges():
@@ -60,3 +61,31 @@ def test_detects_repeated_edges():
     assert not is_valid, "Validator should detect repeated edges."
     assert [0, 1] in repeated_edges.tolist(), "Edge [0, 1] should be reported as repeated."
     assert len(repeated_edges) == 1, "There should be exactly one unique repeated edge."
+
+@pytest.mark.parametrize(
+    "node_ids, edge_ids, tracklet_ids, expected_valid, description", [
+        # Single, simple, valid tracklet (1→2→3)
+        ([1, 2, 3], np.array([[1, 2], [2, 3]]), [10, 10, 10], True, "Valid simple path"),
+        # Tracklet with missing edge
+        ([1, 2, 3], np.array([[1, 2]]), [10, 10, 10], False, "Missing edge in path"),
+        # Tracklet with a cycle
+        ([1, 2, 3], np.array([[1, 2], [2, 3], [3, 1]]), [10, 10, 10], False, "Cycle in tracklet"),
+        # Multiple valid tracklets
+        ([1, 2, 3, 4, 5, 6], np.array([[1, 2], [2, 3], [4, 5], [5, 6]]), [10, 10, 10, 20, 20, 20], True, "Two valid tracklets"),
+        # Branching in tracklet
+        ([1, 2, 3], np.array([[1, 2], [1, 3]]), [10, 10, 10], False, "Branch in tracklet"),
+        # Valid path with in/out edges to/from outside tracklet
+        ([1, 2, 3, 4, 5], np.array([[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]]), [10, 10, 10, 10, 10], True, "Edges to/from outside"),
+        # Not fully connected
+        ([1, 2, 3], np.array([[1, 2]]), [10, 10, 10], False, "Not fully connected"),
+        # Two nodes, valid path
+        ([1, 2], np.array([[1, 2]]), [10, 10], True, "Two nodes, valid path"),
+        # Tracklet with all nodes, but disconnected
+        ([1, 2, 3, 4], np.array([[1, 2], [3, 4]]), [10, 10, 10, 10], False, "Disconnected tracklet"),
+        # Multiple tracklets, one valid, one invalid
+        ([1, 2, 3, 4, 5, 6], np.array([[1, 2], [2, 3], [4, 5]]), [10, 10, 10, 20, 20, 20], False, "One valid, one invalid"),
+    ]
+)
+def test_validate_tracklets(node_ids, edge_ids, tracklet_ids, expected_valid, description):
+    is_valid, errors = validate_tracklets(node_ids, edge_ids, tracklet_ids)
+    assert is_valid == expected_valid, f"{description} failed: {errors}"

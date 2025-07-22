@@ -66,7 +66,70 @@ def validate_no_repeated_edges(group: zarr.Group) -> tuple[bool, np.ndarray]:
     repeated_edges = edges[idx[repeated_mask]]
     return (len(repeated_edges) == 0, repeated_edges)
 
+def validate_tracklets(node_ids, edge_ids, tracklet_ids):
+    """
+    Validates that nodes with the same tracklet_id form a simple directed path,
+    allowing for incoming and outgoing connections to/from nodes outside the tracklet.
 
+    Args:
+        node_ids (list): List of node ids
+        edge_ids (np.ndarray): Array of [source, target] edges
+        tracklet_ids (list): List of tracklet ids per node
+
+    Returns:
+        (is_valid, errors): bool, list of error messages
+    """
+
+    errors = []
+
+    # Map node to its tracklet
+    node_to_tracklet = {node: t_id for node, t_id in zip(node_ids, tracklet_ids)}
+
+    # Map tracklet_id to [nodes]
+    tracklet_to_nodes = {}
+    for node, t_id in zip(node_ids, tracklet_ids):
+        tracklet_to_nodes.setdefault(t_id, []).append(node)
+
+    # Build adjacency and reverse adjacency
+    adj = {node: [] for node in node_ids}
+    rev_adj = {node: [] for node in node_ids}
+    for src, tgt in edge_ids:
+        adj.setdefault(src, []).append(tgt)
+        rev_adj.setdefault(tgt, []).append(src)
+
+    for t_id, t_nodes in tracklet_to_nodes.items():
+        node_set = set(t_nodes)
+        # Subgraph connections within tracklet
+        sub_adj = {n: [m for m in adj.get(n, []) if m in node_set] for n in node_set}
+        sub_rev_adj = {n: [m for m in rev_adj.get(n, []) if m in node_set] for n in node_set}
+
+        # For each node, count incoming and outgoing edges from/to *within the tracklet*
+        in_deg = {n: len(sub_rev_adj[n]) for n in node_set}
+        out_deg = {n: len(sub_adj[n]) for n in node_set}
+
+        # Start: in_deg==0 (within tracklet), End: out_deg==0 (within tracklet), all others ==1
+        starts = [n for n in node_set if in_deg[n] == 0]
+        ends = [n for n in node_set if out_deg[n] == 0]
+
+        if len(starts) != 1 or len(ends) != 1:
+            errors.append(f"Tracklet {t_id}: not a single path (starts: {starts}, ends: {ends})")
+            continue
+
+        # Traverse within the tracklet
+        visited = set()
+        queue = [starts[0]]
+        while queue:
+            n = queue.pop(0)
+            if n in visited:
+                errors.append(f"Tracklet {t_id}: cycle or repeated node detected")
+                break
+            visited.add(n)
+            queue.extend(sub_adj[n])
+        if len(visited) != len(node_set):
+            errors.append(f"Tracklet {t_id}: not fully connected (visited {len(visited)}/{len(node_set)})")
+
+    is_valid = (len(errors) == 0)
+    return is_valid, errors
 
 def validate_seg_id(group):
     pass
