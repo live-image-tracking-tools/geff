@@ -70,6 +70,16 @@ class TestMetadataModel:
         )
         assert len(model.related_objects) == 2
 
+        # Related object type
+        with pytest.warns(
+            UserWarning, match=r".* might not be recognized by reader applications.*"
+        ):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                related_objects=[{"type": "invalid_type", "path": "invalid/"}],
+            )
+
         # Invalid combination of type and label_prop
         with pytest.raises(
             pydantic.ValidationError, match=".*label_prop .+ is only valid for type 'labels'.*"
