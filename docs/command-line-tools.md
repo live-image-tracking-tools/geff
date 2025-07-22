@@ -22,5 +22,5 @@ In a development environment, please run, for example,
 
 ```bash
 pixi run build
-uvx --from dist/geff-0.3 ... .whl validate tracks.geff
+uvx --from dist/geff-0.3 ... .whl validate /path/to/geff.geff
 ```
