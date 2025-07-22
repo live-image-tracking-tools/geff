@@ -14,7 +14,7 @@ Examples:
 
     # Advanced usage with full control
     >>> store, props = create_memory_mock_geff(
-    ...     node_id_dtype="str",
+    ...     node_id_dtype="int",
     ...     node_axis_dtypes={"position": "float64", "time": "float32"},
     ...     directed=True,
     ...     num_nodes=5,
@@ -36,7 +36,7 @@ Examples:
     >>> # graph is a networkx Graph ready for analysis
 """
 
-from typing import Any, Literal, TypedDict, cast
+from typing import Any, Literal, TypedDict, cast, get_args
 
 import networkx as nx
 import numpy as np
@@ -47,6 +47,7 @@ from numpy.typing import NDArray
 import geff
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
+NodeIdDTypeStr = Literal["int", "int8", "uint8", "int16", "uint16"]
 Axes = Literal["t", "z", "y", "x"]
 
 
@@ -71,7 +72,7 @@ class ExampleNodeAxisPropsDtypes(TypedDict):
 
 
 def create_dummy_graph_props(
-    node_id_dtype: DTypeStr,
+    node_id_dtype: NodeIdDTypeStr,
     node_axis_dtypes: ExampleNodeAxisPropsDtypes,
     directed: bool,
     num_nodes: int = 5,
@@ -122,17 +123,12 @@ def create_dummy_graph_props(
         axis_units_list.append("nanometer")
         axis_types_list.append("space")
 
-    axis_names: tuple[Axes, ...] = cast("tuple[Axes, ...]", tuple(axis_names_list))
+    axis_names = cast("tuple[Axes, ...]", tuple(axis_names_list))
     axis_units = tuple(axis_units_list)
     axis_types = tuple(axis_types_list)
 
     # Generate nodes with flexible count
-    if node_id_dtype == "str":
-        # For string dtype, create string representations of numbers
-        nodes = np.array([f"node_{i}" for i in range(num_nodes)], dtype=node_id_dtype)
-    else:
-        # For numeric dtypes, use arange
-        nodes = np.arange(num_nodes, dtype=node_id_dtype)
+    nodes = np.arange(num_nodes, dtype=node_id_dtype)
 
     # Generate spatiotemporal coordinates with flexible dimensions
     t = (
@@ -175,10 +171,7 @@ def create_dummy_graph_props(
         for i in range(min(actual_num_edges, num_nodes - 1)):
             source_idx = i
             target_idx = i + 1
-            if node_id_dtype == "str":
-                edges.append([f"node_{source_idx}", f"node_{target_idx}"])
-            else:
-                edges.append([int(source_idx), int(target_idx)])
+            edges.append([int(source_idx), int(target_idx)])
             edge_count += 1
 
         # Add remaining edges as cross connections
@@ -187,10 +180,7 @@ def create_dummy_graph_props(
             source_idx = i % (num_nodes - 2)
             target_idx = (i + 2) % (num_nodes - 1) + 1
             if source_idx != target_idx:
-                if node_id_dtype == "str":
-                    edges.append([f"node_{source_idx}", f"node_{target_idx}"])
-                else:
-                    edges.append([int(source_idx), int(target_idx)])
+                edges.append([int(source_idx), int(target_idx)])
                 edge_count += 1
     else:
         # For directed graphs, we can create more edges efficiently
@@ -201,10 +191,7 @@ def create_dummy_graph_props(
         for i in range(min(actual_num_edges, num_nodes - 1)):
             source_idx = i
             target_idx = i + 1
-            if node_id_dtype == "str":
-                edges.append([f"node_{source_idx}", f"node_{target_idx}"])
-            else:
-                edges.append([int(source_idx), int(target_idx)])
+            edges.append([int(source_idx), int(target_idx)])
             edge_count += 1
 
         # Add remaining edges using different patterns
@@ -215,10 +202,7 @@ def create_dummy_graph_props(
                 source_idx = i % num_nodes
                 target_idx = (i + 2) % num_nodes  # Skip one node
                 if source_idx != target_idx:
-                    if node_id_dtype == "str":
-                        edges.append([f"node_{source_idx}", f"node_{target_idx}"])
-                    else:
-                        edges.append([int(source_idx), int(target_idx)])
+                    edges.append([int(source_idx), int(target_idx)])
                     edge_count += 1
 
                     # Stop if we've reached the target
@@ -231,10 +215,7 @@ def create_dummy_graph_props(
                     source_idx = i % num_nodes
                     target_idx = (i + 3) % num_nodes  # Skip two nodes
                     if source_idx != target_idx:
-                        if node_id_dtype == "str":
-                            edges.append([f"node_{source_idx}", f"node_{target_idx}"])
-                        else:
-                            edges.append([int(source_idx), int(target_idx)])
+                        edges.append([int(source_idx), int(target_idx)])
                         edge_count += 1
 
                         # Stop if we've reached the target
@@ -260,8 +241,6 @@ def create_dummy_graph_props(
                 )
 
             # Validate dtype is supported using DTypeStr
-            from typing import get_args
-
             valid_dtypes = get_args(DTypeStr)
             if prop_dtype not in valid_dtypes:
                 raise ValueError(
@@ -301,8 +280,6 @@ def create_dummy_graph_props(
                 )
 
             # Validate dtype is supported using DTypeStr
-            from typing import get_args
-
             valid_dtypes = get_args(DTypeStr)
             if prop_dtype not in valid_dtypes:
                 raise ValueError(
@@ -337,7 +314,7 @@ def create_dummy_graph_props(
 
 
 def create_memory_mock_geff(
-    node_id_dtype: DTypeStr,
+    node_id_dtype: NodeIdDTypeStr,
     node_axis_dtypes: ExampleNodeAxisPropsDtypes,
     directed: bool,
     num_nodes: int = 5,

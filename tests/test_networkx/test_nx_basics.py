@@ -4,6 +4,7 @@ import pytest
 import zarr
 
 import geff
+from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
@@ -113,7 +114,6 @@ def test_write_empty_graph(tmp_path):
 
 def test_write_nx_with_metadata(tmp_path):
     """Test write_nx with explicit metadata parameter"""
-    from geff.metadata_schema import GeffMetadata, axes_from_lists
 
     graph = nx.Graph()
     graph.add_node(1, x=1.0, y=2.0)
