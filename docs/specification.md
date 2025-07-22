@@ -119,6 +119,25 @@ This is a geff metadata zattrs file that matches the above example structure.
         "sphere": "radius", # optional
         "ellipsoid": "covariance3d", # optional
         # TODO Implicit assumptions on axis and units, make docs for this
+        "display_hints": {
+            "display_horizontal": "x",
+            "display_vertical": "y",
+            "display_depth": "z",
+            "display_time": "t",
+        },
+        # node attributes corresponding to tracklet and/or lineage IDs
+        "track_node_props": {
+            "lineage": "ultrack_lineage_id",
+            "tracklet": "ultrack_id"
+        },
+        "related_objects": {
+            {
+                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id",
+            },
+            {
+                "type":"image", "path":"../raw/",
+            },
+        }
     }
     ... # custom other things are allowed and ignored by geff
 }
