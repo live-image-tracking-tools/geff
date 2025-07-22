@@ -1,4 +1,3 @@
-from os import write
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -10,10 +9,9 @@ from zarr.storage import StoreLike
 import geff
 
 if TYPE_CHECKING:
-    import rustworkx as rx  # noqa: TC004
+    import rustworkx as rx
 
 from geff.metadata_schema import GeffMetadata
-from geff.networkx.io import _get_graph_existing_metadata
 from geff.write_dicts import write_dicts
 
 
@@ -43,9 +41,11 @@ def write_rx(
         return
 
     if node_id_dict is None:
-        node_data = list(zip(graph.node_indices(), graph.nodes()))
+        node_data = list(zip(graph.node_indices(), graph.nodes(), strict=False))
     else:
-        node_data = [(node_id_dict[i], d) for i, d in zip(graph.node_indices(), graph.nodes())]
+        node_data = [
+            (node_id_dict[i], d) for i, d in zip(graph.node_indices(), graph.nodes(), strict=False)
+        ]
 
     if node_id_dict is None:
         edge_data = [((u, v), data) for u, v, data in graph.weighted_edge_list()]
@@ -131,7 +131,7 @@ def read_rx(
     node_props: list[dict[str, Any]] = [{} for _ in node_ids]
     rx_node_ids = graph.add_nodes_from(node_props)
 
-    to_rx_id_map = dict(zip(node_ids, rx_node_ids))
+    to_rx_id_map = dict(zip(node_ids, rx_node_ids, strict=False))
 
     _set_properties_values(node_props, group["nodes/props"])
 
@@ -142,7 +142,8 @@ def read_rx(
 
         # converting node ids (arbitrary index) to rx ids (0-indexed)
         edges = [
-            (to_rx_id_map[i], to_rx_id_map[j], attr) for (i, j), attr in zip(edge_ids, edge_props)
+            (to_rx_id_map[i], to_rx_id_map[j], attr)
+            for (i, j), attr in zip(edge_ids, edge_props, strict=False)
         ]
         graph.add_edges_from(edges)
 
