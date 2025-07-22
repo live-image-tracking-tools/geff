@@ -6,7 +6,6 @@ from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any, Literal
-from typing import Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
