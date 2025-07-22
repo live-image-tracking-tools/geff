@@ -1,5 +1,7 @@
 import argparse
 
+import zarr
+
 from . import utils
 from .metadata_schema import GeffMetadata
 
@@ -18,6 +20,6 @@ def info() -> None:
     parser = argparse.ArgumentParser(description="Display information about a GEFF file")
     parser.add_argument("input_path", help="Path to the GEFF file")
     args = parser.parse_args()
-    metadata = GeffMetadata.read(args.input_path)
+    metadata = GeffMetadata.read(zarr.open(args.input_path, mode="r"))
     # Assuming utils has a function to get metadata
     print(metadata.to_dict())  # Convert metadata to dict for display
