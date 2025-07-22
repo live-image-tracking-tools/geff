@@ -22,4 +22,4 @@ def info() -> None:
     args = parser.parse_args()
     metadata = GeffMetadata.read(zarr.open(args.input_path, mode="r"))
     # Assuming utils has a function to get metadata
-    print(metadata.to_dict())  # Convert metadata to dict for display
+    print(metadata.model_dump_json(indent=2))  # Convert metadata to dict for display
