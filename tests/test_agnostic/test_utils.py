@@ -61,7 +61,7 @@ def test_validate_zarr_structure(tmp_path):
     with pytest.raises(
         AssertionError,
         match=(
-            f"Node property badshape values has length {n_node * 2}, "
+            f"node property badshape values has length {n_node * 2}, "
             f"which does not match id length {n_node}"
         ),
     ):
@@ -74,12 +74,23 @@ def test_validate_zarr_structure(tmp_path):
     with pytest.raises(
         AssertionError,
         match=(
-            f"Node property badshape missing mask has length {n_node * 2}, "
+            f"node property badshape missing mask has length {n_node * 2}, "
             f"which does not match id length {n_node}"
         ),
     ):
         validate_zarr_structure(z, meta)
     del z["nodes/props"]["badshape"]
+
+    # Missing array must be boolean
+    z['nodes/props/missing_dtype/values'] = np.zeros(shape=(n_node))
+    z['nodes/props/missing_dtype/missing'] = np.zeros(shape=(n_node))
+    with pytest.raises(
+        AssertionError,
+        match="Missing array for property missing_dtype must be boolean"
+    ):
+        validate_zarr_structure(z, meta)
+    del z['nodes/props']['missing_dtype']
+
 
     # No edge group is okay, if the graph has no edges
     z.create_group("edges")
@@ -107,7 +118,7 @@ def test_validate_zarr_structure(tmp_path):
     with pytest.raises(
         AssertionError,
         match=(
-            f"Edge property badshape values has length {n_edges * 2}, "
+            f"edge property badshape values has length {n_edges * 2}, "
             f"which does not match id length {n_edges}"
         ),
     ):
@@ -120,7 +131,7 @@ def test_validate_zarr_structure(tmp_path):
     with pytest.raises(
         AssertionError,
         match=(
-            f"Edge property badshape missing mask has length {n_edges * 2}, "
+            f"edge property badshape missing mask has length {n_edges * 2}, "
             f"which does not match id length {n_edges}"
         ),
     ):

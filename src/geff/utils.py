@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import zarr
@@ -55,26 +55,7 @@ def validate_zarr_structure(graph: zarr.Group, meta: GeffMetadata):
 
     # Properties on nodes are optional
     if "props" in nodes.group_keys():
-        # Property array length should match id length
-        id_len = nodes["ids"].shape[0]
-        for prop in nodes["props"].keys():
-            prop_group = nodes["props"][prop]
-            assert "values" in prop_group.array_keys(), (
-                f"node property group {prop} must have values group"
-            )
-            prop_len = prop_group["values"].shape[0]
-            assert prop_len == id_len, (
-                f"Node property {prop} values has length {prop_len}, which does not match "
-                f"id length {id_len}"
-            )
-            if "missing" in prop_group.array_keys():
-                missing_len = prop_group["missing"].shape[0]
-                assert missing_len == id_len, (
-                    f"Node property {prop} missing mask has length {missing_len}, which "
-                    f"does not match id length {id_len}"
-                )
-
-    # TODO: Do we want to prevent missing values on spatialtemporal properties
+        validate_graph_group(nodes, "node")
 
     if "edges" in graph.group_keys():
         edges = graph["edges"]
@@ -86,22 +67,35 @@ def validate_zarr_structure(graph: zarr.Group, meta: GeffMetadata):
             f"edges ids must have a last dimension of size 2, received shape {id_shape}"
         )
 
-        # Edge property array length should match edge id length
-        edge_id_len = edges["ids"].shape[0]
         if "props" in edges:
-            for prop in edges["props"].keys():
-                prop_group = edges["props"][prop]
-                assert "values" in prop_group.array_keys(), (
-                    f"Edge property group {prop} must have values group"
-                )
-                prop_len = prop_group["values"].shape[0]
-                assert prop_len == edge_id_len, (
-                    f"Edge property {prop} values has length {prop_len}, which does not "
-                    f"match id length {edge_id_len}"
-                )
-                if "missing" in prop_group.array_keys():
-                    missing_len = prop_group["missing"].shape[0]
-                    assert missing_len == edge_id_len, (
-                        f"Edge property {prop} missing mask has length {missing_len}, "
-                        f"which does not match id length {edge_id_len}"
-                    )
+            validate_graph_group(edges, "edge")
+def validate_graph_group(group: zarr.Group, type: Literal["node", "edge"]):
+    """Verify that either a group of nodes or edges has basic correct structure
+
+    - First dimension size must match the number of ids
+    - Missing arrays must be boolean
+
+    Args:
+        group (zarr.Group): The zarr group containing the geff metadata
+        type (Literal[str]): Type of group being evaluated. Either edge or node
+    """
+    # Property array length should match id length
+    id_len = group["ids"].shape[0]
+    for prop in group["props"].keys():
+        prop_group = group["props"][prop]
+        assert "values" in prop_group.array_keys(), (
+            f"{type} property group {prop} must have values group"
+        )
+        prop_len = prop_group["values"].shape[0]
+        assert prop_len == id_len, (
+            f"{type} property {prop} values has length {prop_len}, which does not match "
+            f"id length {id_len}"
+        )
+        if "missing" in prop_group.array_keys():
+            missing_len = prop_group["missing"].shape[0]
+            assert missing_len == id_len, (
+                f"{type} property {prop} missing mask has length {missing_len}, which "
+                f"does not match id length {id_len}"
+            )
+            missing_dtype = prop_group["missing"].dtype
+            assert np.issubdtype(missing_dtype, np.bool_), f"Missing array for property {prop} must be boolean"
