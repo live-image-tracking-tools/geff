@@ -68,13 +68,13 @@ def _get_units(
         units = deepcopy(element.attrib)
     if "spatialunits" not in units:
         warnings.warn(
-            "No spatial units found in the XML file. Setting to 'pixel'.",
+            "No space unit found in the XML file. Setting to 'pixel'.",
             stacklevel=2,
         )
         units["spatialunits"] = "pixel"  # TrackMate default value.
     if "timeunits" not in units:
         warnings.warn(
-            "No time units found in the XML file. Setting to 'frame'.",
+            "No time unit found in the XML file. Setting to 'frame'.",
             stacklevel=2,
         )
         units["timeunits"] = "frame"  # TrackMate default value.
