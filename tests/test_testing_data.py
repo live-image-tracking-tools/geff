@@ -1,7 +1,13 @@
-import geff
-import pytest
 import numpy as np
-from geff.testing.data import create_simple_2d_geff, create_simple_3d_geff, create_simple_temporal_geff
+import pytest
+
+import geff
+from geff.testing.data import (
+    create_simple_2d_geff,
+    create_simple_3d_geff,
+    create_simple_temporal_geff,
+)
+
 
 def test_create_simple_2d_geff():
     """Test the create_simple_2d_geff convenience function"""
@@ -36,7 +42,6 @@ def test_create_simple_2d_geff():
 
 def test_create_simple_3d_geff():
     """Test the create_simple_3d_geff convenience function"""
-    from geff.testing.data import create_simple_3d_geff
 
     # Test with defaults
     store, _ = create_simple_3d_geff()
@@ -99,7 +104,6 @@ def test_create_simple_temporal_geff():
 
 def test_simple_geff_edge_properties():
     """Test that the simple functions create graphs with proper edge properties"""
-    from geff.testing.data import create_simple_3d_geff
 
     # Test 2D
     store_2d, _ = create_simple_2d_geff()

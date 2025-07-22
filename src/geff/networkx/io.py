@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import os
 import warnings
 from pathlib import Path
@@ -165,6 +166,7 @@ def write_nx(
         roi_min, roi_max = get_roi(graph, axis_names)
     else:
         roi_min, roi_max = None, None
+
     axes = axes_from_lists(
         axis_names,
         axis_units=axis_units,
@@ -172,11 +174,21 @@ def write_nx(
         roi_min=roi_min,
         roi_max=roi_max,
     )
-    metadata = GeffMetadata(
-        geff_version=geff.__version__,
-        directed=isinstance(graph, nx.DiGraph),
-        axes=axes,
-    )
+
+    # Conditionally update metadata with new axes, version, and directedness
+    # If metadata is provided, extra properties are preserved; otherwise, a new GeffMetadata object
+    # is created
+    if metadata is not None:
+        metadata = copy.deepcopy(metadata)
+        metadata.geff_version = geff.__version__
+        metadata.directed = isinstance(graph, nx.DiGraph)
+        metadata.axes = axes
+    else:
+        metadata = GeffMetadata(
+            geff_version=geff.__version__,
+            directed=isinstance(graph, nx.DiGraph),
+            axes=axes,
+        )
     metadata.write(group)
 
 
