@@ -171,7 +171,7 @@
             }
           ],
           "default": null,
-          "description": "Node properties denoting tracklet and/or lineage IDs.\nA tracklet is defined as a simple path of connected nodes where the terminating node has incoming degree 1 and any outgoing degree, and other nodes along the path have in/out degree of at most 1.\nA lineage is defined as a weakly connected component on the graph.\nThe dictionary can store one or both of 'tracklet' or 'lineage' keys.",
+          "description": "Node properties denoting tracklet and/or lineage IDs.\nA tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1,and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.\nA lineage is defined as a weakly connected component on the graph.\nThe dictionary can store one or both of 'tracklet' or 'lineage' keys.",
           "title": "Track Node Props"
         },
         "related_objects": {
