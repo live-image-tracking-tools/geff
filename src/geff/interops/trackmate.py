@@ -8,8 +8,7 @@ import networkx as nx
 import typer
 from lxml import etree as ET
 
-import geff
-from geff.metadata_schema import GeffMetadata
+from geff.metadata_schema import Axis, GeffMetadata
 from geff.networkx.io import write_nx
 
 # Type aliases
@@ -427,7 +426,7 @@ def _parse_model_tag(
     xml_path: Path,
     discard_filtered_spots: bool = False,
     discard_filtered_tracks: bool = False,
-) -> nx.Graph:
+) -> tuple[nx.Graph, dict[str, str]]:
     """Read an XML file and convert the model data into several graphs.
 
     All TrackMate tracks and their associated data described in the XML file
@@ -444,11 +443,10 @@ def _parse_model_tag(
 
     Returns:
         nx.Graph: A NetworkX graph representing the TrackMate data.
+        dict[str, str]: A dictionary containing the units of the model, with keys
+            'spatialunits' and 'timeunits'.
     """
     graph = nx.Graph()
-    metadata = GeffMetadata(geff_version=geff.__version__, directed=True)
-    # TODO: determine axes
-    # TODO: remove geff version and related import
 
     # So as not to load the entire XML file into memory at once, we're
     # using an iterator to browse over the tags one by one.
@@ -473,11 +471,13 @@ def _parse_model_tag(
 
         # Adding the spots as nodes.
         if element.tag == "AllSpots" and event == "start":
+            # TODO: segmentation will be used when GEFF supports polygons.
             segmentation = _add_all_nodes(it, element, attrs_md, graph)
             root.clear()
 
         # Adding the tracks as edges.
         if element.tag == "AllTracks" and event == "start":
+            # TODO: implement storage of track attributes.
             tracks_attributes = _build_tracks(it, element, attrs_md, graph)
             root.clear()
 
@@ -498,7 +498,7 @@ def _parse_model_tag(
         if element.tag == "Model" and event == "end":
             break  # We are not interested in the following data.
 
-    return graph
+    return graph, units
 
 
 def from_trackmate_xml_to_geff(
@@ -506,7 +506,6 @@ def from_trackmate_xml_to_geff(
     geff_path: Path | str,
     discard_filtered_spots: bool = False,
     discard_filtered_tracks: bool = False,
-    tczyx: bool = False,
     overwrite: bool = False,
     zarr_format: Literal[2, 3] | None = 2,
 ) -> None:
@@ -520,7 +519,6 @@ def from_trackmate_xml_to_geff(
             filtered out in TrackMate, False otherwise. False by default.
         discard_filtered_tracks (bool, optional): True to discard the tracks
             filtered out in TrackMate, False otherwise. False by default.
-        tczyx (bool): Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
         zarr_format (int, optional): The version of zarr to write. Defaults to 2.
     """
@@ -531,7 +529,7 @@ def from_trackmate_xml_to_geff(
     _preliminary_checks(xml_path, geff_path, overwrite=overwrite)
 
     # graph = _build_nx(xml_path)
-    graph = _parse_model_tag(
+    graph, units = _parse_model_tag(
         xml_path=xml_path,
         discard_filtered_spots=discard_filtered_spots,
         discard_filtered_tracks=discard_filtered_tracks,
@@ -541,22 +539,27 @@ def from_trackmate_xml_to_geff(
     # print(graph.edges[2005, 2007])
     # print(len(list(nx.weakly_connected_components(graph))))
 
+    metadata = GeffMetadata(
+        axes=[
+            Axis(name="POSITION_X", type="space", unit=units.get("spatialunits", "pixel")),
+            Axis(name="POSITION_Y", type="space", unit=units.get("spatialunits", "pixel")),
+            Axis(name="POSITION_Z", type="space", unit=units.get("spatialunits", "pixel")),
+            Axis(name="POSITION_T", type="time", unit=units.get("timeunits", "frame")),
+        ],
+        directed=True,
+    )
+
     write_nx(
         graph,
         geff_path,
+        metadata=metadata,
         zarr_format=zarr_format,
     )
-    # TODO: add the following parameters (cf write_nx definition)
-    #     metadata: GeffMetadata | None = None,
-    #     axis_names: list[str] | None = None,
-    #     axis_units: list[str | None] | None = None,
-    #     axis_types: list[str | None] | None = None,
 
 
 def from_trackmate_xml_to_geff_cli(
     xml_path: Path | str,
     geff_path: Path | str,
-    tczyx: bool = False,
     overwrite: bool = False,
     zarr_format: Literal[2, 3] | None = 2,
 ) -> None:
@@ -566,14 +569,12 @@ def from_trackmate_xml_to_geff_cli(
     Args:
         xml_path (Path | str): The path to the TrackMate XML file.
         geff_path (Path | str): The path to the GEFF file.
-        tczyx (bool): Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
         zarr_format (int, optional): The version of zarr to write. Defaults to 2.
     """
     from_trackmate_xml_to_geff(
         xml_path=xml_path,
         geff_path=geff_path,
-        tczyx=tczyx,
         overwrite=overwrite,
         zarr_format=zarr_format,
     )
