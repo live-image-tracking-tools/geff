@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+import numpy as np
 import zarr
 
 from .metadata_schema import GeffMetadata
@@ -48,28 +49,30 @@ def validate_zarr_structure(graph: zarr.Group, meta: GeffMetadata):
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
 
-    # ids and props are required and should be same length
+    # ids and required and must by int type
     assert "ids" in nodes.array_keys(), "nodes group must contain an ids array"
-    assert "props" in nodes.group_keys(), "nodes group must contain a props group"
+    assert np.issubdtype(nodes["ids"].dtype, np.integer), "node ids must have an integer dtype"
 
-    # Property array length should match id length
-    id_len = nodes["ids"].shape[0]
-    for prop in nodes["props"].keys():
-        prop_group = nodes["props"][prop]
-        assert "values" in prop_group.array_keys(), (
-            f"node property group {prop} must have values group"
-        )
-        prop_len = prop_group["values"].shape[0]
-        assert prop_len == id_len, (
-            f"Node property {prop} values has length {prop_len}, which does not match "
-            f"id length {id_len}"
-        )
-        if "missing" in prop_group.array_keys():
-            missing_len = prop_group["missing"].shape[0]
-            assert missing_len == id_len, (
-                f"Node property {prop} missing mask has length {missing_len}, which "
-                f"does not match id length {id_len}"
+    # Properties on nodes are optional
+    if "props" in nodes.group_keys():
+        # Property array length should match id length
+        id_len = nodes["ids"].shape[0]
+        for prop in nodes["props"].keys():
+            prop_group = nodes["props"][prop]
+            assert "values" in prop_group.array_keys(), (
+                f"node property group {prop} must have values group"
             )
+            prop_len = prop_group["values"].shape[0]
+            assert prop_len == id_len, (
+                f"Node property {prop} values has length {prop_len}, which does not match "
+                f"id length {id_len}"
+            )
+            if "missing" in prop_group.array_keys():
+                missing_len = prop_group["missing"].shape[0]
+                assert missing_len == id_len, (
+                    f"Node property {prop} missing mask has length {missing_len}, which "
+                    f"does not match id length {id_len}"
+                )
 
     # TODO: Do we want to prevent missing values on spatialtemporal properties
 
