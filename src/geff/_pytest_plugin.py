@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 import networkx as nx
 import numpy as np

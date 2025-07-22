@@ -4,9 +4,6 @@ on:
       test-target:
         required: true
         type: string
-      witty-cache: 
-        required: true
-        type: boolean
       install-group:
         required: true
         type: string
@@ -46,10 +43,32 @@ jobs:
           python -m pip install -e . --group ${{ inputs.install-group }}
           python -m pip list
 
+      - name: Get witty cache directory
+        id: cache-path
+        shell: bash
+        run: |
+          dir=$(python -c 'import witty; print(witty.get_witty_cache_dir())')
+          echo "path=$dir" >> "$GITHUB_OUTPUT"
+
+      - name: Restore witty cache
+        uses: actions/cache/restore@v4
+        id: witty-cache
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: ${{ matrix.platform }} - ${{ matrix.python-version }}
+
       - name: Test
-        run: pytest --color=yes --cov --cov-report=xml --cov-report=term-missing ${{ inputs.test-target }}
+        run: |
+          coverage run -m pytest --color=yes ${{ inputs.test-target }}
+          coverage xml
 
       - name: Coverage
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Save witty cache
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: ${{ matrix.platform }} - ${{ matrix.python-version }}

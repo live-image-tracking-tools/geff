@@ -25,6 +25,8 @@ docs/schema/*
 
 # Pytest coverage local files
 .coverage*
+coverage.xml
 
 uv.lock
 /.idea
+site
