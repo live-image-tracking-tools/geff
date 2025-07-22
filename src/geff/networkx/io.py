@@ -224,8 +224,6 @@ def construct_nx(graph_dict: GraphDict) -> tuple[nx.Graph | nx.DiGraph, GeffMeta
     metadata = graph_dict["metadata"]
 
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
-    for key, val in metadata:
-        graph.graph[key] = val
 
     graph.add_nodes_from(graph_dict["nodes"].tolist())
     for name, prop_dict in graph_dict["node_props"].items():
