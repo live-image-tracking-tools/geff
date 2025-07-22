@@ -63,7 +63,7 @@ The `edges/props` is optional. If you do not have any edge properties, the `edge
 Here is a schematic of the expected file structure.
 ``` python
 /path/to.zarr
-    /tracking_graph.geff
+    /tracking_graph
 	    .zattrs  # graph metadata with `geff_version`
 	    nodes/
             ids  # shape: (N,)  dtype: uint64
