@@ -62,6 +62,7 @@ class GraphAttrs(TypedDict):
     directed: bool
     axis_names: tuple[Axes, ...]
     axis_units: tuple[str, ...]
+    axis_types: tuple[str, ...]
 
 
 class ExampleNodeAxisPropsDtypes(TypedDict):
@@ -100,25 +101,30 @@ def create_dummy_graph_props(
     Returns:
         Dictionary containing all graph properties
     """
-    # Build axis_names and axis_units based on which dimensions to include
+    # Build axis_names, axis_units, and axis_types based on which dimensions to include
     axis_names_list = []
     axis_units_list = []
-
+    axis_types_list = []
     if include_t:
         axis_names_list.append("t")
-        axis_units_list.append("s")
+        axis_units_list.append("second")
+        axis_types_list.append("time")
     if include_z:
         axis_names_list.append("z")
-        axis_units_list.append("nm")
+        axis_units_list.append("nanometer")
+        axis_types_list.append("space")
     if include_y:
         axis_names_list.append("y")
-        axis_units_list.append("nm")
+        axis_units_list.append("nanometer")
+        axis_types_list.append("space")
     if include_x:
         axis_names_list.append("x")
-        axis_units_list.append("nm")
+        axis_units_list.append("nanometer")
+        axis_types_list.append("space")
 
     axis_names: tuple[Axes, ...] = cast("tuple[Axes, ...]", tuple(axis_names_list))
     axis_units = tuple(axis_units_list)
+    axis_types = tuple(axis_types_list)
 
     # Generate nodes with flexible count
     if node_id_dtype == "str":
@@ -326,6 +332,7 @@ def create_dummy_graph_props(
         "directed": directed,
         "axis_names": axis_names,
         "axis_units": axis_units,
+        "axis_types": axis_types,
     }
 
 
@@ -409,6 +416,7 @@ def create_memory_mock_geff(
         store,
         axis_names=list(graph_props["axis_names"]),
         axis_units=list(graph_props["axis_units"]),
+        axis_types=list(graph_props["axis_types"]),
     )
 
     return store, graph_props
