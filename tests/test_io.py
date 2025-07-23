@@ -17,6 +17,18 @@ edge_prop_dtypes = [
     {"score": "float32", "color": "int16"},
 ]
 
+# NOTE: new backends have to add cases to the utility functions below
+
+
+def is_expected_type(graph, backend: SupportedBackend):
+    match backend:
+        case SupportedBackend.NETWORKX:
+            return isinstance(graph, nx.Graph | nx.DiGraph)
+        case _:
+            raise TypeError(
+                f"No `is_expected_type` code path has been defined for backend '{backend.value}'."
+            )
+
 
 def get_nodes(graph) -> set[Any]:
     if isinstance(graph, (nx.Graph | nx.DiGraph)):
@@ -48,55 +60,47 @@ def get_edge_prop(graph, name: str, edges: list[Any]) -> NDArray[Any]:
         raise TypeError(f"No `get_edge_prop` code path has been defined for type '{type(graph)}'.")
 
 
-def is_expected_type(graph, backend: SupportedBackend):
-    match backend:
-        case SupportedBackend.NETWORKX:
-            return isinstance(graph, nx.Graph | nx.DiGraph)
-        case _:
-            raise TypeError(
-                f"No `is_expected_type` code path has been defined for backend '{backend.value}'."
-            )
-
-
 @pytest.mark.parametrize("node_dtype", node_dtypes)
 @pytest.mark.parametrize("node_prop_dtypes", node_prop_dtypes)
 @pytest.mark.parametrize("edge_prop_dtypes", edge_prop_dtypes)
 @pytest.mark.parametrize("directed", [True, False])
-# Add new backends to this parametrization
-@pytest.mark.parametrize("backend", [SupportedBackend.NETWORKX])
 def test_read(
     path_w_expected_graph_props,
     node_dtype,
     node_prop_dtypes,
     edge_prop_dtypes,
     directed,
-    backend,
 ):
     path, graph_props = path_w_expected_graph_props(
         node_dtype, node_prop_dtypes, edge_prop_dtypes, directed
     )
-    graph, metadata = read(path, backend=backend)
+    for backend in SupportedBackend:
+        # temporarily skip dummy example case until it is removed
+        if backend == SupportedBackend.GRAPH_DICT:
+            continue
 
-    assert is_expected_type(graph, backend)
+        graph, metadata = read(path, backend=backend)
 
-    # nodes and edges correct
-    assert get_nodes(graph) == {*graph_props["nodes"].tolist()}
-    assert get_edges(graph) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
+        assert is_expected_type(graph, backend)
 
-    # check node properties are correct
-    spatial_node_properties = ["t", "z", "y", "x"]
-    for name in spatial_node_properties:
-        np.testing.assert_array_equal(
-            get_node_prop(graph, name, graph_props["nodes"].tolist()), graph_props[name]
-        )
-    for name, values in graph_props["extra_node_props"].items():
-        np.testing.assert_array_equal(
-            get_node_prop(graph, name, graph_props["nodes"].tolist()), values
-        )
-    # check edge properties are correct
-    for name, values in graph_props["edge_props"].items():
-        np.testing.assert_array_equal(
-            get_edge_prop(graph, name, graph_props["edges"].tolist()), values
-        )
+        # nodes and edges correct
+        assert get_nodes(graph) == {*graph_props["nodes"].tolist()}
+        assert get_edges(graph) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
+
+        # check node properties are correct
+        spatial_node_properties = ["t", "z", "y", "x"]
+        for name in spatial_node_properties:
+            np.testing.assert_array_equal(
+                get_node_prop(graph, name, graph_props["nodes"].tolist()), graph_props[name]
+            )
+        for name, values in graph_props["extra_node_props"].items():
+            np.testing.assert_array_equal(
+                get_node_prop(graph, name, graph_props["nodes"].tolist()), values
+            )
+        # check edge properties are correct
+        for name, values in graph_props["edge_props"].items():
+            np.testing.assert_array_equal(
+                get_edge_prop(graph, name, graph_props["edges"].tolist()), values
+            )
 
     # TODO: metadata? Or will it be tested elsewhere
