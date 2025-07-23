@@ -228,10 +228,13 @@ class GeffMetadata(BaseModel):
             """
             Name of the `ellipsoid` property.
 
-            An ellipsoid is assumed to be in the same coordinate system as the `space` type properties.
+            An ellipsoid is assumed to be in the same coordinate system as the `space` type
+            properties.
+
             It is defined by
             - a center point :math:`c`, already given by the `space` type properties
-            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this property as a `2x2`/`3x3` array.
+            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this
+              property as a `2x2`/`3x3` array.
 
             To plot the ellipsoid:
             - Compute the eigendecomposition of the covariance matrix
