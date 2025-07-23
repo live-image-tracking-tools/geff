@@ -3,10 +3,11 @@ import pytest
 
 import geff
 from geff.testing.data import (
+    create_dummy_graph_props,
+    create_memory_mock_geff,
     create_simple_2d_geff,
     create_simple_3d_geff,
     create_simple_temporal_geff,
-    create_memory_mock_geff
 )
 
 

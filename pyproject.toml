@@ -32,7 +32,6 @@ classifiers = [
 
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
-ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -202,6 +201,3 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 
 [project.entry-points.console_scripts]
 ctc2geff = "geff.interops.ctc:app"
-
-[project.entry-points.pytest11]
-geff = "geff._pytest_plugin"
