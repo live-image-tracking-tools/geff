@@ -34,7 +34,7 @@ class PropDictZArray(TypedDict):
 # Intermediate dict format that can be constructed to different backend types
 class InMemoryGeff(TypedDict):
     metadata: GeffMetadata
-    nodes: NDArray[Any]
-    edges: NDArray[Any]
+    node_ids: NDArray[Any]
+    edge_ids: NDArray[Any]
     node_props: dict[str, PropDictNpArray]
     edge_props: dict[str, PropDictNpArray]

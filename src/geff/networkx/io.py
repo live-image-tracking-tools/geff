@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.typing import InMemoryGeff, PropDictNpArray
+    from geff.typing import PropDictNpArray
 
 import logging
 
@@ -225,27 +225,41 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def construct_nx(graph_dict: InMemoryGeff) -> nx.Graph | nx.DiGraph:
+def construct_nx(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+) -> nx.Graph | nx.DiGraph:
     """
     Construct a `networkx` graph instance from a dictionary representation of the GEFF data.
 
     Args:
-        graph_dict (GraphDict): A dictionary representation of the GEFF data.
+        metadata (GeffMetadata): The metadata of the graph.
+        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+            edge_ids.
+        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+            as node_ids.
+        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from node property names to (values, missing) arrays, which should have same
+            length as node_ids.
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from edge property names to (values, missing) arrays, which should have same
+            length as edge_ids.
 
     Returns:
         (nx.Graph | nx.DiGraph): A `networkx` graph object.
     """
-    metadata = graph_dict["metadata"]
-
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
 
-    graph.add_nodes_from(graph_dict["nodes"].tolist())
-    for name, prop_dict in graph_dict["node_props"].items():
-        _set_property_values(graph, graph_dict["nodes"], name, prop_dict, nodes=True)
+    graph.add_nodes_from(node_ids.tolist())
+    for name, prop_dict in node_props.items():
+        _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
 
-    graph.add_edges_from(graph_dict["edges"].tolist())
-    for name, prop_dict in graph_dict["edge_props"].items():
-        _set_property_values(graph, graph_dict["edges"], name, prop_dict, nodes=False)
+    graph.add_edges_from(edge_ids.tolist())
+    for name, prop_dict in edge_props.items():
+        _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
 
     return graph
 
@@ -273,7 +287,7 @@ def read_nx(
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
-    graph_dict = read_to_dict(store, validate, node_props, edge_props)
-    graph = construct_nx(graph_dict)
+    in_memory_geff = read_to_dict(store, validate, node_props, edge_props)
+    graph = construct_nx(**in_memory_geff)
 
-    return graph, graph_dict["metadata"]
+    return graph, in_memory_geff["metadata"]

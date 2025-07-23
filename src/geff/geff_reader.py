@@ -23,18 +23,18 @@ class GeffReader:
         >>> path = Path("example/path")
         ... file_reader = FileReader(path)
         ... file_reader.read_node_prop("seg_id")
-        ... # graph_dict will only have the node property "seg_id"
-        ... graph_dict = file_reader.build()
-        ... graph_dict
+        ... # in_memory_geff will only have the node property "seg_id"
+        ... in_memory_geff = file_reader.build()
+        ... in_memory_geff
 
         >>> file_reader.read_node_prop("t")
         ... # Now graph dict will have two node properties: "seg_id" and "t"
-        ... graph_dict = file_reader.build()
-        ... graph_dict
+        ... in_memory_geff = file_reader.build()
+        ... in_memory_geff
 
-        >>> # Now graph_dict will only be a subset with nodes "t" < 5
-        ... graph_dict = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
-        ... graph_dict
+        >>> # Now in_memory_geff will only be a subset with nodes "t" < 5
+        ... in_memory_geff = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
+        ... in_memory_geff
     """
 
     def __init__(self, source: StoreLike, validate: bool = True):
@@ -54,8 +54,8 @@ class GeffReader:
             utils.validate(source)
         self.group = zarr.open_group(source, mode="r")
         self.metadata = GeffMetadata.read(self.group)
-        self.nodes = self.group["nodes/ids"]
-        self.edges = self.group["edges/ids"]
+        self.nodes = zarr.open_array(source, path="nodes/ids", mode="r")
+        self.edges = zarr.open_array(source, path="edges/ids", mode="r")
         self.node_props: dict[str, PropDictZArray] = {}
         self.edge_props: dict[str, PropDictZArray] = {}
 
@@ -152,7 +152,7 @@ class GeffReader:
                 )
 
         # remove edges if any of it's nodes has been masked
-        edges = self.edges[:]
+        edges = np.array(self.edges[:])
         if node_mask is not None:
             edge_mask_removed_nodes = np.isin(edges, nodes).all(axis=1)
             if edge_mask is not None:
@@ -176,9 +176,9 @@ class GeffReader:
 
         return {
             "metadata": self.metadata,
-            "nodes": nodes,
+            "node_ids": nodes,
             "node_props": node_props,
-            "edges": edges,
+            "edge_ids": edges,
             "edge_props": edge_props,
         }
 
@@ -217,5 +217,5 @@ def read_to_dict(
     file_reader.read_node_props(node_props)
     file_reader.read_edge_props(edge_props)
 
-    graph_dict = file_reader.build()
-    return graph_dict
+    in_memory_geff = file_reader.build()
+    return in_memory_geff

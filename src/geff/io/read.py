@@ -1,12 +1,13 @@
 from typing import Any, Literal, Protocol, TypeVar, overload
 
 import networkx as nx
+from numpy.typing import NDArray
 from zarr.storage import StoreLike
 
 from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata
 from geff.networkx.io import construct_nx
-from geff.typing import InMemoryGeff
+from geff.typing import InMemoryGeff, PropDictNpArray
 
 from .supported_backends import SupportedBackend
 
@@ -21,33 +22,74 @@ R = TypeVar("R", covariant=True)
 class ConstructFunc(Protocol[R]):
     """A protocol for callables that convert a `GraphDict` to different backends."""
 
-    def __call__(self, graph_dict: InMemoryGeff, *args: Any, **kwargs: Any) -> R:
+    def __call__(
+        self,
+        metadata: GeffMetadata,
+        node_ids: NDArray[Any],
+        edge_ids: NDArray[Any],
+        node_props: dict[str, PropDictNpArray],
+        edge_props: dict[str, PropDictNpArray],
+        *args: Any,
+        **kwargs: Any,
+    ) -> R:
         """
         The callable must have this function signature.
 
-        The callable must have the first argument `graph_dict`, it may have additional
+        The callable must have the first argument `in_memory_geff`, it may have additional
         args and kwargs.
 
         Args:
-            graph_dict (GraphDict): A graph representation of the GEFF data.
-            *args (Any): Optional args for constructing the `graph_dict`.
-            **kwargs (Any): Optional kwargs for constructing the `graph_dict`.
+            metadata (GeffMetadata): The metadata of the graph.
+            node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+                edge_ids.
+            edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+                as node_ids.
+            node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+                from node property names to (values, missing) arrays, which should have same
+                length as node_ids.
+            edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+                from edge property names to (values, missing) arrays, which should have same
+                length as edge_ids.
+            *args (Any): Optional args for constructing the `in_memory_geff`.
+            **kwargs (Any): Optional kwargs for constructing the `in_memory_geff`.
         """
         ...
 
 
 # temporary dummy construct func
-def construct_identity(graph_dict: InMemoryGeff) -> InMemoryGeff:
+def construct_identity(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+) -> InMemoryGeff:
     """
     This functional is the identity.
 
     Args:
-        graph_dict (GraphDict): A dictionary representation of the GEFF data.
+        metadata (GeffMetadata): The metadata of the graph.
+        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+            edge_ids.
+        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+            as node_ids.
+        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from node property names to (values, missing) arrays, which should have same
+            length as node_ids.
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from edge property names to (values, missing) arrays, which should have same
+            length as edge_ids.
 
     Returns:
-        (GraphDict): A dictionary representation of the GEFF data.
+        (InMemoryGeff): A dictionary representation of the GEFF data.
     """
-    return graph_dict
+    return {
+        "metadata": metadata,
+        "node_ids": node_ids,
+        "edge_ids": edge_ids,
+        "node_props": node_props,
+        "edge_props": edge_props,
+    }
 
 
 @overload
@@ -139,5 +181,5 @@ def read(
     construct_func = get_construct_func(backend)
     if backend_kwargs is None:
         backend_kwargs = {}
-    graph_dict = read_to_dict(store, validate, node_props, edge_props)
-    return construct_func(graph_dict, **backend_kwargs), graph_dict["metadata"]
+    in_memory_geff = read_to_dict(store, validate, node_props, edge_props)
+    return construct_func(**in_memory_geff, **backend_kwargs), in_memory_geff["metadata"]
