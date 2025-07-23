@@ -210,7 +210,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def construct_nx(graph_dict: GraphDict) -> tuple[nx.Graph | nx.DiGraph, GeffMetadata]:
+def construct_nx(graph_dict: GraphDict) -> nx.Graph | nx.DiGraph:
     """
     Construct a `networkx` graph instance from a dictionary representation of the GEFF data.
 
@@ -218,8 +218,7 @@ def construct_nx(graph_dict: GraphDict) -> tuple[nx.Graph | nx.DiGraph, GeffMeta
         graph_dict (GraphDict): A dictionary representation of the GEFF data.
 
     Returns:
-        tuple[nx.Graph | nx.DiGraph, GeffMetadata]: A `networkx` graph object, and its metadata.
-
+        (nx.Graph | nx.DiGraph): A `networkx` graph object.
     """
     metadata = graph_dict["metadata"]
 
@@ -233,7 +232,7 @@ def construct_nx(graph_dict: GraphDict) -> tuple[nx.Graph | nx.DiGraph, GeffMeta
     for name, prop_dict in graph_dict["edge_props"].items():
         _set_property_values(graph, graph_dict["edges"], name, prop_dict, nodes=False)
 
-    return graph, metadata
+    return graph
 
 
 def read_nx(

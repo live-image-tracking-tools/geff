@@ -21,7 +21,7 @@ R = TypeVar("R", covariant=True)
 class ConstructFunc(Protocol[R]):
     """A protocol for callables that convert a `GraphDict` to different backends."""
 
-    def __call__(self, graph_dict: GraphDict, *args: Any, **kwargs: Any) -> tuple[R, GeffMetadata]:
+    def __call__(self, graph_dict: GraphDict, *args: Any, **kwargs: Any) -> R:
         """
         The callable must have this function signature.
 
@@ -37,18 +37,17 @@ class ConstructFunc(Protocol[R]):
 
 
 # temporary dummy construct func
-def construct_identity(graph_dict: GraphDict) -> tuple[GraphDict, GeffMetadata]:
+def construct_identity(graph_dict: GraphDict) -> GraphDict:
     """
-    This functional is essentially the identity.
+    This functional is the identity.
 
     Args:
         graph_dict (GraphDict): A dictionary representation of the GEFF data.
 
     Returns:
         (GraphDict): A dictionary representation of the GEFF data.
-        (GeffMetadata): The GEFF metadata.
     """
-    return graph_dict, graph_dict["metadata"]
+    return graph_dict
 
 
 @overload
@@ -141,4 +140,4 @@ def read(
     if backend_kwargs is None:
         backend_kwargs = {}
     graph_dict = read_to_dict(path, validate, node_props, edge_props)
-    return construct_func(graph_dict, **backend_kwargs)
+    return construct_func(graph_dict, **backend_kwargs), graph_dict["metadata"]
