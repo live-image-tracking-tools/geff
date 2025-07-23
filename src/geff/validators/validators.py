@@ -1,21 +1,24 @@
-import zarr
 import numpy as np
+import zarr
+
 
 def validate_geff_edges(group: zarr.Group) -> tuple[bool, list[tuple[int, int]]]:
-    '''
+    """
     Validates that all edge source and target node IDs exist in the node list of a GEFF group.
 
     Args:
-        group: Geff group with 'nodes' and 'edges' datasets. 
+        group: Geff group with 'nodes' and 'edges' datasets.
 
     Returns:
         Tuple[bool, List[Tuple[int, int]]]:
-            - all_edges_valid: True if every edge references only existing node IDs, otherwise False.
-            - invalid_edges: List of (source_id, target_id) tuples for edges that reference missing node IDs.
+            - all_edges_valid: True if every edge references only existing node IDs,
+              otherwise False.
+            - invalid_edges: List of (source_id, target_id) tuples for edges
+            that reference missing node IDs.
 
-    '''
-    node_ids = group['nodes']['ids'][:] 
-    edges_ids = group['edges']['ids'][:]
+    """
+    node_ids = group["nodes"]["ids"][:]
+    edges_ids = group["edges"]["ids"][:]
 
     all_edges_valid = True
     invalid_edges = []
@@ -27,44 +30,48 @@ def validate_geff_edges(group: zarr.Group) -> tuple[bool, list[tuple[int, int]]]
 
     return all_edges_valid, invalid_edges
 
+
 def validate_no_self_edges(group: zarr.Group) -> tuple[bool, np.ndarray]:
     """
     Validates that there are no self-edges in the array of edges in geff.
 
     Args:
-        edges (np.ndarray): An array of shape (N, 2) where each row represents an edge as [source, target].
+        group (zarr.Group): A Zarr group containing edges.
 
     Returns:
         tuple: A tuple (is_valid, problematic_nodes) where:
             - is_valid (bool): True if no node has an edge to itself, False otherwise.
-            - problematic_nodes (np.ndarray): An array of node IDs that have self-edges. Empty if valid.
+            - problematic_nodes (np.ndarray): An array of node IDs that have self-edges.
+              Empty if valid.
     """
-    edges = group['edges']['ids'][:]
-    
+    edges = group["edges"]["ids"][:]
+
     mask = edges[:, 0] == edges[:, 1]
     problematic_nodes = np.unique(edges[mask, 0])
     return (len(problematic_nodes) == 0, problematic_nodes)
+
 
 def validate_no_repeated_edges(group: zarr.Group) -> tuple[bool, np.ndarray]:
     """
     Validates that there are no repeated edges in the array.
 
     Args:
-        edges (np.ndarray): An array of shape (N, 2) where each row represents an edge as [source, target].
+        group (zarr.Group): A Zarr group containing edges in the format.
 
     Returns:
         tuple: A tuple (is_valid, repeated_edges) where:
             - is_valid (bool): True if there are no repeated edges, False otherwise.
-            - repeated_edges (np.ndarray): An array of duplicated edges, each as [source, target]. Empty if valid.
+            - repeated_edges (np.ndarray): An array of duplicated edges. Empty if valid.
 
     """
-    
-    edges = group['edges']['ids'][:]
-    edges_view = np.ascontiguousarray(edges).view([('', edges.dtype)] * edges.shape[1])
+
+    edges = group["edges"]["ids"][:]
+    edges_view = np.ascontiguousarray(edges).view([("", edges.dtype)] * edges.shape[1])
     _, idx, counts = np.unique(edges_view, return_index=True, return_counts=True)
     repeated_mask = counts > 1
     repeated_edges = edges[idx[repeated_mask]]
     return (len(repeated_edges) == 0, repeated_edges)
+
 
 def validate_tracklets(node_ids, edge_ids, tracklet_ids):
     """
@@ -82,12 +89,9 @@ def validate_tracklets(node_ids, edge_ids, tracklet_ids):
 
     errors = []
 
-    # Map node to its tracklet
-    node_to_tracklet = {node: t_id for node, t_id in zip(node_ids, tracklet_ids)}
-
     # Map tracklet_id to [nodes]
     tracklet_to_nodes = {}
-    for node, t_id in zip(node_ids, tracklet_ids):
+    for node, t_id in zip(node_ids, tracklet_ids, strict=False):
         tracklet_to_nodes.setdefault(t_id, []).append(node)
 
     # Build adjacency and reverse adjacency
@@ -126,10 +130,9 @@ def validate_tracklets(node_ids, edge_ids, tracklet_ids):
             visited.add(n)
             queue.extend(sub_adj[n])
         if len(visited) != len(node_set):
-            errors.append(f"Tracklet {t_id}: not fully connected (visited {len(visited)}/{len(node_set)})")
+            errors.append(
+                f"Tracklet {t_id}: not fully connected (visited {len(visited)}/{len(node_set)})"
+            )
 
-    is_valid = (len(errors) == 0)
+    is_valid = len(errors) == 0
     return is_valid, errors
-
-def validate_seg_id(group):
-    pass
