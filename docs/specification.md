@@ -22,6 +22,13 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 
     ::: geff.units.VALID_TIME_UNITS  
 
+### Affine transformations
+The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
+
+### Extra attributes 
+
+The optional `extra` object is a free-form dictionary that can hold any additional, application-specific metadata that is **not** covered by the core geff schema. Users may place arbitrary keys and values inside `extra` without fear of clashing with future reserved fields. Although the core `geff` reader makes these attributes available, their meaning and use are left entirely to downstream applications. 
+
 ## The `nodes` group
 The nodes group will contain an `ids` array and optionally a `props` group. 
 ### The `ids` array
@@ -105,8 +112,38 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'z', 'type': "space", 'unit': "micrometers", 'min': 1523.36, 'max': 4398.1},
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
-        ]
+        ],
+        "display_hints": {
+            "display_horizontal": "x",
+            "display_vertical": "y",
+            "display_depth": "z",
+            "display_time": "t",
+        },
+        # node attributes corresponding to tracklet and/or lineage IDs
+        "track_node_props": {
+            "lineage": "ultrack_lineage_id",
+            "tracklet": "ultrack_id"
+        },
+        "related_objects": {
+            {
+                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id",
+            },
+            {
+                "type":"image", "path":"../raw/",
+            },
+        },
+        # optional coordinate transformation is defined as homogeneous coordinates
+        # It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
+        "affine": [
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1],
+        # custom other things must be placed **inside** the extra attribute
+        "extra": {
+            ...
+        }
     }
-    ... # custom other things are allowed and ignored by geff
 }
 ```
