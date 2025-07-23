@@ -43,8 +43,6 @@ dev = [
     "ruff",
     "ipython",
     "types-PyYAML",
-    "spatial-graph",
-    "geff[ctc]"
 ]
 docs = [
     "mkdocs-material",
@@ -76,7 +74,7 @@ python = "3.12.*"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
-dev = { features = ["dev", "ctc"], solve-group = "default" }
+dev = { features = ["dev", "ctc", "spatial-graph"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 bench = { features = ["dev", "bench"], solve-group = "default" }
