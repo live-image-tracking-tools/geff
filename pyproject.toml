@@ -30,9 +30,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 
-[project.scripts]
-geff = "geff._cli:main"
-
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
 ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
@@ -198,3 +195,4 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 
 [project.entry-points.console_scripts]
 ctc2geff = "geff.interops.ctc:app"
+geff = "geff._cli:app"
