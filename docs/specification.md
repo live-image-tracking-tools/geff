@@ -45,9 +45,9 @@ The `nodes\props` group is optional and will contain one or more `node property`
 
 - The `seg_id` property is an optional, special node property that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` property is not present, it is assumed that the graph is not associated with a segmentation. 
 
--  Geff provides special support for predefined shape properties, although they are not required. These currently include: `sphere`, `ellipsoid`. Values can be marked as `missing`, and a geff graph may contain multiple shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, they are identical to other properties from a storage specification perspective.
+-  Geff provides special support for predefined shape properties, although they are not required. These currently include: `sphere`, `ellipsoid`. Values can be marked as `missing`, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective.
     - `sphere`: Hypersphere in n spatial dimensions, defined by a scalar radius.
-    - `ellipsoid`: Defined by a symmetric positive-semidefinite covariance matrix, which is assumed to match the spatial axes.
+    - `ellipsoid`: Defined by a symmetric positive-definite covariance matrix, whose dimensionality is assumed to match the spatial axes.
 <!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
 
 !!! note
