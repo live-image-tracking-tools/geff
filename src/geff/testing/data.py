@@ -186,41 +186,55 @@ def create_dummy_graph_props(
         # For directed graphs, we can create more edges efficiently
         edges = []
         edge_count = 0
+        created_edges = set()  # Track created edges to avoid duplicates
 
         # First create a chain of edges
         for i in range(min(actual_num_edges, num_nodes - 1)):
             source_idx = i
             target_idx = i + 1
-            edges.append([int(source_idx), int(target_idx)])
-            edge_count += 1
+            edge_tuple = (int(source_idx), int(target_idx))
+            if edge_tuple not in created_edges:
+                edges.append([int(source_idx), int(target_idx)])
+                created_edges.add(edge_tuple)
+                edge_count += 1
 
         # Add remaining edges using different patterns
         remaining_edges = actual_num_edges - edge_count
+        print(f"remaining_edges: {remaining_edges}")
         if remaining_edges > 0:
             # Create edges with different offsets
-            for i in range(remaining_edges):
+            for i in range(remaining_edges * 2):  # Try more iterations to find unique edges
                 source_idx = i % num_nodes
                 target_idx = (i + 2) % num_nodes  # Skip one node
                 if source_idx != target_idx:
-                    edges.append([int(source_idx), int(target_idx)])
-                    edge_count += 1
-
-                    # Stop if we've reached the target
-                    if edge_count >= actual_num_edges:
-                        break
-
-            # If we still need more edges, use another pattern
-            if edge_count < actual_num_edges:
-                for i in range(actual_num_edges - edge_count):
-                    source_idx = i % num_nodes
-                    target_idx = (i + 3) % num_nodes  # Skip two nodes
-                    if source_idx != target_idx:
+                    edge_tuple = (int(source_idx), int(target_idx))
+                    if edge_tuple not in created_edges:
                         edges.append([int(source_idx), int(target_idx)])
+                        created_edges.add(edge_tuple)
                         edge_count += 1
 
                         # Stop if we've reached the target
                         if edge_count >= actual_num_edges:
                             break
+
+            print(f"edge_count: {edge_count}")
+            print(f"actual_num_edges: {actual_num_edges}")
+            print(f"edges: {edges}")
+            # If we still need more edges, use another pattern
+            if edge_count < actual_num_edges:
+                for i in range(actual_num_edges * 2):  # Try more iterations to find unique edges
+                    source_idx = i % num_nodes
+                    target_idx = (i + 3) % num_nodes  # Skip two nodes
+                    if source_idx != target_idx:
+                        edge_tuple = (int(source_idx), int(target_idx))
+                        if edge_tuple not in created_edges:
+                            edges.append([int(source_idx), int(target_idx)])
+                            created_edges.add(edge_tuple)
+                            edge_count += 1
+
+                            # Stop if we've reached the target
+                            if edge_count >= actual_num_edges:
+                                break
 
     edges = np.array(edges, dtype=object if node_id_dtype == "str" else node_id_dtype)
     # Generate extra node properties

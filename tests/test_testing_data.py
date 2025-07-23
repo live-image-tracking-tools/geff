@@ -325,9 +325,9 @@ def test_create_dummy_graph_props_extra_node_props():
         node_id_dtype="int",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         extra_edge_props={"score": "float64", "color": "int"},
-        directed=False,
-        num_nodes=5,
-        num_edges=4,
+        directed=True,
+        num_nodes=10,
+        num_edges=500,
         extra_node_props=extra_node_props,
     )
 
@@ -343,9 +343,9 @@ def test_create_dummy_graph_props_extra_node_props():
     assert extra_props["category"].dtype == "int8"
 
     # Check that arrays have the correct length
-    assert len(extra_props["label"]) == 5
-    assert len(extra_props["confidence"]) == 5
-    assert len(extra_props["category"]) == 5
+    assert len(extra_props["label"]) == 10
+    assert len(extra_props["confidence"]) == 10
+    assert len(extra_props["category"]) == 10
 
     # Check that string properties follow the expected pattern
     for i in range(5):
