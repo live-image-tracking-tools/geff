@@ -3,8 +3,8 @@ import zarr
 from numpy.typing import NDArray
 from zarr.storage import StoreLike
 
-from geff.dict_representation import GraphDict, PropDictNpArray, PropDictZArray
 from geff.metadata_schema import GeffMetadata
+from geff.typing import InMemoryGeff, PropDictNpArray, PropDictZArray
 
 from . import utils
 
@@ -121,7 +121,7 @@ class GeffReader:
         self,
         node_mask: NDArray[np.bool] | None = None,
         edge_mask: NDArray[np.bool] | None = None,
-    ) -> GraphDict:
+    ) -> InMemoryGeff:
         """
         Build a `GraphDict` from a GEFF.
 
@@ -190,7 +190,7 @@ def read_to_dict(
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-) -> GraphDict:
+) -> InMemoryGeff:
     """
     Read a GEFF zarr file to a dictionary representation.
 

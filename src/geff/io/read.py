@@ -3,10 +3,10 @@ from typing import Any, Literal, Protocol, TypeVar, overload
 import networkx as nx
 from zarr.storage import StoreLike
 
-from geff.dict_representation import GraphDict
 from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata
 from geff.networkx.io import construct_nx
+from geff.typing import InMemoryGeff
 
 from .supported_backends import SupportedBackend
 
@@ -21,7 +21,7 @@ R = TypeVar("R", covariant=True)
 class ConstructFunc(Protocol[R]):
     """A protocol for callables that convert a `GraphDict` to different backends."""
 
-    def __call__(self, graph_dict: GraphDict, *args: Any, **kwargs: Any) -> R:
+    def __call__(self, graph_dict: InMemoryGeff, *args: Any, **kwargs: Any) -> R:
         """
         The callable must have this function signature.
 
@@ -37,7 +37,7 @@ class ConstructFunc(Protocol[R]):
 
 
 # temporary dummy construct func
-def construct_identity(graph_dict: GraphDict) -> GraphDict:
+def construct_identity(graph_dict: InMemoryGeff) -> InMemoryGeff:
     """
     This functional is the identity.
 
@@ -59,7 +59,7 @@ def get_construct_func(
 @overload
 def get_construct_func(
     backend: Literal[SupportedBackend.GRAPH_DICT],
-) -> ConstructFunc[GraphDict]: ...
+) -> ConstructFunc[InMemoryGeff]: ...
 
 
 def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
@@ -101,7 +101,7 @@ def read(
     edge_props: list[str] | None,
     backend: Literal[SupportedBackend.GRAPH_DICT],
     backend_kwargs: dict[str, Any] | None = None,
-) -> tuple[GraphDict, GeffMetadata]: ...
+) -> tuple[InMemoryGeff, GeffMetadata]: ...
 
 
 def read(

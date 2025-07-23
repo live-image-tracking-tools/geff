@@ -31,8 +31,8 @@ class PropDictZArray(TypedDict):
     missing: NotRequired[zarr.Array]
 
 
-# Intermediate dict format that can be injested to different backend types
-class GraphDict(TypedDict):
+# Intermediate dict format that can be constructed to different backend types
+class InMemoryGeff(TypedDict):
     metadata: GeffMetadata
     nodes: NDArray[Any]
     edges: NDArray[Any]

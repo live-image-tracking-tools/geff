@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.dict_representation import GraphDict, PropDictNpArray
+    from geff.typing import InMemoryGeff, PropDictNpArray
 
 import logging
 
@@ -225,7 +225,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val
 
 
-def construct_nx(graph_dict: GraphDict) -> nx.Graph | nx.DiGraph:
+def construct_nx(graph_dict: InMemoryGeff) -> nx.Graph | nx.DiGraph:
     """
     Construct a `networkx` graph instance from a dictionary representation of the GEFF data.
 
