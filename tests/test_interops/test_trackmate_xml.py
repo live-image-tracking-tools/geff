@@ -2,69 +2,11 @@ import io
 from copy import deepcopy
 
 import networkx as nx
-import networkx.algorithms.isomorphism as iso
 import pytest
 from lxml import etree as ET
 
 import geff.interops.trackmate_xml as tm_xml
-from geff.utils import validate
-
-
-def is_equal(obt, exp):
-    """Utility function to check that two graphs are perfectly identical.
-
-    It checks that the graphs are isomorphic, and that their graph,
-    nodes and edges attributes are all identical.
-
-    Args:
-        obt (nx.Graph): The obtained graph, built from trackmate_xml.py.
-        exp (nx.Graph): The expected graph, built from here.
-
-    Returns:
-        bool: True if the graphs are identical, False otherwise.
-    """
-    edges_attr = list({k for (n1, n2, d) in exp.edges.data() for k in d})
-    edges_default = len(edges_attr) * [0]
-    em = iso.categorical_edge_match(edges_attr, edges_default)
-    nodes_attr = list({k for (n, d) in exp.nodes.data() for k in d})
-    nodes_default = len(nodes_attr) * [0]
-    nm = iso.categorical_node_match(nodes_attr, nodes_default)
-
-    if not obt.nodes.data() and not exp.nodes.data():
-        same_nodes = True
-    elif len(obt.nodes.data()) != len(exp.nodes.data()):
-        same_nodes = False
-    else:
-        for data1, data2 in zip(sorted(obt.nodes.data()), sorted(exp.nodes.data()), strict=False):
-            n1, attr1 = data1
-            n2, attr2 = data2
-            if sorted(attr1) == sorted(attr2) and n1 == n2:
-                same_nodes = True
-            else:
-                same_nodes = False
-
-    if not obt.edges.data() and not exp.edges.data():
-        same_edges = True
-    elif len(obt.edges.data()) != len(exp.edges.data()):
-        same_edges = False
-    else:
-        for data1, data2 in zip(sorted(obt.edges.data()), sorted(exp.edges.data()), strict=False):
-            n11, n12, attr1 = data1
-            n21, n22, attr2 = data2
-            if sorted(attr1) == sorted(attr2) and sorted((n11, n12)) == sorted((n21, n22)):
-                same_edges = True
-            else:
-                same_edges = False
-
-    if (
-        nx.is_isomorphic(obt, exp, edge_match=em, node_match=nm)
-        and obt.graph == exp.graph
-        and same_nodes
-        and same_edges
-    ):
-        return True
-    else:
-        return False
+from geff.utils import nx_is_equal, validate
 
 
 def test_get_units():
@@ -273,7 +215,7 @@ def test_add_all_nodes():
             (1000, {"name": "ID1000", "ID": 1000, "x": 10.0, "y": 20}),
         ]
     )
-    assert is_equal(obtained, expected)
+    assert nx_is_equal(obtained, expected)
 
     # Only ID attribute
     xml_data = """
@@ -290,7 +232,7 @@ def test_add_all_nodes():
     tm_xml._add_all_nodes(it, element, {}, obtained)
     expected = nx.Graph()
     expected.add_nodes_from([(1001, {"ID": 1001}), (1000, {"ID": 1000})])
-    assert is_equal(obtained, expected)
+    assert nx_is_equal(obtained, expected)
 
     # No nodes
     xml_data = """
@@ -302,7 +244,7 @@ def test_add_all_nodes():
     _, element = next(it)
     obtained = nx.Graph()
     tm_xml._add_all_nodes(it, element, {}, obtained)
-    assert is_equal(obtained, nx.Graph())
+    assert nx_is_equal(obtained, nx.Graph())
 
     # No ID attribute
     xml_data = """
@@ -347,7 +289,7 @@ def test_add_edge():
     expected.add_edge(1, 2, x=20.5, y=25, SPOT_SOURCE_ID=1, SPOT_TARGET_ID=2)
     expected.nodes[1]["TRACK_ID"] = track_id
     expected.nodes[2]["TRACK_ID"] = track_id
-    assert is_equal(obtained, expected)
+    assert nx_is_equal(obtained, expected)
 
     # No edge attributes
     xml_data = """<data SPOT_SOURCE_ID="1" SPOT_TARGET_ID="2" />"""
@@ -366,7 +308,7 @@ def test_add_edge():
     expected.add_edge(1, 2, SPOT_SOURCE_ID=1, SPOT_TARGET_ID=2)
     expected.nodes[1]["TRACK_ID"] = track_id
     expected.nodes[2]["TRACK_ID"] = track_id
-    assert is_equal(obtained, expected)
+    assert nx_is_equal(obtained, expected)
 
     # Missing SPOT_TARGET_ID
     xml_data = """<data SPOT_SOURCE_ID="1" x="20.5" y="25" />"""
@@ -449,7 +391,7 @@ def test_build_tracks():
         {"TRACK_ID": 1, "name": "blob"},
     ]
     expected_tracks_attrib = sorted(expected_tracks_attrib, key=lambda d: d["TRACK_ID"])
-    assert is_equal(obtained, expected)
+    assert nx_is_equal(obtained, expected)
     assert obtained_tracks_attrib == expected_tracks_attrib
 
     # No edges in the tracks
@@ -473,7 +415,7 @@ def test_build_tracks():
         {"TRACK_ID": 1, "name": "blob"},
     ]
     expected_tracks_attrib = sorted(expected_tracks_attrib, key=lambda d: d["TRACK_ID"])
-    assert is_equal(obtained, expected)
+    assert nx_is_equal(obtained, expected)
     assert obtained_tracks_attrib == expected_tracks_attrib
 
     # No node ID
