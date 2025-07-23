@@ -187,6 +187,8 @@ def test_read_write_consistency_rx(tmp_path, directed, include_t, include_z):
     # Read it back
     read_graph, metadata = geff.read_rx(path)
 
+    assert rx.is_isomorphic(graph, read_graph)
+
     # Check basic structure
     assert read_graph.num_nodes() == graph.num_nodes()
     assert read_graph.num_edges() == graph.num_edges()
