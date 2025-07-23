@@ -27,7 +27,7 @@ def has_valid_seg_id(
     errors: list[str] = []
     if isinstance(store, str | Path):
         store = zarr.DirectoryStore(str(store))
-    elif not isinstance(store, zarr.storage.BaseStore):
+    elif not isinstance(store, zarr.storage.StoreLike):
         errors.append(f"Unsupported store type: {type(store)}")
 
     group = zarr.open_group(store, mode="r")
@@ -55,7 +55,7 @@ def has_valid_seg_id(
 
 
 def axes_match_seg_dims(
-    store: str | Path | zarr.storage.BaseStore,
+    store: str | Path | zarr.storage.StoreLike,
     segmentation: np.ndarray | da.Array | zarr.Array,
 ) -> tuple[bool, list[str]]:
     """Validate that geff axes metadata have the same number of dimensions as the
@@ -88,7 +88,7 @@ def axes_match_seg_dims(
 
 
 def graph_is_in_seg_bounds(
-    store: str | Path | zarr.storage.BaseStore,
+    store: str | Path | zarr.storage.StoreLike,
     segmentation: np.ndarray | da.Array | zarr.Array,
     scale: tuple[float] | list[float] | None = None,
 ) -> tuple[bool, list[str]]:
@@ -153,7 +153,7 @@ def has_seg_ids_at_time_points(
     segmentation: np.ndarray | da.Array | zarr.Array,
     time_points: list[int],
     seg_ids: list[int],
-    store: str | Path | zarr.storage.BaseStore | None = None,
+    store: str | Path | zarr.storage.StoreLike | None = None,
 ) -> tuple[bool, list[str]]:
     """
     Validates that labels with given seg_ids exist at time points t. If a store is
