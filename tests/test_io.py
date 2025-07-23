@@ -67,6 +67,7 @@ def get_edge_prop(graph, name: str, edges: list[Any]) -> NDArray[Any]:
 @pytest.mark.parametrize("directed", [True, False])
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
+@pytest.mark.parametrize("backend", [*SupportedBackend])
 def test_read(
     node_id_dtype,
     node_axis_dtypes,
@@ -74,6 +75,7 @@ def test_read(
     directed,
     include_t,
     include_z,
+    backend,
 ):
     store, graph_props = create_memory_mock_geff(
         node_id_dtype,
@@ -83,37 +85,37 @@ def test_read(
         include_t=include_t,
         include_z=include_z,
     )
-    for backend in SupportedBackend:
-        # temporarily skip dummy example case until it is removed
-        if backend == SupportedBackend.GRAPH_DICT:
-            continue
+    # temporarily skip dummy example case until it is removed
+    if backend == SupportedBackend.GRAPH_DICT:
+        return
 
-        graph, metadata = read(store, backend=backend)
+    graph, metadata = read(store, backend=backend)
 
-        assert is_expected_type(graph, backend)
+    assert is_expected_type(graph, backend)
 
-        # nodes and edges correct
-        assert get_nodes(graph) == {*graph_props["nodes"].tolist()}
-        assert get_edges(graph) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
+    # nodes and edges correct
+    assert get_nodes(graph) == {*graph_props["nodes"].tolist()}
+    assert get_edges(graph) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
 
-        # check node properties are correct
-        spatial_node_properties = ["y", "x"]
-        if include_t:
-            spatial_node_properties.append("t")
-        if include_z:
-            spatial_node_properties.append("z")
-        for name in spatial_node_properties:
-            np.testing.assert_array_equal(
-                get_node_prop(graph, name, graph_props["nodes"].tolist()), graph_props[name]
-            )
-        for name, values in graph_props["extra_node_props"].items():
-            np.testing.assert_array_equal(
-                get_node_prop(graph, name, graph_props["nodes"].tolist()), values
-            )
-        # check edge properties are correct
-        for name, values in graph_props["extra_edge_props"].items():
-            np.testing.assert_array_equal(
-                get_edge_prop(graph, name, graph_props["edges"].tolist()), values
-            )
+    # check node properties are correct
+    spatial_node_properties = ["y", "x"]
+    if include_t:
+        spatial_node_properties.append("t")
+    if include_z:
+        spatial_node_properties.append("z")
+    for name in spatial_node_properties:
+        np.testing.assert_array_equal(
+            get_node_prop(graph, name, graph_props["nodes"].tolist()), graph_props[name]
+        )
+    for name, values in graph_props["extra_node_props"].items():
+        np.testing.assert_array_equal(
+            get_node_prop(graph, name, graph_props["nodes"].tolist()), values
+        )
+    # check edge properties are correct
+    for name, values in graph_props["extra_edge_props"].items():
+        np.testing.assert_array_equal(
+            get_edge_prop(graph, name, graph_props["edges"].tolist()), values
+        )
 
-    # TODO: metadata? Or will it be tested elsewhere
+
+# TODO: metadata? Or will it be tested elsewhere
