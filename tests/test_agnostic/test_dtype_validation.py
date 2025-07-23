@@ -54,7 +54,7 @@ def test_write_arrays_rejects_disallowed_id_dtype(tmp_path):
 
     with pytest.warns(UserWarning):
         write_arrays(
-            geff_path=geff_path,
+            geff_store=geff_path,
             node_ids=node_ids,
             node_props=None,
             edge_ids=edge_ids,
@@ -77,7 +77,7 @@ def test_write_arrays_rejects_disallowed_property_dtype(tmp_path):
 
     with pytest.warns(UserWarning):
         write_arrays(
-            geff_path=geff_path,
+            geff_store=geff_path,
             node_ids=node_ids,
             node_props=node_props,
             edge_ids=edge_ids,

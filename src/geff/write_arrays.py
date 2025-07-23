@@ -1,5 +1,4 @@
 import warnings
-from pathlib import Path
 from typing import Literal
 
 import numpy as np
@@ -99,8 +98,6 @@ def write_id_arrays(
             f"{node_ids.dtype}. Please use a supported type.",
             stacklevel=2,
         )
-
-    path = str(geff_path)
 
     if zarr.__version__.startswith("3"):
         geff_root = zarr.open(

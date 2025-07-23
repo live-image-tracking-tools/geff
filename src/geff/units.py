@@ -91,7 +91,6 @@ ALLOWED_DTYPES: set[np.dtype] = {
     np.float32,
     np.float64,
     np.bytes_,
-    # TODO: this should be removed in the future
     np.str_,
 }
 
