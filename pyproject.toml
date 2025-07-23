@@ -44,7 +44,11 @@ dev = [
     "ipython",
     "types-PyYAML",
     "spatial-graph",
-    "geff[ctc]"
+    # ctc stuff:
+    "dask",
+    "scikit-image",
+    "tifffile",
+    "imagecodecs",
 ]
 docs = [
     "mkdocs-material",
@@ -193,5 +197,6 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 #     "tests/**/*",
 # ]
 
-[project.entry-points.console_scripts]
+[project.scripts]
 ctc2geff = "geff.interops.ctc:app"
+geff = "geff._cli:app"
