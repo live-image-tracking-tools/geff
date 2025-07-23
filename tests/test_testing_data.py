@@ -199,7 +199,6 @@ def test_create_memory_mock_geff_with_extra_node_props():
 
 def test_create_memory_mock_geff_with_no_extra_node_props():
     """Test create_memory_mock_geff with no extra node properties"""
-    from geff.testing.data import create_memory_mock_geff
 
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="int",
