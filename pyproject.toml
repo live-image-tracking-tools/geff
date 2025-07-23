@@ -32,19 +32,19 @@ classifiers = [
 
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
-ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
+ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
 dev = [
     { include-group = "test" },
+    { include-group = "ctc" },
     "mypy",
     "pre-commit",
     "ruff",
     "ipython",
     "types-PyYAML",
     "spatial-graph",
-    "geff[ctc]"
 ]
 docs = [
     "mkdocs-material",
@@ -193,5 +193,5 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 #     "tests/**/*",
 # ]
 
-[project.entry-points.console_scripts]
+[project.scripts]
 ctc2geff = "geff.interops.ctc:app"

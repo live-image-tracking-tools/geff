@@ -372,7 +372,22 @@ def test_create_dummy_graph_props_empty_graph():
         extra_node_props=extra_node_props,
     )
 
-    # Check that extra_node_props_dict contains the expected properties
+    # Check every field of graph_props for empty graph
+    # 1. Check nodes array
+    assert len(graph_props["nodes"]) == 0
+    assert graph_props["nodes"].dtype == "int"
+
+    # 2. Check edges array
+    assert len(graph_props["edges"]) == 0
+    assert graph_props["edges"].dtype == "int"
+
+    # 3. Check spatial and temporal coordinates
+    assert len(graph_props["t"]) == 0
+    assert len(graph_props["z"]) == 0
+    assert len(graph_props["y"]) == 0
+    assert len(graph_props["x"]) == 0
+
+    # 4. Check extra node properties
     extra_props = graph_props["extra_node_props"]
     assert "label" in extra_props
     assert "confidence" in extra_props
@@ -388,11 +403,128 @@ def test_create_dummy_graph_props_empty_graph():
     assert len(extra_props["confidence"]) == 0
     assert len(extra_props["category"]) == 0
 
-    # Check that other graph properties are also empty
-    assert len(graph_props["node_ids"]) == 0
-    assert len(graph_props["node_axis_arrays"]["position"]) == 0
-    assert len(graph_props["node_axis_arrays"]["time"]) == 0
-    assert len(graph_props["edge_sources"]) == 0
-    assert len(graph_props["edge_targets"]) == 0
-    assert len(graph_props["extra_edge_props"]["score"]) == 0
-    assert len(graph_props["extra_edge_props"]["color"]) == 0
+    # 5. Check extra edge properties
+    edge_props = graph_props["extra_edge_props"]
+    assert "score" in edge_props
+    assert "color" in edge_props
+
+    # Check data types
+    assert edge_props["score"].dtype == "float64"
+    assert edge_props["color"].dtype == "int"
+
+    # Check that arrays have the correct length (0 for empty graph)
+    assert len(edge_props["score"]) == 0
+    assert len(edge_props["color"]) == 0
+
+    # 6. Check graph metadata
+    assert graph_props["directed"] is True
+
+    # 7. Check axis information
+    assert len(graph_props["axis_names"]) == 4  # t, z, y, x
+    assert graph_props["axis_names"] == ("t", "z", "y", "x")
+
+    assert len(graph_props["axis_units"]) == 4
+    assert graph_props["axis_units"] == ("second", "nanometer", "nanometer", "nanometer")
+
+    assert len(graph_props["axis_types"]) == 4
+    assert graph_props["axis_types"] == ("time", "space", "space", "space")
+
+
+def test_create_dummy_graph_props_empty_graph_no_extra_props():
+    """Test create_dummy_graph_props with empty graph and no extra properties"""
+
+    graph_props = create_dummy_graph_props(
+        node_id_dtype="int",
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        directed=False,
+        num_nodes=0,
+        num_edges=0,
+        extra_node_props=None,
+        extra_edge_props=None,
+    )
+
+    # Check every field of graph_props for empty graph
+    # 1. Check nodes array
+    assert len(graph_props["nodes"]) == 0
+    assert graph_props["nodes"].dtype == "int"
+
+    # 2. Check edges array
+    assert len(graph_props["edges"]) == 0
+    assert graph_props["edges"].dtype == "int"
+
+    # 3. Check spatial and temporal coordinates
+    assert len(graph_props["t"]) == 0
+    assert len(graph_props["z"]) == 0
+    assert len(graph_props["y"]) == 0
+    assert len(graph_props["x"]) == 0
+
+    # 4. Check extra node properties (should be empty dict)
+    assert graph_props["extra_node_props"] == {}
+
+    # 5. Check extra edge properties (should be empty dict)
+    assert graph_props["extra_edge_props"] == {}
+
+    # 6. Check graph metadata
+    assert graph_props["directed"] is False
+
+    # 7. Check axis information
+    assert len(graph_props["axis_names"]) == 4  # t, z, y, x
+    assert graph_props["axis_names"] == ("t", "z", "y", "x")
+
+    assert len(graph_props["axis_units"]) == 4
+    assert graph_props["axis_units"] == ("second", "nanometer", "nanometer", "nanometer")
+
+    assert len(graph_props["axis_types"]) == 4
+    assert graph_props["axis_types"] == ("time", "space", "space", "space")
+
+
+def test_create_dummy_graph_props_empty_graph_partial_dimensions():
+    """Test create_dummy_graph_props with empty graph and partial dimensions"""
+
+    graph_props = create_dummy_graph_props(
+        node_id_dtype="int",
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        directed=True,
+        num_nodes=0,
+        num_edges=0,
+        extra_node_props=None,
+        extra_edge_props=None,
+        include_t=True,
+        include_z=False,  # No z dimension
+        include_y=True,
+        include_x=False,  # No x dimension
+    )
+
+    # Check every field of graph_props for empty graph
+    # 1. Check nodes array
+    assert len(graph_props["nodes"]) == 0
+    assert graph_props["nodes"].dtype == "int"
+
+    # 2. Check edges array
+    assert len(graph_props["edges"]) == 0
+    assert graph_props["edges"].dtype == "int"
+
+    # 3. Check spatial and temporal coordinates
+    assert len(graph_props["t"]) == 0
+    assert len(graph_props["z"]) == 0  # Should be empty since include_z=False
+    assert len(graph_props["y"]) == 0
+    assert len(graph_props["x"]) == 0  # Should be empty since include_x=False
+
+    # 4. Check extra node properties (should be empty dict)
+    assert graph_props["extra_node_props"] == {}
+
+    # 5. Check extra edge properties (should be empty dict)
+    assert graph_props["extra_edge_props"] == {}
+
+    # 6. Check graph metadata
+    assert graph_props["directed"] is True
+
+    # 7. Check axis information (only t and y dimensions)
+    assert len(graph_props["axis_names"]) == 2  # t, y only
+    assert graph_props["axis_names"] == ("t", "y")
+
+    assert len(graph_props["axis_units"]) == 2
+    assert graph_props["axis_units"] == ("second", "nanometer")
+
+    assert len(graph_props["axis_types"]) == 2
+    assert graph_props["axis_types"] == ("time", "space")
