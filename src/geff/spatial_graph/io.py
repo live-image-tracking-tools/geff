@@ -1,27 +1,29 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import spatial_graph as sg
 import zarr
+from zarr.storage import StoreLike
+
+if TYPE_CHECKING:
+    from zarr.storage import StoreLike
 
 import geff
 from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.utils import remove_tilde
 from geff.write_arrays import write_arrays
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 def write_sg(
     graph: sg.SpatialGraph | sg.SpatialDiGraph,
-    path: str | Path,
+    store: StoreLike,
     axis_names: list[str] | None = None,
     axis_units: list[str] | None = None,
     axis_types: list[str] | None = None,
-    zarr_format: int = 2,
+    zarr_format: Literal[2, 3] = 2,
 ):
     """Write a SpatialGraph to the geff file format.
 
@@ -33,7 +35,7 @@ def write_sg(
 
             The graph to write.
 
-        path (str | Path):
+        store (str | Path | zarr store):
 
             The path to the output zarr. Opens in append mode, so will only
             overwrite geff-controlled groups.
@@ -53,12 +55,15 @@ def write_sg(
             The types of the spatial dims represented in position property.
             Usually one of "time", "space", or "channel". Defaults to None.
 
-        zarr_format (int, optional):
+        zarr_format (Literal[2, 3], optional):
 
             The version of zarr to write. Defaults to 2.
     """
+
+    store = remove_tilde(store)
+
     if len(graph) == 0:
-        warnings.warn(f"Graph is empty - not writing anything to {path}", stacklevel=2)
+        warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
         return
 
     if axis_names is None:
@@ -80,7 +85,7 @@ def write_sg(
 
     # write to geff
     write_arrays(
-        geff_path=path,
+        geff_store=store,
         node_ids=graph.nodes,
         node_props={
             name: getattr(graph.node_attrs, name) for name in graph.node_attr_dtypes.keys()
@@ -91,11 +96,12 @@ def write_sg(
             name: getattr(graph.edge_attrs, name) for name in graph.edge_attr_dtypes.keys()
         },
         metadata=metadata,
+        zarr_format=zarr_format,
     )
 
 
 def read_sg(
-    path: Path | str, validate: bool = True, position_attr: str = "position"
+    store: StoreLike, validate: bool = True, position_attr: str = "position"
 ) -> sg.SpatialGraph:
     """Read a geff file into a SpatialGraph.
 
@@ -104,7 +110,7 @@ def read_sg(
 
     Args:
 
-        path (Path | str):
+        store (Path | str | zarr store):
 
             The path to the root of the geff zarr, where the .attrs contains
             the geff  metadata.
@@ -125,14 +131,12 @@ def read_sg(
         A SpatialGraph containing the graph that was stored in the geff file
         format.
     """
-    # zarr python 3 doesn't support Path
-    path = str(path)
 
     # open zarr container
     if validate:
-        geff.utils.validate(path)
+        geff.utils.validate(store)
 
-    group = zarr.open(path, mode="r")
+    group = zarr.open(store, mode="r")
     metadata = GeffMetadata.read(group)
 
     assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"

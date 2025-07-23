@@ -1,12 +1,12 @@
-from pathlib import Path
-
 import numpy as np
 import zarr
 from numpy.typing import NDArray
+from zarr.storage import StoreLike
+
+from geff.dict_representation import GraphDict, PropDictNpArray, PropDictZArray
+from geff.metadata_schema import GeffMetadata
 
 from . import utils
-from .dict_representation import GraphDict, PropDictNpArray, PropDictZArray
-from .metadata_schema import GeffMetadata
 
 
 class GeffReader:
@@ -37,20 +37,22 @@ class GeffReader:
         ... graph_dict
     """
 
-    def __init__(self, path: Path, validate: bool = True):
+    def __init__(self, source: StoreLike, validate: bool = True):
         """
         File reader class that allows subset reading to an intermediate dict representation.
 
         Args:
-            path (Path | str): The path to the root of the geff zarr, where the .attrs contains
-                the geff  metadata
+            source (str | Path | zarr.store): Either a str/path to the root of the geff zarr
+                (where the .attrs contains the geff metadata), or a zarr store object
             validate (bool, optional): Flag indicating whether to perform validation on the
                 geff file before loading into memory. If set to False and there are
                 format issues, will likely fail with a cryptic error. Defaults to True.
         """
+        source = utils.remove_tilde(source)
+
         if validate:
-            utils.validate(path)
-        self.group = zarr.open_group(path, mode="r")
+            utils.validate(source)
+        self.group = zarr.open_group(source, mode="r")
         self.metadata = GeffMetadata.read(self.group)
         self.nodes = self.group["nodes/ids"]
         self.edges = self.group["edges/ids"]
@@ -184,7 +186,7 @@ class GeffReader:
 # NOTE: if different FileReaders exist in the future a `file_reader` argument can be
 #   added to this function to select between them.
 def read_to_dict(
-    path: Path | str,
+    source: StoreLike,
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
@@ -196,8 +198,8 @@ def read_to_dict(
     `edge_props` argument.
 
     Args:
-        path (Path | str): The path to the root of the geff zarr, where the .attrs contains
-            the geff  metadata
+        source (str | Path | zarr store): Either a path to the root of the geff zarr
+            (where the .attrs contains the geff metadata), or a zarr store object
         validate (bool, optional): Flag indicating whether to perform validation on the
             geff file before loading into memory. If set to False and there are
             format issues, will likely fail with a cryptic error. Defaults to True.
@@ -209,10 +211,8 @@ def read_to_dict(
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
-    if isinstance(path, str):
-        path = Path(path)
-    path = path.expanduser()
-    file_reader = GeffReader(path, validate)
+
+    file_reader = GeffReader(source, validate)
 
     file_reader.read_node_props(node_props)
     file_reader.read_edge_props(edge_props)
