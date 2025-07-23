@@ -10,6 +10,8 @@ import zarr
 if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
+    from .dict_representation import GraphDict
+
 from .metadata_schema import GeffMetadata
 
 
@@ -91,6 +93,18 @@ def validate_zarr_structure(graph: zarr.Group, meta: GeffMetadata):
     # Metadata based validation
     if meta.axes is not None:
         validate_axes_structure(graph, meta)
+
+
+def validate_zarr_data(graph_dict: GraphDict):
+    """Runs checks on loaded data based on information present in the metadata
+
+    Args:
+        graph_dict (GraphDict): A graphdict object which contains metadata and
+            dictionaries of node/edge property arrays
+    """
+    graph_dict["metadata"]
+
+    # TODO: Test various properties based on what is present in the metadata
 
 
 def validate_graph_group(group: zarr.Group, type: Literal["node", "edge"]):
