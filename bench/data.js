@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753228203754,
+  "lastUpdate": 1753271691405,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2745,6 +2745,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.39546522925798167",
             "extra": "mean: 15.578930625000007 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "malinmayorc@janelia.hhmi.org",
+            "name": "Caroline Malin-Mayor",
+            "username": "cmalinmayor"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c7ecf6465a6e12af3c764ff5b9bbc82da43b3efc",
+          "message": ":bug: Remove duplicate ctc dependency group (#210)\n\n# Proposed Change\nCouldn't run pixi task update-json in the dev group because the ctc\ngroup was included twice, once as a dependency group and once as extras.\nKeep the extras, because we want users to install geff[ctc], similar to\nspatial graph.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Maintenance (e.g. dependencies, CI, releases, etc.)",
+          "timestamp": "2025-07-23T07:50:43-04:00",
+          "tree_id": "723c3a6241cd64fb52f9ec82b7f5c6ed75eb9162",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/c7ecf6465a6e12af3c764ff5b9bbc82da43b3efc"
+        },
+        "date": 1753271690392,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.12123382406025088,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2316838793130769",
+            "extra": "mean: 8.248523114333333 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.141729756954803,
+            "unit": "iter/sec",
+            "range": "stddev: 0.001580941183608743",
+            "extra": "mean: 52.24188266667321 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06433743423550464,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4629430214445664",
+            "extra": "mean: 15.543050665333334 sec\nrounds: 3"
           }
         ]
       }
