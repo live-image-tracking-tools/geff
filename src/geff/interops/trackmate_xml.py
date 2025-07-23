@@ -235,12 +235,13 @@ def _add_all_nodes(
             # the tag text. So we need to extract then format them.
             # In case of a single-point detection, the `ROI_N_POINTS` attribute
             # is not present.
-            if segmentation:
-                _convert_ROI_coordinates(element, attrs)
-            else:
-                if "ROI_N_POINTS" in attrs:
-                    segmentation = True
-                    _convert_ROI_coordinates(element, attrs)
+            # TODO: waiting for polygons support in GEFF.
+            # if segmentation:
+            #     _convert_ROI_coordinates(element, attrs)
+            # else:
+            #     if "ROI_N_POINTS" in attrs:
+            #         segmentation = True
+            #         _convert_ROI_coordinates(element, attrs)
 
             # Adding the node and its attributes to the graph.
             try:
