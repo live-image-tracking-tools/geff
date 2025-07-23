@@ -4,8 +4,17 @@ import numpy as np
 import pytest
 import zarr
 
+from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata
-from geff.utils import validate, validate_axes_structure, validate_zarr_structure
+from geff.testing.data import create_simple_2d_geff
+from geff.utils import (
+    ValidationConfig,
+    validate,
+    validate_axes_structure,
+    validate_optional_data,
+    validate_zarr_data,
+    validate_zarr_structure,
+)
 
 
 def test_validate(tmp_path):
@@ -168,3 +177,23 @@ def test_validate_axes_structure(tmp_path):
     z["nodes/props/x/missing"] = np.zeros((10,))
     with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
         validate_axes_structure(z, meta)
+
+
+def test_validate_zarr_data():
+    # We're not currently going to test/raise all of the ValueErrors
+    # because each of the sub functions is tested independently
+
+    store, _ = create_simple_2d_geff()
+    graph_dict = read_to_dict(store, validate=False)
+
+    validate_zarr_data(graph_dict)
+
+
+def test_optional_data():
+    config = ValidationConfig(lineage=True)
+    graph_dict = ...  # TODO need a test graph with lineage data
+    validate_optional_data(config, graph_dict)
+
+    config = ValidationConfig(tracklet=True)
+    graph_dict = ...  # TODO need a test graph with tracklet data
+    validate_optional_data(config, graph_dict)

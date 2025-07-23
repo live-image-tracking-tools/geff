@@ -151,10 +151,10 @@ def validate_optional_data(config: ValidationConfig, graph_dict: GraphDict):
     """
     meta = graph_dict["metadata"]
     if config.sphere and meta.sphere is not None:
-        pass
+        raise NotImplementedError
 
     if config.ellipsoid and meta.ellipsoid is not None:
-        pass
+        raise NotImplementedError
 
     if meta.track_node_props is not None:
         if config.lineage and "tracklet" in meta.track_node_props:
