@@ -8,7 +8,7 @@ import zarr
 
 
 def has_valid_seg_id(
-    store: str | Path | zarr.storage.BaseStore, seg_id: str = "seg_id"
+    store: zarr.storage.StoreLike, seg_id: str = "seg_id"
 ) -> tuple[bool, list[str]]:
     """
     Validate that all nodes in the geff have a property 'seg_id', that is of type integer.
