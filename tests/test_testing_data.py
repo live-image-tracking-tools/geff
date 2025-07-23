@@ -226,7 +226,6 @@ def test_create_memory_mock_geff_with_no_extra_node_props():
 
 def test_create_memory_mock_geff_extra_node_props_validation():
     """Test validation of extra_node_props parameter"""
-    from geff.testing.data import create_memory_mock_geff
 
     # Test with invalid input types
     with pytest.raises(ValueError, match="extra_node_props must be a dict"):
