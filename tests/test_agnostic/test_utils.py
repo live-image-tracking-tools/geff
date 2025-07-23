@@ -9,8 +9,14 @@ from geff.utils import validate
 
 def test_validate(tmp_path):
     # Does not exist
-    with pytest.raises(ValueError, match=r"store must be a zarr StoreLike"):
+    with pytest.raises(ValueError, match=r"Path does not exist: does-not-exist"):
         validate("does-not-exist")
+
+    # Path exists but is not a zarr store
+    non_zarr_path = tmp_path / "not-a-zarr"
+    non_zarr_path.mkdir()
+    with pytest.raises(ValueError, match=r"store must be a zarr StoreLike"):
+        validate(non_zarr_path)
 
     zpath = tmp_path / "test.zarr"
     z = zarr.open(zpath)
