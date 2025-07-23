@@ -50,6 +50,8 @@ dev = [
     "scikit-image",
     "tifffile",
     "imagecodecs",
+    # trackmate_xml stuff
+    "lxml",
 ]
 docs = [
     "mkdocs-material",
