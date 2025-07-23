@@ -4,6 +4,8 @@ import numpy as np
 import zarr
 from zarr.storage import StoreLike
 
+from geff.utils import remove_tilde
+
 from .metadata_schema import GeffMetadata
 
 
@@ -48,6 +50,8 @@ def write_arrays(
             (e.g.: `{"pos": ["z", "y", "x"]}` will store the position property
             as three individual properties called "z", "y", and "x".
     """
+    geff_store = remove_tilde(geff_store)
+
     write_id_arrays(geff_store, node_ids, edge_ids)
     if node_props is not None:
         write_props_arrays(
@@ -78,6 +82,8 @@ def write_id_arrays(
     Raises:
         TypeError if node_ids and edge_ids have different types, or if either are float
     """
+    geff_store = remove_tilde(geff_store)
+
     if node_ids.dtype != edge_ids.dtype:
         raise TypeError(
             f"Node ids and edge ids must have same dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
@@ -119,6 +125,9 @@ def write_props_arrays(
         ValueError: If the group is not a 'nodes' or 'edges' group.
     TODO: validate attrs length based on group ids shape?
     """
+
+    geff_store = remove_tilde(geff_store)
+
     if group not in ["nodes", "edges"]:
         raise ValueError(f"Group must be a 'nodes' or 'edges' group. Found {group}")
 

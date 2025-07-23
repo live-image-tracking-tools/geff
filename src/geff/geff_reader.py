@@ -1,14 +1,12 @@
-import os
-from pathlib import Path
-
 import numpy as np
 import zarr
 from numpy.typing import NDArray
 from zarr.storage import StoreLike
 
+from geff.dict_representation import GraphDict, PropDictNpArray, PropDictZArray
+from geff.metadata_schema import GeffMetadata
+
 from . import utils
-from .dict_representation import GraphDict, PropDictNpArray, PropDictZArray
-from .metadata_schema import GeffMetadata
 
 
 class GeffReader:
@@ -50,10 +48,7 @@ class GeffReader:
                 geff file before loading into memory. If set to False and there are
                 format issues, will likely fail with a cryptic error. Defaults to True.
         """
-        if isinstance(source, str | Path):
-            source_str = str(source)
-            if "~" in source_str:
-                source = os.path.expanduser(source_str)
+        source = utils.remove_tilde(source)
 
         if validate:
             utils.validate(source)

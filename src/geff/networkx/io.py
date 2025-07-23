@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import copy
-import os
 import warnings
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
@@ -13,6 +11,7 @@ import zarr
 import geff
 from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.utils import remove_tilde
 from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
@@ -131,10 +130,8 @@ def write_nx(
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
     """
-    if isinstance(store, str | Path):
-        store_str = str(store)
-        if "~" in store_str:
-            store = os.path.expanduser(store_str)
+
+    store = remove_tilde(store)
 
     # open/create zarr container
     if zarr.__version__.startswith("3"):

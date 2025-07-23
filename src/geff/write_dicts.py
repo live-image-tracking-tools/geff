@@ -5,6 +5,7 @@ from typing import Any, Literal
 import numpy as np
 from zarr.storage import StoreLike
 
+from .utils import remove_tilde
 from .write_arrays import write_id_arrays, write_props_arrays
 
 
@@ -40,6 +41,9 @@ def write_dicts(
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
     """
+
+    geff_store = remove_tilde(geff_store)
+
     node_ids = [idx for idx, _ in node_data]
     edge_ids = [idx for idx, _ in edge_data]
 

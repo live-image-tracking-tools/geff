@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import zarr
@@ -8,6 +10,24 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
 from .metadata_schema import GeffMetadata
+
+
+def remove_tilde(store: StoreLike) -> StoreLike:
+    """
+    Remove tilde from a store path/str, because zarr (3?) will not recognize
+        the tilde and write the zarr in the wrong directory.
+
+    Args:
+        store (str | Path | zarr store): The store to remove the tilde from
+
+    Returns:
+        StoreLike: The store with the tilde removed
+    """
+    if isinstance(store, str | Path):
+        store_str = str(store)
+        if "~" in store_str:
+            store = os.path.expanduser(store_str)
+    return store
 
 
 def validate(store: StoreLike):
