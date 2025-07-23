@@ -1,0 +1,38 @@
+changelog:
+  categories:
+    - title: '✨ Features'
+      labels:
+        - ':star: feature'
+        - 'enhancement'
+    - title: ':clipboard: Specification'
+      labels:
+        - ':clipboard: specification'
+        - ':label: metadata'
+    - title: '🚀 Performance'
+      labels:
+        - ':rocket: performance'
+    - title: ':car: implementation'
+      labels:
+        - ':car: implementation'
+    - title: ':mag_right: validation'
+      labels:
+        - ':mag_right: validation'
+    - title: ':steam_locomotive: interoperability'
+      labels:
+        - ':steam_locomotive: interoperability'
+    - title: '🐛 Bug Fixes'
+      labels:
+        - 'fix'
+        - 'bugfix'
+        - ':bug: bug'
+        - 'hotfix'
+    - title: '🧰 Maintenance'
+      labels:
+        - 'chore'
+        - 'dependencies'
+        - ':test_tube: test'
+        - ':wrench: maintenance'
+    - title: '📚️ Documentation'
+      labels:
+        - 'documentation'
+        - ':memo: docs'
