@@ -3,12 +3,13 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
+import numpy as np
+
 from geff.geff_reader import read_to_dict
 from geff.io_utils import (
     calculate_roi_from_nodes,
     create_or_update_metadata,
     get_graph_existing_metadata,
-    process_property_value,
     setup_zarr_group,
 )
 from geff.metadata_schema import GeffMetadata, axes_from_lists
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     import rustworkx as rx
     from zarr.storage import StoreLike
 
-    from geff.dict_representation import GraphDict, PropDictNpArray
+    from geff.dict_representation import GraphDict
 
 
 def get_roi_rx(
@@ -167,61 +168,6 @@ def write_rx(
     metadata.write(group)
 
 
-def _set_property_values_rx(
-    graph: rx.PyGraph,
-    ids: list[int],
-    name: str,
-    prop_dict: PropDictNpArray,
-    nodes: bool = True,
-) -> None:
-    """Add properties in-place to a rustworkx graph's
-    nodes or edges by creating attributes on the nodes/edges
-
-    Args:
-        graph: The rustworkx graph, already populated with nodes or edges,
-            that needs properties added
-        ids: Node or edge ids from Geff. If nodes, list of node ids. If edges, list of edge tuples.
-        name: The name of the property.
-        prop_dict: A dictionary containing a "values" key with
-            an array of values and an optional "missing" key for missing values.
-        nodes: If True, extract and set node properties. If False,
-            extract and set edge properties. Defaults to True.
-    """
-    sparse = "missing" in prop_dict
-
-    for idx in range(len(ids)):
-        _id = ids[idx]
-        val = prop_dict["values"][idx]
-        # If property is sparse and missing for this node, skip setting property
-        ignore = prop_dict["missing"][idx] if sparse else False
-        if not ignore:
-            # Get either individual item or list instead of setting with np.array
-            val = process_property_value(val)
-            if nodes:
-                # For rustworkx, we need to update the node data in place
-                node_data = graph[_id]
-                if isinstance(node_data, dict):
-                    node_data[name] = val
-                else:
-                    # If node data is not a dict, we can't add properties
-                    pass
-            else:
-                # For edges, we need to find the edge and update its data
-                # This is more complex in rustworkx as we need to find the edge index
-                source, target = _id[0], _id[1]  # type: ignore
-                edge_indices = graph.edge_indices_from_endpoints(source, target)
-                if edge_indices:
-                    edge_index = edge_indices[0]
-                    # Get current edge data
-                    current_edge_data = graph.get_edge_data_by_index(edge_index)
-                    if isinstance(current_edge_data, dict):
-                        current_edge_data[name] = val
-                    else:
-                        # If edge data is not a dict, we can't easily add properties
-                        # This is a limitation of the current implementation
-                        pass
-
-
 def _ingest_dict_rx(graph_dict: GraphDict) -> tuple[rx.PyGraph, dict[int, int]]:
     """Convert a GraphDict to a rustworkx graph."""
     try:
@@ -241,14 +187,21 @@ def _ingest_dict_rx(graph_dict: GraphDict) -> tuple[rx.PyGraph, dict[int, int]]:
     node_props: list[dict[str, Any]] = [{} for _ in node_ids]
 
     # Populate node properties first
+    indices = np.arange(len(node_ids))
+
     for name, prop_dict in graph_dict["node_props"].items():
-        sparse = "missing" in prop_dict
-        for idx in range(len(node_ids)):
-            val = prop_dict["values"][idx]
-            ignore = prop_dict["missing"][idx] if sparse else False
-            if not ignore:
-                val = process_property_value(val)
-                node_props[idx][name] = val
+        values = prop_dict["values"]
+        if "missing" in prop_dict:
+            current_indices = indices[~prop_dict["missing"]]
+            values = values[current_indices]
+        else:
+            current_indices = indices
+
+        values = values.tolist()
+        current_indices = current_indices.tolist()
+
+        for idx, val in zip(current_indices, values, strict=True):
+            node_props[idx][name] = val
 
     # Add nodes with their properties
     rx_node_ids = graph.add_nodes_from(node_props)
@@ -258,29 +211,28 @@ def _ingest_dict_rx(graph_dict: GraphDict) -> tuple[rx.PyGraph, dict[int, int]]:
 
     # Add edges if they exist
     if len(graph_dict["edges"]) > 0:
-        edge_ids = graph_dict["edges"].tolist()
-
+        # converting to local rx ids
+        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(graph_dict["edges"])
         # Prepare edge data with properties
-        edges_with_data = []
-        for idx, edge_pair in enumerate(edge_ids):
-            source_id, target_id = edge_pair
-            rx_source = to_rx_id_map[source_id]
-            rx_target = to_rx_id_map[target_id]
+        edges_data: list[dict[str, Any]] = [{} for _ in edge_ids]
+        indices = np.arange(len(edge_ids))
 
-            # Create edge data dict with properties
-            edge_data = {}
-            for name, prop_dict in graph_dict["edge_props"].items():
-                sparse = "missing" in prop_dict
-                val = prop_dict["values"][idx]
-                ignore = prop_dict["missing"][idx] if sparse else False
-                if not ignore:
-                    val = process_property_value(val)
-                    edge_data[name] = val
+        for name, prop_dict in graph_dict["edge_props"].items():
+            values = prop_dict["values"]
+            if "missing" in prop_dict:
+                current_indices = indices[~prop_dict["missing"]]
+                values = values[current_indices]
+            else:
+                current_indices = indices
 
-            edges_with_data.append((rx_source, rx_target, edge_data))
+            values = values.tolist()
+            current_indices = current_indices.tolist()
+
+            for idx, val in zip(current_indices, values, strict=True):
+                edges_data[idx][name] = val
 
         # Add edges with their properties
-        graph.add_edges_from(edges_with_data)
+        graph.add_edges_from([(e[0], e[1], d) for e, d in zip(edge_ids, edges_data, strict=True)])
 
     return graph, to_rx_id_map
 

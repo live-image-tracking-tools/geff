@@ -147,19 +147,3 @@ def calculate_roi_from_nodes(
             _max = np.max([_max, pos], axis=0)
 
     return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
-
-
-def process_property_value(val: Any) -> Any:
-    """Process a property value for storage, converting numpy arrays appropriately.
-
-    Args:
-        val: The property value to process
-
-    Returns:
-        Processed value suitable for storage
-    """
-    return (
-        val.tolist()
-        if hasattr(val, "size") and val.size > 1
-        else (val.item() if hasattr(val, "item") else val)
-    )

@@ -9,7 +9,6 @@ from geff.io_utils import (
     calculate_roi_from_nodes,
     create_or_update_metadata,
     get_graph_existing_metadata,
-    process_property_value,
     setup_zarr_group,
 )
 from geff.metadata_schema import GeffMetadata, axes_from_lists
@@ -146,12 +145,11 @@ def _set_property_values(
         ignore = prop_dict["missing"][idx] if sparse else False
         if not ignore:
             # Get either individual item or list instead of setting with np.array
-            val = process_property_value(val)
             if nodes:
-                graph.nodes[_id.item()][name] = val
+                graph.nodes[_id.item()][name] = val.tolist()
             else:
                 source, target = _id.tolist()
-                graph.edges[source, target][name] = val
+                graph.edges[source, target][name] = val.tolist()
 
 
 def _ingest_dict_nx(graph_dict: GraphDict):
