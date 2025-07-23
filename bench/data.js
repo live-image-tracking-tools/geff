@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753299206486,
+  "lastUpdate": 1753300503439,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3060,6 +3060,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.594809679221276",
             "extra": "mean: 15.432270660999999 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "63270704+melisande-c@users.noreply.github.com",
+            "name": "Melisande Croft",
+            "username": "melisande-c"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f89fc0d1583f9c54b651393f4f6a9d300f3b72bc",
+          "message": "feat: Construct protocol and unified read function (#190)\n\n# Proposed Change\nIntroduce a `ConstructFunc` protocol that takes series of NumPy arrays\nthat represent the GEFF data and constructs a graph in a specific\nbackend. If different backends follow this protocol they can be added to\nthe unified read function which will return a graph object based on the\n`backend` flag. The supported backends are stored in an enum\n`SupportedBackend`.\n\nAdded a readme with instructions on how to add read support for a new\nbackend.\n\nPartially addresses #173.\n\n### Testing\n\nThere is now a test for the `read` function that will be the same for\nall new backends. All backends have to do is add the backend to the test\nparametrisation and modify the `is_expected_type`, `get_nodes`,\n`get_edges`, `get_node_prop` and `get_edge_prop` utility functions. The\ntest `test_read` duplicates `test_read_write_consistency`, but both\ncoexist.\n\nPartially addresses #188\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- Implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n## If you changed the specification\n- [ ] I have checked that any validation functions and tests reflect the\nchanges.\n- [ ] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [ ] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n## If you have added or changed an implementation\n- [ ] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [ ] I updated pyproject.toml with new dependencies if needed.\n- [ ] I added a function to tests/bench.py to benchmark the new\nimplementation.\n\n---------\n\nCo-authored-by: melisande-c <melisande.croft@fht.org>",
+          "timestamp": "2025-07-23T15:50:11-04:00",
+          "tree_id": "e01d2b76212da428e191e16e1c871acc832c8015",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/f89fc0d1583f9c54b651393f4f6a9d300f3b72bc"
+        },
+        "date": 1753300502783,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11583056614268478,
+            "unit": "iter/sec",
+            "range": "stddev: 1.227082644483748",
+            "extra": "mean: 8.633299769666666 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.356528222387286,
+            "unit": "iter/sec",
+            "range": "stddev: 0.001086131331665256",
+            "extra": "mean: 51.66215700000502 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06469603450168854,
+            "unit": "iter/sec",
+            "range": "stddev: 0.44248912954818764",
+            "extra": "mean: 15.456897902666668 sec\nrounds: 3"
           }
         ]
       }
