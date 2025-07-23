@@ -11,12 +11,12 @@ import zarr
 import geff
 from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.utils import remove_tilde
 from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from numpy.typing import NDArray
+    from zarr.storage import StoreLike
 
     from geff.dict_representation import GraphDict, PropDictNpArray
 
@@ -102,19 +102,19 @@ def _get_graph_existing_metadata(
 
 def write_nx(
     graph: nx.Graph,
-    path: str | Path,
+    store: StoreLike,
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
     axis_types: list[str | None] | None = None,
-    zarr_format: Literal[2, 3] | None = 2,
+    zarr_format: Literal[2, 3] = 2,
 ):
     """Write a networkx graph to the geff file format
 
     Args:
         graph (nx.Graph): A networkx graph
-        path (str | Path): The path to the output zarr. Opens in append mode,
-            so will only overwrite geff-controlled groups.
+        store (str | Path | zarr store): The path/str to the output zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
         metadata (GeffMetadata, optional): The original metadata of the graph.
             Defaults to None. If provided, will override the graph properties.
         axis_names (Optional[list[str]], optional): The names of the spatial dims
@@ -127,14 +127,17 @@ def write_nx(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
-        zarr_format (int, optional): The version of zarr to write.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
     """
+
+    store = remove_tilde(store)
+
     # open/create zarr container
     if zarr.__version__.startswith("3"):
-        group = zarr.open_group(path, mode="a", zarr_format=zarr_format)
+        group = zarr.open_group(store, mode="a", zarr_format=zarr_format)
     else:
-        group = zarr.open_group(path, mode="a")
+        group = zarr.open_group(store, mode="a")
 
     axis_names, axis_units, axis_types = _get_graph_existing_metadata(
         graph, metadata, axis_names, axis_units, axis_types
@@ -145,7 +148,7 @@ def write_nx(
     edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
     edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
     write_dicts(
-        path,
+        store,
         graph.nodes(data=True),
         edge_data,
         node_props,
@@ -241,7 +244,7 @@ def _ingest_dict_nx(graph_dict: GraphDict):
 
 
 def read_nx(
-    path: Path | str,
+    store: StoreLike,
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
@@ -250,8 +253,8 @@ def read_nx(
     the graph properties, accessed via `G.graph[key]` where G is a networkx graph.
 
     Args:
-        path (Path | str): The path to the root of the geff zarr, where the .attrs contains
-            the geff  metadata
+        store (str | Path | zarr store): The path/str to the geff zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
         validate (bool, optional): Flag indicating whether to perform validation on the
             geff file before loading into memory. If set to False and there are
             format issues, will likely fail with a cryptic error. Defaults to True.
@@ -263,7 +266,7 @@ def read_nx(
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
-    graph_dict = read_to_dict(path, validate, node_props, edge_props)
+    graph_dict = read_to_dict(store, validate, node_props, edge_props)
     graph, metadata = _ingest_dict_nx(graph_dict)
 
     return graph, metadata

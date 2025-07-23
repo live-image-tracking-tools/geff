@@ -33,26 +33,19 @@ classifiers = [
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
 ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
+trackmate_xml = ["lxml"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
-ctc = [
-    "dask",
-    "scikit-image",
-    "tifffile",
-    "imagecodecs",
-]
-trackmate_xml = ["lxml"]
 dev = [
     { include-group = "test" },
-    { include-group = "ctc" },
-    { include-group = "trackmate_xml" },
     "mypy",
     "pre-commit",
     "ruff",
     "ipython",
     "types-PyYAML",
     "spatial-graph",
+    "geff[ctc]"
 ]
 docs = [
     "mkdocs-material",
@@ -84,17 +77,17 @@ python = "3.12.*"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
-dev = { features = ["dev", "ctc"], solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 bench = { features = ["dev", "bench"], solve-group = "default" }
-ctc = { features = ["ctc"], solve-group = "default" }
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "coverage run -m pytest"
+test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
 benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.bench.tasks]
@@ -203,6 +196,3 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 
 [project.entry-points.console_scripts]
 ctc2geff = "geff.interops.ctc:app"
-
-[project.entry-points.pytest11]
-geff = "geff._pytest_plugin"

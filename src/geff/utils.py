@@ -1,32 +1,50 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import zarr
 
+if TYPE_CHECKING:
+    from zarr.storage import StoreLike
+
 from .metadata_schema import GeffMetadata
 
-if TYPE_CHECKING:
-    from pathlib import Path
+
+def remove_tilde(store: StoreLike) -> StoreLike:
+    """
+    Remove tilde from a store path/str, because zarr (3?) will not recognize
+        the tilde and write the zarr in the wrong directory.
+
+    Args:
+        store (str | Path | zarr store): The store to remove the tilde from
+
+    Returns:
+        StoreLike: The store with the tilde removed
+    """
+    if isinstance(store, str | Path):
+        store_str = str(store)
+        if "~" in store_str:
+            store = os.path.expanduser(store_str)
+    return store
 
 
-def validate(path: str | Path):
+def validate(store: StoreLike):
     """Check that the structure of the zarr conforms to geff specification
 
     Args:
-        path (str | Path): Path to geff zarr
+        store (str | Path | zarr store): Check the geff zarr, either str/Path/store
 
     Raises:
         AssertionError: If geff specs are violated
     """
-    # Check that directory exists
-    assert os.path.exists(path), f"Directory {path} does not exist"
 
-    # zarr python 3 doesn't support Path
-    path = str(path)
-    path = os.path.expanduser(path)
-    graph = zarr.open(path, mode="r")
+    # Open the zarr group from the store
+    try:
+        graph = zarr.open_group(store, mode="r")
+    except Exception as e:
+        raise ValueError("store must be a zarr StoreLike") from e
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
