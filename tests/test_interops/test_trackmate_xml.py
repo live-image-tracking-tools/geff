@@ -265,12 +265,6 @@ def test_add_all_nodes():
         tm_xml._add_all_nodes(it, element, {}, nx.Graph())
 
 
-# Raises:
-#     AssertionError: If the 'TRACK_ID' attribute of either the source or target node
-#         does not match the current track ID, indicating an inconsistency in track
-#         assignment.
-
-
 def test_add_edge():
     # Normal case with several attributes
     xml_data = """<data SPOT_SOURCE_ID="1" SPOT_TARGET_ID="2" x="20.5" y="25" />"""
