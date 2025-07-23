@@ -190,6 +190,8 @@ def read_to_dict(
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
+    validate_data: bool = False,
+    validate_optional_data: utils.ValidationConfig | None = None,
 ) -> GraphDict:
     """
     Read a GEFF zarr file to a dictionary representation.
@@ -200,9 +202,13 @@ def read_to_dict(
     Args:
         source (str | Path | zarr store): Either a path to the root of the geff zarr
             (where the .attrs contains the geff metadata), or a zarr store object
-        validate (bool, optional): Flag indicating whether to perform validation on the
-            geff file before loading into memory. If set to False and there are
-            format issues, will likely fail with a cryptic error. Defaults to True.
+        validate (bool, optional): Flag indicating whether to perform metadata/structure
+            validation on the geff file before loading into memory. If set to False and
+            there are format issues, will likely fail with a cryptic error. Defaults to True.
+        validate_data (bool, optional): Flag indicating whether to perform validation on the
+            underlying data of the geff, e.g. edges. Defaults to False.
+        validate_optional_data (ValidationConfig, optional): Optional configuration for which
+            optional properties to validate. Defaults to None and validation does not occur.
         node_props (list of str, optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
         edge_props (list of str, optional): The names of the edge properties to load,
@@ -218,4 +224,11 @@ def read_to_dict(
     file_reader.read_edge_props(edge_props)
 
     graph_dict = file_reader.build()
+
+    if validate_data:
+        utils.validate_zarr_data(graph_dict)
+
+    if validate_optional_data is not None:
+        utils.validate_optional_data(config=validate_optional_data, graph_dict=graph_dict)
+
     return graph_dict
