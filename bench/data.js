@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753300503439,
+  "lastUpdate": 1753301458508,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3105,6 +3105,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.44248912954818764",
             "extra": "mean: 15.456897902666668 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33941387+lxenard@users.noreply.github.com",
+            "name": "Laura Xénard",
+            "username": "lxenard"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6fe8929a2841ca299e82e5aeaba99f14d123fb38",
+          "message": "TrackMate XML to GEFF (#197)\n\n# Proposed Change\nAdd a converter to convert TrackMate XML to GEFF.\nFor now, it only extracts the graph data, including nodes and edges\nproperties, and relies on write_nx to build a valid GEFF.\nRelates to #69 .\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- io\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n# Further Comments\nThe actual implementation relies on iterparse from lxml (not part of\nstandard library). It means that the converter iteratively parses the\nXML, line by line. At no point is the XML completely loaded into memory.\nSo, nice for crazy huge XMLs but probably comes at the cost of\nefficiency.",
+          "timestamp": "2025-07-23T16:08:18-04:00",
+          "tree_id": "f6b3b30e88895c9ed19391490b0bfdbb7a44672d",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/6fe8929a2841ca299e82e5aeaba99f14d123fb38"
+        },
+        "date": 1753301457811,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11144359558705896,
+            "unit": "iter/sec",
+            "range": "stddev: 1.301971020913922",
+            "extra": "mean: 8.973149105 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 18.589117692561732,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000356777555332751",
+            "extra": "mean: 53.79491466666764 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06400003452793328,
+            "unit": "iter/sec",
+            "range": "stddev: 0.47000170666101576",
+            "extra": "mean: 15.624991570333336 sec\nrounds: 3"
           }
         ]
       }
