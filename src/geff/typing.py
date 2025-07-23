@@ -22,19 +22,33 @@ from .metadata_schema import GeffMetadata
 
 
 class PropDictNpArray(TypedDict):
+    """
+    A prop dictionary which has the keys "values" and optionally "missing", stored as numpy arrays.
+
+    "values" is a numpy array of any type, "missing" is a numpy array of bools.
+    """
+
     values: NDArray[Any]
     missing: NotRequired[NDArray[np.bool]]
 
 
 class PropDictZArray(TypedDict):
+    """
+    A prop dictionary which has the keys "values" and optionally "missing", stored as zarr arrays.
+    """
+
     values: zarr.Array
     missing: NotRequired[zarr.Array]
 
 
-# Intermediate dict format that can be injested to different backend types
-class GraphDict(TypedDict):
+# Intermediate dict format that can be constructed to different backend types
+class InMemoryGeff(TypedDict):
+    """
+    Geff data loaded into memory as numpy arrays.
+    """
+
     metadata: GeffMetadata
-    nodes: NDArray[Any]
-    edges: NDArray[Any]
+    node_ids: NDArray[Any]
+    edge_ids: NDArray[Any]
     node_props: dict[str, PropDictNpArray]
     edge_props: dict[str, PropDictNpArray]

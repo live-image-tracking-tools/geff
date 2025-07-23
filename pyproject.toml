@@ -33,6 +33,7 @@ classifiers = [
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
 ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
+trackmate_xml = ["lxml"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -49,6 +50,8 @@ dev = [
     "scikit-image",
     "tifffile",
     "imagecodecs",
+    # trackmate_xml stuff
+    "lxml",
 ]
 docs = [
     "mkdocs-material",

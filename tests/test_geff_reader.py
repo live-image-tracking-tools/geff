@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from geff.geff_reader import GeffReader
-from geff.networkx.io import _ingest_dict_nx
+from geff.networkx.io import construct_nx
 from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
@@ -39,16 +39,16 @@ def test_build_w_masked_nodes(
     node_mask = np.zeros(n_nodes, dtype=bool)
     node_mask[: n_nodes // 2] = True  # mask half the nodes
 
-    graph_dict = file_reader.build(node_mask=node_mask)
+    in_memory_geff = file_reader.build(node_mask=node_mask)
 
     # make sure nodes and edges are masked as expected
-    np.testing.assert_array_equal(graph_props["nodes"][node_mask], graph_dict["nodes"])
+    np.testing.assert_array_equal(graph_props["nodes"][node_mask], in_memory_geff["node_ids"])
 
     # assert no edges that reference non existing nodes
-    assert np.isin(graph_dict["nodes"], graph_dict["edges"]).all()
+    assert np.isin(in_memory_geff["node_ids"], in_memory_geff["edge_ids"]).all()
 
     # make sure graph dict can be ingested
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(**in_memory_geff)
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
@@ -73,12 +73,12 @@ def test_build_w_masked_edges(
     edge_mask = np.zeros(n_edges, dtype=bool)
     edge_mask[: n_edges // 2] = True  # mask half the edges
 
-    graph_dict = file_reader.build(edge_mask=edge_mask)
+    in_memory_geff = file_reader.build(edge_mask=edge_mask)
 
-    np.testing.assert_array_equal(graph_props["edges"][edge_mask], graph_dict["edges"])
+    np.testing.assert_array_equal(graph_props["edges"][edge_mask], in_memory_geff["edge_ids"])
 
     # make sure graph dict can be ingested
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(**in_memory_geff)
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
@@ -107,22 +107,22 @@ def test_build_w_masked_nodes_edges(
     edge_mask = np.zeros(n_edges, dtype=bool)
     edge_mask[: n_edges // 2] = True  # mask half the edges
 
-    graph_dict = file_reader.build(node_mask=node_mask, edge_mask=edge_mask)
+    in_memory_geff = file_reader.build(node_mask=node_mask, edge_mask=edge_mask)
 
     # make sure nodes and edges are masked as expected
-    np.testing.assert_array_equal(graph_props["nodes"][node_mask], graph_dict["nodes"])
+    np.testing.assert_array_equal(graph_props["nodes"][node_mask], in_memory_geff["node_ids"])
 
     # assert no edges that reference non existing nodes
-    assert np.isin(graph_dict["nodes"], graph_dict["edges"]).all()
+    assert np.isin(in_memory_geff["node_ids"], in_memory_geff["edge_ids"]).all()
 
     # assert all the output edges are in the naively masked edges
-    output_edges = graph_dict["edges"]
+    output_edges = in_memory_geff["edge_ids"]
     masked_edges = graph_props["edges"][edge_mask]
     # Adding a new axis allows comparing each element
     assert (output_edges[:, :, np.newaxis] == masked_edges).all(axis=1).any(axis=1).all()
 
     # make sure graph dict can be ingested
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(**in_memory_geff)
 
 
 def test_read_node_props():
@@ -140,18 +140,18 @@ def test_read_node_props():
     node_mask = np.zeros(n_nodes, dtype=bool)
     node_mask[: n_nodes // 2] = True  # mask half the nodes
 
-    graph_dict = file_reader.build(node_mask=node_mask)
-    assert len(graph_dict["node_props"]) == 0
+    in_memory_geff = file_reader.build(node_mask=node_mask)
+    assert len(in_memory_geff["node_props"]) == 0
 
-    file_reader.read_node_props("t")
-    graph_dict = file_reader.build(node_mask=node_mask)
-    assert "t" in graph_dict["node_props"]
+    file_reader.read_node_props(["t"])
+    in_memory_geff = file_reader.build(node_mask=node_mask)
+    assert "t" in in_memory_geff["node_props"]
     np.testing.assert_allclose(
         graph_props["t"][node_mask],
-        graph_dict["node_props"]["t"]["values"],
+        in_memory_geff["node_props"]["t"]["values"],
     )
 
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(**in_memory_geff)
 
 
 def test_read_edge_props():
@@ -169,14 +169,14 @@ def test_read_edge_props():
     edge_mask = np.zeros(n_edges, dtype=bool)
     edge_mask[: n_edges // 2] = True  # mask half the edges
 
-    graph_dict = file_reader.build(edge_mask=edge_mask)
-    assert len(graph_dict["edge_props"]) == 0
+    in_memory_geff = file_reader.build(edge_mask=edge_mask)
+    assert len(in_memory_geff["edge_props"]) == 0
 
     file_reader.read_edge_props(["score"])
-    graph_dict = file_reader.build(edge_mask=edge_mask)
+    in_memory_geff = file_reader.build(edge_mask=edge_mask)
     np.testing.assert_allclose(
         graph_props["extra_edge_props"]["score"][edge_mask],
-        graph_dict["edge_props"]["score"]["values"],
+        in_memory_geff["edge_props"]["score"]["values"],
     )
 
-    _ = _ingest_dict_nx(graph_dict)
+    _ = construct_nx(**in_memory_geff)
