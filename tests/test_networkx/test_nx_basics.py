@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 import geff
+from geff.utils import check_equiv_geff
 
 node_dtypes = ["int8", "uint8", "int16", "uint16", "str"]
 node_prop_dtypes = [
@@ -23,6 +24,7 @@ edge_prop_dtypes = [
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_consistency(
     path_w_expected_graph_props,
+    tmp_path,
     node_dtype,
     node_prop_dtypes,
     edge_prop_dtypes,
@@ -34,6 +36,7 @@ def test_read_write_consistency(
 
     graph, metadata = geff.read_nx(path)
 
+    # Check that in memory representation is consistent with what we expected to have from fixture
     assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
     assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
     for idx, node in enumerate(graph_props["nodes"]):
@@ -47,6 +50,18 @@ def test_read_write_consistency(
     # TODO: test metadata
     # assert graph.graph["axis_names"] == graph_props["axis_names"]
     # assert graph.graph["axis_units"] == graph_props["axis_units"]
+
+    # Write again
+    out_zarr = tmp_path / "write-out.zarr/tracks"
+    geff.write_nx(
+        graph,
+        out_zarr,
+        axis_names=list(graph_props["axis_names"]),
+        axis_units=list(graph_props["axis_units"]),
+    )
+
+    # Check consistency with source fixture
+    check_equiv_geff(path, out_zarr)
 
 
 @pytest.mark.parametrize("node_dtype", node_dtypes)
