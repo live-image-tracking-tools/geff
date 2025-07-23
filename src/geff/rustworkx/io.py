@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-import copy
 import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
-import numpy as np
-import zarr
-
-import geff
 from geff.geff_reader import read_to_dict
+from geff.io_utils import (
+    calculate_roi_from_nodes,
+    create_or_update_metadata,
+    get_graph_existing_metadata,
+    process_property_value,
+    setup_zarr_group,
+)
 from geff.metadata_schema import GeffMetadata, axes_from_lists
-from geff.utils import remove_tilde
 from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
@@ -33,66 +34,11 @@ def get_roi_rx(
         tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
             spatial dim, and a tuple with the max values in each spatial dim
     """
-    _min = None
-    _max = None
-    for node_data in graph.nodes():
-        try:
-            pos = np.array([node_data[name] for name in axis_names])
-        except KeyError as e:
-            missing_names = {name for name in axis_names if name not in node_data}
-            raise ValueError(f"Spatiotemporal properties {missing_names} not found in node") from e
-        if _min is None or _max is None:
-            _min = pos
-            _max = pos
-        else:
-            _min = np.min([_min, pos], axis=0)
-            _max = np.max([_max, pos], axis=0)
-
-    return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
-
-
-def _get_graph_existing_metadata_rx(
-    graph: rx.PyGraph,
-    metadata: GeffMetadata | None = None,
-    axis_names: list[str] | None = None,
-    axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
-) -> tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
-    """Get the existing metadata from a rustworkx graph.
-
-    If axis lists are provided, they will override the graph properties and metadata.
-    If metadata is provided, it will override the graph properties.
-    If neither are provided, the graph properties will be used.
-
-    Args:
-        graph: A rustworkx graph
-        metadata: The metadata of the graph. Defaults to None.
-        axis_names: The names of the spatial dims. Defaults to None.
-        axis_units: The units of the spatial dims. Defaults to None.
-        axis_types: The types of the spatial dims. Defaults to None.
-
-    Returns:
-        tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
-            A tuple with the names of the spatial dims, the units of the spatial dims,
-            and the types of the spatial dims. None if not provided.
-    """
-    lists_provided = any(x is not None for x in [axis_names, axis_units, axis_types])
-    metadata_provided = metadata is not None
-
-    if lists_provided and metadata_provided:
-        warnings.warn(
-            "Both axis lists and metadata provided. Overriding metadata with axis lists.",
-            stacklevel=2,
-        )
-
-    # If any axis lists is not provided, fallback to metadata if provided
-    if metadata is not None and metadata.axes is not None:
-        # the x = x or y is a python idiom for setting x to y if x is None, otherwise x
-        axis_names = axis_names or [axis.name for axis in metadata.axes]
-        axis_units = axis_units or [axis.unit for axis in metadata.axes]
-        axis_types = axis_types or [axis.type for axis in metadata.axes]
-
-    return axis_names, axis_units, axis_types
+    return calculate_roi_from_nodes(
+        graph.nodes(),
+        axis_names,
+        lambda node_data: node_data,  # node_data is already the dict for rustworkx
+    )
 
 
 def write_rx(
@@ -124,16 +70,10 @@ def write_rx(
             "rustworkx is not installed. Please install it with `pip install geff[rx]`."
         ) from e
 
-    store = remove_tilde(store)
+    group = setup_zarr_group(store, zarr_format)
 
-    # open/create zarr container
-    if zarr.__version__.startswith("3"):
-        group = zarr.open_group(store, mode="a", zarr_format=zarr_format)
-    else:
-        group = zarr.open_group(store, mode="a")
-
-    axis_names, axis_units, axis_types = _get_graph_existing_metadata_rx(
-        graph, metadata, axis_names, axis_units, axis_types
+    axis_names, axis_units, axis_types = get_graph_existing_metadata(
+        metadata, axis_names, axis_units, axis_types
     )
 
     if graph.num_nodes() == 0:
@@ -162,17 +102,11 @@ def write_rx(
             roi_max=None,
         )
 
-        if metadata is not None:
-            metadata = copy.deepcopy(metadata)
-            metadata.geff_version = geff.__version__
-            metadata.directed = isinstance(graph, rx.PyDiGraph)
-            metadata.axes = axes
-        else:
-            metadata = GeffMetadata(
-                geff_version=geff.__version__,
-                directed=isinstance(graph, rx.PyDiGraph),
-                axes=axes,
-            )
+        metadata = create_or_update_metadata(
+            metadata,
+            isinstance(graph, rx.PyDiGraph),
+            axes,
+        )
         metadata.write(group)
         warnings.warn(f"Graph is empty - only writing metadata to {store}", stacklevel=2)
         return
@@ -225,18 +159,11 @@ def write_rx(
         roi_max=roi_max,
     )
 
-    # Conditionally update metadata with new axes, version, and directedness
-    if metadata is not None:
-        metadata = copy.deepcopy(metadata)
-        metadata.geff_version = geff.__version__
-        metadata.directed = isinstance(graph, rx.PyDiGraph)
-        metadata.axes = axes
-    else:
-        metadata = GeffMetadata(
-            geff_version=geff.__version__,
-            directed=isinstance(graph, rx.PyDiGraph),
-            axes=axes,
-        )
+    metadata = create_or_update_metadata(
+        metadata,
+        isinstance(graph, rx.PyDiGraph),
+        axes,
+    )
     metadata.write(group)
 
 
@@ -269,11 +196,7 @@ def _set_property_values_rx(
         ignore = prop_dict["missing"][idx] if sparse else False
         if not ignore:
             # Get either individual item or list instead of setting with np.array
-            val = (
-                val.tolist()
-                if hasattr(val, "size") and val.size > 1
-                else (val.item() if hasattr(val, "item") else val)
-            )
+            val = process_property_value(val)
             if nodes:
                 # For rustworkx, we need to update the node data in place
                 node_data = graph[_id]
@@ -324,11 +247,7 @@ def _ingest_dict_rx(graph_dict: GraphDict) -> tuple[rx.PyGraph, dict[int, int]]:
             val = prop_dict["values"][idx]
             ignore = prop_dict["missing"][idx] if sparse else False
             if not ignore:
-                val = (
-                    val.tolist()
-                    if hasattr(val, "size") and val.size > 1
-                    else (val.item() if hasattr(val, "item") else val)
-                )
+                val = process_property_value(val)
                 node_props[idx][name] = val
 
     # Add nodes with their properties
@@ -355,11 +274,7 @@ def _ingest_dict_rx(graph_dict: GraphDict) -> tuple[rx.PyGraph, dict[int, int]]:
                 val = prop_dict["values"][idx]
                 ignore = prop_dict["missing"][idx] if sparse else False
                 if not ignore:
-                    val = (
-                        val.tolist()
-                        if hasattr(val, "size") and val.size > 1
-                        else (val.item() if hasattr(val, "item") else val)
-                    )
+                    val = process_property_value(val)
                     edge_data[name] = val
 
             edges_with_data.append((rx_source, rx_target, edge_data))

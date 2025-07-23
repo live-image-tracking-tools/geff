@@ -43,7 +43,9 @@ def big_graph_path(tmpdir_factory, big_graph):
     return tmp_path
 
 
-@pytest.mark.parametrize("write_func", [geff_nx.write_nx, geff_rx.write_rx])
+@pytest.mark.parametrize(
+    "write_func", [geff_nx.write_nx]
+)  # , geff_rx.write_rx])  # we cannot test rustworkx because the big_graph is a NX graph
 def test_write(write_func, benchmark, tmp_path, big_graph):
     path = tmp_path / "test_write.zarr"
 
