@@ -33,6 +33,8 @@ classifiers = [
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
 ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
+rx = ["rustworkx>=0.16.0"]
+trackmate_xml = ["lxml"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -44,7 +46,14 @@ dev = [
     "ipython",
     "types-PyYAML",
     "spatial-graph",
-    "geff[ctc]"
+    "rustworkx",
+    # ctc stuff:
+    "dask",
+    "scikit-image",
+    "tifffile",
+    "imagecodecs",
+    # trackmate_xml stuff
+    "lxml",
 ]
 docs = [
     "mkdocs-material",
@@ -62,6 +71,7 @@ bench = [
     "tabulate",
     "pandas",
     "typer",
+    "rustworkx",
 ]
 
 [tool.pixi.project]
@@ -193,5 +203,6 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 #     "tests/**/*",
 # ]
 
-[project.entry-points.console_scripts]
+[project.scripts]
 ctc2geff = "geff.interops.ctc:app"
+geff = "geff._cli:app"

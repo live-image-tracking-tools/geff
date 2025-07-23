@@ -6,6 +6,7 @@ nav:
   - index.md
   - what-is-geff.md
   - specification.md
+  - command-line-tools.md
   - api.md
 
 theme:

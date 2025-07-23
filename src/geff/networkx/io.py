@@ -1,24 +1,24 @@
 from __future__ import annotations
 
-import copy
-import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
-import numpy as np
-import zarr
 
-import geff
-from geff.geff_reader import read_to_dict
+from geff.geff_reader import read_to_memory
+from geff.io_utils import (
+    calculate_roi_from_nodes,
+    create_or_update_metadata,
+    get_graph_existing_metadata,
+    setup_zarr_group,
+)
 from geff.metadata_schema import GeffMetadata, axes_from_lists
-from geff.utils import remove_tilde
 from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.dict_representation import GraphDict, PropDictNpArray
+    from geff.typing import PropDictNpArray
 
 import logging
 
@@ -36,68 +36,11 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
         tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
             spatial dim, and a tuple with the max values in each spatial dim
     """
-    _min = None
-    _max = None
-    for node, data in graph.nodes(data=True):
-        try:
-            pos = np.array([data[name] for name in axis_names])
-        except KeyError as e:
-            missing_names = {name for name in axis_names if name not in data}
-            raise ValueError(
-                f"Spatiotemporal properties {missing_names} not found in node {node}"
-            ) from e
-        if _min is None or _max is None:
-            _min = pos
-            _max = pos
-        else:
-            _min = np.min([_min, pos], axis=0)
-            _max = np.max([_max, pos], axis=0)
-
-    return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
-
-
-def _get_graph_existing_metadata(
-    graph: nx.Graph,
-    metadata: GeffMetadata | None = None,
-    axis_names: list[str] | None = None,
-    axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
-) -> tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
-    """Get the existing metadata from a graph.
-
-    If axis lists are provided, they will override the graph properties and metadata.
-    If metadata is provided, it will override the graph properties.
-    If neither are provided, the graph properties will be used.
-
-    Args:
-        graph (nx.Graph): A networkx graph
-        metadata (GeffMetadata, optional): The metadata of the graph. Defaults to None.
-        axis_names (list[str | None], optional): The names of the spatial dims. Defaults to None.
-        axis_units (list[str | None], optional): The units of the spatial dims. Defaults to None.
-        axis_types (list[str | None], optional): The types of the spatial dims. Defaults to None.
-
-    Returns:
-        tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
-            A tuple with the names of the spatial dims, the units of the spatial dims,
-            and the types of the spatial dims. None if not provided.
-    """
-    lists_provided = any(x is not None for x in [axis_names, axis_units, axis_types])
-    metadata_provided = metadata is not None
-
-    if lists_provided and metadata_provided:
-        warnings.warn(
-            "Both axis lists and metadata provided. Overriding metadata with axis lists.",
-            stacklevel=2,
-        )
-
-    # If any axis lists is not provided, fallback to metadata if provided
-    if metadata is not None and metadata.axes is not None:
-        # the x = x or y is a python idiom for setting x to y if x is None, otherwise x
-        axis_names = axis_names or [axis.name for axis in metadata.axes]
-        axis_units = axis_units or [axis.unit for axis in metadata.axes]
-        axis_types = axis_types or [axis.type for axis in metadata.axes]
-
-    return axis_names, axis_units, axis_types
+    return calculate_roi_from_nodes(
+        graph.nodes(data=True),
+        axis_names,
+        lambda node_tuple: node_tuple[1],  # Extract data from (node_id, data) tuple
+    )
 
 
 def write_nx(
@@ -131,16 +74,10 @@ def write_nx(
             Defaults to 2.
     """
 
-    store = remove_tilde(store)
+    group = setup_zarr_group(store, zarr_format)
 
-    # open/create zarr container
-    if zarr.__version__.startswith("3"):
-        group = zarr.open_group(store, mode="a", zarr_format=zarr_format)
-    else:
-        group = zarr.open_group(store, mode="a")
-
-    axis_names, axis_units, axis_types = _get_graph_existing_metadata(
-        graph, metadata, axis_names, axis_units, axis_types
+    axis_names, axis_units, axis_types = get_graph_existing_metadata(
+        metadata, axis_names, axis_units, axis_types
     )
 
     node_props = list({k for _, data in graph.nodes(data=True) for k in data})
@@ -172,20 +109,11 @@ def write_nx(
         roi_max=roi_max,
     )
 
-    # Conditionally update metadata with new axes, version, and directedness
-    # If metadata is provided, extra properties are preserved; otherwise, a new GeffMetadata object
-    # is created
-    if metadata is not None:
-        metadata = copy.deepcopy(metadata)
-        metadata.geff_version = geff.__version__
-        metadata.directed = isinstance(graph, nx.DiGraph)
-        metadata.axes = axes
-    else:
-        metadata = GeffMetadata(
-            geff_version=geff.__version__,
-            directed=isinstance(graph, nx.DiGraph),
-            axes=axes,
-        )
+    metadata = create_or_update_metadata(
+        metadata,
+        isinstance(graph, nx.DiGraph),
+        axes,
+    )
     metadata.write(group)
 
 
@@ -217,30 +145,50 @@ def _set_property_values(
         ignore = prop_dict["missing"][idx] if sparse else False
         if not ignore:
             # Get either individual item or list instead of setting with np.array
-            val = val.tolist() if val.size > 1 else val.item()
             if nodes:
-                graph.nodes[_id.item()][name] = val
+                graph.nodes[_id.item()][name] = val.tolist()
             else:
                 source, target = _id.tolist()
-                graph.edges[source, target][name] = val
+                graph.edges[source, target][name] = val.tolist()
 
 
-def _ingest_dict_nx(graph_dict: GraphDict):
-    metadata = graph_dict["metadata"]
+def construct_nx(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+) -> nx.Graph | nx.DiGraph:
+    """
+    Construct a `networkx` graph instance from a dictionary representation of the GEFF data.
 
+    Args:
+        metadata (GeffMetadata): The metadata of the graph.
+        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+            edge_ids.
+        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+            as node_ids.
+        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from node property names to (values, missing) arrays, which should have same
+            length as node_ids.
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from edge property names to (values, missing) arrays, which should have same
+            length as edge_ids.
+
+    Returns:
+        (nx.Graph | nx.DiGraph): A `networkx` graph object.
+    """
     graph = nx.DiGraph() if metadata.directed else nx.Graph()
-    for key, val in metadata:
-        graph.graph[key] = val
 
-    graph.add_nodes_from(graph_dict["nodes"].tolist())
-    for name, prop_dict in graph_dict["node_props"].items():
-        _set_property_values(graph, graph_dict["nodes"], name, prop_dict, nodes=True)
+    graph.add_nodes_from(node_ids.tolist())
+    for name, prop_dict in node_props.items():
+        _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
 
-    graph.add_edges_from(graph_dict["edges"].tolist())
-    for name, prop_dict in graph_dict["edge_props"].items():
-        _set_property_values(graph, graph_dict["edges"], name, prop_dict, nodes=False)
+    graph.add_edges_from(edge_ids.tolist())
+    for name, prop_dict in edge_props.items():
+        _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
 
-    return graph, metadata
+    return graph
 
 
 def read_nx(
@@ -266,7 +214,7 @@ def read_nx(
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
-    graph_dict = read_to_dict(store, validate, node_props, edge_props)
-    graph, metadata = _ingest_dict_nx(graph_dict)
+    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
+    graph = construct_nx(**in_memory_geff)
 
-    return graph, metadata
+    return graph, in_memory_geff["metadata"]
