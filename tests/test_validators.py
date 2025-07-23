@@ -120,14 +120,6 @@ def test_detects_repeated_edges():
             False,
             "Branch in tracklet",
         ),
-        # Valid path with in/out edges to/from outside tracklet
-        (
-            np.array([1, 2, 3, 4, 5]),
-            np.array([[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]]),
-            np.array([10, 10, 10, 10, 10]),
-            True,
-            "Edges to/from outside",
-        ),
         # Not fully connected
         (
             np.array([1, 2, 3]),
@@ -153,6 +145,14 @@ def test_detects_repeated_edges():
             np.array([10, 10, 10, 20, 20, 20]),
             False,
             "One valid, one invalid",
+        ),
+        # Not maximal length tracklet
+        (
+            np.array([1, 2, 3, 4, 5]),
+            np.array([[1, 2], [2, 3], [3, 4], [4, 5]]),
+            np.array([10, 10, 10, 20, 20]),
+            False,
+            "Tracklet not maximal length",
         ),
     ],
 )

@@ -91,6 +91,7 @@ def validate_tracklets(
     Args:
         node_ids (ArrayLike): Sequence of node identifiers.
         edge_ids (ArrayLike): Sequence of edges as (source, target) node ID pairs.
+            Edges must be between nodes in `node_ids`.
         tracklet_ids (ArrayLike): Sequence of tracklet IDs corresponding to each node.
 
     Returns:
@@ -100,10 +101,6 @@ def validate_tracklets(
     """
     errors = []
 
-    # if hasattr(edge_ids, "tolist"):
-    #     edges = edge_ids.tolist()
-    # else:
-    #     edges = list(edge_ids)
     ID_DTYPE = np.int64
     nodes = node_ids.astype(ID_DTYPE, copy=False)
     edges = edge_ids.astype(ID_DTYPE, copy=False)
@@ -145,6 +142,32 @@ def validate_tracklets(
         if not nx.is_weakly_connected(S):
             errors.append(f"Tracklet {t_id}: Not fully connected.")
             continue
+
+        # Check - Tracklet is maximal linear segment.
+        start_node = next(n for n, d in S.in_degree() if d == 0)
+        end_node = next(n for n, d in S.out_degree() if d == 0)
+
+        # Check if the path could be extended backward
+        preds_in_G = list(G.predecessors(start_node))
+        if len(preds_in_G) == 1:
+            predecessor = preds_in_G[0]
+            # If the predecessor is also part of a linear segment...
+            if G.out_degree(predecessor) == 1:
+                errors.append(
+                    f"Tracklet {t_id}: Not maximal. Path can extend backward to node {predecessor}."
+                )
+                continue
+
+        # Check if the path could be extended forward
+        succs_in_G = list(G.successors(end_node))
+        if len(succs_in_G) == 1:
+            successor = succs_in_G[0]
+            # If the successor is also part of a linear segment...
+            if G.in_degree(successor) == 1:
+                errors.append(
+                    f"Tracklet {t_id}: Not maximal. Path can extend forward to node {successor}."
+                )
+                continue
 
     return not errors, errors
 
