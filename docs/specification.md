@@ -22,6 +22,13 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 
     ::: geff.units.VALID_TIME_UNITS  
 
+### Affine transformations
+The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
+
+### Extra attributes 
+
+The optional `extra` object is a free-form dictionary that can hold any additional, application-specific metadata that is **not** covered by the core geff schema. Users may place arbitrary keys and values inside `extra` without fear of clashing with future reserved fields. Although the core `geff` reader makes these attributes available, their meaning and use are left entirely to downstream applications. 
+
 ## The `nodes` group
 The nodes group will contain an `ids` array and optionally a `props` group. 
 ### The `ids` array
@@ -37,6 +44,10 @@ The `nodes\props` group is optional and will contain one or more `node property`
 -  Geff provides special support for spatio-temporal properties, although they are not required. When `axes` are specified in the `geff` metadata, each axis name identifies a spatio-temporal property. Spatio-temporal properties are not allowed to have missing arrays. Otherwise, they are identical to other properties from a storage specification perspective.
 
 - The `seg_id` property is an optional, special node property that stores the segmenatation label for each node. The `seg_id` values do not need to be unique, in case labels are repeated between time points. If the `seg_id` property is not present, it is assumed that the graph is not associated with a segmentation. 
+
+-  Geff provides special support for predefined shape properties, although they are not required. These currently include: `sphere`, `ellipsoid`. Values can be marked as `missing`, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective.
+    - `sphere`: Hypersphere in n spatial dimensions, defined by a scalar radius.
+    - `ellipsoid`: Defined by a symmetric positive-definite covariance matrix, whose dimensionality is assumed to match the spatial axes.
 <!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
 
 !!! note
@@ -76,6 +87,12 @@ Here is a schematic of the expected file structure.
                     values # shape: (N,) dtype: float32
                 x/
                     values # shape: (N,) dtype: float32
+                radius/
+                    values # shape: (N,) dtype: int | float
+                    missing # shape: (N,) dtype: bool
+                covariance3d/
+                    values # shape: (N, 3, 3) dtype: float
+                    missing # shape: (N,) dtype: bool
                 color/
                     values # shape: (N, 4) dtype: float16
                     missing # shape: (N,) dtype: bool
@@ -105,8 +122,41 @@ This is a geff metadata zattrs file that matches the above example structure.
             {'name': 'z', 'type': "space", 'unit': "micrometers", 'min': 1523.36, 'max': 4398.1},
             {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
             {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
-        ]
+        ],
+        # predefined node attributes for storing detections as spheres or ellipsoids
+        "sphere": "radius", # optional
+        "ellipsoid": "covariance3d", # optional
+        "display_hints": {
+            "display_horizontal": "x",
+            "display_vertical": "y",
+            "display_depth": "z",
+            "display_time": "t",
+        },
+        # node attributes corresponding to tracklet and/or lineage IDs
+        "track_node_props": {
+            "lineage": "ultrack_lineage_id",
+            "tracklet": "ultrack_id"
+        },
+        "related_objects": {
+            {
+                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id",
+            },
+            {
+                "type":"image", "path":"../raw/",
+            },
+        },
+        # optional coordinate transformation is defined as homogeneous coordinates
+        # It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
+        "affine": [
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1],
+        # custom other things must be placed **inside** the extra attribute
+        "extra": {
+            ...
+        }
     }
-    ... # custom other things are allowed and ignored by geff
 }
 ```

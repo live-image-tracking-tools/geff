@@ -5,11 +5,13 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
+from typing import Any, Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
+from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
@@ -118,6 +120,64 @@ def axes_from_lists(
     return axes
 
 
+class DisplayHint(BaseModel):
+    """Metadata indicating how spatiotemporal axes are displayed by a viewer"""
+
+    display_horizontal: str = Field(
+        ..., description="Which spatial axis to use for horizontal display"
+    )
+    display_vertical: str = Field(..., description="Which spatial axis to use for vertical display")
+    display_depth: str | None = Field(
+        None, description="Optional, which spatial axis to use for depth display"
+    )
+    display_time: str | None = Field(
+        None, description="Optional, which temporal axis to use for time"
+    )
+
+
+class RelatedObject(BaseModel):
+    type: str = Field(
+        ...,
+        description=(
+            "Type of the related object. 'labels' for label objects, "
+            "'image' for image objects. Other types are also allowed, but may not be "
+            "recognized by reader applications. "
+        ),
+    )
+    path: str = Field(
+        ...,
+        description=(
+            "Path of the related object within the zarr group, relative "
+            "to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group."
+        ),
+    )
+    label_prop: str | None = Field(
+        None,
+        description=(
+            "Property name for label objects. This is the node property that will be used "
+            "to identify the labels in the related object. "
+            "This is only valid for type 'labels'."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> RelatedObject:
+        if self.type != "labels" and self.label_prop is not None:
+            raise ValueError(
+                f"label_prop {self.label_prop} is only valid for type 'labels', "
+                f"but got type {self.type}."
+            )
+        if self.type not in ["labels", "image"]:
+            warnings.warn(
+                f"Got type {self.type} for related object, "
+                "which might not be recognized by reader applications. ",
+                stacklevel=2,
+            )
+        return self
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -138,6 +198,7 @@ class GeffMetadata(BaseModel):
             "If not provided, the version will be set to the current geff package version."
         ),
     )
+
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: Sequence[Axis] | None = Field(
         None,
@@ -146,6 +207,83 @@ class GeffMetadata(BaseModel):
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+    )
+    sphere: str | None = Field(
+        None,
+        title="Node property: Detections as spheres",
+        description=(
+            """
+            Name of the optional `sphere` property.
+
+            A sphere is defined by
+            - a center point, already given by the `space` type properties
+            - a radius scalar, stored in this property
+            """
+        ),
+    )
+    ellipsoid: str | None = Field(
+        None,
+        title="Node property: Detections as ellipsoids",
+        description=(
+            """
+            Name of the `ellipsoid` property.
+
+            An ellipsoid is assumed to be in the same coordinate system as the `space` type
+            properties.
+
+            It is defined by
+            - a center point :math:`c`, already given by the `space` type properties
+            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this
+              property as a `2x2`/`3x3` array.
+
+            To plot the ellipsoid:
+            - Compute the eigendecomposition of the covariance matrix
+            :math:`\\Sigma = Q \\Lambda Q^{\\top}`
+            - Sample points :math:`z` on the unit sphere
+            - Transform the points to the ellipsoid by
+            :math:`x = c + Q \\Lambda^{(1/2)} z`.
+            """
+        ),
+    )
+    track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
+        None,
+        description=(
+            "Node properties denoting tracklet and/or lineage IDs.\n"
+            "A tracklet is defined as a simple path of connected nodes "
+            "where the initiating node has any incoming degree and outgoing degree at most 1,"
+            "and the terminating node has incoming degree at most 1 and any outgoing degree, "
+            "and other nodes along the path have in/out degree of 1. Each tracklet must contain "
+            "the maximal set of connected nodes that match this definition - no sub-tracklets.\n"
+            "A lineage is defined as a weakly connected component on the graph.\n"
+            "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
+        ),
+    )
+    related_objects: Sequence[RelatedObject] | None = Field(
+        None,
+        description=(
+            "A list of dictionaries of related objects such as labels or images. "
+            "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
+            "properties. The 'type' represents the data type. 'labels' and 'image' should "
+            "be used for label and image objects, respectively. Other types are also allowed, "
+            "The 'path' should be relative to the geff zarr-attributes file. "
+            "It is strongly recommended all related objects are stored as siblings "
+            "of the geff group within the top-level zarr group. "
+            "The 'label_prop' is only valid for type 'labels' and specifies the node property "
+            "that will be used to identify the labels in the related object. "
+        ),
+    )
+    affine: Affine | None = Field(
+        None,
+        description="Affine transformation matrix to transform the graph coordinates to the "
+        "physical coordinates. The matrix must have the same number of dimensions as the number of "
+        "axes in the graph.",
+    )
+    display_hints: DisplayHint | None = Field(
+        None, description="Metadata indicating how spatiotemporal axes are displayed by a viewer"
+    )
+    extra: Any = Field(
+        default_factory=dict,
+        description="Extra metadata that is not part of the schema",
     )
 
     @model_validator(mode="before")
@@ -162,10 +300,48 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
+
+            if self.affine is not None:
+                if self.affine.ndim != len(self.axes):
+                    raise ValueError(
+                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
+                        f"got {self.affine.ndim}"
+                    )
+
+        # Display hint axes match names in axes
+        if self.axes is not None and self.display_hints is not None:
+            ax_names = [ax.name for ax in self.axes]
+            if self.display_hints.display_horizontal not in ax_names:
+                raise ValueError(
+                    f"Display hint display_horizontal name {self.display_hints.display_horizontal} "
+                    f"not found in axes {ax_names}"
+                )
+            if self.display_hints.display_vertical not in ax_names:
+                raise ValueError(
+                    f"Display hint display_vertical name {self.display_hints.display_vertical} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_time is not None
+                and self.display_hints.display_time not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_time name {self.display_hints.display_time} "
+                    f"not found in axes {ax_names}"
+                )
+            if (
+                self.display_hints.display_depth is not None
+                and self.display_hints.display_depth not in ax_names
+            ):
+                raise ValueError(
+                    f"Display hint display_depth name {self.display_hints.display_depth} "
+                    f"not found in axes {ax_names}"
+                )
         return self
 
     def write(self, group: zarr.Group | Path | str):
         """Helper function to write GeffMetadata into the zarr geff group.
+        Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
             group (zarr.Group | Path): The geff group to write the metadata to

@@ -10,7 +10,7 @@ from geff.utils import validate, validate_axes_structure, validate_zarr_structur
 
 def test_validate(tmp_path):
     # Does not exist
-    with pytest.raises(AssertionError, match=r"Directory .* does not exist"):
+    with pytest.raises(ValueError, match=r"store must be a zarr StoreLike"):
         validate("does-not-exist")
 
     zpath = tmp_path / "test.zarr"
