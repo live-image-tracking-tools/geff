@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753297301904,
+  "lastUpdate": 1753299206486,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3015,6 +3015,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5014643116281076",
             "extra": "mean: 15.309618945333341 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "7549583+fjorka@users.noreply.github.com",
+            "name": "Kasia Kedziora",
+            "username": "fjorka"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8e0d1fd98c7e80f96108b63dde95e192f8715e82",
+          "message": "Validator functions for geff data (#180)\n\n# Proposed Change\nThis branch contains validators for checking different aspects of data\nin geff in response to #152.\nIt also provides a generator of correct and incorrect geff graphs to be\nreplaced with a general approach in #161.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n- `networkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n\n## If you changed the specification \n- no change\n\n## If you have added or changed an implementation\n- [ ] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [ ] I updated pyproject.toml with new dependencies if needed.\n- [ ] I added a function to tests/bench.py to benchmark the new\nimplementation.\n\n---------\n\nCo-authored-by: AnniekStok <anniek.stokkermans@gmail.com>\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>",
+          "timestamp": "2025-07-23T15:27:00-04:00",
+          "tree_id": "13a6bf2c8082385ab5d0fc5be73c33e783f32871",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/8e0d1fd98c7e80f96108b63dde95e192f8715e82"
+        },
+        "date": 1753299205205,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.10786024557084783,
+            "unit": "iter/sec",
+            "range": "stddev: 1.4803927141615325",
+            "extra": "mean: 9.271256473666673 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.47592101321977,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00159930182127614",
+            "extra": "mean: 51.34545366666998 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06479927821167444,
+            "unit": "iter/sec",
+            "range": "stddev: 0.594809679221276",
+            "extra": "mean: 15.432270660999999 sec\nrounds: 3"
           }
         ]
       }
