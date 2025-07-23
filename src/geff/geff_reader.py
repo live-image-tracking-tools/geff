@@ -185,14 +185,14 @@ class GeffReader:
 
 # NOTE: if different FileReaders exist in the future a `file_reader` argument can be
 #   added to this function to select between them.
-def read_to_dict(
+def read_to_memory(
     source: StoreLike,
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
 ) -> InMemoryGeff:
     """
-    Read a GEFF zarr file to a dictionary representation.
+    Read a GEFF zarr file to into memory as a series of numpy arrays in a dictionary.
 
     A subset of node and edge properties can be selected with the `node_props` and
     `edge_props` argument.

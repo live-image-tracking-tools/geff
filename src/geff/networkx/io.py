@@ -9,7 +9,7 @@ import numpy as np
 import zarr
 
 import geff
-from geff.geff_reader import read_to_dict
+from geff.geff_reader import read_to_memory
 from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.utils import remove_tilde
 from geff.write_dicts import write_dicts
@@ -287,7 +287,7 @@ def read_nx(
     Returns:
         A networkx graph containing the graph that was stored in the geff file format
     """
-    in_memory_geff = read_to_dict(store, validate, node_props, edge_props)
+    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
     graph = construct_nx(**in_memory_geff)
 
     return graph, in_memory_geff["metadata"]

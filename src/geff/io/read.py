@@ -4,7 +4,7 @@ import networkx as nx
 from numpy.typing import NDArray
 from zarr.storage import StoreLike
 
-from geff.geff_reader import read_to_dict
+from geff.geff_reader import read_to_memory
 from geff.metadata_schema import GeffMetadata
 from geff.networkx.io import construct_nx
 from geff.typing import InMemoryGeff, PropDictNpArray
@@ -181,5 +181,5 @@ def read(
     construct_func = get_construct_func(backend)
     if backend_kwargs is None:
         backend_kwargs = {}
-    in_memory_geff = read_to_dict(store, validate, node_props, edge_props)
+    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
     return construct_func(**in_memory_geff, **backend_kwargs), in_memory_geff["metadata"]
