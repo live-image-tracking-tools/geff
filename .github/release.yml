@@ -36,3 +36,6 @@ changelog:
       labels:
         - 'documentation'
         - ':memo: docs'
+    - title: 'Miscellaneous'
+      labels:
+        - '*'
