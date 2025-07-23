@@ -200,7 +200,7 @@ def _add_all_nodes(
     it: ET.iterparse,
     ancestor: ET._Element,
     attrs_md: dict[str, dict[str, str]],
-    graph: nx.DiGraph,
+    graph: nx.Graph,
 ) -> bool:
     """Add nodes and their attributes to a graph and return the presence of segmentation.
 
@@ -211,14 +211,10 @@ def _add_all_nodes(
         ancestor (ET._Element): The XML element that encompasses the information to be added.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected node attributes.
-        graph (nx.DiGraph): The graph to which the nodes will be added.
+        graph (nx.Graph): The graph to which the nodes will be added.
 
     Returns:
         bool: True if the model has segmentation data, False otherwise.
-
-    Raises:
-        ValueError: If a node attribute cannot be converted to the expected type.
-        KeyError: If a node attribute is not found in the attributes metadata.
 
     Warns:
         UserWarning: If a node cannot be added to the graph due to missing attributes.
@@ -240,10 +236,7 @@ def _add_all_nodes(
             # In case of a single-point detection, the `ROI_N_POINTS` attribute
             # is not present.
             if segmentation:
-                try:
-                    _convert_ROI_coordinates(element, attrs)
-                except KeyError as err:
-                    print(err)
+                _convert_ROI_coordinates(element, attrs)
             else:
                 if "ROI_N_POINTS" in attrs:
                     segmentation = True
