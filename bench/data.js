@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753301458508,
+  "lastUpdate": 1753301925774,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3150,6 +3150,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.47000170666101576",
             "extra": "mean: 15.624991570333336 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "17995243+DragaDoncila@users.noreply.github.com",
+            "name": "Draga Doncila Pop",
+            "username": "DragaDoncila"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "aef88387714721572108795550a2eda4fbeb6fcd",
+          "message": "Only check `path.exists` for local paths (#222)\n\n# Proposed Change\nThe current validator precludes the handling of remote GEFFs because it\nexplicitly checks `path.exists`, which will always return `False` for a\nremote GEFF.\n\nThis PR omits that check for URLs that are parsed as remote using the\nbuiltin `urllib` library.\n\n# Types of Changes\n-  enhancement\n- validators\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [ ] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n---------\n\nCo-authored-by: Draga Doncila <ddon0001@student.monash.edu>",
+          "timestamp": "2025-07-23T16:16:02-04:00",
+          "tree_id": "9975e6ef3c0017a4129a7c3c8626fdf42aa604be",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/aef88387714721572108795550a2eda4fbeb6fcd"
+        },
+        "date": 1753301925069,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11646494192379267,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2037923516759406",
+            "extra": "mean: 8.58627483500002 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.70446158205664,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013926703890777207",
+            "extra": "mean: 50.74992766666734 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.0649681735994483,
+            "unit": "iter/sec",
+            "range": "stddev: 0.491395755805703",
+            "extra": "mean: 15.392151950666687 sec\nrounds: 3"
           }
         ]
       }
