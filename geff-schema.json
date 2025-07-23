@@ -162,8 +162,8 @@
             }
           ],
           "default": null,
-          "description": "Name of the sphere property, if applicable. If not provided, no sphere property is defined.",
-          "title": "Sphere"
+          "description": "\n            Name of the optional `sphere` property.\n\n            A sphere is defined by\n            - a center point, already given by the `space` type properties\n            - a radius scalar, stored in this property\n            ",
+          "title": "Node property: Detections as spheres"
         },
         "ellipsoid": {
           "anyOf": [
@@ -175,8 +175,8 @@
             }
           ],
           "default": null,
-          "description": "Name of the ellipsoid property, if applicable. If not provided, no ellipsoid property is defined.",
-          "title": "Ellipsoid"
+          "description": "\n            Name of the `ellipsoid` property.\n\n            An ellipsoid is assumed to be in the same coordinate system as the `space` type properties.\n            It is defined by\n            - a center point :math:`c`, already given by the `space` type properties\n            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this property as a `2x2`/`3x3` array.\n\n            To plot the ellipsoid:\n            - Compute the eigendecomposition of the covariance matrix\n            :math:`\\Sigma = Q \\Lambda Q^{\\top}`\n            - Sample points :math:`z` on the unit sphere\n            - Transform the points to the ellipsoid by\n            :math:`x = c + Q \\Lambda^{(1/2)} z`.\n            ",
+          "title": "Node property: Detections as ellipsoids"
         },
         "track_node_props": {
           "anyOf": [

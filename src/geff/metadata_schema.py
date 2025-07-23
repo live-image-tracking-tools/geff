@@ -209,13 +209,37 @@ class GeffMetadata(BaseModel):
     )
     sphere: str | None = Field(
         None,
-        description="Name of the sphere property, if applicable. "
-        "If not provided, no sphere property is defined.",
+        title="Node property: Detections as spheres",
+        description=(
+            """
+            Name of the optional `sphere` property.
+
+            A sphere is defined by
+            - a center point, already given by the `space` type properties
+            - a radius scalar, stored in this property
+            """
+        ),
     )
     ellipsoid: str | None = Field(
         None,
-        description="Name of the ellipsoid property, if applicable. "
-        "If not provided, no ellipsoid property is defined.",
+        title="Node property: Detections as ellipsoids",
+        description=(
+            """
+            Name of the `ellipsoid` property.
+
+            An ellipsoid is assumed to be in the same coordinate system as the `space` type properties.
+            It is defined by
+            - a center point :math:`c`, already given by the `space` type properties
+            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this property as a `2x2`/`3x3` array.
+
+            To plot the ellipsoid:
+            - Compute the eigendecomposition of the covariance matrix
+            :math:`\\Sigma = Q \\Lambda Q^{\\top}`
+            - Sample points :math:`z` on the unit sphere
+            - Transform the points to the ellipsoid by
+            :math:`x = c + Q \\Lambda^{(1/2)} z`.
+            """
+        ),
     )
     track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
         None,
