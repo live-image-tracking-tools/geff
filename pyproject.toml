@@ -80,7 +80,6 @@ dev = { features = ["dev", "ctc"], solve-group = "default" }
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 bench = { features = ["dev", "bench"], solve-group = "default" }
-ctc = { features = ["ctc"], solve-group = "default" }
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
