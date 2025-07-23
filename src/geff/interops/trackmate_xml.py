@@ -9,7 +9,7 @@ import typer
 from lxml import etree as ET
 
 from geff.metadata_schema import Axis, GeffMetadata
-from geff.networkx.io import write_nx
+from geff.networkx.io import write_nx, read_nx
 
 # Type aliases
 Attribute = str | int | float | list[float] | None
@@ -503,38 +503,30 @@ def from_trackmate_xml_to_geff(
     discard_filtered_spots: bool = False,
     discard_filtered_tracks: bool = False,
     overwrite: bool = False,
-    zarr_format: Literal[2, 3] | None = 2,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
     Convert a TrackMate XML file to a GEFF file.
 
     Args:
         xml_path (Path | str): The path to the TrackMate XML file.
-        geff_path (Path | str): The path to the GEFF file.
+        geff_path (Store): The path to the GEFF file.
         discard_filtered_spots (bool, optional): True to discard the spots
             filtered out in TrackMate, False otherwise. False by default.
         discard_filtered_tracks (bool, optional): True to discard the tracks
             filtered out in TrackMate, False otherwise. False by default.
-        overwrite (bool): Whether to overwrite the GEFF file if it already exists.
-        zarr_format (int, optional): The version of zarr to write. Defaults to 2.
+        overwrite (bool, optional): Whether to overwrite the GEFF file if it already exists.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
     """
-    if isinstance(xml_path, str):
-        xml_path = Path(xml_path)
-    if isinstance(geff_path, str):
-        geff_path = Path(geff_path)
+    xml_path = Path(xml_path)
+    geff_path = Path(geff_path).with_suffix(".geff")
     _preliminary_checks(xml_path, geff_path, overwrite=overwrite)
 
-    # graph = _build_nx(xml_path)
     graph, units = _parse_model_tag(
         xml_path=xml_path,
         discard_filtered_spots=discard_filtered_spots,
         discard_filtered_tracks=discard_filtered_tracks,
     )
-    print(graph)
-    # print(graph.nodes[2004])
-    # print(graph.edges[2005, 2007])
-    # print(len(list(nx.weakly_connected_components(graph))))
-
     metadata = GeffMetadata(
         axes=[
             Axis(name="POSITION_X", type="space", unit=units.get("spatialunits", "pixel")),
@@ -547,17 +539,19 @@ def from_trackmate_xml_to_geff(
 
     write_nx(
         graph,
-        geff_path,
+        store=geff_path,
         metadata=metadata,
         zarr_format=zarr_format,
     )
 
 
 def from_trackmate_xml_to_geff_cli(
-    xml_path: Path | str,
-    geff_path: Path | str,
+    xml_path: Path,
+    geff_path: Path,
+    discard_filtered_spots: bool = False,
+    discard_filtered_tracks: bool = False,
     overwrite: bool = False,
-    zarr_format: Literal[2, 3] | None = 2,
+    zarr_format: int = 2,
 ) -> None:
     """
     Convert a TrackMate XML file to a GEFF file.
@@ -565,12 +559,18 @@ def from_trackmate_xml_to_geff_cli(
     Args:
         xml_path (Path | str): The path to the TrackMate XML file.
         geff_path (Path | str): The path to the GEFF file.
-        overwrite (bool): Whether to overwrite the GEFF file if it already exists.
+        discard_filtered_spots (bool, optional): True to discard the spots
+            filtered out in TrackMate, False otherwise. False by default.
+        discard_filtered_tracks (bool, optional): True to discard the tracks
+            filtered out in TrackMate, False otherwise. False by default.
+        overwrite (bool, optional): Whether to overwrite the GEFF file if it already exists.
         zarr_format (int, optional): The version of zarr to write. Defaults to 2.
     """
     from_trackmate_xml_to_geff(
         xml_path=xml_path,
         geff_path=geff_path,
+        discard_filtered_spots=discard_filtered_spots,
+        discard_filtered_tracks=discard_filtered_tracks,
         overwrite=overwrite,
         zarr_format=zarr_format,
     )
@@ -579,17 +579,5 @@ def from_trackmate_xml_to_geff_cli(
 app = typer.Typer()
 app.command()(from_trackmate_xml_to_geff_cli)
 
-
 if __name__ == "__main__":
-    # app()
-    xml_path = "C:/Users/lxenard/Documents/Code/pycellin/sample_data/FakeTracks.xml"
-    geff_path = (
-        "C:/Users/lxenard/Documents/Janelia_Cell_Trackathon/test_trackmate_to_geff/FakeTracks.geff"
-    )
-    from_trackmate_xml_to_geff(
-        xml_path,
-        geff_path,
-        discard_filtered_spots=True,
-        discard_filtered_tracks=True,
-        overwrite=True,
-    )
+    app()
