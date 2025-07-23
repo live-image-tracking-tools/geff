@@ -8,9 +8,9 @@ Follow these steps to add read support for a new graph backend.
 
 2. Write a function that constructs your graph object from a [`GraphDict`](../dict_representation.py#L35) representation of the GEFF data. Your construct function must follow the [`ConstructFunc`](read.py#L21) protocol.
 
-    > [!TIP]
-    > - A python `Protocol` is a way to do structural type hinting, in our case it means a static type checker, such as `mypy`, will enforce anything typed as a `ConstructFunc` to have a matching function signature, i.e. it's first argument must be `graph_dict`, additional `args` and `kwargs` are allowed and the return type can be anything.
-    > - The `GraphDict` object is a defined as a python `TypedDict` which is used for type hinting a dictionary with known keys.
+> [!TIP]
+> - A python `Protocol` is a way to do structural type hinting, in our case it means a static type checker, such as `mypy`, will enforce anything typed as a `ConstructFunc` to have a matching function signature, i.e. it's first argument must be `graph_dict`, additional `args` and `kwargs` are allowed and the return type can be anything.
+> - The `GraphDict` object is a defined as a python `TypedDict` which is used for type hinting a dictionary with known keys.
 
 3. Add a case to the function [`get_construct_func`](read.py#L65) so that when your backend flag, which you added to `SupportedBackend`, is chosen, the new construct function you defined will be returned.
 
