@@ -267,7 +267,6 @@ def test_create_memory_mock_geff_extra_node_props_validation():
 
 def test_create_memory_mock_geff_extra_node_props_different_dtypes():
     """Test extra node properties with different data types"""
-    from geff.testing.data import create_memory_mock_geff
 
     # Test all supported dtypes
     extra_node_props = {
