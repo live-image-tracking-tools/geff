@@ -200,7 +200,6 @@ def create_dummy_graph_props(
 
         # Add remaining edges using different patterns
         remaining_edges = actual_num_edges - edge_count
-        print(f"remaining_edges: {remaining_edges}")
         if remaining_edges > 0:
             # Create edges with different offsets
             for i in range(remaining_edges * 2):  # Try more iterations to find unique edges
@@ -217,9 +216,6 @@ def create_dummy_graph_props(
                         if edge_count >= actual_num_edges:
                             break
 
-            print(f"edge_count: {edge_count}")
-            print(f"actual_num_edges: {actual_num_edges}")
-            print(f"edges: {edges}")
             # If we still need more edges, use another pattern
             if edge_count < actual_num_edges:
                 for i in range(actual_num_edges * 2):  # Try more iterations to find unique edges
