@@ -4,8 +4,9 @@
 
 Validate the schema for the GEFF file. 
 
-```bash
-uvx geff validate /path/to/geff.geff
+```bash                         
+pip install geff
+geff validate /path/to/geff.geff
 ```
 
 ## Show info
@@ -13,14 +14,24 @@ uvx geff validate /path/to/geff.geff
 Show GEFF metadata as a JSON.
 
 ```bash
-uvx geff info /path/to/geff.geff
+pip install geff
+geff info /path/to/geff.geff
+```
+
+# Running command line tools asss     
+
+Without pip-installing `geff`, you can run the tools as 
+```bash
+uvx geff -h # by uv
+# or 
+pipx geff -h # by pipx
 ```
 
 # Running command with a developmental build
 
-In a development environment, please run, for example, 
+You can run the command line tool for your local build as 
 
 ```bash
-pixi run build
-uvx --from dist/geff-0.3 ... .whl validate /path/to/geff.geff
+pip install -e .
+geff -h
 ```
