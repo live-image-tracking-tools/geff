@@ -7,6 +7,7 @@ import pytest
 from lxml import etree as ET
 
 import geff.interops.trackmate_xml as tm_xml
+from geff.utils import validate
 
 
 def is_equal(obt, exp):
@@ -581,3 +582,27 @@ def test_get_filtered_tracks_ID():
         ),
     ):
         tm_xml._get_filtered_tracks_ID(it, element)
+
+
+def test_from_trackmate_xml_to_geff(tmp_path):
+    # No arguments, should use default values
+    geff_output = tmp_path / "test.geff"
+    tm_xml.from_trackmate_xml_to_geff("tests/data/FakeTracks.xml", geff_output)
+    validate(geff_output)
+
+    # Discard filtered spots and tracks
+    tm_xml.from_trackmate_xml_to_geff(
+        "tests/data/FakeTracks.xml",
+        geff_output,
+        discard_filtered_spots=True,
+        discard_filtered_tracks=True,
+        overwrite=True,
+    )
+    validate(geff_output)
+
+    # Geff file already exists
+    with pytest.raises(FileExistsError):
+        tm_xml.from_trackmate_xml_to_geff(
+            "tests/data/FakeTracks.xml",
+            geff_output,
+        )

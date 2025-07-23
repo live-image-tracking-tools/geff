@@ -492,7 +492,7 @@ def _parse_model_tag(
                 graph.remove_nodes_from(to_remove)
 
         if element.tag == "Model" and event == "end":
-            break  # We are not interested in the following data.
+            root.clear()
 
     return graph, units
 
