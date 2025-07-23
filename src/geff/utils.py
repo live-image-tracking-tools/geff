@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import zarr
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from zarr.storage import StoreLike
@@ -102,9 +103,35 @@ def validate_zarr_data(graph_dict: GraphDict):
         graph_dict (GraphDict): A graphdict object which contains metadata and
             dictionaries of node/edge property arrays
     """
-    graph_dict["metadata"]
+    # TODO add edge validation
+    pass
 
-    # TODO: Test various properties based on what is present in the metadata
+
+class ValidationConfig(BaseModel):
+    sphere: bool = False
+    ellipsoid: bool = False
+    lineage: bool = False
+    tracklet: bool = False
+
+
+def validate_optional_data(config: ValidationConfig, graph_dict: GraphDict):
+    """Run data validation on optional data types based on the input
+
+    Args:
+        config (ValidationConfig): Configuration for which validation to run
+        graph_dict (GraphDict): A graphdict object which contains metadata and
+            dictionaries of node/edge property arrays
+    """
+    meta = graph_dict["metadata"]
+    if config.sphere and meta.sphere is not None:
+        pass
+    if config.ellipsoid and meta.ellipsoid is not None:
+        pass
+    if meta.track_node_props is not None:
+        if config.lineage and "lineage" in meta.track_node_props:
+            pass
+        if config.lineage and "tracklet" in meta.track_node_props:
+            pass
 
 
 def validate_graph_group(group: zarr.Group, type: Literal["node", "edge"]):
