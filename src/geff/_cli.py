@@ -1,6 +1,6 @@
 # /// script
 # dependencies = [
-#   "zarr>2,<4",
+#   "zarr>2,<4", # Pinning to 3 to ensure that we can ready zarr 3 geffs if necessary
 # ]
 # ///
 
