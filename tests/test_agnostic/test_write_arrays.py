@@ -16,7 +16,7 @@ class TestWriteArrays:
 
         # Call write_arrays
         write_arrays(
-            geff_path=geff_path,
+            geff_store=geff_path,
             node_ids=node_ids,
             node_props=None,
             edge_ids=edge_ids,

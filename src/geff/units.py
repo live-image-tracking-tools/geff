@@ -2,6 +2,7 @@
 # https://github.com/ome/ngff/blob/7ac3430c74a66e5bcf53e41c429143172d68c0a4/index.bs#L240-L245
 
 VALID_SPACE_UNITS = [
+    None,
     "angstrom",
     "attometer",
     "centimeter",
@@ -31,6 +32,7 @@ VALID_SPACE_UNITS = [
 ]
 
 VALID_TIME_UNITS = [
+    None,
     "attosecond",
     "centisecond",
     "day",
