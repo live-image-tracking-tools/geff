@@ -9,7 +9,26 @@ import zarr
 if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
+from urllib.parse import urlparse
+
 from .metadata_schema import GeffMetadata
+
+
+def is_remote_url(path: str) -> bool:
+    """Returns True if the path is a remote URL (http, https, ftp, sftp), otherwise False.
+
+    Parameters
+    ----------
+    path : str
+        path to a local or remote resource
+
+    Returns
+    -------
+    bool
+        True if the path is a remote URL, False otherwise
+    """
+    parsed = urlparse(path)
+    return parsed.scheme in ("http", "https", "ftp", "sftp")
 
 
 def remove_tilde(store: StoreLike) -> StoreLike:
@@ -44,7 +63,7 @@ def validate(store: StoreLike):
     # Check if path exists for string/Path inputs
     if isinstance(store, str | Path):
         store_path = Path(store)
-        if not store_path.exists():
+        if not is_remote_url(str(store_path)) and not store_path.exists():
             raise ValueError(f"Path does not exist: {store}")
 
     # Open the zarr group from the store
