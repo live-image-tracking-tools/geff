@@ -4051,10 +4051,10 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
 <p>The <code>seg_id</code> property is an optional, special node property that stores the segmenatation label for each node. The <code>seg_id</code> values do not need to be unique, in case labels are repeated between time points. If the <code>seg_id</code> property is not present, it is assumed that the graph is not associated with a segmentation. </p>
 </li>
 <li>
-<p>Geff provides special support for predefined shape properties, although they are not required. These currently include: <code>sphere</code>, <code>ellipsoid</code>. Values can be marked as <code>missing</code>, and a geff graph may contain multiple shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, they are identical to other properties from a storage specification perspective.</p>
+<p>Geff provides special support for predefined shape properties, although they are not required. These currently include: <code>sphere</code>, <code>ellipsoid</code>. Values can be marked as <code>missing</code>, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective.</p>
 <ul>
 <li><code>sphere</code>: Hypersphere in n spatial dimensions, defined by a scalar radius.</li>
-<li><code>ellipsoid</code>: Defined by a symmetric positive-semidefinite covariance matrix, which is assumed to match the spatial axes.</li>
+<li><code>ellipsoid</code>: Defined by a symmetric positive-definite covariance matrix, whose dimensionality is assumed to match the spatial axes.</li>
 </ul>
 </li>
 </ul>

@@ -812,7 +812,7 @@
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_nx</span><span class="p">(</span>
-    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -838,15 +838,15 @@ the graph properties, accessed via <code>G.graph[key]</code> where G is a networ
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>path</code>
+                <code>store</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a> | <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
+                  <code>str | Path | zarr store</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The path to the root of the geff zarr, where the .attrs contains
-the geff  metadata</p>
+                <p>The path/str to the geff zarr, or the store
+itself. Opens in append mode, so will only overwrite geff-controlled groups.</p>
               </div>
             </td>
             <td>
@@ -946,12 +946,12 @@ if None all properties will be loaded, defaults to None.</p>
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_nx</span><span class="p">(</span>
     <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">,</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -989,15 +989,15 @@ if None all properties will be loaded, defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>path</code>
+                <code>store</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | <a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></code>
+                  <code>str | Path | zarr store</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The path to the output zarr. Opens in append mode,
-so will only overwrite geff-controlled groups.</p>
+                <p>The path/str to the output zarr, or the store
+itself. Opens in append mode, so will only overwrite geff-controlled groups.</p>
               </div>
             </td>
             <td>
@@ -1081,7 +1081,7 @@ if provided.</p>
                 <code>zarr_format</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[2, 3]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1110,7 +1110,7 @@ Defaults to 2.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1131,14 +1131,14 @@ Defaults to 2.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>path</code>
+                <code>store</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | <a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></code>
+                  <code>str | Path | zarr store</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Path to geff zarr</p>
+                <p>Check the geff zarr, either str/Path/store</p>
               </div>
             </td>
             <td>
@@ -1920,7 +1920,7 @@ Defaults to None.</p>
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_arrays</span><span class="p">(</span>
-    <span class="n">geff_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">geff_store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">node_ids</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
     <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -1954,14 +1954,15 @@ as an optional flag.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>geff_path</code>
+                <code>geff_store</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a> | <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
+                  <code>str | Path | zarr store</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The path to the zarr group where the graph will be written</p>
+                <p>The path/str to the geff zarr, or the store
+itself. Opens in append mode, so will only overwrite geff-controlled groups.</p>
               </div>
             </td>
             <td>
