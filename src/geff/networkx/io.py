@@ -274,6 +274,6 @@ def read_nx(
         A networkx graph containing the graph that was stored in the geff file format
     """
     graph_dict = read_to_dict(store, validate, node_props, edge_props)
-    graph, metadata = construct_nx(graph_dict)
+    graph = construct_nx(graph_dict)
 
-    return graph, metadata
+    return graph, graph_dict["metadata"]
