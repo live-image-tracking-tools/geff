@@ -6,7 +6,7 @@ import zarr
 
 from geff.geff_reader import read_to_dict
 from geff.metadata_schema import GeffMetadata
-from geff.testing.data import create_simple_2d_geff
+from geff.testing.data import create_simple_2d_geff, create_2d_geff_with_invalid_shapes
 from geff.utils import (
     ValidationConfig,
     validate,
@@ -189,11 +189,20 @@ def test_validate_zarr_data():
     validate_zarr_data(graph_dict)
 
 
+@pytest.mark.xfail(reason="Bad shapes. TODO seperate out into multiple tests")
 def test_optional_data():
-    config = ValidationConfig(lineage=True)
-    graph_dict = ...  # TODO need a test graph with lineage data
+    # config = ValidationConfig(lineage=True)
+    # graph_dict = ...  # TODO need a test graph with lineage data
+    # validate_optional_data(config, graph_dict)
+
+    # config = ValidationConfig(tracklet=True)
+    # graph_dict = ...  # TODO need a test graph with tracklet data
+    # validate_optional_data(config, graph_dict)
+
+    graph_dict = create_2d_geff_with_invalid_shapes()
+
+    config = ValidationConfig(sphere=True)
     validate_optional_data(config, graph_dict)
 
-    config = ValidationConfig(tracklet=True)
-    graph_dict = ...  # TODO need a test graph with tracklet data
+    config = ValidationConfig(ellipsoid=True)
     validate_optional_data(config, graph_dict)

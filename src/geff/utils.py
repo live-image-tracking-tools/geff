@@ -151,10 +151,19 @@ def validate_optional_data(config: ValidationConfig, graph_dict: GraphDict):
     """
     meta = graph_dict["metadata"]
     if config.sphere and meta.sphere is not None:
-        raise NotImplementedError
+        if np.any(graph_dict["node_props"][meta.sphere]["values"] < 0):
+            raise ValueError("Sphere radius values must be non-negative.")
 
     if config.ellipsoid and meta.ellipsoid is not None:
-        raise NotImplementedError
+        covariance = graph_dict["node_props"][meta.ellipsoid]["values"]
+        if not isinstance(covariance, np.ndarray):
+            raise TypeError("Ellipsoid covariance must be a numpy array")
+        if covariance.ndim != 3 or covariance.shape[1] != covariance.shape[2]:
+            raise ValueError("Ellipsoid covariance must be square matrices")
+        if not np.allclose(covariance, covariance.transpose((0, 2, 1))):
+            raise ValueError("Ellipsoid covariance matrices must be symmetric")
+        if not np.all(np.linalg.eigvals(covariance) > 0):
+            raise ValueError("Ellipsoid covariance matrices must be positive-definite")
 
     if meta.track_node_props is not None:
         if config.lineage and "tracklet" in meta.track_node_props:
