@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753287371594,
+  "lastUpdate": 1753297301904,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2970,6 +2970,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5371828529857057",
             "extra": "mean: 15.345796406000005 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "ilan.silva@czbiohub.org",
+            "name": "Ilan F. S. Theodoro",
+            "username": "ilan-theodoro"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "80dba089d55c9e12af2bab088838870788b59bb9",
+          "message": "Warn about float16 compatibility with java (#206)\n\n# Proposed Change\nCloses #182 \n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n## If you changed the specification\n- [x] I have checked that any validation functions and tests reflect the\nchanges.\n- [x] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [ ] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n## If you have added or changed an implementation\n- [x] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [ ] I updated pyproject.toml with new dependencies if needed.\n- [ ] I added a function to tests/bench.py to benchmark the new\nimplementation.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...",
+          "timestamp": "2025-07-23T14:59:03-04:00",
+          "tree_id": "9452a1f4994d3b61499eaa24a2b2c017155ec306",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/80dba089d55c9e12af2bab088838870788b59bb9"
+        },
+        "date": 1753297300932,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.11393213519665339,
+            "unit": "iter/sec",
+            "range": "stddev: 1.28942341860546",
+            "extra": "mean: 8.777154911333335 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.35666747767544,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0009452530630994275",
+            "extra": "mean: 51.661785333313524 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06531841214146082,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5014643116281076",
+            "extra": "mean: 15.309618945333341 sec\nrounds: 3"
           }
         ]
       }
