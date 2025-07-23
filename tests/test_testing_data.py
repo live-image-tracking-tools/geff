@@ -351,3 +351,48 @@ def test_create_dummy_graph_props_extra_node_props():
     for i in range(5):
         assert extra_props["label"][i] == f"label_{i}"
         assert extra_props["category"][i] == i
+
+
+def test_create_dummy_graph_props_empty_graph():
+    """Test create_dummy_graph_props with empty graph (0 nodes, 0 edges)"""
+
+    extra_node_props = {
+        "label": "str",
+        "confidence": "float64",
+        "category": "int8",
+    }
+
+    graph_props = create_dummy_graph_props(
+        node_id_dtype="int",
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        extra_edge_props={"score": "float64", "color": "int"},
+        directed=True,
+        num_nodes=0,
+        num_edges=0,
+        extra_node_props=extra_node_props,
+    )
+
+    # Check that extra_node_props_dict contains the expected properties
+    extra_props = graph_props["extra_node_props"]
+    assert "label" in extra_props
+    assert "confidence" in extra_props
+    assert "category" in extra_props
+
+    # Check data types
+    assert extra_props["label"].dtype.kind == "U"  # Unicode string
+    assert extra_props["confidence"].dtype == "float64"
+    assert extra_props["category"].dtype == "int8"
+
+    # Check that arrays have the correct length (0 for empty graph)
+    assert len(extra_props["label"]) == 0
+    assert len(extra_props["confidence"]) == 0
+    assert len(extra_props["category"]) == 0
+
+    # Check that other graph properties are also empty
+    assert len(graph_props["node_ids"]) == 0
+    assert len(graph_props["node_axis_arrays"]["position"]) == 0
+    assert len(graph_props["node_axis_arrays"]["time"]) == 0
+    assert len(graph_props["edge_sources"]) == 0
+    assert len(graph_props["edge_targets"]) == 0
+    assert len(graph_props["extra_edge_props"]["score"]) == 0
+    assert len(graph_props["extra_edge_props"]["color"]) == 0

@@ -132,6 +132,8 @@ def read_sg(
         format.
     """
 
+    store = remove_tilde(store)
+
     # open zarr container
     if validate:
         geff.utils.validate(store)

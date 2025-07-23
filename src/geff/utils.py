@@ -38,7 +38,14 @@ def validate(store: StoreLike):
 
     Raises:
         AssertionError: If geff specs are violated
+        ValueError: If store is not a valid zarr store or path doesn't exist
     """
+
+    # Check if path exists for string/Path inputs
+    if isinstance(store, str | Path):
+        store_path = Path(store)
+        if not store_path.exists():
+            raise ValueError(f"Path does not exist: {store}")
 
     # Open the zarr group from the store
     try:
