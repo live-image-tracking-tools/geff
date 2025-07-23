@@ -12,6 +12,7 @@ requires-python = ">=3.10"
 license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
+    "typer",
     "zarr>2,<4",
     "pydantic>=2",
     "numcodecs<0.16", # TODO: remove pin once the 16 release is stable
@@ -31,6 +32,7 @@ classifiers = [
 
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
+ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -42,6 +44,11 @@ dev = [
     "ipython",
     "types-PyYAML",
     "spatial-graph",
+    # ctc stuff:
+    "dask",
+    "scikit-image",
+    "tifffile",
+    "imagecodecs",
 ]
 docs = [
     "mkdocs-material",
@@ -83,6 +90,7 @@ update-json = "python scripts/export_json_schema.py"
 
 [tool.pixi.feature.dev.tasks]
 test = "coverage run -m pytest"
+test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
 benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.bench.tasks]
@@ -189,5 +197,5 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 #     "tests/**/*",
 # ]
 
-[project.entry-points.pytest11]
-geff = "geff._pytest_plugin"
+[project.scripts]
+ctc2geff = "geff.interops.ctc:app"

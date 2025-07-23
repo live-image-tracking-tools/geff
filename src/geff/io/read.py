@@ -1,7 +1,7 @@
-from pathlib import Path
 from typing import Any, Literal, Protocol, TypeVar, overload
 
 import networkx as nx
+from zarr.storage import StoreLike
 
 from geff.dict_representation import GraphDict
 from geff.geff_reader import read_to_dict
@@ -84,7 +84,7 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
 
 @overload
 def read(
-    path: Path | str,
+    store: StoreLike,
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
@@ -95,7 +95,7 @@ def read(
 
 @overload
 def read(
-    path: Path | str,
+    store: StoreLike,
     validate: bool,
     node_props: list[str] | None,
     edge_props: list[str] | None,
@@ -105,7 +105,7 @@ def read(
 
 
 def read(
-    path: Path | str,
+    store: StoreLike,
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
@@ -120,8 +120,8 @@ def read(
     Read a GEFF to a chosen backend.
 
     Args:
-        path (Path | str): The path to the root of the geff zarr, where the .attrs contains
-            the geff  metadata
+        store (StoreLike): The path or zarr store to the root of the geff zarr, where
+            the .attrs contains the geff  metadata.
         validate (bool, optional): Flag indicating whether to perform validation on the
             geff file before loading into memory. If set to False and there are
             format issues, will likely fail with a cryptic error. Defaults to True.
@@ -139,5 +139,5 @@ def read(
     construct_func = get_construct_func(backend)
     if backend_kwargs is None:
         backend_kwargs = {}
-    graph_dict = read_to_dict(path, validate, node_props, edge_props)
+    graph_dict = read_to_dict(store, validate, node_props, edge_props)
     return construct_func(graph_dict, **backend_kwargs), graph_dict["metadata"]

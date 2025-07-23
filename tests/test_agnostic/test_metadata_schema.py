@@ -145,6 +145,23 @@ class TestMetadataModel:
         with pytest.raises(pydantic.ValidationError):
             meta.geff_version = "abcde"
 
+    def test_read_write_ignored_metadata(self, tmp_path):
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            extra={"foo": "bar", "bar": {"baz": "qux"}},
+        )
+        zpath = tmp_path / "test.zarr"
+        group = zarr.open(zpath, mode="a")
+        meta.write(group)
+        compare = GeffMetadata.read(group)
+        assert compare.extra["foo"] == "bar"
+        assert compare.extra["bar"]["baz"] == "qux"
+
+        # Check that extra metadata is not accessible as attributes
+        with pytest.raises(AttributeError, match="object has no attribute 'foo'"):
+            compare.foo  # noqa: B018
+
     def test_display_hints(self):
         meta = {
             "geff_version": "0.0.1",
