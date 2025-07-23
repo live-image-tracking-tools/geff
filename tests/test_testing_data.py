@@ -145,7 +145,6 @@ def test_simple_geff_edge_properties():
 
 def test_create_memory_mock_geff_with_extra_node_props():
     """Test create_memory_mock_geff with extra node properties"""
-    from geff.testing.data import create_memory_mock_geff
 
     # Test with various extra node properties
     extra_node_props = {
