@@ -5,7 +5,7 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -198,6 +198,7 @@ class GeffMetadata(BaseModel):
             "If not provided, the version will be set to the current geff package version."
         ),
     )
+
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: Sequence[Axis] | None = Field(
         None,
@@ -277,6 +278,10 @@ class GeffMetadata(BaseModel):
     display_hints: DisplayHint | None = Field(
         None, description="Metadata indicating how spatiotemporal axes are displayed by a viewer"
     )
+    extra: Any = Field(
+        default_factory=dict,
+        description="Extra metadata that is not part of the schema",
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -333,6 +338,7 @@ class GeffMetadata(BaseModel):
 
     def write(self, group: zarr.Group | Path | str):
         """Helper function to write GeffMetadata into the zarr geff group.
+        Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
             group (zarr.Group | Path): The geff group to write the metadata to

@@ -22,6 +22,13 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 
     ::: geff.units.VALID_TIME_UNITS  
 
+### Affine transformations
+The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
+
+### Extra attributes 
+
+The optional `extra` object is a free-form dictionary that can hold any additional, application-specific metadata that is **not** covered by the core geff schema. Users may place arbitrary keys and values inside `extra` without fear of clashing with future reserved fields. Although the core `geff` reader makes these attributes available, their meaning and use are left entirely to downstream applications. 
+
 ## The `nodes` group
 The nodes group will contain an `ids` array and optionally a `props` group. 
 ### The `ids` array
@@ -137,8 +144,19 @@ This is a geff metadata zattrs file that matches the above example structure.
             {
                 "type":"image", "path":"../raw/",
             },
+        },
+        # optional coordinate transformation is defined as homogeneous coordinates
+        # It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
+        "affine": [
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1],
+        # custom other things must be placed **inside** the extra attribute
+        "extra": {
+            ...
         }
     }
-    ... # custom other things are allowed and ignored by geff
 }
 ```

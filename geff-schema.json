@@ -239,6 +239,10 @@
           ],
           "default": null,
           "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer"
+        },
+        "extra": {
+          "description": "Extra metadata that is not part of the schema",
+          "title": "Extra"
         }
       },
       "required": [
