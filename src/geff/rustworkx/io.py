@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from geff.geff_reader import read_to_dict
+from geff.geff_reader import read_to_memory
 from geff.io_utils import (
     calculate_roi_from_nodes,
     create_or_update_metadata,
@@ -183,7 +183,7 @@ def _ingest_dict_rx(graph_dict: GraphDict) -> rx.PyDiGraph | rx.PyGraph:
     graph.attrs = metadata.model_dump()
 
     # Add nodes with populated properties
-    node_ids = graph_dict["nodes"].tolist()
+    node_ids = graph_dict["node_ids"].tolist()
     node_props: list[dict[str, Any]] = [{} for _ in node_ids]
 
     # Populate node properties first
@@ -210,9 +210,9 @@ def _ingest_dict_rx(graph_dict: GraphDict) -> rx.PyDiGraph | rx.PyGraph:
     to_rx_id_map = dict(zip(node_ids, rx_node_ids, strict=False))
 
     # Add edges if they exist
-    if len(graph_dict["edges"]) > 0:
+    if len(graph_dict["edge_ids"]) > 0:
         # converting to local rx ids
-        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(graph_dict["edges"])
+        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(graph_dict["edge_ids"])
         # Prepare edge data with properties
         edges_data: list[dict[str, Any]] = [{} for _ in edge_ids]
         indices = np.arange(len(edge_ids))
@@ -244,7 +244,7 @@ def read_rx(
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-) -> tuple[rx.PyGraph, GeffMetadata]:
+) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]:
     """Read a geff file into a rustworkx graph.
     Metadata properties will be stored in the graph.attrs dict
     and can be accessed via `G.attrs[key]` where G is a rustworkx graph.
@@ -264,7 +264,7 @@ def read_rx(
     Returns:
         A tuple containing the rustworkx graph and the metadata.
     """
-    graph_dict = read_to_dict(store, validate, node_props, edge_props)
+    graph_dict = read_to_memory(store, validate, node_props, edge_props)
     graph = _ingest_dict_rx(graph_dict)
 
     return graph, graph_dict["metadata"]

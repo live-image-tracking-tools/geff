@@ -34,6 +34,7 @@ classifiers = [
 spatial-graph = ["spatial-graph"]
 ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
 rx = ["rustworkx>=0.16.0"]
+trackmate_xml = ["lxml"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -51,6 +52,8 @@ dev = [
     "scikit-image",
     "tifffile",
     "imagecodecs",
+    # trackmate_xml stuff
+    "lxml",
 ]
 docs = [
     "mkdocs-material",
@@ -202,3 +205,4 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 
 [project.scripts]
 ctc2geff = "geff.interops.ctc:app"
+geff = "geff._cli:app"
