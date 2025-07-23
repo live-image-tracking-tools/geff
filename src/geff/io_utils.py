@@ -1,7 +1,7 @@
 import copy
 import warnings
 from collections.abc import Callable
-from typing import Any, Literal, Protocol
+from typing import Any, Literal
 
 import numpy as np
 import zarr
@@ -9,18 +9,6 @@ import zarr
 import geff
 from geff.metadata_schema import GeffMetadata
 from geff.utils import remove_tilde
-
-
-class GraphProtocol(Protocol):
-    """Protocol for graph objects that can be used with shared I/O utilities."""
-
-    def num_nodes(self) -> int:
-        """Return the number of nodes in the graph."""
-        ...
-
-    def nodes(self) -> Any:
-        """Return nodes with data."""
-        ...
 
 
 def get_graph_existing_metadata(
