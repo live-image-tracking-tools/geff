@@ -174,7 +174,7 @@ def from_ctc_to_geff(
     node_ids = np.asarray(node_props.pop("id"), dtype=int)
 
     write_arrays(
-        geff_path=geff_path,
+        geff_store=geff_path,
         node_ids=node_ids,
         node_props={name: (np.asarray(values), None) for name, values in node_props.items()},
         edge_ids=np.asarray(edges, dtype=node_ids.dtype),

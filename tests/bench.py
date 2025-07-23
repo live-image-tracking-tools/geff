@@ -38,7 +38,7 @@ def big_graph():
 @pytest.fixture(scope="session")
 def big_graph_path(tmpdir_factory, big_graph):
     tmp_path = Path(tmpdir_factory.mktemp("data").join("test.zarr"))
-    geff_nx.write_nx(graph=big_graph, path=tmp_path, axis_names=["t", "z", "y", "x"])
+    geff_nx.write_nx(graph=big_graph, store=tmp_path, axis_names=["t", "z", "y", "x"])
     return tmp_path
 
 
@@ -47,17 +47,17 @@ def test_write(benchmark, tmp_path, big_graph):
 
     benchmark.pedantic(
         geff_nx.write_nx,
-        kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "path": path},
+        kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "store": path},
         rounds=ROUNDS,
         setup=lambda: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
     )
 
 
 def test_validate(benchmark, big_graph_path):
-    benchmark.pedantic(validate, kwargs={"path": big_graph_path}, rounds=ROUNDS)
+    benchmark.pedantic(validate, kwargs={"store": big_graph_path}, rounds=ROUNDS)
 
 
 def test_read(benchmark, big_graph_path):
     benchmark.pedantic(
-        geff_nx.read_nx, kwargs={"path": big_graph_path, "validate": False}, rounds=ROUNDS
+        geff_nx.read_nx, kwargs={"store": big_graph_path, "validate": False}, rounds=ROUNDS
     )
