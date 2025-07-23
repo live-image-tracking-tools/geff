@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753301925774,
+  "lastUpdate": 1753303826165,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3195,6 +3195,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.491395755805703",
             "extra": "mean: 15.392151950666687 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jordao.bragantini@gmail.com",
+            "name": "Jordão Bragantini",
+            "username": "JoOkuma"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "246da2638e81aa16329cad3ca82c9d3c66587566",
+          "message": "rustworkx backend implementation (#94)\n\n# Proposed Change\nThis PR adds `read_rx` and `write_rx` to support a rustworkx backend.\nCloses #65 \n\n# Types of Changes\n- New feature or enhancement\n\nWhich topics does your change affect? Delete those that do not apply.\n- `rustworkx` implementation\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the developer/contributing docs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly.\n- [ ] If I changed the specification, I have checked that any validation\nfunctions and tests reflect the changes.\n\n# Further Comments\nFor the `write_rx` I'm considering using the discussed higher level\n`dict[str, Array]` writing API.\n\n---------\n\nCo-authored-by: melisande-c <melisande.croft@fht.org>",
+          "timestamp": "2025-07-23T16:45:19-04:00",
+          "tree_id": "77e8a3df0796f7fd430d5f548de1edd5c02d070d",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/246da2638e81aa16329cad3ca82c9d3c66587566"
+        },
+        "date": 1753303825417,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11609241241352312,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2443249386532915",
+            "extra": "mean: 8.613827374333331 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.765704585284116,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0005395083337130737",
+            "extra": "mean: 50.59268166663363 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.06650142426606868,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4766817003510217",
+            "extra": "mean: 15.03727192366667 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.10874310953445801,
+            "unit": "iter/sec",
+            "range": "stddev: 0.43774305107778283",
+            "extra": "mean: 9.195984962000049 sec\nrounds: 3"
           }
         ]
       }
