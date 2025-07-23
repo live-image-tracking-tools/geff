@@ -12,6 +12,7 @@ wheels/
 
 # Virtual environments
 .venv
+.python-version
 
 # pixi environments
 .pixi
@@ -29,4 +30,5 @@ coverage.xml
 
 uv.lock
 /.idea
+.vscode/
 site
