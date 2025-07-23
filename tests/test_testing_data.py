@@ -6,6 +6,7 @@ from geff.testing.data import (
     create_simple_2d_geff,
     create_simple_3d_geff,
     create_simple_temporal_geff,
+    create_memory_mock_geff
 )
 
 
