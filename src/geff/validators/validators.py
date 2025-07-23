@@ -121,7 +121,7 @@ def validate_tracklets(
 
     # Validate each tracklet.
     for t_id, t_nodes in tracklet_to_nodes.items():
-        # A single node is always a valid path.
+        # by definition, a tracklet
         if len(t_nodes) < 2:
             continue
 
@@ -145,5 +145,60 @@ def validate_tracklets(
         if not nx.is_weakly_connected(S):
             errors.append(f"Tracklet {t_id}: Not fully connected.")
             continue
+
+    return not errors, errors
+
+
+def validate_lineages(
+    node_ids: ArrayLike, edge_ids: ArrayLike, lineage_ids: ArrayLike
+) -> tuple[bool, list[str]]:
+    """Validates if each lineage is a valid, isolated connected component.
+
+    A lineage is considered valid if and only if the set of nodes belonging
+    to it is identical to one of the graph's weakly connected components.
+    This efficiently ensures both internal connectivity and external isolation.
+
+    Args:
+        node_ids: A sequence of unique node identifiers in the graph.
+        edge_ids: A sequence of (source, target) pairs representing directed
+            edges.
+        lineage_ids: A sequence of lineage identifiers corresponding to each
+            node in `node_ids`.
+
+    Returns:
+        A tuple containing:
+            - is_valid (bool): True if all lineages are valid connected
+              components, False otherwise.
+            - errors (list[str]): A list of error messages for each invalid
+              lineage.
+    """
+    ID_DTYPE = np.int64
+    # Ensure consistent dtypes.
+    nodes = np.asarray(node_ids, dtype=ID_DTYPE)
+    edges = np.asarray(edge_ids, dtype=ID_DTYPE)
+    lineages = np.asarray(lineage_ids, dtype=ID_DTYPE)
+
+    errors: list[str] = []
+    lineage_to_nodes: dict[np.int64, list[np.int64]] = {}
+
+    for node, l_id in zip(nodes, lineages, strict=False):
+        lineage_to_nodes.setdefault(l_id, []).append(node)
+
+    # Build the graph.
+    G = nx.DiGraph(tuple(edge) for edge in edges)
+    G.add_nodes_from(nodes)
+
+    # Find all weakly connected components.
+    valid_components = {frozenset(component) for component in nx.weakly_connected_components(G)}
+
+    # Check if each lineage's node set matches a valid component.
+    for l_id, l_nodes in lineage_to_nodes.items():
+        if not l_nodes:
+            continue
+
+        l_nodes_set = frozenset(l_nodes)
+
+        if l_nodes_set not in valid_components:
+            errors.append(f"Lineage {l_id}: Does not form a valid, isolated connected component.")
 
     return not errors, errors
