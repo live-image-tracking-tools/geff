@@ -199,3 +199,4 @@ extend-ignore-identifiers-re = ["(?i)ome"]
 
 [project.scripts]
 ctc2geff = "geff.interops.ctc:app"
+geff = "geff._cli:app"
