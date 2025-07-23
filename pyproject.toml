@@ -64,6 +64,7 @@ bench = [
     "tabulate",
     "pandas",
     "typer",
+    "rustworkx",
 ]
 rustworkx = [
     "rustworkx>=0.16.0",

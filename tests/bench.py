@@ -43,11 +43,12 @@ def big_graph_path(tmpdir_factory, big_graph):
     return tmp_path
 
 
-def test_write(benchmark, tmp_path, big_graph):
+@pytest.mark.parametrize("write_func", [geff_nx.write_nx, geff_rx.write_rx])
+def test_write(write_func, benchmark, tmp_path, big_graph):
     path = tmp_path / "test_write.zarr"
 
     benchmark.pedantic(
-        geff_nx.write_nx,
+        write_func,
         kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "store": path},
         rounds=ROUNDS,
         setup=lambda: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
