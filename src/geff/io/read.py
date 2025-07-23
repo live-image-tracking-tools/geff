@@ -30,8 +30,8 @@ class ConstructFunc(Protocol[R]):
 
         Args:
             graph_dict (GraphDict): A graph representation of the GEFF data.
-            *args (Any): Optional args for ingesting the `graph_dict`.
-            **kwargs (Any): Optional kwargs for ingesting the `graph_dict`.
+            *args (Any): Optional args for constructing the `graph_dict`.
+            **kwargs (Any): Optional kwargs for constructing the `graph_dict`.
         """
         ...
 
@@ -137,8 +137,8 @@ def read(
     Returns:
         tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
     """
-    ingest_func = get_construct_func(backend)
+    construct_func = get_construct_func(backend)
     if backend_kwargs is None:
         backend_kwargs = {}
     graph_dict = read_to_dict(path, validate, node_props, edge_props)
-    return ingest_func(graph_dict, **backend_kwargs)
+    return construct_func(graph_dict, **backend_kwargs)
