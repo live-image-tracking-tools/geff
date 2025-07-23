@@ -52,7 +52,7 @@ def test_write_arrays_rejects_disallowed_id_dtype(tmp_path):
     node_ids = np.array([1, 2, 3], dtype=np.float16)
     edge_ids = np.array([[1, 2], [2, 3]], dtype=np.float16)
 
-    with pytest.raises(TypeError, match="Java Zarr.*dtype"):
+    with pytest.warns(UserWarning):
         write_arrays(
             geff_path=geff_path,
             node_ids=node_ids,
@@ -75,7 +75,7 @@ def test_write_arrays_rejects_disallowed_property_dtype(tmp_path):
     bad_prop_values = np.array([0.1, 0.2, 0.3], dtype=np.float16)
     node_props = {"score": (bad_prop_values, None)}
 
-    with pytest.raises(TypeError, match="not supported"):
+    with pytest.warns(UserWarning):
         write_arrays(
             geff_path=geff_path,
             node_ids=node_ids,

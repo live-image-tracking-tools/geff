@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import Literal
 
@@ -84,9 +85,10 @@ def write_id_arrays(
 
     # Disallow data types that cannot be consumed by Java-based Zarr readers
     if not validate_data_type(node_ids.dtype):
-        raise TypeError(
+        warnings.warn(
             "Java Zarr implementations do not support dtype "
-            f"{node_ids.dtype.name}. Please use a supported type."
+            f"{node_ids.dtype}. Please use a supported type.",
+            stacklevel=2,
         )
 
     path = str(geff_path)
@@ -149,9 +151,10 @@ def write_props_arrays(
         # Java Zarr readers before any data get written to disk.
         values, missing = arrays
         if not validate_data_type(values.dtype):
-            raise TypeError(
-                f"Data type {values.dtype.name} for property '{prop}' is not supported "
-                "by Java Zarr implementations."
+            warnings.warn(
+                f"Data type {values.dtype} for property '{prop}' is not supported "
+                "by Java Zarr implementations. Proceeding anyway.",
+                stacklevel=2,
             )
 
         prop_group = props_group.create_group(prop)
