@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753271691405,
+  "lastUpdate": 1753274728032,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2790,6 +2790,51 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.4629430214445664",
             "extra": "mean: 15.543050665333334 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "45037215+TeunHuijben@users.noreply.github.com",
+            "name": "Teun Huijben",
+            "username": "TeunHuijben"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1cc3a3cbfa375b78ca3ff6e7267861ed41dbcba8",
+          "message": "Flexible testing utils to create dummy graphs with full freedom  (#161)\n\n# Proposed Change\n- flexible test function to create dummy graph with full freedom over\ndtype/nodes/edges/numbers/props/etc\n- retyped all inputs throughout the repo to be a zarr `StoreLike` (str |\nPath | store)\n- added `pixi run test-cov` to run test and print coverage report\n\n# Types of Changes\nWhat types of changes does your code introduce?\n- New feature or enhancement\n- Tests\n\nWhich topics does your change affect?\n- testing\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly.\n\n## If you changed the specification\n- [x] I have checked that any validation functions and tests reflect the\nchanges.\n- [x] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [x] I have updated docs/specification.md to reflect the change.\n- [x] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n## If you have added or changed an implementation\n- [x] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [x] I updated pyproject.toml with new dependencies if needed.\n- [x] I added a function to tests/bench.py to benchmark the new\nimplementation.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2025-07-23T08:42:08-04:00",
+          "tree_id": "88f41ac86996eadc7630c7356d5bb8bb4d633fca",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/1cc3a3cbfa375b78ca3ff6e7267861ed41dbcba8"
+        },
+        "date": 1753274727414,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write",
+            "value": 0.1121470224490617,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2987150510162155",
+            "extra": "mean: 8.916866254333323 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.42560556414823,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0008844932760431361",
+            "extra": "mean: 51.47844666657875 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read",
+            "value": 0.06417410380558855,
+            "unit": "iter/sec",
+            "range": "stddev: 0.503417378554623",
+            "extra": "mean: 15.582609506000077 sec\nrounds: 3"
           }
         ]
       }
