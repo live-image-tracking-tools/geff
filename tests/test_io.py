@@ -116,6 +116,3 @@ def test_read(
         np.testing.assert_array_equal(
             get_edge_prop(graph, name, graph_props["edges"].tolist()), values
         )
-
-
-# TODO: metadata? Or will it be tested elsewhere

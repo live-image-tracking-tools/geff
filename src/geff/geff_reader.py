@@ -123,7 +123,7 @@ class GeffReader:
         edge_mask: NDArray[np.bool] | None = None,
     ) -> InMemoryGeff:
         """
-        Build a `GraphDict` from a GEFF.
+        Build an `InMemoryGeff` by loading the data from a GEFF zarr.
 
         A set of nodes and edges can be selected using `node_mask` and `edge_mask`.
 
