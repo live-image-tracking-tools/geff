@@ -20,7 +20,7 @@ R = TypeVar("R", covariant=True)
 
 
 class ConstructFunc(Protocol[R]):
-    """A protocol for callables that convert a `GraphDict` to different backends."""
+    """A protocol for callables that construct a graph from GEFF data."""
 
     def __call__(
         self,
@@ -52,6 +52,9 @@ class ConstructFunc(Protocol[R]):
                 length as edge_ids.
             *args (Any): Optional args for constructing the `in_memory_geff`.
             **kwargs (Any): Optional kwargs for constructing the `in_memory_geff`.
+
+        Returns:
+            A graph object instance for a particular backend.
         """
         ...
 
@@ -112,7 +115,7 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
         backend (SupportedBackend): Flag for the chosen backend.
 
     Returns:
-        ConstructFunc: A function to convert a `GraphDict` to the chosen backend.
+        ConstructFunc: A function that construct a graph from GEFF data.
     """
     match backend:
         case SupportedBackend.NETWORKX:
