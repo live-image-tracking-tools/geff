@@ -1,3 +1,4 @@
+import warnings
 from typing import Literal
 
 import numpy as np
@@ -7,6 +8,7 @@ from zarr.storage import StoreLike
 from geff.utils import remove_tilde
 
 from .metadata_schema import GeffMetadata
+from .units import validate_data_type
 
 
 def write_arrays(
@@ -88,6 +90,15 @@ def write_id_arrays(
         raise TypeError(
             f"Node ids and edge ids must have same dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
         )
+
+    # Disallow data types that cannot be consumed by Java-based Zarr readers
+    if not validate_data_type(node_ids.dtype):
+        warnings.warn(
+            "Java Zarr implementations do not support dtype "
+            f"{node_ids.dtype}. Please use a supported type.",
+            stacklevel=2,
+        )
+
     if zarr.__version__.startswith("3"):
         geff_root = zarr.open(
             geff_store, mode="a", zarr_format=zarr_format
@@ -150,8 +161,17 @@ def write_props_arrays(
         geff_root = zarr.open(geff_store, mode="a")
     props_group = geff_root.require_group(f"{group}/props")
     for prop, arrays in props.items():
-        prop_group = props_group.create_group(prop)
+        # data-type validation - ensure this property can round-trip through
+        # Java Zarr readers before any data get written to disk.
         values, missing = arrays
+        if not validate_data_type(values.dtype):
+            warnings.warn(
+                f"Data type {values.dtype} for property '{prop}' is not supported "
+                "by Java Zarr implementations. Proceeding anyway.",
+                stacklevel=2,
+            )
+
+        prop_group = props_group.create_group(prop)
         prop_group["values"] = values
         if missing is not None:
             prop_group["missing"] = missing
