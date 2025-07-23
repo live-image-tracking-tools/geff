@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753307844785,
+  "lastUpdate": 1753308116290,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3299,6 +3299,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 1.012236346781787",
             "extra": "mean: 9.189450385333316 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "funkej@janelia.hhmi.org",
+            "name": "Jan Funke",
+            "username": "funkey"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d4ec6f621df69f09a1ba19176612ac86606251ed",
+          "message": "Use GeffReader to read spatial_graph (#229)\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Documentation update\n\nWhich topics does your change affect? Delete those that do not apply.\n- `spatial_graph` implementation",
+          "timestamp": "2025-07-23T17:58:43-04:00",
+          "tree_id": "fbec552e2bad3f46942b7c697264db775cdcbbed",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/d4ec6f621df69f09a1ba19176612ac86606251ed"
+        },
+        "date": 1753308114995,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.10944919840483337,
+            "unit": "iter/sec",
+            "range": "stddev: 1.415375781002181",
+            "extra": "mean: 9.136658966666667 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.31303309524356,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0009965954081368206",
+            "extra": "mean: 51.77850599998616 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.0658543851081769,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4958345302714186",
+            "extra": "mean: 15.185017646999995 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.10386366321845192,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4946104725897784",
+            "extra": "mean: 9.628006263333342 sec\nrounds: 3"
           }
         ]
       }
