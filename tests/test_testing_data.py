@@ -316,7 +316,6 @@ def test_create_memory_mock_geff_extra_node_props_different_dtypes():
 
 def test_create_dummy_graph_props_extra_node_props():
     """Test create_dummy_graph_props with extra node properties"""
-    from geff.testing.data import create_dummy_graph_props
 
     extra_node_props = {
         "label": "str",
