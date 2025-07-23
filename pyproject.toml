@@ -30,8 +30,7 @@ classifiers = [
 ]
 
 [project.scripts]
-validate = "geff._cli:validate"
-info = "geff._cli:info"
+geff = "geff._cli:main"
 
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
