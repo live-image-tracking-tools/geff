@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753303826165,
+  "lastUpdate": 1753307844785,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3247,6 +3247,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.43774305107778283",
             "extra": "mean: 9.195984962000049 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "32863964+AnniekStok@users.noreply.github.com",
+            "name": "AnniekStok",
+            "username": "AnniekStok"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "87ca1a2f28240c4257f678829d3ba5cba291163e",
+          "message": "add segmentation validator functions and tests (#213)\n\n# Proposed Change\nAdd functions for testing whether the combination of a graph in geff and\n(external) segmentation data is valid.\n - Function to check for the existence of a 'seg_id' property\n- Function to check if the number of axes in the geff metadata matches\nthe number of dimensions in the segmentation array.\n- Function to check whether the (scaled) axes metadata 'max' values are\nwithin bounds of the segmentation array.\n- Function to check whether labels with given seg_ids exist at time\npoints t in the segmentation array.\n- Function to check if the pixel value in the segmentation array at\n(scaled) node coordinates matches the seg_id.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [ ] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n## If you changed the specification\n- [ ] I have checked that any validation functions and tests reflect the\nchanges.\n- [ ] I have updated the GeffMetadata and the json schema using `pixi\nrun update-schema` if necessary.\n- [ ] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n## If you have added or changed an implementation\n- [ ] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [ ] I updated pyproject.toml with new dependencies if needed.\n- [ ] I added a function to tests/bench.py to benchmark the new\nimplementation.\n\n# Further Comments\nIf this is a relatively large or complex change, kick off the discussion\nby explaining why you chose the solution you did and what alternatives\nyou considered, etc...\n\n---------\n\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>",
+          "timestamp": "2025-07-23T17:54:13-04:00",
+          "tree_id": "b478a25d221694ae3228bc89ba3af489f1b29277",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/87ca1a2f28240c4257f678829d3ba5cba291163e"
+        },
+        "date": 1753307844105,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11048101423987221,
+            "unit": "iter/sec",
+            "range": "stddev: 1.363888489072104",
+            "extra": "mean: 9.051328926333332 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.22860317792538,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0012919420490269946",
+            "extra": "mean: 52.00585766666658 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.06683696007006198,
+            "unit": "iter/sec",
+            "range": "stddev: 0.45123877104288357",
+            "extra": "mean: 14.961781609333338 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.1088204362685319,
+            "unit": "iter/sec",
+            "range": "stddev: 1.012236346781787",
+            "extra": "mean: 9.189450385333316 sec\nrounds: 3"
           }
         ]
       }
