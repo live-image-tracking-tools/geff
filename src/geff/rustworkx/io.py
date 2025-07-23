@@ -54,11 +54,25 @@ def write_rx(
 ) -> None:
     """Write a rustworkx graph to the geff file format
 
+    Note on RustworkX Node ID Handling:
+        RustworkX uses internal node indices that are not directly controllable by the user.
+        These indices are typically sequential integers starting from 0, but may have gaps
+        if nodes are removed. To maintain compatibility with geff's requirement for stable
+        node identifiers, this function uses the following approach:
+
+        1. If node_id_dict is None: Uses rustworkx's internal node indices directly
+        2. If node_id_dict is provided: Maps rx node indices to custom identifiers
+
+        When reading back with read_rx(), the mapping is reversed to restore the original
+        rustworkx node indices, ensuring round-trip consistency.
+
     Args:
         graph: The rustworkx graph to write.
         store: The store to write the geff file to.
         metadata: The original metadata of the graph. Defaults to None.
         node_id_dict: A dictionary mapping rx node indices to arbitrary indices.
+            This allows custom node identifiers to be used in the geff file instead
+            of rustworkx's internal indices. If None, uses rx indices directly.
         axis_names: The names of the axes.
         axis_units: The units of the axes.
         axis_types: The types of the axes.
@@ -84,55 +98,31 @@ def write_rx(
         node_props: list[str] = []
         edge_props: list[str] = []
 
-        write_dicts(
-            geff_store=store,
-            node_data=node_data,
-            edge_data=edge_data,
-            node_prop_names=node_props,
-            edge_prop_names=edge_props,
-            axis_names=axis_names,
-            zarr_format=zarr_format,
-        )
-
-        # Write metadata for empty graph
-        axes = axes_from_lists(
-            axis_names,
-            axis_units=axis_units,
-            axis_types=axis_types,
-            roi_min=None,
-            roi_max=None,
-        )
-
-        metadata = create_or_update_metadata(
-            metadata,
-            isinstance(graph, rx.PyDiGraph),
-            axes,
-        )
-        metadata.write(group)
         warnings.warn(f"Graph is empty - only writing metadata to {store}", stacklevel=2)
-        return
 
-    # Prepare node data
-    if node_id_dict is None:
-        node_data = [
-            (i, data) for i, data in zip(graph.node_indices(), graph.nodes(), strict=False)
-        ]
     else:
-        node_data = [
-            (node_id_dict[i], data)
-            for i, data in zip(graph.node_indices(), graph.nodes(), strict=False)
-        ]
+        # Prepare node data
+        if node_id_dict is None:
+            node_data = [
+                (i, data) for i, data in zip(graph.node_indices(), graph.nodes(), strict=False)
+            ]
+        else:
+            node_data = [
+                (node_id_dict[i], data)
+                for i, data in zip(graph.node_indices(), graph.nodes(), strict=False)
+            ]
 
-    # Prepare edge data
-    if node_id_dict is None:
-        edge_data = [((u, v), data) for u, v, data in graph.weighted_edge_list()]
-    else:
-        edge_data = [
-            ((node_id_dict[u], node_id_dict[v]), data) for u, v, data in graph.weighted_edge_list()
-        ]
+        # Prepare edge data
+        if node_id_dict is None:
+            edge_data = [((u, v), data) for u, v, data in graph.weighted_edge_list()]
+        else:
+            edge_data = [
+                ((node_id_dict[u], node_id_dict[v]), data)
+                for u, v, data in graph.weighted_edge_list()
+            ]
 
-    node_props = list({k for _, data in node_data for k in data})
-    edge_props = list({k for _, data in edge_data for k in data})
+        node_props = list({k for _, data in node_data for k in data})
+        edge_props = list({k for _, data in edge_data for k in data})
 
     write_dicts(
         geff_store=store,
@@ -168,8 +158,18 @@ def write_rx(
     metadata.write(group)
 
 
-def _ingest_dict_rx(graph_dict: GraphDict) -> tuple[rx.PyGraph, dict[int, int]]:
-    """Convert a GraphDict to a rustworkx graph."""
+def _ingest_dict_rx(graph_dict: GraphDict) -> rx.PyDiGraph | rx.PyGraph:
+    """
+    Convert a GraphDict to a rustworkx graph.
+    The graph will have a `to_rx_id_map` attribute that maps geff node ids
+    to rustworkx node indices.
+
+    Args:
+        graph_dict: The GraphDict to convert to a rustworkx graph.
+
+    Returns:
+        rx.PyGraph: A rustworkx graph.
+    """
     try:
         import rustworkx as rx
     except ImportError as e:
@@ -234,7 +234,9 @@ def _ingest_dict_rx(graph_dict: GraphDict) -> tuple[rx.PyGraph, dict[int, int]]:
         # Add edges with their properties
         graph.add_edges_from([(e[0], e[1], d) for e, d in zip(edge_ids, edges_data, strict=True)])
 
-    return graph, to_rx_id_map
+    graph.attrs["to_rx_id_map"] = to_rx_id_map
+
+    return graph
 
 
 def read_rx(
@@ -246,6 +248,10 @@ def read_rx(
     """Read a geff file into a rustworkx graph.
     Metadata properties will be stored in the graph.attrs dict
     and can be accessed via `G.attrs[key]` where G is a rustworkx graph.
+
+    The graph will have a `to_rx_id_map` attribute that maps geff node ids
+    to rustworkx node indices.
+    This can be used to map back to the original geff node ids.
 
     Args:
         store: The path/str to the geff zarr, or the store itself.
@@ -259,6 +265,6 @@ def read_rx(
         A tuple containing the rustworkx graph and the metadata.
     """
     graph_dict = read_to_dict(store, validate, node_props, edge_props)
-    graph, _ = _ingest_dict_rx(graph_dict)
+    graph = _ingest_dict_rx(graph_dict)
 
     return graph, graph_dict["metadata"]
