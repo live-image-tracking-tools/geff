@@ -12,6 +12,11 @@ def test_validate(tmp_path):
     with pytest.raises(ValueError, match=r"Path does not exist: does-not-exist"):
         validate("does-not-exist")
 
+    # remote zarr path does not raise existence error
+    remote_path = "https://blah.com/test.zarr"
+    with pytest.raises(ValueError, match=r"store must be a zarr StoreLike"):
+        validate(remote_path)
+
     # Path exists but is not a zarr store
     non_zarr_path = tmp_path / "not-a-zarr"
     non_zarr_path.mkdir()
