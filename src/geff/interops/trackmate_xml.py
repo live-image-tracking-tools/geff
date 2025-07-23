@@ -535,6 +535,7 @@ def from_trackmate_xml_to_geff(
             Axis(name="POSITION_T", type="time", unit=units.get("timeunits", "frame")),
         ],
         directed=True,
+        track_node_props={"lineage": "TRACK_ID"},
     )
 
     write_nx(
