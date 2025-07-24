@@ -1,13 +1,16 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated, cast
 
 import typer
 import zarr
 
 from . import utils
 from .metadata_schema import GeffMetadata
+
+if TYPE_CHECKING:
+    from typing import Literal
 
 app = typer.Typer(help="GEFF Command Line Interface")
 
@@ -91,6 +94,43 @@ def convert_ctc(
             ctzyx=tczyx,
             overwrite=overwrite,
         )
+
+
+@app.command()
+def convert_trackmate_xml(
+    xml_path: Annotated[
+        Path, typer.Argument(help="The path to the TrackMate XML file", show_default=False)
+    ],
+    geff_path: Annotated[
+        Path, typer.Argument(help="The path to the GEFF file", show_default=False)
+    ],
+    discard_filtered_spots: Annotated[
+        bool,
+        typer.Option(help="True to discard the spots filtered out in TrackMate, False otherwise."),
+    ] = False,
+    discard_filtered_tracks: Annotated[
+        bool,
+        typer.Option(help="True to discard the tracks filtered out in TrackMate, False otherwise."),
+    ] = False,
+    overwrite: Annotated[
+        bool, typer.Option(help="Whether to overwrite the GEFF file if it already exists.")
+    ] = False,
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,  # type: ignore
+    # because of Typer not supporting Literal types
+) -> None:
+    """
+    Convert a TrackMate XML file to a GEFF file.
+    """
+    from geff.interops import from_trackmate_xml_to_geff  # noqa: I001 import at call time to avoid optional dependency issues
+
+    from_trackmate_xml_to_geff(
+        xml_path=xml_path,
+        geff_path=geff_path,
+        discard_filtered_spots=discard_filtered_spots,
+        discard_filtered_tracks=discard_filtered_tracks,
+        overwrite=overwrite,
+        zarr_format=cast("Literal[2, 3]", zarr_format),
+    )
 
 
 if __name__ == "__main__":
