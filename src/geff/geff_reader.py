@@ -79,7 +79,7 @@ class GeffReader:
 
         If no names are specified, then all properties will be loaded
 
-        Call `build` to get the output `GraphDict` with the loaded properties.
+        Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
             names (lists of str, optional): The names of the node properties to load. If
@@ -101,7 +101,7 @@ class GeffReader:
 
         If no names are specified, then all properties will be loaded
 
-        Call `build` to get the output `GraphDict` with the loaded properties.
+        Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
             names (lists of str, optional): The names of the edge properties to load. If
@@ -135,7 +135,7 @@ class GeffReader:
             of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
             array of length number of edges.
         Returns:
-            GraphDict: A graph represented in graph dict format.
+            InMemoryGeff: A dictionary of in memory numpy arrays representing the graph.
         """
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray] = {}
@@ -209,7 +209,8 @@ def read_to_memory(
             if None all properties will be loaded, defaults to None.
 
     Returns:
-        A networkx graph containing the graph that was stored in the geff file format
+        A InMemoryGeff object containing the graph as a TypeDict of in memory numpy arrays
+        (metadata, node_ids, edge_ids, node_props, edge_props)
     """
 
     file_reader = GeffReader(source, validate)

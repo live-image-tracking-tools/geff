@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import spatial_graph as sg
-import zarr
 from zarr.storage import StoreLike
 
 if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
 import geff
+from geff.geff_reader import read_to_memory
 from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.utils import remove_tilde
 from geff.write_arrays import write_arrays
@@ -101,7 +101,11 @@ def write_sg(
 
 
 def read_sg(
-    store: StoreLike, validate: bool = True, position_attr: str = "position"
+    store: StoreLike,
+    validate: bool = True,
+    position_attr: str = "position",
+    node_props: list[str] | None = None,
+    edge_props: list[str] | None = None,
 ) -> sg.SpatialGraph:
     """Read a geff file into a SpatialGraph.
 
@@ -126,21 +130,25 @@ def read_sg(
             How to call the position attribute in the returned SpatialGraph.
             Defaults to "position".
 
+        node_props (list of str, optional):
+
+            The names of the node properties to load, if None all properties
+            will be loaded, defaults to None.
+
+        edge_props (list of str, optional):
+
+            The names of the edge properties to load, if None all properties
+            will be loaded, defaults to None.
+
     Returns:
 
         A SpatialGraph containing the graph that was stored in the geff file
         format.
     """
 
-    store = remove_tilde(store)
+    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
 
-    # open zarr container
-    if validate:
-        geff.utils.validate(store)
-
-    group = zarr.open(store, mode="r")
-    metadata = GeffMetadata.read(group)
-
+    metadata = in_memory_geff["metadata"]
     assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"
 
     position_attrs = [axis.name for axis in metadata.axes]
@@ -156,29 +164,38 @@ def read_sg(
             return str(dtype)
 
     # read nodes/edges
-    nodes = group["nodes/ids"][:]
-    edges = group["edges/ids"][:]
-    node_dtype = get_dtype_str(group["nodes/ids"])
+    nodes = in_memory_geff["node_ids"]
+    edges = in_memory_geff["edge_ids"]
+    node_dtype = get_dtype_str(nodes)
 
-    # collect node attributes
+    # collect node and edge attributes
     node_attr_dtypes = {
-        name: get_dtype_str(group[f"nodes/props/{name}/values"]) for name in group["nodes/props"]
+        name: get_dtype_str(in_memory_geff["node_props"][name]["values"])
+        for name in in_memory_geff["node_props"].keys()
     }
-    for name in group["nodes/props"]:
-        if "missing" in group[f"nodes/props/{name}"].array_keys():
+    for name in in_memory_geff["node_props"].keys():
+        if "missing" in in_memory_geff["node_props"][name]:
             warnings.warn(
                 f"Potential missing values for attr {name} are being ignored", stacklevel=2
             )
     edge_attr_dtypes = {
-        name: get_dtype_str(group[f"edges/props/{name}/values"]) for name in group["edges/props"]
+        name: get_dtype_str(in_memory_geff["edge_props"][name]["values"])
+        for name in in_memory_geff["edge_props"].keys()
     }
-    for name in group["edges/props"]:
-        if "missing" in group[f"edges/props/{name}"].array_keys():
+    for name in in_memory_geff["edge_props"].keys():
+        if "missing" in in_memory_geff["edge_props"][name]:
             warnings.warn(
                 f"Potential missing values for attr {name} are being ignored", stacklevel=2
             )
-    node_attrs = {name: group[f"nodes/props/{name}/values"][:] for name in group["nodes/props"]}
-    edge_attrs = {name: group[f"edges/props/{name}/values"][:] for name in group["edges/props"]}
+
+    node_attrs = {
+        name: in_memory_geff["node_props"][name]["values"]
+        for name in in_memory_geff["node_props"].keys()
+    }
+    edge_attrs = {
+        name: in_memory_geff["edge_props"][name]["values"]
+        for name in in_memory_geff["edge_props"].keys()
+    }
 
     # squish position attributes together into one position attribute
     position = np.stack([node_attrs[name] for name in position_attrs], axis=1)

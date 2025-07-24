@@ -33,6 +33,7 @@ classifiers = [
 [project.optional-dependencies]
 spatial-graph = ["spatial-graph"]
 ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
+rx = ["rustworkx>=0.16.0"]
 trackmate_xml = ["lxml", "xmltodict"]
 
 [dependency-groups]
@@ -45,6 +46,7 @@ dev = [
     "ipython",
     "types-PyYAML",
     "spatial-graph",
+    "rustworkx",
     # ctc stuff:
     "dask",
     "scikit-image",
@@ -70,6 +72,7 @@ bench = [
     "tabulate",
     "pandas",
     "typer",
+    "rustworkx",
 ]
 
 [tool.pixi.project]

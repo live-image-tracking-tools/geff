@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 import geff.networkx.io as geff_nx
+import geff.rustworkx.io as geff_rx
 from geff.utils import validate
 
 ROUNDS = 3
@@ -42,11 +43,14 @@ def big_graph_path(tmpdir_factory, big_graph):
     return tmp_path
 
 
-def test_write(benchmark, tmp_path, big_graph):
+@pytest.mark.parametrize(
+    "write_func", [geff_nx.write_nx]
+)  # , geff_rx.write_rx])  # we cannot test rustworkx because the big_graph is a NX graph
+def test_write(write_func, benchmark, tmp_path, big_graph):
     path = tmp_path / "test_write.zarr"
 
     benchmark.pedantic(
-        geff_nx.write_nx,
+        write_func,
         kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "store": path},
         rounds=ROUNDS,
         setup=lambda: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
@@ -57,7 +61,8 @@ def test_validate(benchmark, big_graph_path):
     benchmark.pedantic(validate, kwargs={"store": big_graph_path}, rounds=ROUNDS)
 
 
-def test_read(benchmark, big_graph_path):
+@pytest.mark.parametrize("read_func", [geff_nx.read_nx, geff_rx.read_rx])
+def test_read(read_func, benchmark, big_graph_path):
     benchmark.pedantic(
-        geff_nx.read_nx, kwargs={"store": big_graph_path, "validate": False}, rounds=ROUNDS
+        read_func, kwargs={"store": big_graph_path, "validate": False}, rounds=ROUNDS
     )

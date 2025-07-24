@@ -28,7 +28,10 @@ docs/schema/*
 .coverage*
 coverage.xml
 
+# uv files
+.uv
 uv.lock
+
 /.idea
 .vscode/
 site

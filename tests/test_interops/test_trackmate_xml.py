@@ -206,9 +206,9 @@ def test_add_all_nodes():
         "x": {"name": "x", "isint": "false", "random": "info1"},
         "y": {"name": "y", "isint": "true", "random": "info3"},
     }
-    obtained = nx.Graph()
+    obtained = nx.DiGraph()
     tm_xml._add_all_nodes(it, element, attrs_md, obtained)
-    expected = nx.Graph()
+    expected = nx.DiGraph()
     expected.add_nodes_from(
         [
             (1001, {"name": "ID1001", "y": 30, "ID": 1001, "x": 30.5}),
@@ -228,9 +228,9 @@ def test_add_all_nodes():
     """
     it = ET.iterparse(io.BytesIO(xml_data.encode("utf-8")), events=["start", "end"])
     _, element = next(it)
-    obtained = nx.Graph()
+    obtained = nx.DiGraph()
     tm_xml._add_all_nodes(it, element, {}, obtained)
-    expected = nx.Graph()
+    expected = nx.DiGraph()
     expected.add_nodes_from([(1001, {"ID": 1001}), (1000, {"ID": 1000})])
     assert nx_is_equal(obtained, expected)
 
@@ -242,9 +242,9 @@ def test_add_all_nodes():
     """
     it = ET.iterparse(io.BytesIO(xml_data.encode("utf-8")), events=["start", "end"])
     _, element = next(it)
-    obtained = nx.Graph()
+    obtained = nx.DiGraph()
     tm_xml._add_all_nodes(it, element, {}, obtained)
-    assert nx_is_equal(obtained, nx.Graph())
+    assert nx_is_equal(obtained, nx.DiGraph())
 
     # No ID attribute
     xml_data = """
@@ -262,7 +262,7 @@ def test_add_all_nodes():
         "Not adding this node to the graph."
     )
     with pytest.warns(UserWarning, match=msg):
-        tm_xml._add_all_nodes(it, element, {}, nx.Graph())
+        tm_xml._add_all_nodes(it, element, {}, nx.DiGraph())
 
 
 def test_add_edge():
@@ -277,9 +277,9 @@ def test_add_edge():
         "SPOT_SOURCE_ID": {"name": "SPOT_SOURCE_ID", "isint": "true", "random": "info2"},
         "SPOT_TARGET_ID": {"name": "SPOT_TARGET_ID", "isint": "true", "random": "info4"},
     }
-    obtained = nx.Graph()
+    obtained = nx.DiGraph()
     tm_xml._add_edge(element, attrs_md, obtained, track_id)
-    expected = nx.Graph()
+    expected = nx.DiGraph()
     expected.add_edge(1, 2, x=20.5, y=25, SPOT_SOURCE_ID=1, SPOT_TARGET_ID=2)
     expected.nodes[1]["TRACK_ID"] = track_id
     expected.nodes[2]["TRACK_ID"] = track_id
@@ -296,9 +296,9 @@ def test_add_edge():
         "SPOT_SOURCE_ID": {"name": "SPOT_SOURCE_ID", "isint": "true", "random": "info2"},
         "SPOT_TARGET_ID": {"name": "SPOT_TARGET_ID", "isint": "true", "random": "info4"},
     }
-    obtained = nx.Graph()
+    obtained = nx.DiGraph()
     tm_xml._add_edge(element, attrs_md, obtained, track_id)
-    expected = nx.Graph()
+    expected = nx.DiGraph()
     expected.add_edge(1, 2, SPOT_SOURCE_ID=1, SPOT_TARGET_ID=2)
     expected.nodes[1]["TRACK_ID"] = track_id
     expected.nodes[2]["TRACK_ID"] = track_id
@@ -321,7 +321,7 @@ def test_add_edge():
             "current element 'data'. Not adding this edge to the graph."
         ),
     ):
-        tm_xml._add_edge(element, attrs_md, nx.Graph(), track_id)
+        tm_xml._add_edge(element, attrs_md, nx.DiGraph(), track_id)
 
     # Inconsistent TRACK_ID
     xml_data = """<data SPOT_SOURCE_ID="1" SPOT_TARGET_ID="2" x="20.5" y="25" />"""
@@ -333,7 +333,7 @@ def test_add_edge():
         "SPOT_SOURCE_ID": {"name": "SPOT_SOURCE_ID", "isint": "true", "random": "info2"},
         "SPOT_TARGET_ID": {"name": "SPOT_TARGET_ID", "isint": "true", "random": "info4"},
     }
-    obtained = nx.Graph()
+    obtained = nx.DiGraph()
     obtained.add_nodes_from([(1, {"TRACK_ID": 1}), (2, {"TRACK_ID": 2})])
     with pytest.raises(
         AssertionError,

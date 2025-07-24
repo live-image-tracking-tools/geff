@@ -200,7 +200,7 @@ def _add_all_nodes(
     it: ET.iterparse,
     ancestor: ET._Element,
     attrs_md: dict[str, dict[str, str]],
-    graph: nx.Graph,
+    graph: nx.DiGraph,
 ) -> bool:
     """Add nodes and their attributes to a graph and return the presence of segmentation.
 
@@ -211,7 +211,7 @@ def _add_all_nodes(
         ancestor (ET._Element): The XML element that encompasses the information to be added.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected node attributes.
-        graph (nx.Graph): The graph to which the nodes will be added.
+        graph (nx.DiGraph): The graph to which the nodes will be added.
 
     Returns:
         bool: True if the model has segmentation data, False otherwise.
@@ -261,7 +261,7 @@ def _add_all_nodes(
 def _add_edge(
     element: ET._Element,
     attrs_md: dict[str, dict[str, str]],
-    graph: nx.Graph,
+    graph: nx.DiGraph,
     current_track_id: int,
 ) -> None:
     """Add an edge between two nodes in the graph based on the XML element.
@@ -276,7 +276,7 @@ def _add_edge(
         element (ET._Element): The XML element containing edge information.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing
             the expected edge attributes.
-        graph (nx.Graph): The graph to which the edge and its attributes will be added.
+        graph (nx.DiGraph): The graph to which the edge and its attributes will be added.
         current_track_id (int): Track ID of the track holding the edge.
 
     Raises:
@@ -323,7 +323,7 @@ def _build_tracks(
     iterator: ET.iterparse,
     ancestor: ET._Element,
     attrs_md: dict[str, dict[str, str]],
-    graph: nx.Graph,
+    graph: nx.DiGraph,
 ) -> list[dict[str, Attribute]]:
     """Add edges and their attributes to a graph based on the XML elements.
 
@@ -338,7 +338,7 @@ def _build_tracks(
         ancestor (ET._Element): The XML element that encompasses the information to be added.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected edge attributes.
-        graph (nx.Graph): The graph to which the edges and their attributes will be added.
+        graph (nx.DiGraph): The graph to which the edges and their attributes will be added.
 
     Returns:
         list[dict[str, Attribute]]: A list of dictionaries, each representing the
@@ -423,7 +423,7 @@ def _parse_model_tag(
     xml_path: Path,
     discard_filtered_spots: bool = False,
     discard_filtered_tracks: bool = False,
-) -> tuple[nx.Graph, dict[str, str]]:
+) -> tuple[nx.DiGraph, dict[str, str]]:
     """Read an XML file and convert the model data into several graphs.
 
     All TrackMate tracks and their associated data described in the XML file
@@ -439,11 +439,11 @@ def _parse_model_tag(
             filtered out in TrackMate, False otherwise. False by default.
 
     Returns:
-        nx.Graph: A NetworkX graph representing the TrackMate data.
+        nx.DiGraph: A NetworkX graph representing the TrackMate data.
         dict[str, str]: A dictionary containing the units of the model, with keys
             'spatialunits' and 'timeunits'.
     """
-    graph = nx.Graph()
+    graph = nx.DiGraph()
 
     # So as not to load the entire XML file into memory at once, we're
     # using an iterator to browse over the tags one by one.
