@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753371964926,
+  "lastUpdate": 1753372360326,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3403,6 +3403,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.48317793275856175",
             "extra": "mean: 9.480133539333318 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33941387+lxenard@users.noreply.github.com",
+            "name": "Laura Xénard",
+            "username": "lxenard"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f5e08debbd677e684dbb201a3483c4700264ce27",
+          "message": "Fix TrackMate graph from XML being undirected (#235)\n\n# Proposed Change\nChange graph from nx.Graph to nx.DiGraph.\nFixes #234 \n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n\nWhich topics does your change affect? Delete those that do not apply.\n- converter\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [ ] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).",
+          "timestamp": "2025-07-24T11:49:26-04:00",
+          "tree_id": "abbcd660a46f0cdd242edbf92c7d0473a1cf559b",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/f5e08debbd677e684dbb201a3483c4700264ce27"
+        },
+        "date": 1753372359607,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11001877883874779,
+            "unit": "iter/sec",
+            "range": "stddev: 1.4017311257086997",
+            "extra": "mean: 9.089357385666668 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.372117138389555,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0009411972624285136",
+            "extra": "mean: 51.62058399999599 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.06626841065563731,
+            "unit": "iter/sec",
+            "range": "stddev: 0.47816328970928973",
+            "extra": "mean: 15.090146120999995 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.1036403399099359,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5233482308939749",
+            "extra": "mean: 9.648752607999995 sec\nrounds: 3"
           }
         ]
       }
