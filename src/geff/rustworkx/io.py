@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     import rustworkx as rx
     from zarr.storage import StoreLike
 
-    from geff.dict_representation import GraphDict
+    from geff.typing import InMemoryGeff
 
 
 def get_roi_rx(
@@ -158,14 +158,14 @@ def write_rx(
     metadata.write(group)
 
 
-def _ingest_dict_rx(graph_dict: GraphDict) -> rx.PyDiGraph | rx.PyGraph:
+def _ingest_dict_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:
     """
-    Convert a GraphDict to a rustworkx graph.
+    Convert a InMemoryGeff to a rustworkx graph.
     The graph will have a `to_rx_id_map` attribute that maps geff node ids
     to rustworkx node indices.
 
     Args:
-        graph_dict: The GraphDict to convert to a rustworkx graph.
+        graph_dict: The InMemoryGeff to convert to a rustworkx graph.
 
     Returns:
         rx.PyGraph: A rustworkx graph.
