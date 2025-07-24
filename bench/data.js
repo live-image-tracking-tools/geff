@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753308116290,
+  "lastUpdate": 1753371964926,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3351,6 +3351,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.4946104725897784",
             "extra": "mean: 9.628006263333342 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "45037215+TeunHuijben@users.noreply.github.com",
+            "name": "Teun Huijben",
+            "username": "TeunHuijben"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1a629f3a8f40cadcc322b29760c5d7739e402dc2",
+          "message": "remove lingering Graphdict occurences (#236)\n\nOnly textual changes: \n- renaming `GraphDict` variables to `InMemoryGeff`\n- changed some doc strings",
+          "timestamp": "2025-07-24T11:42:56-04:00",
+          "tree_id": "9285f80ac74a26caf914078c9a16e0daa2fe2f40",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/1a629f3a8f40cadcc322b29760c5d7739e402dc2"
+        },
+        "date": 1753371964131,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11021555897487283,
+            "unit": "iter/sec",
+            "range": "stddev: 1.3619745606096623",
+            "extra": "mean: 9.07312914166667 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.047420833509445,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013875463426169256",
+            "extra": "mean: 52.50054633332487 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.0664570555591003,
+            "unit": "iter/sec",
+            "range": "stddev: 0.6202189673597528",
+            "extra": "mean: 15.047311253666654 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.10548374617836069,
+            "unit": "iter/sec",
+            "range": "stddev: 0.48317793275856175",
+            "extra": "mean: 9.480133539333318 sec\nrounds: 3"
           }
         ]
       }
