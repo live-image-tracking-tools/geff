@@ -158,7 +158,7 @@ def write_rx(
     metadata.write(group)
 
 
-def _ingest_dict_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:
+def construct_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:
     """
     Convert a InMemoryGeff to a rustworkx graph.
     The graph will have a `to_rx_id_map` attribute that maps geff node ids
@@ -265,6 +265,6 @@ def read_rx(
         A tuple containing the rustworkx graph and the metadata.
     """
     graph_dict = read_to_memory(store, validate, node_props, edge_props)
-    graph = _ingest_dict_rx(graph_dict)
+    graph = construct_rx(graph_dict)
 
     return graph, graph_dict["metadata"]
