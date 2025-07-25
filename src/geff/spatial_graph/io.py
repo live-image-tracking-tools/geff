@@ -108,7 +108,7 @@ def read_sg(
     position_attr: str = "position",
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-) -> sg.SpatialGraph:
+) -> tuple[sg.SpatialGraph, GeffMetadata]:
     """Read a geff file into a SpatialGraph.
 
     Because SpatialGraph does not support missing/ragged node/edge attributes,
@@ -144,14 +144,13 @@ def read_sg(
 
     Returns:
 
-        A SpatialGraph containing the graph that was stored in the geff file
-        format.
+        A tuple containing the spatial_graph graph and the metadata.
     """
 
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
     graph = construct_sg(**in_memory_geff, position_attr=position_attr)
 
-    return graph
+    return graph, in_memory_geff["metadata"]
 
 
 def construct_sg(

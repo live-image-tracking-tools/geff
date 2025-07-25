@@ -35,7 +35,7 @@ def test_read_write_consistency(
     # with pytest.warns(UserWarning, match="Potential missing values for attr"):
     # TODO: make sure test data has missing values, otherwise this warning will
     # not be triggered
-    graph = geff.read_sg(store, position_attr="pos")
+    graph, _ = geff.read_sg(store, position_attr="pos")
 
     np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(graph_attrs["nodes"]))
     np.testing.assert_array_equal(np.sort(graph.edges), np.sort(graph_attrs["edges"]))
