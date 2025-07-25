@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import spatial_graph as sg
-from zarr.storage import StoreLike
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
     from zarr.storage import StoreLike
+
+    from geff.typing import PropDictNpArray
 
 import geff
 from geff.geff_reader import read_to_memory
@@ -147,8 +149,39 @@ def read_sg(
     """
 
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
+    graph = construct_sg(**in_memory_geff, position_attr=position_attr)
 
-    metadata = in_memory_geff["metadata"]
+    return graph
+
+
+def construct_sg(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    position_attr: str = "position",
+) -> sg.SpatialGraph:
+    """Construct a spatial graph graph instance from a dictionary representation of the GEFF data
+
+    Args:
+        metadata (GeffMetadata): The metadata of the graph.
+        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+            edge_ids.
+        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+            as node_ids.
+        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from node property names to (values, missing) arrays, which should have same
+            length as node_ids.
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from edge property names to (values, missing) arrays, which should have same
+            length as edge_ids.
+        position_attr (str, optional): How to call the position attribute in the returned
+            SpatialGraph. Defaults to "position".
+
+    Returns:
+        sg.SpatialGraph: A SpatialGraph containing the graph that was stored in the geff file format
+    """
     assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"
 
     position_attrs = [axis.name for axis in metadata.axes]
@@ -164,38 +197,28 @@ def read_sg(
             return str(dtype)
 
     # read nodes/edges
-    nodes = in_memory_geff["node_ids"]
-    edges = in_memory_geff["edge_ids"]
-    node_dtype = get_dtype_str(nodes)
+    node_dtype = get_dtype_str(node_ids)
 
     # collect node and edge attributes
     node_attr_dtypes = {
-        name: get_dtype_str(in_memory_geff["node_props"][name]["values"])
-        for name in in_memory_geff["node_props"].keys()
+        name: get_dtype_str(node_props[name]["values"]) for name in node_props.keys()
     }
-    for name in in_memory_geff["node_props"].keys():
-        if "missing" in in_memory_geff["node_props"][name]:
+    for name in node_props.keys():
+        if "missing" in node_props[name]:
             warnings.warn(
                 f"Potential missing values for attr {name} are being ignored", stacklevel=2
             )
     edge_attr_dtypes = {
-        name: get_dtype_str(in_memory_geff["edge_props"][name]["values"])
-        for name in in_memory_geff["edge_props"].keys()
+        name: get_dtype_str(edge_props[name]["values"]) for name in edge_props.keys()
     }
-    for name in in_memory_geff["edge_props"].keys():
-        if "missing" in in_memory_geff["edge_props"][name]:
+    for name in edge_props.keys():
+        if "missing" in edge_props[name]:
             warnings.warn(
                 f"Potential missing values for attr {name} are being ignored", stacklevel=2
             )
 
-    node_attrs = {
-        name: in_memory_geff["node_props"][name]["values"]
-        for name in in_memory_geff["node_props"].keys()
-    }
-    edge_attrs = {
-        name: in_memory_geff["edge_props"][name]["values"]
-        for name in in_memory_geff["edge_props"].keys()
-    }
+    node_attrs = {name: node_props[name]["values"] for name in node_props.keys()}
+    edge_attrs = {name: edge_props[name]["values"] for name in edge_props.keys()}
 
     # squish position attributes together into one position attribute
     position = np.stack([node_attrs[name] for name in position_attrs], axis=1)
@@ -216,7 +239,7 @@ def read_sg(
         directed=metadata.directed,
     )
 
-    graph.add_nodes(nodes, **node_attrs)
-    graph.add_edges(edges, **edge_attrs)
+    graph.add_nodes(node_ids, **node_attrs)
+    graph.add_edges(edge_ids, **edge_attrs)
 
     return graph
