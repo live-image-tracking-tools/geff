@@ -26,7 +26,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13561316530585438,
             "unit": "iter/sec",
             "range": "stddev: 0.0299426634299259",
@@ -40,7 +40,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 2.7337169999934 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06300089966349438,
             "unit": "iter/sec",
             "range": "stddev: 0.5470120897994015",
@@ -71,7 +71,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13512345883098548,
             "unit": "iter/sec",
             "range": "stddev: 0.02128361089617375",
@@ -85,7 +85,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 2.7322463333424216 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06277695766855433,
             "unit": "iter/sec",
             "range": "stddev: 0.5359005540661197",
@@ -116,7 +116,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13230598755983364,
             "unit": "iter/sec",
             "range": "stddev: 0.017444794270241534",
@@ -130,7 +130,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 24.199356333326705 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.061765764248896564,
             "unit": "iter/sec",
             "range": "stddev: 0.4369738380750813",
@@ -161,7 +161,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1317593000588966,
             "unit": "iter/sec",
             "range": "stddev: 0.06036641119597091",
@@ -175,7 +175,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 25.125149333319996 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06231025220596681,
             "unit": "iter/sec",
             "range": "stddev: 0.48398951712292115",
@@ -206,7 +206,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13073676183148755,
             "unit": "iter/sec",
             "range": "stddev: 0.046781299029505896",
@@ -220,7 +220,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 25.814970333338277 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06208278214701933,
             "unit": "iter/sec",
             "range": "stddev: 0.5129349935750673",
@@ -251,7 +251,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12916558064910222,
             "unit": "iter/sec",
             "range": "stddev: 0.06651300248353748",
@@ -265,7 +265,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 25.36626599999181 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06062424212980675,
             "unit": "iter/sec",
             "range": "stddev: 0.7411778533321154",
@@ -296,7 +296,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13333210044399263,
             "unit": "iter/sec",
             "range": "stddev: 0.07667985222091646",
@@ -310,7 +310,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 24.68253833332786 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06219479649351004,
             "unit": "iter/sec",
             "range": "stddev: 0.444083006084229",
@@ -341,7 +341,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13204822954625095,
             "unit": "iter/sec",
             "range": "stddev: 0.08419713926622867",
@@ -355,7 +355,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 24.27087966667803 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.062197974193076495,
             "unit": "iter/sec",
             "range": "stddev: 0.4444821724850281",
@@ -386,7 +386,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12983098020358938,
             "unit": "iter/sec",
             "range": "stddev: 0.05637559853345289",
@@ -400,7 +400,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 25.36696166667222 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06230545688586261,
             "unit": "iter/sec",
             "range": "stddev: 0.380610788976034",
@@ -431,7 +431,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1309941814769118,
             "unit": "iter/sec",
             "range": "stddev: 0.030928851143142505",
@@ -445,7 +445,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 24.754113999989613 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06190503046588155,
             "unit": "iter/sec",
             "range": "stddev: 0.4343135261786798",
@@ -476,7 +476,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13052457402137832,
             "unit": "iter/sec",
             "range": "stddev: 0.04778223859528065",
@@ -490,7 +490,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 26.598205000008573 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.061712705199432186,
             "unit": "iter/sec",
             "range": "stddev: 0.5186527806230805",
@@ -521,7 +521,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1319776240031371,
             "unit": "iter/sec",
             "range": "stddev: 0.05206763989380486",
@@ -535,7 +535,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 24.898428333330003 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06118176923099284,
             "unit": "iter/sec",
             "range": "stddev: 0.5287178501322192",
@@ -566,7 +566,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13074507012891357,
             "unit": "iter/sec",
             "range": "stddev: 0.03964761123681386",
@@ -580,7 +580,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 26.547572666667445 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06299809721177169,
             "unit": "iter/sec",
             "range": "stddev: 0.6580076909468524",
@@ -611,7 +611,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1345107373948937,
             "unit": "iter/sec",
             "range": "stddev: 0.02785696663958436",
@@ -625,7 +625,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 24.9868273333315 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06305431482978914,
             "unit": "iter/sec",
             "range": "stddev: 0.4011755509680916",
@@ -656,7 +656,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13254492113290295,
             "unit": "iter/sec",
             "range": "stddev: 0.04559163297779535",
@@ -670,7 +670,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 25.25623033335478 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.062091617666436005,
             "unit": "iter/sec",
             "range": "stddev: 0.6581938351653169",
@@ -701,7 +701,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1342187526234033,
             "unit": "iter/sec",
             "range": "stddev: 0.03448514123154347",
@@ -715,7 +715,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 44.40402766667262 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06291093111152098,
             "unit": "iter/sec",
             "range": "stddev: 0.5289917902718193",
@@ -746,7 +746,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1352454497554738,
             "unit": "iter/sec",
             "range": "stddev: 0.08000349447605065",
@@ -760,7 +760,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 42.87174333332663 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06295545518839211,
             "unit": "iter/sec",
             "range": "stddev: 0.49239333045650685",
@@ -791,7 +791,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1342715971878896,
             "unit": "iter/sec",
             "range": "stddev: 0.04950272409824297",
@@ -805,7 +805,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.13239399998755 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06184292619249766,
             "unit": "iter/sec",
             "range": "stddev: 0.591044780483727",
@@ -836,7 +836,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1350205222349956,
             "unit": "iter/sec",
             "range": "stddev: 0.03735901895165445",
@@ -850,7 +850,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.02431133334039 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06253154624273917,
             "unit": "iter/sec",
             "range": "stddev: 0.5566116872977945",
@@ -881,7 +881,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1319188245322834,
             "unit": "iter/sec",
             "range": "stddev: 0.018082099680022657",
@@ -895,7 +895,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 44.84304333333474 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.0616968361576104,
             "unit": "iter/sec",
             "range": "stddev: 0.4851341275134227",
@@ -926,7 +926,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13484077945679246,
             "unit": "iter/sec",
             "range": "stddev: 0.06861429748469902",
@@ -940,7 +940,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.1981366666605 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.062253820205599095,
             "unit": "iter/sec",
             "range": "stddev: 0.5918303088260715",
@@ -971,7 +971,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13556383878707387,
             "unit": "iter/sec",
             "range": "stddev: 0.06316242332884157",
@@ -985,7 +985,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 42.84042699998736 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.062217633896074535,
             "unit": "iter/sec",
             "range": "stddev: 0.5047312216557547",
@@ -1016,7 +1016,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13472583441501257,
             "unit": "iter/sec",
             "range": "stddev: 0.03824246995590367",
@@ -1030,7 +1030,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 42.60330833329817 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.0626976993993589,
             "unit": "iter/sec",
             "range": "stddev: 0.5062633080856318",
@@ -1061,7 +1061,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11410515538758542,
             "unit": "iter/sec",
             "range": "stddev: 0.09462164148328087",
@@ -1075,7 +1075,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 42.78236933333327 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.05193797834376855,
             "unit": "iter/sec",
             "range": "stddev: 0.44821304575036697",
@@ -1106,7 +1106,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13459249697664036,
             "unit": "iter/sec",
             "range": "stddev: 0.015091190036101829",
@@ -1120,7 +1120,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.330861000001164 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06266314144043875,
             "unit": "iter/sec",
             "range": "stddev: 0.5022254919808535",
@@ -1151,7 +1151,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13707957027818363,
             "unit": "iter/sec",
             "range": "stddev: 0.015631569188810146",
@@ -1165,7 +1165,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.44714900002108 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06351632223060326,
             "unit": "iter/sec",
             "range": "stddev: 0.5084517781962051",
@@ -1196,7 +1196,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13710388386434388,
             "unit": "iter/sec",
             "range": "stddev: 0.03969404147141159",
@@ -1210,7 +1210,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.41785333332856 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06351249162701936,
             "unit": "iter/sec",
             "range": "stddev: 0.42743992903414013",
@@ -1241,7 +1241,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13509101706210153,
             "unit": "iter/sec",
             "range": "stddev: 0.01734128726867922",
@@ -1255,7 +1255,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.13751933333757 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.0636878828029682,
             "unit": "iter/sec",
             "range": "stddev: 0.5198899222226586",
@@ -1286,7 +1286,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13545450495890252,
             "unit": "iter/sec",
             "range": "stddev: 0.02343941505245835",
@@ -1300,7 +1300,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 42.804997666678446 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06387438114275057,
             "unit": "iter/sec",
             "range": "stddev: 0.49465154499529906",
@@ -1331,7 +1331,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13658235011980957,
             "unit": "iter/sec",
             "range": "stddev: 0.020829630851159565",
@@ -1345,7 +1345,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.10186500000176 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06360826325989417,
             "unit": "iter/sec",
             "range": "stddev: 0.4446939799008658",
@@ -1376,7 +1376,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.13529507037531344,
             "unit": "iter/sec",
             "range": "stddev: 0.006971001439456599",
@@ -1390,7 +1390,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.210120000002426 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06400962840272623,
             "unit": "iter/sec",
             "range": "stddev: 0.44703487833697075",
@@ -1421,7 +1421,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11513522504323612,
             "unit": "iter/sec",
             "range": "stddev: 1.376757616630841",
@@ -1435,7 +1435,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 44.352770999997425 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06316757157527808,
             "unit": "iter/sec",
             "range": "stddev: 0.5561047611782917",
@@ -1466,7 +1466,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11318826331955958,
             "unit": "iter/sec",
             "range": "stddev: 1.124769251399605",
@@ -1480,7 +1480,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 42.89995066666563 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06424243523911984,
             "unit": "iter/sec",
             "range": "stddev: 0.47055259967538815",
@@ -1511,7 +1511,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11328561494179856,
             "unit": "iter/sec",
             "range": "stddev: 1.228961513662249",
@@ -1525,7 +1525,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.52799033333099 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06332434177199804,
             "unit": "iter/sec",
             "range": "stddev: 0.4701486259283807",
@@ -1556,7 +1556,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.10631159603974798,
             "unit": "iter/sec",
             "range": "stddev: 1.4027314509186142",
@@ -1570,7 +1570,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.4074803333336 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06327865582753356,
             "unit": "iter/sec",
             "range": "stddev: 0.5896237574292282",
@@ -1601,7 +1601,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11389666949583145,
             "unit": "iter/sec",
             "range": "stddev: 1.2243515003430943",
@@ -1615,7 +1615,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.43685533333996 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06405206347257195,
             "unit": "iter/sec",
             "range": "stddev: 0.4822650266509218",
@@ -1646,7 +1646,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.10840839780739096,
             "unit": "iter/sec",
             "range": "stddev: 1.3574327180649337",
@@ -1660,7 +1660,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.93527700000277 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06407231184712557,
             "unit": "iter/sec",
             "range": "stddev: 0.531920857471153",
@@ -1691,7 +1691,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11077763733304812,
             "unit": "iter/sec",
             "range": "stddev: 1.2990164654886138",
@@ -1705,7 +1705,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 43.11045966668795 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06259611375188044,
             "unit": "iter/sec",
             "range": "stddev: 0.5330580916081966",
@@ -1736,7 +1736,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11101718772907468,
             "unit": "iter/sec",
             "range": "stddev: 1.2772644251410599",
@@ -1750,7 +1750,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 42.495313999988106 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06290447820752318,
             "unit": "iter/sec",
             "range": "stddev: 0.4273898292602204",
@@ -1781,7 +1781,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11745217868194315,
             "unit": "iter/sec",
             "range": "stddev: 1.212893816619275",
@@ -1795,7 +1795,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 56.99140366668113 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06366631454206821,
             "unit": "iter/sec",
             "range": "stddev: 0.4672057685052953",
@@ -1826,7 +1826,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12131271353773183,
             "unit": "iter/sec",
             "range": "stddev: 1.1248927991056572",
@@ -1840,7 +1840,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 56.033303999991325 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.063947367515844,
             "unit": "iter/sec",
             "range": "stddev: 0.5257912524295439",
@@ -1871,7 +1871,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11967328961205807,
             "unit": "iter/sec",
             "range": "stddev: 1.1499715345887092",
@@ -1885,7 +1885,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 56.813071000002914 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.0643029078898041,
             "unit": "iter/sec",
             "range": "stddev: 0.48034258083972875",
@@ -1916,7 +1916,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11928813514653684,
             "unit": "iter/sec",
             "range": "stddev: 1.1530442154301783",
@@ -1930,7 +1930,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 57.40592033333769 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06330787603184307,
             "unit": "iter/sec",
             "range": "stddev: 0.5129998673531103",
@@ -1961,7 +1961,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12055202325605684,
             "unit": "iter/sec",
             "range": "stddev: 1.0919066322118538",
@@ -1975,7 +1975,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 56.593986333306624 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.0634837008237893,
             "unit": "iter/sec",
             "range": "stddev: 0.46384384072778023",
@@ -2006,7 +2006,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11807545645790914,
             "unit": "iter/sec",
             "range": "stddev: 1.1712546800167298",
@@ -2020,7 +2020,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 58.323831666664695 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06341940193169764,
             "unit": "iter/sec",
             "range": "stddev: 0.5275798329624102",
@@ -2051,7 +2051,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11988207305490246,
             "unit": "iter/sec",
             "range": "stddev: 1.153197287865622",
@@ -2065,7 +2065,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 56.37605033333178 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06417517438370678,
             "unit": "iter/sec",
             "range": "stddev: 0.46573041013878413",
@@ -2096,7 +2096,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12017020146899031,
             "unit": "iter/sec",
             "range": "stddev: 1.1541451326126924",
@@ -2110,7 +2110,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 58.26132233333207 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06308338202851217,
             "unit": "iter/sec",
             "range": "stddev: 0.5342171535121121",
@@ -2141,7 +2141,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12291331851136995,
             "unit": "iter/sec",
             "range": "stddev: 1.1860935183922825",
@@ -2155,7 +2155,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.09908700000195 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06529075164657311,
             "unit": "iter/sec",
             "range": "stddev: 0.4747900302255456",
@@ -2186,7 +2186,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11755103950651265,
             "unit": "iter/sec",
             "range": "stddev: 1.3085633419925777",
@@ -2200,7 +2200,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.87981499999713 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06462320523336193,
             "unit": "iter/sec",
             "range": "stddev: 0.47890913246296624",
@@ -2231,7 +2231,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11082379229430092,
             "unit": "iter/sec",
             "range": "stddev: 1.4165692861278198",
@@ -2245,7 +2245,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 53.0799373333366 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06453164994045288,
             "unit": "iter/sec",
             "range": "stddev: 0.6344430877150187",
@@ -2276,7 +2276,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12085557853381863,
             "unit": "iter/sec",
             "range": "stddev: 1.2611158913207976",
@@ -2290,7 +2290,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.1325196666661 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06547649783235497,
             "unit": "iter/sec",
             "range": "stddev: 0.5486298691905883",
@@ -2321,7 +2321,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12144779556639942,
             "unit": "iter/sec",
             "range": "stddev: 1.1709096071845848",
@@ -2335,7 +2335,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.10900166667424 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06543321426524107,
             "unit": "iter/sec",
             "range": "stddev: 0.5189815032443579",
@@ -2366,7 +2366,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12334156906382879,
             "unit": "iter/sec",
             "range": "stddev: 1.17313169594428",
@@ -2380,7 +2380,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.86517366666029 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06539413937324035,
             "unit": "iter/sec",
             "range": "stddev: 0.46260948228242404",
@@ -2411,7 +2411,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12336835764886225,
             "unit": "iter/sec",
             "range": "stddev: 1.1444536418956204",
@@ -2425,7 +2425,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 53.05032500000569 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06600863458579372,
             "unit": "iter/sec",
             "range": "stddev: 0.44194016755749543",
@@ -2456,7 +2456,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12493148666695858,
             "unit": "iter/sec",
             "range": "stddev: 1.0939888526829809",
@@ -2470,7 +2470,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.00884633333658 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06501177830154614,
             "unit": "iter/sec",
             "range": "stddev: 0.5004064089331546",
@@ -2501,7 +2501,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12037927869484323,
             "unit": "iter/sec",
             "range": "stddev: 1.1978449737582597",
@@ -2515,7 +2515,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.52021066666165 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06374862208014766,
             "unit": "iter/sec",
             "range": "stddev: 0.5171585957836933",
@@ -2546,7 +2546,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11837844573366639,
             "unit": "iter/sec",
             "range": "stddev: 1.3040977558875047",
@@ -2560,7 +2560,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.26981466666795 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06477221994586026,
             "unit": "iter/sec",
             "range": "stddev: 0.5565154407949987",
@@ -2591,7 +2591,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12053332974956142,
             "unit": "iter/sec",
             "range": "stddev: 1.2208358602867921",
@@ -2605,7 +2605,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.7235686666595 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06425595652197026,
             "unit": "iter/sec",
             "range": "stddev: 0.5437095769890301",
@@ -2636,7 +2636,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12051372890750689,
             "unit": "iter/sec",
             "range": "stddev: 1.1458748826452625",
@@ -2650,7 +2650,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.08661366666926 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06470100738271957,
             "unit": "iter/sec",
             "range": "stddev: 0.4722995979358651",
@@ -2681,7 +2681,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12015241711870658,
             "unit": "iter/sec",
             "range": "stddev: 1.0548415214277893",
@@ -2695,7 +2695,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.12653433331601 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06471343746404483,
             "unit": "iter/sec",
             "range": "stddev: 0.4482687051340619",
@@ -2726,7 +2726,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12610538321523726,
             "unit": "iter/sec",
             "range": "stddev: 1.0998630973955839",
@@ -2740,7 +2740,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.59228366666946 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06418925817637752,
             "unit": "iter/sec",
             "range": "stddev: 0.39546522925798167",
@@ -2771,7 +2771,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.12123382406025088,
             "unit": "iter/sec",
             "range": "stddev: 1.2316838793130769",
@@ -2785,7 +2785,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 52.24188266667321 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06433743423550464,
             "unit": "iter/sec",
             "range": "stddev: 0.4629430214445664",
@@ -2816,7 +2816,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.1121470224490617,
             "unit": "iter/sec",
             "range": "stddev: 1.2987150510162155",
@@ -2830,7 +2830,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.47844666657875 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06417410380558855,
             "unit": "iter/sec",
             "range": "stddev: 0.503417378554623",
@@ -2861,7 +2861,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.10604664909829932,
             "unit": "iter/sec",
             "range": "stddev: 1.523197464954664",
@@ -2875,7 +2875,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 53.4426076666629 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.0639151146750354,
             "unit": "iter/sec",
             "range": "stddev: 0.5139306224693448",
@@ -2906,7 +2906,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11400170821413592,
             "unit": "iter/sec",
             "range": "stddev: 1.3521701648652997",
@@ -2920,7 +2920,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 50.71102800000441 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06486826144838263,
             "unit": "iter/sec",
             "range": "stddev: 0.5175825305637328",
@@ -2951,7 +2951,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11501582456608878,
             "unit": "iter/sec",
             "range": "stddev: 1.2303780771421573",
@@ -2965,7 +2965,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 50.684323333333246 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06516442506750664,
             "unit": "iter/sec",
             "range": "stddev: 0.5371828529857057",
@@ -2996,7 +2996,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11393213519665339,
             "unit": "iter/sec",
             "range": "stddev: 1.28942341860546",
@@ -3010,7 +3010,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.661785333313524 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06531841214146082,
             "unit": "iter/sec",
             "range": "stddev: 0.5014643116281076",
@@ -3041,7 +3041,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.10786024557084783,
             "unit": "iter/sec",
             "range": "stddev: 1.4803927141615325",
@@ -3055,7 +3055,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.34545366666998 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06479927821167444,
             "unit": "iter/sec",
             "range": "stddev: 0.594809679221276",
@@ -3086,7 +3086,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11583056614268478,
             "unit": "iter/sec",
             "range": "stddev: 1.227082644483748",
@@ -3100,7 +3100,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 51.66215700000502 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06469603450168854,
             "unit": "iter/sec",
             "range": "stddev: 0.44248912954818764",
@@ -3131,7 +3131,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11144359558705896,
             "unit": "iter/sec",
             "range": "stddev: 1.301971020913922",
@@ -3145,7 +3145,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 53.79491466666764 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.06400003452793328,
             "unit": "iter/sec",
             "range": "stddev: 0.47000170666101576",
@@ -3176,7 +3176,7 @@ window.BENCHMARK_DATA = {
         "tool": "pytest",
         "benches": [
           {
-            "name": "tests/bench.py::test_write",
+            "name": "tests/bench.py::test_write[write_nx]",
             "value": 0.11646494192379267,
             "unit": "iter/sec",
             "range": "stddev: 1.2037923516759406",
@@ -3190,7 +3190,7 @@ window.BENCHMARK_DATA = {
             "extra": "mean: 50.74992766666734 msec\nrounds: 3"
           },
           {
-            "name": "tests/bench.py::test_read",
+            "name": "tests/bench.py::test_read[read_nx]",
             "value": 0.0649681735994483,
             "unit": "iter/sec",
             "range": "stddev: 0.491395755805703",
