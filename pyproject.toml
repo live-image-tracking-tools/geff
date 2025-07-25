@@ -64,6 +64,7 @@ docs = [
     "json-schema-for-humans",
     "typing-extensions",              # Required for json-schema-for-humans
     "ruff",                           # to format the source code signatures
+    "mkdocs-typer"                    # CLI documentation
 ]
 bench = [
     { include-group = "test" },
