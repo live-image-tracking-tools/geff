@@ -2,9 +2,10 @@ import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 import networkx as nx
+import xmltodict
 import typer
 from lxml import etree as ET
 
@@ -449,53 +450,234 @@ def _parse_model_tag(
     # using an iterator to browse over the tags one by one.
     # The events 'start' and 'end' correspond respectively to the opening
     # and the closing of the considered tag.
-    it = ET.iterparse(xml_path, events=["start", "end"])
-    _, root = next(it)  # Saving the root of the tree for later cleaning.
+    with open(xml_path, "rb") as f:
+        it = ET.iterparse(f, events=["start", "end"])
+        _, root = next(it)  # Saving the root of the tree for later cleaning.
 
-    for event, element in it:
-        if element.tag == "Model" and event == "start":
-            units = _get_units(element)
-            root.clear()  # Cleaning the tree to free up some memory.
-            # All the browsed subelements of `root` are deleted.
+        for event, element in it:
+            if element.tag == "Model" and event == "start":
+                units = _get_units(element)
+                root.clear()  # Cleaning the tree to free up some memory.
+                # All the browsed subelements of `root` are deleted.
 
-        # Get the spot, edge and track features and add them to the
-        # attributes metadata.
-        if element.tag == "FeatureDeclarations" and event == "start":
-            attrs_md = _get_attributes_metadata(it, element)
-            root.clear()
+            # Get the spot, edge and track features and add them to the
+            # attributes metadata.
+            if element.tag == "FeatureDeclarations" and event == "start":
+                attrs_md = _get_attributes_metadata(it, element)
+                root.clear()
 
-        # Adding the spots as nodes.
-        if element.tag == "AllSpots" and event == "start":
-            # TODO: segmentation will be used when GEFF supports polygons.
-            # segmentation = _add_all_nodes(it, element, attrs_md, graph)
-            _add_all_nodes(it, element, attrs_md, graph)
-            root.clear()
+            # Adding the spots as nodes.
+            if element.tag == "AllSpots" and event == "start":
+                # TODO: segmentation will be used when GEFF supports polygons.
+                # segmentation = _add_all_nodes(it, element, attrs_md, graph)
+                _add_all_nodes(it, element, attrs_md, graph)
+                root.clear()
 
-        # Adding the tracks as edges.
-        if element.tag == "AllTracks" and event == "start":
-            # TODO: implement storage of track attributes.
-            # tracks_attrs = _build_tracks(it, element, attrs_md, graph)
-            _build_tracks(it, element, attrs_md, graph)
-            root.clear()
+            # Adding the tracks as edges.
+            if element.tag == "AllTracks" and event == "start":
+                # TODO: implement storage of track attributes.
+                # tracks_attrs = _build_tracks(it, element, attrs_md, graph)
+                _build_tracks(it, element, attrs_md, graph)
+                root.clear()
 
-            # Removal of filtered spots / nodes.
-            if discard_filtered_spots:
-                # Those nodes belong to no tracks: they have a degree of 0.
-                lone_nodes = [n for n, d in graph.degree if d == 0]
-                graph.remove_nodes_from(lone_nodes)
+                # Removal of filtered spots / nodes.
+                if discard_filtered_spots:
+                    # Those nodes belong to no tracks: they have a degree of 0.
+                    lone_nodes = [n for n, d in graph.degree if d == 0]
+                    graph.remove_nodes_from(lone_nodes)
 
-        # Filtering out tracks.
-        if element.tag == "FilteredTracks" and event == "start":
-            # Removal of filtered tracks.
-            id_to_keep = _get_filtered_tracks_ID(it, element)
-            if discard_filtered_tracks:
-                to_remove = [n for n, t in graph.nodes(data="TRACK_ID") if t not in id_to_keep]
-                graph.remove_nodes_from(to_remove)
+            # Filtering out tracks.
+            if element.tag == "FilteredTracks" and event == "start":
+                # Removal of filtered tracks.
+                id_to_keep = _get_filtered_tracks_ID(it, element)
+                if discard_filtered_tracks:
+                    to_remove = [n for n, t in graph.nodes(data="TRACK_ID") if t not in id_to_keep]
+                    graph.remove_nodes_from(to_remove)
 
-        if element.tag == "Model" and event == "end":
-            root.clear()
+            if element.tag == "Model" and event == "end":
+                break
 
     return graph, units
+
+
+def _get_trackmate_version(
+    xml_path: str,
+) -> str:
+    """
+    Extract the version of TrackMate used to generate the XML file.
+
+    Parameters
+    ----------
+    xml_path : str
+        The file path of the XML file to be parsed.
+
+    Returns
+    -------
+    str
+        The version of TrackMate used to generate the XML file. If the
+        version cannot be found, "unknown" is returned.
+    """
+    with open(xml_path, "rb") as f:
+        it = ET.iterparse(f, tag="TrackMate", events=["start"])
+        for _, element in it:
+            return str(element.attrib["version"])
+    return "unknown"
+
+
+def _get_specific_tags(
+    xml_path: str,
+    tag_names: list[str],
+) -> dict[str, dict[str, Any]]:
+    """
+    Extract specific tags from an XML file and returns them in a dictionary.
+
+    This function parses an XML file, searching for specific tag names
+    provided by the user. Once a tag is found, it is deep copied and
+    stored in a dictionary with the tag name as the key. The search
+    stops when all specified tags have been found or the end of the
+    file is reached.
+
+    Parameters
+    ----------
+    xml_path : str
+        The file path of the XML file to be parsed.
+    tag_names : list[str]
+        A list of tag names to search for in the XML file.
+
+    Returns
+    -------
+    dict[str, dict[str, Any]]
+        A dictionary where each key is a tag name from `tag_names` that
+        was found in the XML file, and the corresponding value is a nested
+        dictionary representing the XML structure of that tag.
+    """
+    with open(xml_path, "rb") as f:
+        it = ET.iterparse(f, tag=tag_names, events=["start", "end"])
+        dict_tags = {}
+        for event, element in it:
+            if event == "start":
+                dict_tags[element.tag] = xmltodict.parse(ET.tostring(element))
+                tag_names.remove(element.tag)
+                if not tag_names:
+                    # All the tags have been found.
+                    break
+
+            if event == "end":
+                element.clear()
+
+    return dict_tags
+
+
+def _extract_image_path(settings_md: dict[str, dict[str, Any]]) -> str | None:
+    image_data = settings_md.get("Settings", None).get("ImageData", None)
+    filename = image_data.get("@filename", None)
+    folder = image_data.get("@folder", None)
+    if not filename and not folder:
+        warnings.warn(
+            "No image path found in the XML file. The GEFF file will not point to a related image.",
+            stacklevel=2,
+        )
+        return None
+    elif not filename:
+        warnings.warn(
+            "No image name found in the XML file. The GEFF file will only point to a folder.",
+            stacklevel=2,
+        )
+        return
+    elif not folder:
+        warnings.warn(
+            "No image folder found in the XML file. "
+            "The GEFF file will only point to an image name.",
+            stacklevel=2,
+        )
+    else:
+        return str(Path(folder) / filename)
+
+
+def _extract_props_metadata(
+    xml_path: str,
+) -> dict[str, Any]:
+    """Extract properties metadata from the TrackMate XML file.
+
+    Args:
+        xml_path (str): The file path of the XML file to be parsed.
+
+    Returns:
+        A dictionary containing the properties metadata extracted from the XML file.
+    """
+    tags_data = _get_specific_tags(xml_path, ["FeatureDeclarations"])
+    if "FeatureDeclarations" not in tags_data:
+        raise ValueError(
+            "No FeatureDeclarations tag found in the XML file. Please check the XML file."
+        )
+    xml_md = tags_data["FeatureDeclarations"].get("FeatureDeclarations", {})
+
+    props_metadata = {}
+    mapping_feat_type = {
+        "SpotFeatures": "node",
+        "EdgeFeatures": "edge",
+        "TrackFeatures": "lineage",
+    }
+    for feat_type, feat_tag in xml_md.items():
+        for feats_md in feat_tag.values():
+            if isinstance(feats_md, dict):
+                feats_md = [feats_md]
+
+            for feat_md in feats_md:
+                key = feat_md.get("@feature")
+                if key is None:
+                    raise ValueError(
+                        f"Missing field 'feature' in FeatureDeclarations {feat_type} tag. "
+                        "Please check the XML file."
+                    )
+                if key in props_metadata:
+                    raise ValueError(
+                        f"Duplicate feature identifier '{key}' found in FeatureDeclarations tag."
+                    )
+
+                name = feat_md.get("@name", None)
+                if name is None:
+                    raise ValueError(
+                        f"Missing field 'name' in FeatureDeclarations {feat_type} tag. "
+                        "Please check the XML file."
+                    )
+
+                shortname = feat_md.get("@shortname", None)
+                if shortname is None:
+                    raise ValueError(
+                        f"Missing field 'shortname' in FeatureDeclarations {feat_type} tag. "
+                        "Please check the XML file."
+                    )
+
+                dimension = feat_md.get("@dimension")
+                if dimension is None:
+                    raise ValueError(
+                        f"Missing field 'dimension' in FeatureDeclarations {feat_type} tag. "
+                        "Please check the XML file."
+                    )
+                if dimension == "NONE":
+                    dimension = None
+
+                dtype = feat_md.get("@isint")
+                if dtype is None:
+                    raise ValueError(
+                        f"Missing field 'isint' in FeatureDeclarations {feat_type} tag. "
+                        "Please check the XML file."
+                    )
+                if dtype == "true":
+                    dtype = "int"
+                else:
+                    dtype = "float"
+
+                props_metadata[key] = {
+                    "name": name,
+                    "shortname": shortname,
+                    "dimension": dimension,
+                    "dtype": dtype,
+                    "prop_type": mapping_feat_type[feat_type],
+                }
+
+    return props_metadata
 
 
 def from_trackmate_xml_to_geff(
@@ -523,11 +705,28 @@ def from_trackmate_xml_to_geff(
     geff_path = Path(geff_path).with_suffix(".geff")
     _preliminary_checks(xml_path, geff_path, overwrite=overwrite)
 
+    # Data
     graph, units = _parse_model_tag(
         xml_path=xml_path,
         discard_filtered_spots=discard_filtered_spots,
         discard_filtered_tracks=discard_filtered_tracks,
     )
+
+    # Metadata
+    tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
+    img_path = _extract_image_path(tm_md.get("Settings", {}))
+    props_metadata = _extract_props_metadata(xml_path)
+    for key, value in props_metadata.items():
+        print(f"{key}: {value}")
+    extra = {
+        "trackmate_version": _get_trackmate_version(xml_path),
+        "provenance": "trackmate",
+        "props_metadata": props_metadata,  # FeatureDeclarations in TrackMate
+        "log": tm_md.get("Log", None),
+        "settings": tm_md.get("Settings", None),
+        "gui_state": tm_md.get("GUIState", None),
+        "display_settings": tm_md.get("DisplaySettings", None),
+    }
     metadata = GeffMetadata(
         axes=[
             Axis(name="POSITION_X", type="space", unit=units.get("spatialunits", "pixel")),
@@ -537,6 +736,8 @@ def from_trackmate_xml_to_geff(
         ],
         directed=True,
         track_node_props={"lineage": "TRACK_ID"},
+        related_objects=img_path,
+        extra=extra,
     )
 
     write_nx(
@@ -582,5 +783,18 @@ def from_trackmate_xml_to_geff_cli(
 app = typer.Typer()
 app.command()(from_trackmate_xml_to_geff_cli)
 
+
 if __name__ == "__main__":
-    app()
+    # app()
+
+    xml_file = "tests/data/FakeTracks.xml"
+    geff_file = (
+        "C:/Users/lxenard/Documents/Janelia_Cell_Trackathon/test_trackmate_to_geff/FakeTracks.geff"
+    )
+    from_trackmate_xml_to_geff(
+        xml_path=xml_file,
+        geff_path=geff_file,
+        # discard_filtered_spots=False,
+        # discard_filtered_tracks=False,
+        overwrite=True,
+    )
