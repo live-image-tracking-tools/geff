@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753372360326,
+  "lastUpdate": 1753463027111,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3455,6 +3455,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.5233482308939749",
             "extra": "mean: 9.648752607999995 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "45037215+TeunHuijben@users.noreply.github.com",
+            "name": "Teun Huijben",
+            "username": "TeunHuijben"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "32c0359a017e842c67431b15a33d61f6593136fb",
+          "message": "create_memory_mock_geff takes arrays as node/edge_properties (#245)\n\ncreate_memory_mock_geff now also takes arrays as input for\nextra_{node/edge}_props + extra tests to fully cover\ngeff/testing/data.py\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n- Tests\n\nWhich topics does your change affect? Delete those that do not apply.\n- testing utilities (create_mock_memory_geff)\n\n# Checklist\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n## If you changed the specification\n- [x] I have checked that any validation functions and tests reflect the\nchanges.\n- [x] I have updated the GeffMetadata and the json schema using `pixi\nrun update-json` if necessary.\n- [x] I have updated docs/specification.md to reflect the change.\n- [x] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n## If you have added or changed an implementation\n- [x] I wrote tests for the new implementation using standard fixtures\nsupplied in conftest.py.\n- [x] I updated pyproject.toml with new dependencies if needed.\n- [x] I added a function to tests/bench.py to benchmark the new\nimplementation.",
+          "timestamp": "2025-07-25T13:00:32-04:00",
+          "tree_id": "6d4ee5adbfcdd3494955ddef4f298e88d8aaacff",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/32c0359a017e842c67431b15a33d61f6593136fb"
+        },
+        "date": 1753463026173,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11255322754824679,
+            "unit": "iter/sec",
+            "range": "stddev: 1.268835863689957",
+            "extra": "mean: 8.884685244333332 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 18.996905872624644,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0013054145272538714",
+            "extra": "mean: 52.6401513333307 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.06643633971635814,
+            "unit": "iter/sec",
+            "range": "stddev: 0.5079305055142611",
+            "extra": "mean: 15.052003230000002 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.10655313551879214,
+            "unit": "iter/sec",
+            "range": "stddev: 0.4224030576654463",
+            "extra": "mean: 9.384988955333332 sec\nrounds: 3"
           }
         ]
       }
