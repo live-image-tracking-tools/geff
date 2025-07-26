@@ -29,8 +29,12 @@ jobs:
         include:
           # test that bare minimum deps work without extras
           - platform: "ubuntu-latest"
-            python-version: ["3.10", "3.11", "3.12", "3.13"]
-            zarr-version: ["3.*"]
+            python-version: "3.10"
+            zarr-version: "3.*"
+            group: "test"
+          - platform: "ubuntu-latest"
+            python-version: "3.13"
+            zarr-version: "3.*"
             group: "test"
 
     steps:
