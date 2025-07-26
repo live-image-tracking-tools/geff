@@ -1,6 +1,5 @@
 from importlib.metadata import PackageNotFoundError, version
 from typing import TYPE_CHECKING, Any
-from webbrowser import get
 
 try:
     __version__ = version("geff")
