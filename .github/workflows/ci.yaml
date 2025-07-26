@@ -55,6 +55,7 @@ jobs:
           python -m pip list
 
       - name: Get witty cache directory
+        if: matrix.group == 'test-third-party'
         id: cache-path
         shell: bash
         run: |
@@ -79,6 +80,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Save witty cache
+        if: matrix.group == 'test-third-party'
         uses: actions/cache/save@v4
         with:
           path: ${{ steps.cache-path.outputs.path }}
