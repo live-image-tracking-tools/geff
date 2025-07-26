@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   test:
-    name: ${{ matrix.platform }} ${{ matrix.python-version }} zarr ${{ matrix.zarr-version }} ${{ matrix.group }} 
+    name: ${{ matrix.platform }} ${{ matrix.python-version }} zarr ${{ matrix.zarr-version }} ${{ matrix.group }}
     runs-on: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -21,16 +21,17 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
         platform: [ubuntu-latest, macos-latest, windows-latest]
         zarr-version: ["2.*", "3.*"]
-        group: [test-third-party]  # full test with all extras
+        group: [test-third-party] # full test with all extras
         exclude:
           # Zarr 3 doesn't support 3.10
           - zarr-version: "3.*"
             python-version: "3.10"
         include:
+          # test that bare minimum deps work without extras
           - platform: "ubuntu-latest"
             python-version: ["3.10", "3.11", "3.12", "3.13"]
             zarr-version: ["3.*"]
-            group: "test" # test that bare minimum deps work without extras
+            group: "test"
 
     steps:
       - uses: actions/checkout@v4
