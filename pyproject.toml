@@ -17,6 +17,7 @@ dependencies = [
     "pydantic>=2.9",
     "networkx>=3.2.1",
     "numcodecs>=0.13,<0.16",  # TODO: remove pin once the 16 release is stable
+    "numcodecs>=0.15,<0.16; python_version >= '3.13'",  # TODO: remove pin once the 16 release is stable
 ]
 
 classifiers = [
@@ -35,7 +36,7 @@ spatial-graph = ["spatial-graph>=0.0.4"]
 ctc = [
     "dask>=2024.10",
     "imagecodecs>=2025.3.30",
-    "scikit-image>=0.23",
+    "scikit-image>=0.23.2",
     "tifffile>=2024.10",
 ]
 rx = ["rustworkx>=0.16.0"]
