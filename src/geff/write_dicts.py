@@ -5,6 +5,9 @@ from typing import Any, Literal
 import numpy as np
 from zarr.storage import StoreLike
 
+from geff.typing import PropDict
+
+from .serialization import serialize_property_data
 from .utils import remove_tilde
 from .write_arrays import write_id_arrays, write_props_arrays
 
@@ -17,6 +20,8 @@ def write_dicts(
     edge_prop_names: Sequence[str],
     axis_names: list[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
+    node_serialized_prop_names: Sequence[str] | None = None,
+    edge_serialized_prop_names: Sequence[str] | None = None,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -37,6 +42,10 @@ def write_dicts(
             any. Defaults to None
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
+        node_serialized_prop_names (Sequence[str] | None): A list of node properties to
+            serialize. Defaults to None.
+        edge_serialized_prop_names (Sequence[str] | None): A list of edge properties to
+            serialize. Defaults to None.
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -75,9 +84,31 @@ def write_dicts(
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
     write_props_arrays(geff_store, "nodes", node_props_dict, zarr_format=zarr_format)
+    if node_serialized_prop_names is not None:
+        node_serialized_props_dict = dict_serialized_props_to_arr(
+            node_data, node_serialized_prop_names
+        )
+        write_props_arrays(
+            geff_store,
+            "nodes",
+            node_serialized_props_dict,
+            zarr_format=zarr_format,
+            serialize=True,
+        )
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
     write_props_arrays(geff_store, "edges", edge_props_dict, zarr_format=zarr_format)
+    if edge_serialized_prop_names is not None:
+        edge_serialized_props_dict = dict_serialized_props_to_arr(
+            edge_data, edge_serialized_prop_names
+        )
+        write_props_arrays(
+            geff_store,
+            "edges",
+            edge_serialized_props_dict,
+            zarr_format=zarr_format,
+            serialize=True,
+        )
 
 
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
@@ -121,7 +152,7 @@ def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_na
 def dict_props_to_arr(
     data: Sequence[tuple[Any, dict[str, Any]]],
     prop_names: Sequence[str],
-) -> dict[str, tuple[np.ndarray, np.ndarray | None]]:
+) -> PropDict:
     """Convert dict-like properties to values and missing array representation.
 
     Note: The order of the sequence of data should be the same as that used to write
@@ -133,10 +164,10 @@ def dict_props_to_arr(
         prop_names (str): The properties to include in the dictionary of property arrays.
 
     Returns:
-        dict[tuple[np.ndarray, np.ndarray | None]]: A dictionary from property names
-            to a tuple of (value, missing) arrays, where the missing array can be None.
+        PropDict: A dictionary from property names to a tuple of (value, missing) arrays,
+        where the missing array can be None.
     """
-    props_dict = {}
+    props_dict: PropDict = {}
     for name in prop_names:
         values = []
         missing = []
@@ -158,3 +189,33 @@ def dict_props_to_arr(
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
         props_dict[name] = (values_arr, missing_arr)
     return props_dict
+
+
+def dict_serialized_props_to_arr(
+    data: Sequence[tuple[Any, dict[str, Any]]],
+    serialized_prop_names: Sequence[str],
+) -> PropDict:
+    """Convert dict-like properties to values and missing array representation.
+
+    Note: The order of the sequence of data should be the same as that used to write
+    the ids, or this will not work properly.
+
+    Args:
+        data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of elements and a dictionary
+            holding the properties of that element
+        serialized_prop_names (str): The properties to include in the dictionary of property arrays.
+
+    Returns:
+       PropDict: A dictionary from property names to a tuple of (values, missing, slices) arrays,
+       where the missing array can be None.
+    """
+    serialized_props_dict: PropDict = {}
+    for name in serialized_prop_names:
+        prop_data = []
+        for _, data_dict in data:
+            if name in data_dict:
+                prop_data.append(data_dict[name])
+            else:
+                prop_data.append(None)
+        serialized_props_dict[name] = serialize_property_data(prop_data)
+    return serialized_props_dict

@@ -1,10 +1,13 @@
 import warnings
-from typing import Literal
+from pathlib import Path
+from typing import Literal, cast
 
 import numpy as np
 import zarr
+from zarr import Group
 from zarr.storage import StoreLike
 
+from geff.typing import PropDict
 from geff.utils import remove_tilde
 
 from .metadata_schema import GeffMetadata
@@ -14,9 +17,9 @@ from .units import validate_data_type
 def write_arrays(
     geff_store: StoreLike,
     node_ids: np.ndarray,
-    node_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
+    node_props: PropDict | None,
     edge_ids: np.ndarray,
-    edge_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
+    edge_props: PropDict | None,
     metadata: GeffMetadata,
     node_props_unsquish: dict[str, list[str]] | None = None,
     edge_props_unsquish: dict[str, list[str]] | None = None,
@@ -32,14 +35,14 @@ def write_arrays(
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
         node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
             edge_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids.
+        node_props (PropDict | None): A dictionary from node property names to tuples
+            containing (values, missing) or (values, missing, slices), which should have
+            same length as node_ids.
         edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
             as node_ids.
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids.
+        edge_props (PropDict | None): A dictionary from edge property names to tuples
+            containing (values, missing) or (values, missing, slices), which should have
+            same length as edge_ids.
         metadata (GeffMetadata): The metadata of the graph.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
@@ -63,7 +66,7 @@ def write_arrays(
         write_props_arrays(
             geff_store, "edges", edge_props, edge_props_unsquish, zarr_format=zarr_format
         )
-    metadata.write(geff_store)
+    metadata.write(cast("Group | Path | str", geff_store))
 
 
 def write_id_arrays(
@@ -105,16 +108,17 @@ def write_id_arrays(
         )  # zarr format defaulted to 2
     else:
         geff_root = zarr.open(geff_store, mode="a")
-    geff_root["nodes/ids"] = node_ids
-    geff_root["edges/ids"] = edge_ids
+    cast("Group", geff_root)["nodes/ids"] = node_ids
+    cast("Group", geff_root)["edges/ids"] = edge_ids
 
 
 def write_props_arrays(
     geff_store: StoreLike,
     group: str,
-    props: dict[str, tuple[np.ndarray, np.ndarray | None]],
+    props: PropDict,
     props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
+    serialize: bool = False,
 ) -> None:
     """Writes a set of properties to a geff nodes or edges group.
 
@@ -124,14 +128,19 @@ def write_props_arrays(
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
         group (str): "nodes" or "edges"
-        props (dict[str, tuple[np.ndarray, np.ndarray | None]]): a dictionary from
-            attr name to (attr_values, attr_missing) arrays.
+        props (PropDict): a dictionary from attr name to tuples containing
+            (attr_values, attr_missing) when serialize=False, or
+            (attr_values, attr_missing, attr_slices) when serialize=True.
         props_unsquish (dict[str, list[str]] | None): a dictionary indicication
             how to "unsquish" a property into individual scalars (e.g.:
             `{"pos": ["z", "y", "x"]}` will store the position property as
             three individual properties called "z", "y", and "x".
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
+        serialize (bool): If True, will write the properties in a serialized format
+            with "values", "missing", and "slices" arrays. If False, will
+            write the properties in a non-serialized format with "values" and "missing"
+            arrays.
     Raises:
         ValueError: If the group is not a 'nodes' or 'edges' group.
     TODO: validate attrs length based on group ids shape?
@@ -144,12 +153,34 @@ def write_props_arrays(
 
     if props_unsquish is not None:
         for name, replace_names in props_unsquish.items():
-            array, missing = props[name]
+            prop_tuple = props[name]
+            if serialize:
+                array, missing, slices = cast(
+                    "tuple[np.ndarray, np.ndarray | None, np.ndarray]", prop_tuple
+                )
+            else:
+                array, missing = cast("tuple[np.ndarray, np.ndarray | None]", prop_tuple)
+
             assert len(array.shape) == 2, "Can only unsquish 2D arrays."
-            replace_arrays = {
-                replace_name: (array[:, i], None if not missing else missing[:, i])
-                for i, replace_name in enumerate(replace_names)
-            }
+
+            replace_arrays: PropDict = {}
+            if serialize:
+                replace_arrays = {
+                    replace_name: (
+                        array[:, i],
+                        None if missing is None else missing[:, i],
+                        slices,
+                    )
+                    for i, replace_name in enumerate(replace_names)
+                }
+            else:
+                replace_arrays = {
+                    replace_name: (
+                        array[:, i],
+                        None if missing is None else missing[:, i],
+                    )
+                    for i, replace_name in enumerate(replace_names)
+                }
             del props[name]
             props.update(replace_arrays)
 
@@ -159,11 +190,19 @@ def write_props_arrays(
         )  # zarr format defaulted to 2
     else:
         geff_root = zarr.open(geff_store, mode="a")
-    props_group = geff_root.require_group(f"{group}/props")
+    if serialize:
+        props_group = cast("Group", geff_root).require_group(f"{group}/serialized_props")
+    else:
+        props_group = cast("Group", geff_root).require_group(f"{group}/props")
     for prop, arrays in props.items():
         # data-type validation - ensure this property can round-trip through
         # Java Zarr readers before any data get written to disk.
-        values, missing = arrays
+        if serialize:
+            values, missing, slices = cast(
+                "tuple[np.ndarray, np.ndarray | None, np.ndarray]", arrays
+            )
+        else:
+            values, missing = cast("tuple[np.ndarray, np.ndarray | None]", arrays)
         if not validate_data_type(values.dtype):
             warnings.warn(
                 f"Data type {values.dtype} for property '{prop}' is not supported "
@@ -175,3 +214,5 @@ def write_props_arrays(
         prop_group["values"] = values
         if missing is not None:
             prop_group["missing"] = missing
+        if serialize:
+            prop_group["slices"] = slices

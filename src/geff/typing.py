@@ -1,4 +1,5 @@
-from typing import Any, TypedDict
+from collections.abc import Sequence
+from typing import Any, TypeAlias, TypedDict
 
 import numpy as np
 import zarr
@@ -41,6 +42,20 @@ class PropDictZArray(TypedDict):
     missing: NotRequired[zarr.Array]
 
 
+class PropDictSequence(TypedDict):
+    """
+    A prop dictionary which has the keys "values" and optionally "missing", stored as list or tuple.
+    """
+
+    values: Sequence
+    missing: NotRequired[NDArray[np.bool] | Sequence[Any]]
+
+
+PropDict: TypeAlias = dict[
+    str, tuple[np.ndarray, np.ndarray | None] | tuple[np.ndarray, np.ndarray | None, np.ndarray]
+]
+
+
 # Intermediate dict format that can be constructed to different backend types
 class InMemoryGeff(TypedDict):
     """
@@ -50,5 +65,5 @@ class InMemoryGeff(TypedDict):
     metadata: GeffMetadata
     node_ids: NDArray[Any]
     edge_ids: NDArray[Any]
-    node_props: dict[str, PropDictNpArray]
-    edge_props: dict[str, PropDictNpArray]
+    node_props: dict[str, PropDictNpArray | PropDictSequence]
+    edge_props: dict[str, PropDictNpArray | PropDictSequence]
