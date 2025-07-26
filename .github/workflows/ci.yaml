@@ -63,6 +63,7 @@ jobs:
           echo "path=$dir" >> "$GITHUB_OUTPUT"
 
       - name: Restore witty cache
+        if: matrix.group == 'test-third-party'
         uses: actions/cache/restore@v4
         id: witty-cache
         with:
