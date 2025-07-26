@@ -396,7 +396,7 @@ def _get_filtered_tracks_ID(
     Extract and return a list of track IDs identifying the tracks to keep.
 
     Args:
-        iterator (EIterator[tuple[str, ET.Element]]): An iterator over XML elements.
+        iterator (Iterator[tuple[str, ET.Element]]): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
 
     Returns:
