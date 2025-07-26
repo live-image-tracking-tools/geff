@@ -43,9 +43,6 @@ it to github. This will trigger a github action that will build and deploy to
 PyPI. (see the "deploy" step in workflows/ci.yml). The version number is
 determined automatically based on the tag.
 
-Prior to making a release that bumps the major or minor number, the
-`supported_versions.yml` needs to be updated and the json schema updated by
-running `pixi run update-json`.
 
 ```sh
 git tag -a v0.1.0 -m v0.1.0
