@@ -118,6 +118,7 @@ filterwarnings = [
     "ignore:'cgi' is deprecated and slated for removal in Python 3.13",
     # if needed, add global ignores here, for example:
     # "ignore:Some message:SomeCategory",
+    "ignore:pandas not found, skipping conversion test:ImportWarning:networkx"
 ]
 
 
