@@ -60,47 +60,8 @@ docs = [
     "typing-extensions",              # Required for json-schema-for-humans
     "ruff",                           # to format the source code signatures
 ]
-bench = [
-    { include-group = "test" },
-    "pytest-benchmark",
-    "tabulate",
-    "pandas",
-    "typer",
-    "rustworkx",
-]
+bench = [{ include-group = "test" }, "pytest-benchmark", "pandas", "geff[rx]"]
 
-[tool.pixi.project]
-channels = ["conda-forge"]
-platforms = ["osx-arm64", "linux-64", "win-64", "osx-64"]
-
-[tool.pixi.pypi-dependencies]
-geff = { path = ".", editable = true }
-
-[tool.pixi.dependencies]
-python = "3.12.*"
-
-[tool.pixi.environments]
-default = ["dev", "spatial-graph", "ctc", "rx", "lxml"]
-build = { features = ["build"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default" }
-bench = { features = ["dev", "bench"], solve-group = "default" }
-
-[tool.pixi.tasks]
-update-json = "python scripts/export_json_schema.py"
-test = "coverage run -m pytest"
-test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
-
-[tool.pixi.feature.bench.tasks]
-benchmark = "pytest tests/bench.py"
-
-[tool.pixi.feature.build.pypi-dependencies]
-build = "*"
-
-[tool.pixi.feature.build.tasks]
-build = "python -m build"
-
-[tool.pixi.feature.docs.tasks]
-preview-docs = { cmd = "mkdocs serve" }
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
@@ -162,12 +123,6 @@ disallow_subclassing_any = false
 show_error_codes = true
 pretty = true
 
-# # module specific overrides
-# [[tool.mypy.overrides]]
-# module = ["numpy.*",]
-# ignore_errors = true
-
-
 # https://coverage.readthedocs.io/en/6.4/config.html
 [tool.coverage.report]
 exclude_lines = [
@@ -185,15 +140,38 @@ omit = ["*/__init__.py"]
 [tool.typos.default]
 extend-ignore-identifiers-re = ["(?i)ome"]
 
-# https://github.com/mgedmin/check-manifest#configuration
-# [tool.check-manifest]
-# ignore = [
-#     ".github_changelog_generator",
-#     ".pre-commit-config.yaml",
-#     ".ruff_cache/**/*",
-#     "tests/**/*",
-# ]
-
 [project.scripts]
 ctc2geff = "geff.interops.ctc:app"
 geff = "geff._cli:app"
+
+# ------------------- pixi ---------------------
+
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "win-64", "osx-64"]
+
+[tool.pixi.pypi-dependencies]
+geff = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = ["dev", "spatial-graph", "ctc", "rx", "lxml"]
+build = { features = ["build"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
+bench = { features = ["dev", "bench", "rx"], solve-group = "default" }
+
+[tool.pixi.tasks]
+update-json = "python scripts/export_json_schema.py"
+test = "coverage run -m pytest"
+test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
+
+[tool.pixi.feature.bench.tasks]
+benchmark = "pytest tests/bench.py"
+
+[tool.pixi.feature.build.pypi-dependencies]
+build = "*"
+
+[tool.pixi.feature.build.tasks]
+build = "python -m build"
+
+[tool.pixi.feature.docs.tasks]
+preview-docs = { cmd = "mkdocs serve" }
