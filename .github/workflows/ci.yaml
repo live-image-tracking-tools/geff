@@ -152,7 +152,7 @@ jobs:
       - uses: hynek/build-and-inspect-python-package@v2
 
   upload-to-pypi:
-    if: success() && startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule' && github.repository == 'pyapp-kit/magicgui'
+    if: success() && startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule'
     name: Upload package to PyPI
     needs: build-and-inspect-package
     runs-on: ubuntu-latest
