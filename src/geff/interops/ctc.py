@@ -3,6 +3,11 @@ from pathlib import Path
 
 try:
     import tifffile
+
+    # TODO: would be nice to remove dask dependency just to create Zarr from Tiff
+    # tifffile directly supports creating Zarr stores from sequences of Tiff files
+    # The only convenience added is the ability to easily expand the data to (T, C, Z, Y, X)
+    # in the case of images that cannot fit into memory.
     from dask.array.image import imread
     from skimage.measure import regionprops
 except ImportError as e:
