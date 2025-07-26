@@ -1,32 +1,53 @@
 # CONTRIBUTING
 
-We recommend using `pixi` for environment management while developing `geff`. See the [pixi docs](https://pixi.sh/dev/) for installation instructions. The following instructions will be focused on pixi-based development, but all of the same tasks can be completed with pip and another environment manager.
+We recommend using `pixi` for environment management while developing `geff`.
+See the [pixi docs](https://pixi.sh/dev/) for installation instructions. The
+following instructions will be focused on pixi-based development, but all of the
+same tasks can be completed with pip and another environment manager.
 
 For local development, clone the repo and install in editable mode.
-```
+
+```sh
 git clone https://github.com/funkelab/geff.git
 pixi install
 ```
 
 ## Testing
+
 To run tests
-```
+
+```sh
 pixi run test
 ```
 
 ## Style
+
 We utilize `pre-commit` with ruff for linting and formatting. If you would like to run `pre-commit` locally:
+
+```sh
+pixi run pre-commit run -a
 ```
-pixi run -e dev pre-commit install
+
+To always run `pre-commit` before committing, you can install the pre-commit hooks by running:
+
+```sh
+pixi run pre-commit install
 ```
+
 Alternatively [pre-commit.ci](https://pre-commit.ci/), will run and commit changes on any open PRs.
 
 ## Releases
-In order to deploy a new version, tag the commit with a version number and push it to github. This will trigger a github action that will build and deploy to PyPI. (see the "deploy" step in workflows/ci.yml). The version number is determined automatically based on the tag.
 
-Prior to making a release that bumps the major or minor number, the `supported_versions.yml` needs to be updated and the json schema updated by running `pixi run update-json`. 
+In order to deploy a new version, tag the commit with a version number and push
+it to github. This will trigger a github action that will build and deploy to
+PyPI. (see the "deploy" step in workflows/ci.yml). The version number is
+determined automatically based on the tag.
 
-```
+Prior to making a release that bumps the major or minor number, the
+`supported_versions.yml` needs to be updated and the json schema updated by
+running `pixi run update-json`.
+
+```sh
 git tag -a v0.1.0 -m v0.1.0
 git push --follow-tags
 ```
@@ -35,7 +56,8 @@ git push --follow-tags
 
 Docs are written with MkDocs
 
-Relevant commends can be run using `pixi run -e docs <mkdocs command>`
+Relevant commands can be run using `pixi run -e docs <mkdocs command>`
+
 * `mkdocs serve` - Start the live-reloading docs server.
 * `mkdocs build` - Build the documentation site.
 * `mkdocs -h` - Print help message and exit.

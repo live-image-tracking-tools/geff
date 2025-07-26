@@ -1,11 +1,16 @@
 import shutil
 from pathlib import Path
 
+try:
+    import tifffile
+    from dask.array.image import imread
+    from skimage.measure import regionprops
+except ImportError as e:
+    raise ImportError("Please install with geff[ctc] to use this module.") from e
+
 import numpy as np
-import tifffile
 import typer
 import zarr
-from skimage.measure import regionprops
 from zarr.storage import StoreLike
 
 import geff
@@ -28,11 +33,6 @@ def ctc_tiffs_to_zarr(
         ctzyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite: Whether to overwrite the Zarr file if it already exists.
     """
-    try:
-        from dask.array.image import imread
-    except ImportError as e:
-        raise ImportError("install with geff[ctc] to use ctc_tiffs_to_zarr") from e
-
     array = imread(str(ctc_path / "*.tif"))
     if ctzyx:
         n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)

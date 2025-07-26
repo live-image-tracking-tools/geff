@@ -3,10 +3,15 @@ from copy import deepcopy
 
 import networkx as nx
 import pytest
-from lxml import etree as ET
 
-import geff.interops.trackmate_xml as tm_xml
 from geff.utils import nx_is_equal, validate
+
+try:
+    from lxml import etree as ET
+
+    import geff.interops.trackmate_xml as tm_xml
+except ImportError:
+    pytest.skip("geff[trackmate_xml] not installed", allow_module_level=True)
 
 
 def test_get_units():

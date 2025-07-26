@@ -4,6 +4,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
+import rustworkx as rx
 
 from geff.geff_reader import read_to_memory
 from geff.io_utils import (
@@ -16,7 +17,6 @@ from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
-    import rustworkx as rx
     from zarr.storage import StoreLike
 
     from geff.typing import InMemoryGeff
@@ -78,12 +78,6 @@ def write_rx(
         axis_types: The types of the axes.
         zarr_format: The zarr format to use.
     """
-    try:
-        import rustworkx as rx
-    except ImportError as e:
-        raise ImportError(
-            "rustworkx is not installed. Please install it with `pip install geff[rx]`."
-        ) from e
 
     group = setup_zarr_group(store, zarr_format)
 
@@ -170,13 +164,6 @@ def _ingest_dict_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:
     Returns:
         rx.PyGraph: A rustworkx graph.
     """
-    try:
-        import rustworkx as rx
-    except ImportError as e:
-        raise ImportError(
-            "rustworkx is not installed. Please install it with `pip install geff[rx]`."
-        ) from e
-
     metadata = graph_dict["metadata"]
 
     graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()

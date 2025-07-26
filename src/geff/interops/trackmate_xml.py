@@ -6,7 +6,11 @@ from typing import Literal, cast
 
 import networkx as nx
 import typer
-from lxml import etree as ET
+
+try:
+    from lxml import etree as ET
+except ImportError as e:
+    raise ImportError("Please `pip install 'geff[trackmate_xml]'` to use this module.") from e
 
 from geff.metadata_schema import Axis, GeffMetadata
 from geff.networkx.io import write_nx
