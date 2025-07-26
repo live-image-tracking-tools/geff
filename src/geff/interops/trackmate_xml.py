@@ -1,22 +1,31 @@
+from __future__ import annotations
+
 import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import networkx as nx
 import typer
 
-try:
-    from lxml import etree as ET
-except ImportError as e:
-    raise ImportError("Please `pip install 'geff[trackmate_xml]'` to use this module.") from e
+if TYPE_CHECKING:
+    import xml.etree.ElementTree as ET
+    from collections.abc import Iterator
+
+    # from lxml import etree as ET
+else:
+    # Prefer lxml for performance, but gracefully fall back to the Python
+    # standard-library implementation to avoid the hard dependency.
+    # these follow a similar enough API that we can use the same code.
+    try:
+        from lxml import etree as ET
+    except ImportError:  # pragma: no cover
+        import xml.etree.ElementTree as ET
+
 
 from geff.metadata_schema import Axis, GeffMetadata
 from geff.networkx.io import write_nx
-
-# Type aliases
-Attribute = str | int | float | list[float] | None
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
 # used in ctc_to_geff. Need to wait for CTC PR.
@@ -49,7 +58,7 @@ def _preliminary_checks(
 
 
 def _get_units(
-    element: ET._Element,
+    element: ET.Element,
 ) -> dict[str, str]:
     """Extract units information from an XML element and return it as a dictionary.
 
@@ -89,8 +98,8 @@ def _get_units(
 
 
 def _get_attributes_metadata(
-    it: ET.iterparse,
-    ancestor: ET._Element,
+    it: Iterator[tuple[str, ET.Element]],
+    ancestor: ET.Element,
 ) -> dict[str, dict[str, str]]:
     """Extract the TrackMate model features to a attributes dictionary.
 
@@ -100,7 +109,7 @@ def _get_attributes_metadata(
     the FeatureDeclarations tag.
 
     Args:
-        it (ET.iterparse): An iterator over XML elements.
+        it (Iterator[tuple[str, ET.Element]]): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
 
     Returns:
@@ -124,7 +133,7 @@ def _get_attributes_metadata(
 
 
 def _convert_attributes(
-    attrs: dict[str, Attribute],
+    attrs: dict[str, Any],
     attrs_metadata: dict[str, dict[str, str]],
     attr_type: str,
 ) -> None:
@@ -135,7 +144,7 @@ def _convert_attributes(
     convert to is given by the attributes metadata.
 
     Args:
-        attrs (dict[str, Attribute): The dictionary whose values we want to convert.
+        attrs (dict[str, Any): The dictionary whose values we want to convert.
         attrs_metadata (dict[str, dict[str, str]]): The attributes metadata containing
         information on the expected data types for each attribute.
         attr_type (str): The type of the attribute to convert (node, edge, or lineage).
@@ -172,8 +181,8 @@ def _convert_attributes(
 
 
 def _convert_ROI_coordinates(
-    element: ET._Element,
-    attrs: dict[str, Attribute],
+    element: ET.Element,
+    attrs: dict[str, Any],
 ) -> None:
     """Extract, format and add ROI coordinates to the attributes dict.
 
@@ -189,20 +198,21 @@ def _convert_ROI_coordinates(
             f"No key 'ROI_N_POINTS' in the attributes of current element '{element.tag}'."
         )
     if element.text:
-        points_coordinates = element.text.split()
-        points_coordinates = [float(x) for x in points_coordinates]
-        assert type(attrs["ROI_N_POINTS"]) is int, "ROI_N_POINTS should be an integer"
-        points_dimension = len(points_coordinates) // attrs["ROI_N_POINTS"]
-        it = [iter(points_coordinates)] * points_dimension
-        points_coordinates = list(zip(*it, strict=True))
-        attrs["ROI_coords"] = points_coordinates
+        n_points = attrs["ROI_N_POINTS"]
+        if not isinstance(n_points, int):
+            raise TypeError("ROI_N_POINTS should be an integer")
+
+        coords = [float(v) for v in element.text.split()]
+        dim = len(coords) // n_points
+        attrs["ROI_coords"] = [tuple(coords[i : i + dim]) for i in range(0, len(coords), dim)]
+
     else:
         attrs["ROI_coords"] = None
 
 
 def _add_all_nodes(
-    it: ET.iterparse,
-    ancestor: ET._Element,
+    it: Iterator[tuple[str, ET.Element]],
+    ancestor: ET.Element,
     attrs_md: dict[str, dict[str, str]],
     graph: nx.DiGraph,
 ) -> bool:
@@ -211,7 +221,7 @@ def _add_all_nodes(
     All the elements that are descendants of `ancestor` are explored.
 
     Args:
-        it (ET.iterparse): An iterator over XML elements.
+        it (Iterator[tuple[str, ET.Element]]): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected node attributes.
@@ -263,7 +273,7 @@ def _add_all_nodes(
 
 
 def _add_edge(
-    element: ET._Element,
+    element: ET.Element,
     attrs_md: dict[str, dict[str, str]],
     graph: nx.DiGraph,
     current_track_id: int,
@@ -324,11 +334,11 @@ def _add_edge(
 
 
 def _build_tracks(
-    iterator: ET.iterparse,
-    ancestor: ET._Element,
+    iterator: Iterator[tuple[str, ET.Element]],
+    ancestor: ET.Element,
     attrs_md: dict[str, dict[str, str]],
     graph: nx.DiGraph,
-) -> list[dict[str, Attribute]]:
+) -> list[dict[str, Any]]:
     """Add edges and their attributes to a graph based on the XML elements.
 
     This function explores all elements that are descendants of the
@@ -338,7 +348,7 @@ def _build_tracks(
     to construct track attributes.
 
     Args:
-        iterator (ET.iterparse): An iterator over XML elements.
+        iterator (Iterator[tuple[str, ET.Element]]): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected edge attributes.
@@ -357,7 +367,7 @@ def _build_tracks(
     while (event, element) != ("end", ancestor):
         # Saving the current track information.
         if element.tag == "Track" and event == "start":
-            attrs = deepcopy(element.attrib)
+            attrs: dict[str, Any] = deepcopy(element.attrib)
             _convert_attributes(attrs, attrs_md, "lineage")
             tracks_attrs.append(attrs)
             try:
@@ -379,14 +389,14 @@ def _build_tracks(
 
 
 def _get_filtered_tracks_ID(
-    iterator: ET.iterparse,
-    ancestor: ET._Element,
+    iterator: Iterator[tuple[str, ET.Element]],
+    ancestor: ET.Element,
 ) -> list[int]:
     """
     Extract and return a list of track IDs identifying the tracks to keep.
 
     Args:
-        iterator (ET.iterparse): An iterator over XML elements.
+        iterator (EIterator[tuple[str, ET.Element]]): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
 
     Returns:
