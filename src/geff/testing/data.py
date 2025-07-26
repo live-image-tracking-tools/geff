@@ -28,6 +28,26 @@ Examples:
     ...     include_x=True,
     ... )
 
+    # Advanced usage with custom arrays
+    >>> import numpy as np
+    >>> custom_labels = np.array(["A", "B", "C", "D", "E"])
+    >>> custom_scores = np.array([0.1, 0.5, 0.8, 0.3, 0.9])
+    >>> custom_edge_weights = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
+    >>> store, props = create_memory_mock_geff(
+    ...     node_id_dtype="int",
+    ...     node_axis_dtypes={"position": "float64", "time": "float64"},
+    ...     directed=False,
+    ...     num_nodes=5,
+    ...     num_edges=8,
+    ...     extra_node_props={"label": custom_labels, "score": custom_scores,
+    ...         "confidence": "float64"},
+    ...     extra_edge_props={"weight": custom_edge_weights, "type": "str"},
+    ...     include_t=True,
+    ...     include_z=False,
+    ...     include_y=True,
+    ...     include_x=True,
+    ... )
+
     # Using with GeffReader
     >>> from geff import GeffReader
     >>> store, props = create_simple_2d_geff()
@@ -77,8 +97,8 @@ def create_dummy_graph_props(
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: dict[str, DTypeStr] | None = None,
-    extra_edge_props: dict[str, DTypeStr] | None = None,
+    extra_node_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
+    extra_edge_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
@@ -240,34 +260,53 @@ def create_dummy_graph_props(
         if not isinstance(extra_node_props, dict):
             raise ValueError(f"extra_node_props must be a dict, got {type(extra_node_props)}")
 
-        # Validate dict contains only string keys and valid dtype values
-        for prop_name, prop_dtype in extra_node_props.items():
+        # Validate dict contains only string keys and valid dtype values or numpy arrays
+        for prop_name, prop_value in extra_node_props.items():
             if not isinstance(prop_name, str):
                 raise ValueError(f"extra_node_props keys must be strings, got {type(prop_name)}")
 
-            if not isinstance(prop_dtype, str):
-                raise ValueError(
-                    f"extra_node_props[{prop_name}] must be a string dtype, got {type(prop_dtype)}"
-                )
+            # Check if value is a string (dtype) or numpy array
+            if isinstance(prop_value, str):
+                # Auto-generate array with specified dtype
+                prop_dtype = prop_value
 
-            # Validate dtype is supported using DTypeStr
-            valid_dtypes = get_args(DTypeStr)
-            if prop_dtype not in valid_dtypes:
-                raise ValueError(
-                    f"extra_node_props[{prop_name}] dtype '{prop_dtype}' not supported. "
-                    f"Valid dtypes: {valid_dtypes}"
-                )
+                # Validate dtype is supported using DTypeStr
+                valid_dtypes = get_args(DTypeStr)
+                if prop_dtype not in valid_dtypes:
+                    raise ValueError(
+                        f"extra_node_props[{prop_name}] dtype '{prop_dtype}' not supported. "
+                        f"Valid dtypes: {valid_dtypes}"
+                    )
 
-            # Generate different patterns for different property types
-            if prop_dtype == "str":
-                extra_node_props_dict[prop_name] = np.array(
-                    [f"{prop_name}_{i}" for i in range(num_nodes)], dtype=prop_dtype
-                )
-            elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
-                extra_node_props_dict[prop_name] = np.arange(num_nodes, dtype=prop_dtype)
-            else:  # float types
-                extra_node_props_dict[prop_name] = np.linspace(
-                    0.1, 1.0, num_nodes, dtype=prop_dtype
+                # Generate different patterns for different property types
+                if prop_dtype == "str":
+                    extra_node_props_dict[prop_name] = np.array(
+                        [f"{prop_name}_{i}" for i in range(num_nodes)], dtype=prop_dtype
+                    )
+                elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
+                    extra_node_props_dict[prop_name] = np.arange(num_nodes, dtype=prop_dtype)
+                else:  # float types
+                    extra_node_props_dict[prop_name] = np.linspace(
+                        0.1, 1.0, num_nodes, dtype=prop_dtype
+                    )
+
+            elif isinstance(prop_value, np.ndarray):
+                # Use provided array directly
+                custom_array = prop_value
+
+                # Validate array length matches num_nodes
+                if len(custom_array) != num_nodes:
+                    raise ValueError(
+                        f"extra_node_props[{prop_name}] array length {len(custom_array)} "
+                        f"does not match num_nodes {num_nodes}"
+                    )
+
+                extra_node_props_dict[prop_name] = custom_array
+
+            else:
+                raise ValueError(
+                    f"extra_node_props[{prop_name}] must be a string dtype or numpy array, "
+                    f"got {type(prop_value)}"
                 )
 
     # Generate edge properties
@@ -279,33 +318,52 @@ def create_dummy_graph_props(
         if not isinstance(extra_edge_props, dict):
             raise ValueError(f"extra_edge_props must be a dict, got {type(extra_edge_props)}")
 
-        # Validate dict contains only string keys and valid dtype values
-        for prop_name, prop_dtype in extra_edge_props.items():
+        # Validate dict contains only string keys and valid dtype values or numpy arrays
+        for prop_name, prop_value in extra_edge_props.items():
             if not isinstance(prop_name, str):
                 raise ValueError(f"extra_edge_props keys must be strings, got {type(prop_name)}")
 
-            if not isinstance(prop_dtype, str):
-                raise ValueError(
-                    f"extra_edge_props[{prop_name}] must be a string dtype, got {type(prop_dtype)}"
-                )
+            # Check if value is a string (dtype) or numpy array
+            if isinstance(prop_value, str):
+                # Auto-generate array with specified dtype
+                prop_dtype = prop_value
 
-            # Validate dtype is supported using DTypeStr
-            valid_dtypes = get_args(DTypeStr)
-            if prop_dtype not in valid_dtypes:
-                raise ValueError(
-                    f"extra_edge_props[{prop_name}] dtype '{prop_dtype}' not supported. "
-                    f"Valid dtypes: {valid_dtypes}"
-                )
+                # Validate dtype is supported using DTypeStr
+                valid_dtypes = get_args(DTypeStr)
+                if prop_dtype not in valid_dtypes:
+                    raise ValueError(
+                        f"extra_edge_props[{prop_name}] dtype '{prop_dtype}' not supported. "
+                        f"Valid dtypes: {valid_dtypes}"
+                    )
 
-            # Generate different patterns for different property types
-            if prop_dtype == "str":
-                edge_props_dict[prop_name] = np.array(
-                    [f"{prop_name}_{i}" for i in range(len(edges))], dtype=prop_dtype
+                # Generate different patterns for different property types
+                if prop_dtype == "str":
+                    edge_props_dict[prop_name] = np.array(
+                        [f"{prop_name}_{i}" for i in range(len(edges))], dtype=prop_dtype
+                    )
+                elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
+                    edge_props_dict[prop_name] = np.arange(len(edges), dtype=prop_dtype)
+                else:  # float types
+                    edge_props_dict[prop_name] = np.linspace(0.1, 1.0, len(edges), dtype=prop_dtype)
+
+            elif isinstance(prop_value, np.ndarray):
+                # Use provided array directly
+                custom_array = prop_value
+
+                # Validate array length matches num_edges
+                if len(custom_array) != len(edges):
+                    raise ValueError(
+                        f"extra_edge_props[{prop_name}] array length {len(custom_array)} "
+                        f"does not match number of edges {len(edges)}"
+                    )
+
+                edge_props_dict[prop_name] = custom_array
+
+            else:
+                raise ValueError(
+                    f"extra_edge_props[{prop_name}] must be a string dtype or numpy array, "
+                    f"got {type(prop_value)}"
                 )
-            elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
-                edge_props_dict[prop_name] = np.arange(len(edges), dtype=prop_dtype)
-            else:  # float types
-                edge_props_dict[prop_name] = np.linspace(0.1, 1.0, len(edges), dtype=prop_dtype)
 
     return {
         "nodes": nodes,
@@ -329,8 +387,8 @@ def create_memory_mock_geff(
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: dict[str, DTypeStr] | None = None,
-    extra_edge_props: dict[str, DTypeStr] | None = None,
+    extra_node_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
+    extra_edge_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
