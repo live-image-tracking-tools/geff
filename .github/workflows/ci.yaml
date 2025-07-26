@@ -28,6 +28,7 @@ jobs:
             python-version: "3.10"
         include:
           - platform: "ubuntu-latest"
+            python-version: ["3.10", "3.11", "3.12", "3.13"]
             zarr-version: ["3.*"]
             group: "test" # test that bare minimum deps work without extras
 
