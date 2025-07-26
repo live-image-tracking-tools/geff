@@ -37,6 +37,7 @@ ctc = [
     "dask>=2024.10",
     "imagecodecs>=2025.3.30",
     "scikit-image>=0.23.2",
+    "scikit-image>=0.25; python_version >= '3.13'",
     "tifffile>=2024.10",
 ]
 rx = ["rustworkx>=0.16.0"]
