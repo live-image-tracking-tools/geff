@@ -54,6 +54,11 @@ The `nodes\props` group is optional and will contain one or more `node property`
 
     When writing a graph with missing properties to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the property, in order to keep the indices aligned with the node ids. 
 
+### The `serialized_props` group and `node serialized property` groups
+The `nodes\serialized_props` group is optional and will contain one or more `node serialized property` groups, each with a `values` array, a `slices` array and an optional `missing` array. These properties are serialized as a list of arrays, where each element in the array can have a different length. This is useful for properties that are not fixed-length, such as polygons or other complex shapes.
+
+The `nodes\serialized_props` is optional. If you do not have any node serialized properties, the `nodes\serialized_props` can be absent.
+
 ## The `edges` group
 Similar to the `nodes` group, the `edges` group will contain an `ids` array and an optional `props` group.
 
@@ -69,6 +74,11 @@ The `edges\props` group will contain zero or more `edge property` groups, each w
 - The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A `1` at an index in the `missing` array indicates that the `value` of that property for the edge at that index is missing, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all edges have values for the property.
 
 The `edges/props` is optional. If you do not have any edge properties, the `edges\props` can be absent. 
+
+### The `serialized_props` group and `edge serialized property` groups
+The `edges\serialized_props` group is optional and will contain one or more `edge serialized property` groups, each with a `values` array, a `slices` array and an optional `missing` array. These properties are serialized as a list of arrays, where each element in the array can have a different length. This is useful for properties that are not fixed-length.
+
+The `edges\serialized_props` is optional. If you do not have any edge serialized properties, the `edges\serialized_props` can be absent.
 
 ## Example file structure and metadata
 Here is a schematic of the expected file structure.
@@ -95,6 +105,11 @@ Here is a schematic of the expected file structure.
                     missing # shape: (N,) dtype: bool
                 color/
                     values # shape: (N, 4) dtype: float16
+                    missing # shape: (N,) dtype: bool
+            serialized_props/
+                polygon/
+                    values # shape: (V, 2) dtype: float32
+                    slices # shape: (N, 2) dtype: int64
                     missing # shape: (N,) dtype: bool
 	    edges/
             ids  # shape: (E, 2) dtype: uint64
