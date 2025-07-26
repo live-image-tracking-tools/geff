@@ -89,7 +89,6 @@ bench = { features = ["dev", "bench"], solve-group = "default" }
 update-json = "python scripts/export_json_schema.py"
 test = "coverage run -m pytest"
 test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
-benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.bench.tasks]
 benchmark = "pytest tests/bench.py"
