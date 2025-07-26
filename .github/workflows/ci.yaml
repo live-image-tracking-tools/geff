@@ -81,6 +81,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
       - name: Generate json
         run: uv run scripts/export_json_schema.py --filename $testjson
 

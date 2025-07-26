@@ -26,6 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
 
       - name: configure git
         run: |
@@ -78,6 +80,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
       - name: Run benchmark
         run: uv run --group bench pytest tests/bench.py --benchmark-json output.json
 
