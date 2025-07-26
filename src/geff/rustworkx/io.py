@@ -4,7 +4,15 @@ import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-import rustworkx as rx
+
+try:
+    import rustworkx as rx
+except ImportError as e:
+    raise ImportError(
+        "This module requires rustworkx to be installed. "
+        "Please install it with `pip install 'geff[rx]'`."
+    ) from e
+
 
 from geff.geff_reader import read_to_memory
 from geff.io_utils import (
