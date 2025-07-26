@@ -24,16 +24,8 @@ jobs:
   build-docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: pip install -e . --group docs
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
 
       - name: configure git
         run: |
@@ -48,12 +40,12 @@ jobs:
       # if this workflow is triggered by a push event, deploy the docs to gh-pages
       - name: Push changes to gh-pages branch
         if: github.event_name == 'push'
-        run: mike deploy ${{ steps.get_version.outputs.version }} $TAG -u -p
+        run: uv run --group docs mike deploy ${{ steps.get_version.outputs.version }} $TAG -u -p
 
       # if triggered by a pull request, build the docs and upload them as an artifact
       - name: Build docs
         if: github.event_name == 'pull_request'
-        run: mkdocs build --strict
+        run: uv run --group docs mkdocs build --strict
 
       # it's too hard (from a security perspective) to host previews from fork PRs
       # so we skip unless it's a PR from a branch in the same repository
@@ -85,22 +77,9 @@ jobs:
       - build-docs
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-          cache-dependency-path: "pyproject.toml"
-          cache: "pip"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install -U pip
-          python -m pip install -e . --group bench
-
+      - uses: astral-sh/setup-uv@v6
       - name: Run benchmark
-        run: |
-          pytest tests/bench.py --benchmark-json output.json
+        run: uv run --group bench pytest tests/bench.py --benchmark-json output.json
 
       - name: Store benchmark results
         uses: benchmark-action/github-action-benchmark@v1
