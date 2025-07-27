@@ -66,15 +66,8 @@ docs = [
     "typing-extensions",              # Required for json-schema-for-humans
     "ruff",                           # to format the source code signatures
 ]
-bench = [
-    { include-group = "test" },
-    "pytest-benchmark",
-    "tabulate",
-    "pandas",
-    "typer",
-    "rustworkx",
-]
-test-codspeed = [{ include-group = "bench" }, "pytest-codspeed"]
+bench = [{ include-group = "test" }, "pytest-benchmark", "rustworkx"]
+test-codspeed = [{ include-group = "test" }, "pytest-codspeed", "rustworkx"]
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -111,7 +104,7 @@ build = "*"
 build = "python -m build"
 
 [tool.pixi.feature.docs.tasks]
-preview-docs = {cmd = "mkdocs serve"}
+preview-docs = { cmd = "mkdocs serve" }
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
