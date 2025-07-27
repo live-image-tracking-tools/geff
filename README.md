@@ -6,6 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/geff.svg?color=green)](https://pypi.org/project/geff)
 [![Python Version](https://img.shields.io/pypi/pyversions/geff.svg?color=green)](https://python.org)
 [![Test geff](https://github.com/funkelab/geff/actions/workflows/ci.yaml/badge.svg)](https://github.com/funkelab/geff/actions/workflows/ci.yaml)
+[![Benchmarks](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://codspeed.io/live-image-tracking-tools/geff)
 
 geff is a specification for a file format for **exchanging** spatial graph data. It is not intended to be mutable, editable, chunked, or optimized for use in an application setting.
 
