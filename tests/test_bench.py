@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import sys
+
+import pytest
+
+# only run this file if benchmarks are requested, or running directly
+if all(x not in {"--codspeed", "--benchmark", "tests/test_bench.py"} for x in sys.argv):
+    pytest.skip("use --benchmark to run benchmark", allow_module_level=True)
+
 import atexit
 import shutil
-import sys
 import tempfile
 from functools import cache
 from pathlib import Path
@@ -11,7 +18,6 @@ from typing import TYPE_CHECKING, Any
 
 import networkx as nx
 import numpy as np
-import pytest
 import rustworkx as rx
 
 import geff.networkx.io as geff_nx
@@ -23,9 +29,6 @@ if TYPE_CHECKING:
 
     from pytest_codspeed.plugin import BenchmarkFixture
 
-# only run this file if benchmarks are requested, or running directly
-if all(x not in {"--codspeed", "--benchmark", "tests/test_bench.py"} for x in sys.argv):
-    pytest.skip("use --benchmark to run benchmark", allow_module_level=True)
 
 np.random.seed(42)  # for reproducibility
 
@@ -87,7 +90,7 @@ def graph_file_path(num_nodes: int) -> Path:
     return Path(tmp_dir)
 
 
-CREATE_MAP: dict[Callable, Callable] = {
+CREATE_FUNCS: Mapping[Callable, Callable[[int], Any]] = {
     geff_nx.write_nx: create_nx_graph,
     geff_rx.write_rx: create_rx_graph,
 }
@@ -101,7 +104,7 @@ def test_bench_write(
     write_func: Callable, benchmark: BenchmarkFixture, tmp_path: Path, nodes: int
 ) -> None:
     path = tmp_path / "test_write.zarr"
-    big_graph = CREATE_MAP[write_func](nodes)
+    big_graph = CREATE_FUNCS[write_func](nodes)
     benchmark.pedantic(
         write_func,
         kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "store": path},
