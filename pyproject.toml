@@ -66,8 +66,7 @@ docs = [
     "typing-extensions",              # Required for json-schema-for-humans
     "ruff",                           # to format the source code signatures
 ]
-bench = [{ include-group = "test" }, "pytest-benchmark", "rustworkx"]
-test-codspeed = [{ include-group = "test" }, "pytest-codspeed", "rustworkx"]
+bench = [{ include-group = "test" }, "pytest-codspeed", "rustworkx"]
 
 [tool.pixi.project]
 channels = ["conda-forge"]

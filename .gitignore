@@ -35,3 +35,4 @@ uv.lock
 /.idea
 .vscode/
 site
+.codspeed
