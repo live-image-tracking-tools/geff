@@ -69,7 +69,7 @@ jobs:
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v3
         with:
-          run: pytest --codspeed -v
+          run: pytest tests/bench.py --codspeed -v
 
   deploy:
     name: Deploy
