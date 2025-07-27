@@ -45,6 +45,7 @@ dev = [
     "ruff",
     "ipython",
     "types-PyYAML",
+    "types-networkx",
     "spatial-graph",
     "rustworkx",
     # ctc stuff:
@@ -73,6 +74,7 @@ bench = [
     "typer",
     "rustworkx",
 ]
+test-codspeed = [{ include-group = "bench" }, "pytest-codspeed"]
 
 [tool.pixi.project]
 channels = ["conda-forge"]
