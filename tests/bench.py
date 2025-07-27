@@ -10,7 +10,6 @@ import geff.networkx.io as geff_nx
 import geff.rustworkx.io as geff_rx
 from geff.utils import validate
 
-ROUNDS = 3
 N_NODES = 2000
 
 
@@ -52,17 +51,14 @@ def test_write(write_func, benchmark, tmp_path, big_graph):
     benchmark.pedantic(
         write_func,
         kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "store": path},
-        rounds=ROUNDS,
         setup=lambda: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
     )
 
 
 def test_validate(benchmark, big_graph_path):
-    benchmark.pedantic(validate, kwargs={"store": big_graph_path}, rounds=ROUNDS)
+    benchmark(validate, store=big_graph_path)
 
 
 @pytest.mark.parametrize("read_func", [geff_nx.read_nx, geff_rx.read_rx])
 def test_read(read_func, benchmark, big_graph_path):
-    benchmark.pedantic(
-        read_func, kwargs={"store": big_graph_path, "validate": False}, rounds=ROUNDS
-    )
+    benchmark(read_func, store=big_graph_path, validate=False)
