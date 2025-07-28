@@ -9,11 +9,11 @@ repos:
     hooks:
       - id: update-json
         name: Update geff-schema.json
-        entry: pixi run update-json
-        language: python
-        types: [python]
+        entry: uv run scripts/export_json_schema.py
+        language: system
         pass_filenames: false
         stages: [manual]
+
   - repo: https://github.com/crate-ci/typos
     rev: v1.34.0
     hooks:
@@ -39,3 +39,7 @@ repos:
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
+          - networkx
+          - typer
+          # codebase not ready for this one yet
+          # - pydantic
