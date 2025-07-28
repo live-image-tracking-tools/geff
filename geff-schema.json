@@ -152,6 +152,70 @@
           "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
           "title": "Axes"
         },
+        "node_props_metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/PropMetadata"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
+          "title": "Node Props Metadata"
+        },
+        "edge_props_metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/PropMetadata"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
+          "title": "Edge Props Metadata"
+        },
+        "tracklet_props_metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/PropMetadata"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata for tracklet properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
+          "title": "Tracklet Props Metadata"
+        },
+        "lineage_props_metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/PropMetadata"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata for lineage properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
+          "title": "Lineage Props Metadata"
+        },
         "sphere": {
           "anyOf": [
             {
@@ -250,6 +314,66 @@
         "directed"
       ],
       "title": "geff_metadata",
+      "type": "object"
+    },
+    "PropMetadata": {
+      "description": "Metadata describing a property in the geff graph.",
+      "properties": {
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "dtype": {
+          "title": "Dtype",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "shortname": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Shortname"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        }
+      },
+      "required": [
+        "identifier",
+        "dtype",
+        "unit"
+      ],
+      "title": "PropMetadata",
       "type": "object"
     },
     "RelatedObject": {
