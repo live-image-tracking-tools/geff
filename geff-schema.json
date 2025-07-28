@@ -184,38 +184,6 @@
           "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
           "title": "Edge Props Metadata"
         },
-        "tracklet_props_metadata": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/PropMetadata"
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Metadata for tracklet properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
-          "title": "Tracklet Props Metadata"
-        },
-        "lineage_props_metadata": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/PropMetadata"
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Metadata for lineage properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
-          "title": "Lineage Props Metadata"
-        },
         "sphere": {
           "anyOf": [
             {
@@ -328,8 +296,16 @@
           "type": "string"
         },
         "unit": {
-          "title": "Unit",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
         },
         "name": {
           "anyOf": [
@@ -370,8 +346,7 @@
       },
       "required": [
         "identifier",
-        "dtype",
-        "unit"
+        "dtype"
       ],
       "title": "PropMetadata",
       "type": "object"
