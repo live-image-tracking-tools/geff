@@ -1,5 +1,7 @@
-from collections.abc import Sequence
-from typing import cast
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 import numpy as np
 import zarr
@@ -8,7 +10,7 @@ from zarr import Array
 from zarr.storage import StoreLike
 
 from geff.metadata_schema import GeffMetadata
-from geff.serialization import get_deserialized_property_data
+from geff.serialization import deserialize_vlen_property_data
 from geff.typing import InMemoryGeff, PropDictNpArray, PropDictSequence, PropDictZArray
 
 from . import utils
@@ -80,23 +82,23 @@ class GeffReader:
         else:
             self.edge_prop_names = []
 
-        # get serialized node properties names
-        if "serialized_props" in nodes_group.keys():
-            serialized_node_props_group = zarr.open_group(
-                self.group.store, path="nodes/serialized_props", mode="r"
+        # get vlen node properties names
+        if "vlen_props" in nodes_group.keys():
+            vlen_node_props_group = zarr.open_group(
+                self.group.store, path="nodes/vlen_props", mode="r"
             )
-            self.serialized_node_prop_names: list[str] = [*serialized_node_props_group.group_keys()]
+            self.vlen_node_prop_names: list[str] = [*vlen_node_props_group.group_keys()]
         else:
-            self.serialized_node_prop_names = []
+            self.vlen_node_prop_names = []
 
-        # get serialized edge properties names
-        if "serialized_props" in edges_group.keys():
-            serialized_edge_props_group = zarr.open_group(
-                self.group.store, path="edges/serialized_props", mode="r"
+        # get vlen edge properties names
+        if "vlen_props" in edges_group.keys():
+            vlen_edge_props_group = zarr.open_group(
+                self.group.store, path="edges/vlen_props", mode="r"
             )
-            self.serialized_edge_prop_names: list[str] = [*serialized_edge_props_group.group_keys()]
+            self.vlen_edge_prop_names: list[str] = [*vlen_edge_props_group.group_keys()]
         else:
-            self.serialized_edge_prop_names = []
+            self.vlen_edge_prop_names = []
 
     def read_node_props(self, names: list[str] | None = None):
         """
@@ -142,53 +144,53 @@ class GeffReader:
                 prop_dict["missing"] = cast("Array", prop_group["missing"])
             self.edge_props[name] = prop_dict
 
-    def read_serialized_node_props(self, names: list[str] | None = None):
+    def read_vlen_node_props(self, names: list[str] | None = None):
         """
-        Read the serialized node property with the name `name` from a GEFF.
+        Read the vlen node property with the name `name` from a GEFF.
 
         If no names are specified, then all properties will be loaded
 
         Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
-            names (lists of str, optional): The names of the serialized node properties
+            names (lists of str, optional): The names of the vlen node properties
             to load. If None all node properties will be loaded.
         """
         if names is None:
-            names = self.serialized_node_prop_names
+            names = self.vlen_node_prop_names
 
         for name in names:
             prop_group = zarr.open_group(
-                self.group.store, path=f"nodes/serialized_props/{name}", mode="r"
+                self.group.store, path=f"nodes/vlen_props/{name}", mode="r"
             )
             prop_dict: PropDictSequence = {
-                "values": cast("Sequence", get_deserialized_property_data(prop_group))
+                "values": cast("Sequence", deserialize_vlen_property_data(prop_group))
             }
             if "missing" in prop_group.keys():
                 prop_dict["missing"] = cast("Array", prop_group["missing"])
             self.node_props[name] = prop_dict
 
-    def read_serialized_edge_props(self, names: list[str] | None = None):
+    def read_vlen_edge_props(self, names: list[str] | None = None):
         """
-        Read the serialized edge property with the name `name` from a GEFF.
+        Read the vlen edge property with the name `name` from a GEFF.
 
         If no names are specified, then all properties will be loaded
 
         Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
-            names (lists of str, optional): The names of the serialized edge properties
+            names (lists of str, optional): The names of the vlen edge properties
             to load. If None all edge properties will be loaded.
         """
         if names is None:
-            names = self.serialized_edge_prop_names
+            names = self.vlen_edge_prop_names
 
         for name in names:
             prop_group = zarr.open_group(
-                self.group.store, path=f"edges/serialized_props/{name}", mode="r"
+                self.group.store, path=f"edges/vlen_props/{name}", mode="r"
             )
             prop_dict: PropDictSequence = {
-                "values": cast("Sequence", get_deserialized_property_data(prop_group))
+                "values": cast("Sequence", deserialize_vlen_property_data(prop_group))
             }
             if "missing" in prop_group.keys():
                 prop_dict["missing"] = cast("Array", prop_group["missing"])
@@ -217,7 +219,7 @@ class GeffReader:
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray | PropDictSequence] = {}
         for name, props in self.node_props.items():
-            if isinstance(props["values"], (tuple, list)):
+            if isinstance(props["values"], tuple | list):
                 masked_values = (
                     props["values"][node_mask.tolist()]
                     if node_mask is not None
@@ -227,14 +229,14 @@ class GeffReader:
                 masked_values = cast("PropDictZArray", props)["values"][
                     node_mask.tolist() if node_mask is not None else ...
                 ]
-            if name in self.serialized_node_prop_names:
+            if name in self.vlen_node_prop_names:
                 node_props[name] = {"values": cast("Sequence", masked_values)}
             else:
                 node_props[name] = {"values": cast("NDArray", np.array(masked_values))}
 
             if "missing" in props:
                 node_masked_missing: Sequence | NDArray[np.bool] | None = None
-                if isinstance(props["missing"], (tuple, list)):
+                if isinstance(props["missing"], tuple | list):
                     node_masked_missing = (
                         tuple(
                             miss
@@ -250,7 +252,7 @@ class GeffReader:
                     node_masked_missing = cast("NDArray", props["missing"])[
                         node_mask.tolist() if node_mask is not None else ...
                     ]
-                if name in self.serialized_node_prop_names:
+                if name in self.vlen_node_prop_names:
                     cast("PropDictSequence", node_props[name])["missing"] = cast(
                         "Sequence", node_masked_missing
                     )
@@ -275,7 +277,7 @@ class GeffReader:
 
         edge_props: dict[str, PropDictNpArray | PropDictSequence] = {}
         for name, props in self.edge_props.items():
-            if isinstance(props["values"], (tuple, list)):
+            if isinstance(props["values"], tuple | list):
                 masked_values = (
                     props["values"][edge_mask.tolist()]
                     if edge_mask is not None
@@ -285,13 +287,13 @@ class GeffReader:
                 masked_values = cast("PropDictZArray", props)["values"][
                     edge_mask.tolist() if edge_mask is not None else ...
                 ]
-            if name in self.serialized_edge_prop_names:
+            if name in self.vlen_edge_prop_names:
                 edge_props[name] = {"values": cast("Sequence", masked_values)}
             else:
                 edge_props[name] = {"values": cast("NDArray", np.array(masked_values))}
             if "missing" in props:
                 edge_masked_missing: Sequence | NDArray[np.bool] | None = None
-                if isinstance(props["missing"], (tuple, list)):
+                if isinstance(props["missing"], tuple | list):
                     edge_masked_missing = (
                         tuple(
                             miss
@@ -307,7 +309,7 @@ class GeffReader:
                     edge_masked_missing = cast("NDArray", props["missing"])[
                         edge_mask.tolist() if edge_mask is not None else ...
                     ]
-                if name in self.serialized_edge_prop_names:
+                if name in self.vlen_edge_prop_names:
                     cast("PropDictSequence", edge_props[name])["missing"] = cast(
                         "Sequence", edge_masked_missing
                     )
@@ -363,8 +365,8 @@ def read_to_memory(
 
     file_reader.read_node_props(node_props)
     file_reader.read_edge_props(edge_props)
-    file_reader.read_serialized_node_props(node_props)
-    file_reader.read_serialized_edge_props(edge_props)
+    file_reader.read_vlen_node_props(node_props)
+    file_reader.read_vlen_edge_props(edge_props)
 
     in_memory_geff = file_reader.build()
     return in_memory_geff

@@ -6,18 +6,18 @@ from numpy.typing import ArrayLike, NDArray
 from zarr import Group
 
 
-def serialize_property_data_as_dict(
+def serialize_vlen_property_data_as_dict(
     data: Sequence[ArrayLike | None],
 ) -> dict[str, NDArray | None]:
     """
-    Serialize a sequence of property data into a structured format as a dictionary.
+    Serialize a sequence of vlen property data into a structured format as a dictionary.
     Args:
         data (Sequence[ArrayLike | None]): A sequence of property data, where each element can be
             a numpy array or None.
     Returns:
         dict[str, NDArray]: A dictionary with keys 'values', 'missing', and 'slices'.
     """
-    values, missing, slices = serialize_property_data(data)
+    values, missing, slices = serialize_vlen_property_data(data)
     return {
         "values": values,
         "missing": missing,
@@ -25,7 +25,7 @@ def serialize_property_data_as_dict(
     }
 
 
-def serialize_property_data(
+def serialize_vlen_property_data(
     data: Sequence[ArrayLike | None],
 ) -> tuple[NDArray, NDArray | None, NDArray]:
     """
@@ -71,30 +71,30 @@ def serialize_property_data(
     )
 
 
-def get_deserialized_property_data(
-    serialized: Group | dict[str, NDArray],
+def deserialize_vlen_property_data(
+    vlen_props: Group | dict[str, NDArray],
     index: int | None = None,
 ) -> NDArray | Sequence[NDArray | None] | None:
     """
-    Get deserialized property data for a specific property name.
+    Get deserialized vlen property data for a specific property name.
 
     Args:
-        serialized (Group | dict[str, NDArray]): The Zarr group or dictionary containing the
+        vlen_props (Group | dict[str, NDArray]): The Zarr group or dictionary containing the
             serialized data.
         index (int | None): The index of the property to retrieve. If None, returns all properties.
 
     Returns:
-        NDArray | Sequence[NDArray | None] | None: The deserialized property data, or None if the
-            indexed item is missing.
+        NDArray | Sequence[NDArray | None] | None: The deserialized vlen property data, or None if
+            the indexed item is missing.
     """
-    if "values" not in serialized:
-        raise ValueError(f"Group {serialized} does not contain 'values'.")
-    if "slices" not in serialized:
-        raise ValueError(f"Group {serialized} does not contain 'slices'.")
-    slices = cast("NDArray", serialized["slices"])
-    values = cast("NDArray", serialized["values"])
-    if "missing" in serialized:
-        missing = cast("NDArray | None", serialized["missing"])
+    if "values" not in vlen_props:
+        raise ValueError(f"Group {vlen_props} does not contain 'values'.")
+    if "slices" not in vlen_props:
+        raise ValueError(f"Group {vlen_props} does not contain 'slices'.")
+    slices = cast("NDArray", vlen_props["slices"])
+    values = cast("NDArray", vlen_props["values"])
+    if "missing" in vlen_props:
+        missing = cast("NDArray | None", vlen_props["missing"])
         if missing is not None and missing.shape[0] != slices.shape[0]:
             raise ValueError(
                 f"Length of 'missing' ({missing.shape[0]}) does not match length of 'slices'"

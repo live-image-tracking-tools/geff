@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from geff.metadata_schema import GeffMetadata
-from geff.write_dicts import dict_serialized_props_to_arr, write_dicts
+from geff.write_dicts import dict_vlen_props_to_arr, write_dicts
 
 
 @pytest.fixture
@@ -102,7 +102,7 @@ def data():
     ],
 )
 def test_dict_prop_to_arr(data, expected):
-    props_dict = dict_serialized_props_to_arr(data, ["polygon"])
+    props_dict = dict_vlen_props_to_arr(data, ["polygon"])
     values, missing, slices = props_dict["polygon"]
     ex_values, ex_missing, ex_slices = expected
     ex_values = np.array(ex_values)
@@ -122,7 +122,7 @@ def test_write_dicts(tmp_path, data):
         [],
         [],
         [],
-        node_serialized_prop_names=["polygon"],
+        node_vlen_prop_names=["polygon"],
     )
     meta = GeffMetadata(
         geff_version="0.0.1",

@@ -7,7 +7,7 @@ from zarr.storage import StoreLike
 
 from geff.typing import PropDict
 
-from .serialization import serialize_property_data
+from .serialization import serialize_vlen_property_data
 from .utils import remove_tilde
 from .write_arrays import write_id_arrays, write_props_arrays
 
@@ -20,8 +20,8 @@ def write_dicts(
     edge_prop_names: Sequence[str],
     axis_names: list[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
-    node_serialized_prop_names: Sequence[str] | None = None,
-    edge_serialized_prop_names: Sequence[str] | None = None,
+    node_vlen_prop_names: Sequence[str] | None = None,
+    edge_vlen_prop_names: Sequence[str] | None = None,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -42,10 +42,10 @@ def write_dicts(
             any. Defaults to None
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
-        node_serialized_prop_names (Sequence[str] | None): A list of node properties to
-            serialize. Defaults to None.
-        edge_serialized_prop_names (Sequence[str] | None): A list of edge properties to
-            serialize. Defaults to None.
+        node_vlen_prop_names (Sequence[str] | None): A list of node properties to
+            be serialized as variable-length arrays. Defaults to None.
+        edge_vlen_prop_names (Sequence[str] | None): A list of edge properties to
+            be serialized as variable-length arrays. Defaults to None.
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -84,30 +84,26 @@ def write_dicts(
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
     write_props_arrays(geff_store, "nodes", node_props_dict, zarr_format=zarr_format)
-    if node_serialized_prop_names is not None:
-        node_serialized_props_dict = dict_serialized_props_to_arr(
-            node_data, node_serialized_prop_names
-        )
+    if node_vlen_prop_names is not None:
+        node_vlen_props_dict = dict_vlen_props_to_arr(node_data, node_vlen_prop_names)
         write_props_arrays(
             geff_store,
             "nodes",
-            node_serialized_props_dict,
+            node_vlen_props_dict,
             zarr_format=zarr_format,
-            serialize=True,
+            is_vlen=True,
         )
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
     write_props_arrays(geff_store, "edges", edge_props_dict, zarr_format=zarr_format)
-    if edge_serialized_prop_names is not None:
-        edge_serialized_props_dict = dict_serialized_props_to_arr(
-            edge_data, edge_serialized_prop_names
-        )
+    if edge_vlen_prop_names is not None:
+        edge_vlen_props_dict = dict_vlen_props_to_arr(edge_data, edge_vlen_prop_names)
         write_props_arrays(
             geff_store,
             "edges",
-            edge_serialized_props_dict,
+            edge_vlen_props_dict,
             zarr_format=zarr_format,
-            serialize=True,
+            is_vlen=True,
         )
 
 
@@ -191,9 +187,9 @@ def dict_props_to_arr(
     return props_dict
 
 
-def dict_serialized_props_to_arr(
+def dict_vlen_props_to_arr(
     data: Sequence[tuple[Any, dict[str, Any]]],
-    serialized_prop_names: Sequence[str],
+    vlen_prop_names: Sequence[str],
 ) -> PropDict:
     """Convert dict-like properties to values and missing array representation.
 
@@ -203,19 +199,19 @@ def dict_serialized_props_to_arr(
     Args:
         data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of elements and a dictionary
             holding the properties of that element
-        serialized_prop_names (str): The properties to include in the dictionary of property arrays.
+        vlen_prop_names (str): The properties to include in the dictionary of property arrays.
 
     Returns:
        PropDict: A dictionary from property names to a tuple of (values, missing, slices) arrays,
        where the missing array can be None.
     """
-    serialized_props_dict: PropDict = {}
-    for name in serialized_prop_names:
+    vlen_props_dict: PropDict = {}
+    for name in vlen_prop_names:
         prop_data = []
         for _, data_dict in data:
             if name in data_dict:
                 prop_data.append(data_dict[name])
             else:
                 prop_data.append(None)
-        serialized_props_dict[name] = serialize_property_data(prop_data)
-    return serialized_props_dict
+        vlen_props_dict[name] = serialize_vlen_property_data(prop_data)
+    return vlen_props_dict
