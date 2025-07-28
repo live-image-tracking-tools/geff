@@ -158,21 +158,28 @@ class PropMetadata(BaseModel):
         return self
 
 
-# class PropsMetadataCollection(BaseModel):
-#     """Collection of property metadata organized by component type."""
+def validate_props_metadata(
+    props_metadata: dict[str, PropMetadata],
+    c_type: Literal["node", "edge", "tracklet", "lineage"],
+) -> None:
+    """Check that the keys in the property metadata dictionary match the identifiers
+    in the PropMetadata objects.
 
-#     nodes: dict[str, PropMetadata] | None = Field(  # or could be Sequence instead of dict
-#         None, description="Node property metadata, keyed by property identifier"
-#     )
-#     edges: dict[str, PropMetadata] | None = Field(
-#         None, description="Edge property metadata, keyed by property identifier"
-#     )
-#     tracklets: dict[str, PropMetadata] | None = Field(
-#         None, description="Tracklet property metadata, keyed by property identifier"
-#     )
-#     lineages: dict[str, PropMetadata] | None = Field(
-#         None, description="Lineage property metadata, keyed by property identifier"
-#     )
+    Args:
+        props_metadata (dict[str, PropMetadata]): The property metadata dictionary
+            where keys are property identifiers and values are PropMetadata objects.
+        c_type (Literal["node", "edge", "tracklet", "lineage"]): The type of component
+            to which the property belongs.
+
+    Raises:
+        ValueError: If the key does not match the identifier.
+    """
+    for key, prop_md in props_metadata.items():
+        if key != prop_md.identifier:
+            raise ValueError(
+                f"{c_type.capitalize()} property key '{key}' does not match "
+                f"identifier {prop_md.identifier}"
+            )
 
 
 class RelatedObject(BaseModel):
@@ -264,17 +271,20 @@ class GeffMetadata(BaseModel):
             "and the values are PropMetadata objects describing the properties."
         ),
     )
-    # Same for lineages and tracklets
-
-    # PROPOSITION 2: more nesting to "declutter" GeffMetadata
-    # props_metadata: PropsMetadataCollection | None = Field(
-    #     None,
-    #     description=(
-    #         "Optional metadata describing properties in the graph, organized by component type. "
-    #         "Each component type (nodes, edges, tracklets, lineages) contains a dictionary "
-    #         "mapping property identifiers to their metadata."
-    #     ),
-    # )
+    tracklet_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for tracklet properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+    lineage_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for lineage properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
 
     sphere: str | None = Field(
         None,
@@ -407,8 +417,15 @@ class GeffMetadata(BaseModel):
                 )
 
         # Property metadata validation
-        # - unicity of identifiers per component type
-        # - identifiers must match between the dictionary key and the PropMetadata identifier field
+        if self.node_props_metadata is not None:
+            validate_props_metadata(self.node_props_metadata, "node")
+        if self.edge_props_metadata is not None:
+            validate_props_metadata(self.edge_props_metadata, "edge")
+        if self.tracklet_props_metadata is not None:
+            validate_props_metadata(self.tracklet_props_metadata, "tracklet")
+        if self.lineage_props_metadata is not None:
+            validate_props_metadata(self.lineage_props_metadata, "lineage")
+
         return self
 
     def write(self, group: zarr.Group | Path | str):
