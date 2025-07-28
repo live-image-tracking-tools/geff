@@ -119,8 +119,8 @@ class GeffReader:
 
     def build(
         self,
-        node_mask: NDArray[np.bool] | None = None,
-        edge_mask: NDArray[np.bool] | None = None,
+        node_mask: NDArray[np.bool_] | None = None,
+        edge_mask: NDArray[np.bool_] | None = None,
     ) -> InMemoryGeff:
         """
         Build an `InMemoryGeff` by loading the data from a GEFF zarr.
