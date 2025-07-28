@@ -86,7 +86,7 @@ On github pull requests, [pre-commit.ci](https://pre-commit.ci/), will always ru
 
 In order to deploy a new version, tag the commit with a version number and push
 it to github. This will trigger a github action that will build and deploy to
-PyPI. (see the "deploy" step in workflows/ci.yml). The version number is
+PyPI. (see the "deploy" step in [workflows/ci.yaml](./.github/workflows/ci.yaml)). The version number is
 determined automatically based on the tag.
 
 ```sh
