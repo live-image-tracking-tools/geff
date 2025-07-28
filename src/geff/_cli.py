@@ -19,14 +19,22 @@ logging.captureWarnings(True)
 
 
 @app.command()
-def validate(input_path: str = typer.Argument(..., help="Path to the GEFF file")):
+def validate(
+    input_path: str = typer.Argument(
+        ..., help="Path to the GEFF folder, e.g. data.zarr/tracks.geff"
+    ),
+):
     """Validate a GEFF file."""
     utils.validate(input_path)
     print(f"{input_path} is valid")
 
 
 @app.command()
-def info(input_path: str = typer.Argument(..., help="Path to the GEFF file")):
+def info(
+    input_path: str = typer.Argument(
+        ..., help="Path to the GEFF folder, e.g. data.zarr/tracks.geff"
+    ),
+):
     """Display information about a GEFF file."""
     metadata = GeffMetadata.read(zarr.open(input_path, mode="r"))
     print(metadata.model_dump_json(indent=2))
@@ -36,10 +44,19 @@ def info(input_path: str = typer.Argument(..., help="Path to the GEFF file")):
 def convert_ctc(
     ctc_path: Annotated[
         Path,
-        typer.Argument(help="The path to the directory containing ctc tracks", show_default=False),
+        typer.Argument(
+            help="The path to the directory containing ctc tracks (man_track.txt or res_track.txt),"
+            " e.g. data/01_GT/TRA or data/01_RES",
+            show_default=False,
+        ),
     ],
     geff_path: Annotated[
-        Path, typer.Argument(help="Path to save the output geff", show_default=False)
+        Path,
+        typer.Argument(
+            help="Path to save the output geff,  including the geff directory name "
+            "(eg. ~/folder/folder/data.zarr/tracks.geff)",
+            show_default=False,
+        ),
     ],
     segm_path: Annotated[
         Path | None,
@@ -102,7 +119,12 @@ def convert_trackmate_xml(
         Path, typer.Argument(help="The path to the TrackMate XML file", show_default=False)
     ],
     geff_path: Annotated[
-        Path, typer.Argument(help="The path to the GEFF file", show_default=False)
+        Path,
+        typer.Argument(
+            help="Path to save the output geff,  including the geff directory name"
+            " (eg. ~/folder/folder/data.zarr/tracks.geff)",
+            show_default=False,
+        ),
     ],
     discard_filtered_spots: Annotated[
         bool,
