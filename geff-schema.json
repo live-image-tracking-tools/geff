@@ -288,10 +288,12 @@
       "description": "Metadata describing a property in the geff graph.",
       "properties": {
         "identifier": {
+          "description": "Identifier of the property. Must be unique within its own component subgroup (nodes or edges). Must be a non-empty string.",
           "title": "Identifier",
           "type": "string"
         },
         "dtype": {
+          "description": "Data type of the property. Must be a non-empty string. Valid values are: <class 'numpy.str_'>, <class 'numpy.int16'>, <class 'numpy.bytes_'>, <class 'numpy.uint16'>, <class 'numpy.float64'>, <class 'numpy.int8'>, <class 'numpy.bool'>, <class 'numpy.uint8'>, <class 'numpy.float32'>, <class 'numpy.int64'>, <class 'numpy.uint64'>, <class 'numpy.int32'>, <class 'numpy.uint32'>",
           "title": "Dtype",
           "type": "string"
         },
@@ -305,6 +307,7 @@
             }
           ],
           "default": null,
+          "description": "Optional encoding when the property is stored as a string. For example, but not limited to, 'utf-8' or 'ascii'.",
           "title": "Encoding"
         },
         "unit": {
@@ -317,6 +320,7 @@
             }
           ],
           "default": null,
+          "description": "Optional unit of the property.",
           "title": "Unit"
         },
         "name": {
@@ -329,6 +333,7 @@
             }
           ],
           "default": null,
+          "description": "Optional human friendly name of the property",
           "title": "Name"
         },
         "description": {
@@ -341,6 +346,7 @@
             }
           ],
           "default": null,
+          "description": "Optional description of the property.",
           "title": "Description"
         }
       },
