@@ -45,8 +45,6 @@ def big_graph_path(tmpdir_factory, big_graph):
 
 
 @pytest.mark.parametrize("write_func", [geff_nx.write_nx, geff_rx.write_rx, geff_sg.write_sg])
-# TODO: the sg test is failing because the spatial properties don't have a missing array
-# line 147 in write_arrays
 def test_write(write_func, benchmark, tmp_path, big_graph_path):
     path = tmp_path / "test_write.zarr"
 
