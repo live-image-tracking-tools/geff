@@ -295,6 +295,18 @@
           "title": "Dtype",
           "type": "string"
         },
+        "encoding": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Encoding"
+        },
         "unit": {
           "anyOf": [
             {
@@ -318,18 +330,6 @@
           ],
           "default": null,
           "title": "Name"
-        },
-        "shortname": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Shortname"
         },
         "description": {
           "anyOf": [
