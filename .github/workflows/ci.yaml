@@ -93,7 +93,7 @@ jobs:
 
       - name: Compare hashes
         if: ${{ hashFiles( env.testjson ) != hashFiles('geff-schema.json') }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v7
         with:
           script: |
             core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`. ${{ hashFiles( env.testjson ) }} vs ${{ hashFiles('geff-schema.json') }}')
