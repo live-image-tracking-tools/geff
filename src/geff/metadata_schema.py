@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
 from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
-from .units import (
+from .valid_values import (
     ALLOWED_DTYPES,
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
