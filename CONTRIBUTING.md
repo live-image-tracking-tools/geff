@@ -32,9 +32,9 @@ If you are using [uv](https://docs.astral.sh/uv/):
 uv sync
 ```
 
-> [!NOTE]
-> All commands below assume an activate virtual environment, but you may also
-> use `pixi run <COMMAND>` or `uv run <COMMAND>` to run them.
+> [!IMPORTANT]
+> **All commands below assume an activate virtual environment, but you
+> may also use `pixi run <COMMAND>` or `uv run <COMMAND>` to run them.**
 
 ## Testing
 
