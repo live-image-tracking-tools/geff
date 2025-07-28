@@ -1,13 +1,10 @@
 name: Test geff
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
-    branches:
-      - main
+    branches: [main]
     tags: [v*]
+  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -15,11 +12,69 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
-    uses: ./.github/workflows/test.yaml
-    with:
-      test-target: "tests"
-      install-group: "dev"
+  test:
+    name: ${{ matrix.platform }} ${{ matrix.python-version }} ${{ matrix.group }} ${{ matrix.resolution }}
+    runs-on: ${{ matrix.platform }}
+    env:
+      # disable resyncing on uv run
+      UV_NO_SYNC: "1"
+      # test package pre-releases on cron-scheduled runs
+      UV_PRERELEASE: ${{ github.event_name == 'schedule' && 'allow' || 'if-necessary-or-explicit' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        resolution: [highest, lowest-direct]
+        group: [test, test-third-party]
+        exclude:
+          - group: test
+            resolution: lowest-direct # (already tested by third-party group)
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --no-dev --group ${{ matrix.group }} --resolution ${{ matrix.resolution }}
+
+      - name: Get witty cache directory
+        if: matrix.group == 'test-third-party'
+        id: cache-path
+        shell: bash
+        run: |
+          dir=$(uv run python -c 'import witty; print(witty.get_witty_cache_dir())')
+          echo "path=$dir" >> "$GITHUB_OUTPUT"
+
+      - name: Restore witty cache
+        if: matrix.group == 'test-third-party'
+        uses: actions/cache/restore@v4
+        id: witty-cache
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: ${{ matrix.platform }} - ${{ matrix.python-version }}
+
+      - name: Test
+        run: |
+          uv run coverage run -m pytest --color=yes -v
+          uv run coverage xml
+
+      - name: Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Save witty cache
+        if: matrix.group == 'test-third-party'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.cache-path.outputs.path }}
+          key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
   schema:
     name: Check json schema
@@ -28,21 +83,11 @@ jobs:
       testjson: check-json.json
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.12"
-          cache-dependency-path: "pyproject.toml"
-          cache: "pip"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install -U pip
-          python -m pip install .
-
-      - name: Generate json 
-        run: python scripts/export_json_schema.py --filename $testjson
+          enable-cache: true
+      - name: Generate json
+        run: uv run scripts/export_json_schema.py --filename $testjson
 
       - run: cat $testjson
 
@@ -51,7 +96,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-              core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`. ${{ hashFiles( env.testjson ) }} vs ${{ hashFiles('geff-schema.json') }}')
+            core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`. ${{ hashFiles( env.testjson ) }} vs ${{ hashFiles('geff-schema.json') }}')
 
   benchmark:
     name: Benchmark
@@ -62,17 +107,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 50 # this is to make sure we obtain the target base commit
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
-          python-version: 3.13
-          cache-dependency-path: "pyproject.toml"
-          cache: "pip"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install -U pip
+          enable-cache: true
 
       - name: Retrieve cached baseline if available
         uses: actions/cache/restore@v4
@@ -85,8 +122,7 @@ jobs:
         if: steps.cache_baseline.outputs.cache-hit != 'true'
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
-          python -m pip install -e . --group bench
-          pytest tests/bench.py -v --benchmark-json baseline.json
+          uv run --group bench pytest tests/bench.py -v --benchmark-json baseline.json
 
       - name: Cache baseline results
         uses: actions/cache/save@v4
@@ -98,11 +134,10 @@ jobs:
       - name: Run benchmark on PR head commit
         run: |
           git checkout ${{ github.event.pull_request.head.sha }}
-          python -m pip install -e . --group bench
-          pytest tests/bench.py -v --benchmark-json pr.json
+          uv run --group bench pytest tests/bench.py -v --benchmark-json pr.json
 
       - name: Generate report
-        run: python scripts/benchmark-pr.py baseline.json pr.json report.md
+        run: uv run scripts/benchmark-pr.py baseline.json pr.json report.md
 
       - name: Comment on commit with report for non-forks
         uses: peter-evans/commit-comment@v3
@@ -111,43 +146,32 @@ jobs:
           body-path: report.md
           token: ${{ secrets.COMMIT_MESSAGE_TOKEN }}
 
-  deploy:
-    name: Deploy
-    # TODO: Add back successful test requirement once package is more stable
-    # needs: test
-    # if: success() && startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule'
-    if: startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule'
+  build-and-inspect-package:
+    name: Build & inspect package.
+    needs: test
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: write
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: hynek/build-and-inspect-python-package@v2
 
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v5
+  upload-to-pypi:
+    if: success() && startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule'
+    name: Upload package to PyPI
+    needs: build-and-inspect-package
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # this permission is required for trusted publishing
+      contents: write  # this permission is required for generate_release_notes
+    steps:
+      - name: Download built artifact to dist/
+        uses: actions/download-artifact@v4
         with:
-          python-version: "3.x"
-
-      - name: Install geff
-        run: pip install .
-
-      - run: echo ${{ github.ref_name }}
-
-      - name: 👷 Build
-        run: |
-          python -m pip install build
-          python -m build
-
+          name: Packages
+          path: dist
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true

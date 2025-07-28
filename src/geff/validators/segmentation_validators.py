@@ -1,10 +1,17 @@
-from collections import defaultdict
-from collections.abc import Sequence
-from pathlib import Path
+from __future__ import annotations
 
-import dask.array as da
+from collections import defaultdict
+from pathlib import Path
+from typing import TYPE_CHECKING
+
 import numpy as np
 import zarr
+import zarr.storage
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from numpy.typing import ArrayLike
 
 
 def has_valid_seg_id(
@@ -56,15 +63,14 @@ def has_valid_seg_id(
 
 def axes_match_seg_dims(
     store: str | Path | zarr.storage.StoreLike,
-    segmentation: np.ndarray | da.Array | zarr.Array,
+    segmentation: ArrayLike,
 ) -> tuple[bool, list[str]]:
     """Validate that geff axes metadata have the same number of dimensions as the
     segmentation data.
 
     Args:
         store (DirectoryStore, MemoryStore): A Zarr store or a path to one.
-        segmentation (np.ndarray | da.Array | zarr.Array): a 3D or 4D segmentation array
-        (t, (z), y, x).
+        segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
 
     Returns:
         tuple (bool, list[str])
@@ -81,7 +87,7 @@ def axes_match_seg_dims(
     axes = metadata.get("geff", {}).get("axes")
 
     if axes:
-        return segmentation.ndim == len(axes), errors
+        return np.asanyarray(segmentation).ndim == len(axes), errors
     else:
         errors.append("No axes metadata found in this geff.")
         return False, errors
@@ -89,16 +95,15 @@ def axes_match_seg_dims(
 
 def graph_is_in_seg_bounds(
     store: str | Path | zarr.storage.StoreLike,
-    segmentation: np.ndarray | da.Array | zarr.Array,
-    scale: tuple[float] | list[float] | None = None,
+    segmentation: ArrayLike,
+    scale: Sequence[float] | None = None,
 ) -> tuple[bool, list[str]]:
     """Validate that geff axes metadata have the same number of dimensions as the
     segmentation data.
 
     Args:
         store (DirectoryStore, MemoryStore): A geff zarr store or a path to one.
-        segmentation (np.ndarray | da.Array | zarr.Array): a 3D or 4D segmentation array
-            (t, (z), y, x).
+        segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
         scale (tuple[float] | list[float] | None = None): optional scaling tuple, with the
           same length as the number of dimensions in the segmentation data.
 
@@ -117,10 +122,11 @@ def graph_is_in_seg_bounds(
     metadata = dict(group.attrs)
     axes = metadata.get("geff", {}).get("axes")
 
+    segmentation = np.asanyarray(segmentation)
     seg_shape = segmentation.shape
 
     if scale is None:
-        scale = [1] * segmentation.ndim
+        scale = [1.0] * segmentation.ndim
 
     if len(scale) != segmentation.ndim:
         errors.append(
@@ -150,9 +156,9 @@ def graph_is_in_seg_bounds(
 
 
 def has_seg_ids_at_time_points(
-    segmentation: np.ndarray | da.Array | zarr.Array,
-    time_points: list[int],
-    seg_ids: list[int],
+    segmentation: ArrayLike,
+    time_points: Sequence[int],
+    seg_ids: Sequence[int],
     store: str | Path | zarr.storage.StoreLike | None = None,
 ) -> tuple[bool, list[str]]:
     """
@@ -161,10 +167,9 @@ def has_seg_ids_at_time_points(
     this is not possible, it is assumed that time is on axis 0.
 
     Args:
-        segmentation (np.ndarray | da.Array | zarr.Array): a 3D or 4D segmentation array
-            (t, (z), y, x).
-        time_points (list[int]): list of time points to check.
-        seg_ids (list[int]): list of seg_ids to check.
+        segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
+        time_points (Sequence[int]): Sequence of time points to check.
+        seg_ids (Sequence[int]): Sequence of seg_ids to check.
         store (DirectoryStore, MemoryStore, | None = None): Optional geff Zarr store or a
           path to one. If provided, it will attempt to read the axis order from the
           metadata. Otherwise, it is assumed that the dimension order is t(z)yx.
@@ -218,22 +223,21 @@ def has_seg_ids_at_time_points(
 
 
 def has_seg_ids_at_coords(
-    segmentation: np.ndarray | da.Array | zarr.Array,
-    coords: list[Sequence[int]],
-    seg_ids: list[int],
-    scale: tuple[float] | list[float] | None = None,
+    segmentation: ArrayLike,
+    coords: Sequence[Sequence[int]],
+    seg_ids: Sequence[int],
+    scale: Sequence[float] | None = None,
 ) -> tuple[bool, list[str]]:
     """
     Validates that the pixels at given coordinates in the segmentation have a value equal
       to the provided seg_ids.
 
     Args:
-        segmentation (np.ndarray | da.Array | zarr.Array): a 3D or 4D segmentation array
-            (t, (z), y, x).
-        coords (list[Sequence[int]]): list of t(z)yx coordinates, should have the same order as the
-            segmentation dimensions.
-        seg_ids (list[int]): list of corresponding seg_ids to check.
-        scale (tuple[float] | list[float] | None = None): optional scaling tuple, with the same
+        segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
+        coords (Sequence[Sequence[int]]): Sequence of t(z)yx coordinates, should have the
+            same order as the segmentation dimensions.
+        seg_ids (Sequence[int]): Sequence of corresponding seg_ids to check.
+        scale (Sequence[float] | None = None): optional scaling tuple, with the same
             length as the number of dimensions in the segmentation data.
 
     Returns:
@@ -249,8 +253,9 @@ def has_seg_ids_at_coords(
         errors.append("Coordinate list must have the same length as the list of seg_ids to test.")
         return False, errors
 
+    segmentation = np.asanyarray(segmentation)
     if scale is None:
-        scale = [1] * segmentation.ndim
+        scale = [1.0] * segmentation.ndim
 
     if len(scale) != segmentation.ndim:
         errors.append(

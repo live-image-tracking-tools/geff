@@ -28,32 +28,13 @@ __all__ = [
 
 
 def __getattr__(name: str) -> Any:
-    if name == "read_rx":
-        try:
-            from geff.rustworkx.io import read_rx
+    if name in ("read_rx", "write_rx"):
+        from geff.rustworkx import io
 
-            return read_rx
-        except ImportError as e:
-            raise ImportError("install with geff[rx] to use read_rx") from e
-    if name == "write_rx":
-        try:
-            from geff.rustworkx.io import write_rx
+        return getattr(io, name)
+    if name in ("read_sg", "write_sg"):
+        from geff.spatial_graph import io  # type: ignore[no-redef]
 
-            return write_rx
-        except ImportError as e:
-            raise ImportError("install with geff[rx] to use write_rx") from e
-    if name == "read_sg":
-        try:
-            from .spatial_graph.io import read_sg
+        return getattr(io, name)
 
-            return read_sg
-        except ImportError as e:
-            raise ImportError("install with geff[spatial_graph] to use read_sg") from e
-    if name == "write_sg":
-        try:
-            from .spatial_graph.io import write_sg
-
-            return write_sg
-        except ImportError as e:
-            raise ImportError("install with geff[spatial_graph] to use write_sg") from e
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
