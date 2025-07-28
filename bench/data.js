@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753463027111,
+  "lastUpdate": 1753709036245,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3507,6 +3507,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.4224030576654463",
             "extra": "mean: 9.384988955333332 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "talley.lambert@gmail.com",
+            "name": "Talley Lambert",
+            "username": "tlambert03"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7a518c06d31aa664373233b64a0ed5dafeea6569",
+          "message": "refactor: cleanup third-party imports and tests (#248)\n\ncloses #216 by cleaning up patterns around third party dependencies.\nhere's the overview:\n\n- in `pyproject.toml`:\n- `dev` environment is removed and made `default` (I think in most\ncases, in local development, this is what you want. users just want to\n`pixi install`, `pixi run` ... without having to use `-e dev` every\ntime. (cc @cmalinmayor and @msschwartz21 ... lemme know if you want that\nreverted)\n- removes duplicate third party features from the `dev` dependency\ngroup.\n- adds all the third party features manually to the default pixi\nenvironment (because pixi doesn't support the standard\n`\"geff[spatial-graph,ctc,rx,lxml]\"` syntax in dependency groups, so we\nhave to do it manually\n- `ci.yaml`\n- removes the internal reusable worfklow that was only being used in one\nplace (makes it easier to modify the test without creating one-off\ninputs for each thing you want to modify)\n- adds a test with *no* third-party extras, to ensure that there are no\nassumptions about dependencies that \"leak\" into the package due to the\ndev environment\n- this also means that all tests must gracefully skip if their required\nthird-party package is missing (using\n`pytest.skip(allow_module_level=True)`\n- updates all third-party modules to check one-time at module import,\nrather than each time inside a function. This pattern could be made\nsimpler if this package moved to private modules... but until then, we\nhave to assume that the end user is\n\"allowed\" to import from anywhere. However, changing to all private\nmodules will cause lots of conflicts in open PRs and should be done\nlater\n- simplified the imports in top level `geff.__init__` (here too, because\nall modules are public, we can't assume that they will be importing from\nthe top, so we *have* to move those guards down to the lowest level\npublic export)\n- drops the lxml dependency for trackmate. The standard library xml\nmodule is sufficient for this use case and we should be able to support\ntrackmate without demanding an additional dependency. If the user *does*\ninstall lxml, we can and do still use it (they have the same API), but\nno need to fail without it. (cc @lxenard)\n- I removed the `Attribute` type alias from trackmate_xml... there was a\nplace it still failed, and given how many things are in the union, I'm\nnot sure it's really adding that much value at this point. (cc @lxenard)\n- updated type hints in trackmate_lxml (`ET.iterparse` is not valid as a\ntype hint, cc @lxenard)\n- updates the segmentation type hint in `segmentation_validators` to\n`ArrayLike`. No specific need to restrict it just to numpy, dask, and\nzarr... there are plenty of other libraries that also implement an\narraylike api that we can easily support in this context (xarray, torch,\njax, etc...). cc @fjorka\n- relaxes most of the `list[int] | tuple[int]` to `Sequence[int]`.\nside-note: `tuple[int]` implies a tuple of length 1 a *single*\ninteger... `tuple[int, ...]` is what you want for a variable length\ntuple of integers (cc @fjorka)\n- adds `py.typed` to top level (otherwise mypy/pyright sees geff as\nuntyped ... even though it has a lot of type hints)\n\nside-note: it would be nice not to bring in the dask dependency here\nsimply for the purpose of reading in a folder of tiffs and exporting to\nzarr. tifffile itself can create a zarr store from a multi-page tiff or\nfolder of tiffs. (cc @JoOkuma)\n\napologies for all the things in a single PR. let me know if you want it\nbroken apart\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>\nCo-authored-by: Laura Xénard <33941387+lxenard@users.noreply.github.com>",
+          "timestamp": "2025-07-28T09:20:34-04:00",
+          "tree_id": "78722e5bbd8ac85ec6846e2527ac3ab04d9b4259",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/7a518c06d31aa664373233b64a0ed5dafeea6569"
+        },
+        "date": 1753709035478,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.12294433166796877,
+            "unit": "iter/sec",
+            "range": "stddev: 1.3286082369170054",
+            "extra": "mean: 8.133762544666665 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 18.931410835942554,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0005623640157623402",
+            "extra": "mean: 52.82226499999846 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.06654140213704317,
+            "unit": "iter/sec",
+            "range": "stddev: 0.43236436401512807",
+            "extra": "mean: 15.028237576666669 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.10968476686044604,
+            "unit": "iter/sec",
+            "range": "stddev: 0.9678044830405319",
+            "extra": "mean: 9.117036290666675 sec\nrounds: 3"
           }
         ]
       }
