@@ -233,7 +233,7 @@ class GeffMetadata(BaseModel):
     )
 
     geff_version: str = Field(
-        ...,
+        default=version("geff"),
         pattern=VERSION_PATTERN,
         description=(
             "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
@@ -344,13 +344,6 @@ class GeffMetadata(BaseModel):
         default_factory=dict,
         description="Extra metadata that is not part of the schema",
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_model_before(cls, values: dict) -> dict:
-        if values.get("geff_version") is None:
-            values["geff_version"] = version("geff")
-        return values
 
     @model_validator(mode="after")
     def _validate_model_after(self) -> GeffMetadata:

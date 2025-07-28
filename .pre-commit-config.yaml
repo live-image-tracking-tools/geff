@@ -39,3 +39,5 @@ repos:
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
+          # - numpy # Uncomment when feeling brave enough to fix all the numpy type errors
+          - pydantic
