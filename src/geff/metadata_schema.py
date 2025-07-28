@@ -151,10 +151,6 @@ class PropMetadata(BaseModel):
             raise ValueError("Property identifier cannot be an empty string.")
         if not self.dtype:
             raise ValueError("Property dtype cannot be an empty string.")
-        # TODO: how to deal with the unit?
-        # - what value to use if the prop has no unit?
-        # - do we set a default value? => I would say no default value because even when
-        #  the prop has no unit, we want the user to consciously specify that it has no unit.
         return self
 
 
@@ -267,20 +263,6 @@ class GeffMetadata(BaseModel):
         None,
         description=(
             "Metadata for edge properties. The keys are the property identifiers, "
-            "and the values are PropMetadata objects describing the properties."
-        ),
-    )
-    tracklet_props_metadata: dict[str, PropMetadata] | None = Field(
-        None,
-        description=(
-            "Metadata for tracklet properties. The keys are the property identifiers, "
-            "and the values are PropMetadata objects describing the properties."
-        ),
-    )
-    lineage_props_metadata: dict[str, PropMetadata] | None = Field(
-        None,
-        description=(
-            "Metadata for lineage properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
         ),
     )
@@ -420,10 +402,6 @@ class GeffMetadata(BaseModel):
             validate_props_metadata(self.node_props_metadata, "node")
         if self.edge_props_metadata is not None:
             validate_props_metadata(self.edge_props_metadata, "edge")
-        if self.tracklet_props_metadata is not None:
-            validate_props_metadata(self.tracklet_props_metadata, "tracklet")
-        if self.lineage_props_metadata is not None:
-            validate_props_metadata(self.lineage_props_metadata, "lineage")
 
         return self
 
