@@ -135,6 +135,46 @@ class DisplayHint(BaseModel):
     )
 
 
+class PropMetadata(BaseModel):
+    """Metadata describing a property in the geff graph."""
+
+    identifier: str
+    dtype: str  # TODO: investigate how other packages deal with data types
+    unit: str
+    name: str | None = None
+    shortname: str | None = None  # TODO: do we keep this?
+    description: str | None = None
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> PropMetadata:
+        if not self.identifier:
+            raise ValueError("Property identifier cannot be an empty string.")
+        if not self.dtype:
+            raise ValueError("Property dtype cannot be an empty string.")
+        # TODO: how to deal with the unit?
+        # - what value to use if the prop has no unit?
+        # - do we set a default value? => I would say no default value because even when
+        #  the prop has no unit, we want the user to consciously specify that it has no unit.
+        return self
+
+
+# class PropsMetadataCollection(BaseModel):
+#     """Collection of property metadata organized by component type."""
+
+#     nodes: dict[str, PropMetadata] | None = Field(  # or could be Sequence instead of dict
+#         None, description="Node property metadata, keyed by property identifier"
+#     )
+#     edges: dict[str, PropMetadata] | None = Field(
+#         None, description="Edge property metadata, keyed by property identifier"
+#     )
+#     tracklets: dict[str, PropMetadata] | None = Field(
+#         None, description="Tracklet property metadata, keyed by property identifier"
+#     )
+#     lineages: dict[str, PropMetadata] | None = Field(
+#         None, description="Lineage property metadata, keyed by property identifier"
+#     )
+
+
 class RelatedObject(BaseModel):
     type: str = Field(
         ...,
@@ -208,6 +248,34 @@ class GeffMetadata(BaseModel):
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
+
+    # PROPOSITION 1: separate metadata by component type
+    node_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for node properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+    edge_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for edge properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+    # Same for lineages and tracklets
+
+    # PROPOSITION 2: more nesting to "declutter" GeffMetadata
+    # props_metadata: PropsMetadataCollection | None = Field(
+    #     None,
+    #     description=(
+    #         "Optional metadata describing properties in the graph, organized by component type. "
+    #         "Each component type (nodes, edges, tracklets, lineages) contains a dictionary "
+    #         "mapping property identifiers to their metadata."
+    #     ),
+    # )
+
     sphere: str | None = Field(
         None,
         title="Node property: Detections as spheres",
@@ -337,6 +405,10 @@ class GeffMetadata(BaseModel):
                     f"Display hint display_depth name {self.display_hints.display_depth} "
                     f"not found in axes {ax_names}"
                 )
+
+        # Property metadata validation
+        # - unicity of identifiers per component type
+        # - identifiers must match between the dictionary key and the PropMetadata identifier field
         return self
 
     def write(self, group: zarr.Group | Path | str):
