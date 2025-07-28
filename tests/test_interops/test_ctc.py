@@ -1,15 +1,20 @@
+import pytest
+
+try:
+    import tifffile
+
+    from geff.interops import ctc
+except ImportError:
+    pytest.skip("geff[ctc] not installed", allow_module_level=True)
+
 import itertools
 from pathlib import Path
 
 import numpy as np
-import pytest
 import zarr
 from typer.testing import CliRunner
 
-from geff.interops.ctc import app, ctc_tiffs_to_zarr, from_ctc_to_geff
 from geff.networkx.io import read_nx
-
-tifffile = pytest.importorskip("tifffile")
 
 
 def create_mock_data(
@@ -85,13 +90,13 @@ def test_ctc_to_geff(
         ]
         if tczyx:
             cmd_args.append("--tczyx")
-        result = CliRunner().invoke(app, cmd_args)
+        result = CliRunner().invoke(ctc.app, cmd_args)
         assert result.exit_code == 0, (
             f"{cmd_args} failed with exit code {result.exit_code} and "
             f"message:\n{result.stdout}\n{result.stderr}"
         )
     else:
-        from_ctc_to_geff(
+        ctc.from_ctc_to_geff(
             ctc_path=ctc_path,
             geff_path=geff_path,
             segmentation_store=segm_path,
@@ -130,7 +135,7 @@ def test_ctc_image_to_zarr(tmp_path: Path, ctzyx: bool) -> None:
     ctc_path = create_mock_data(tmp_path, is_gt=False)
     zarr_path = tmp_path / "segm.zarr"
 
-    ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=ctzyx)
+    ctc.ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=ctzyx)
 
     expected_arr = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
     copied_arr = zarr.open(zarr_path, mode="r")

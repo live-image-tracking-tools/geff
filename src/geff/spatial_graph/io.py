@@ -3,8 +3,15 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING, Literal
 
+try:
+    import spatial_graph as sg
+except ImportError as e:
+    raise ImportError(
+        "This module requires spatial-graph to be installed. "
+        "Please install it with `pip install 'geff[spatial-graph]'`."
+    ) from e
+
 import numpy as np
-import spatial_graph as sg
 from zarr.storage import StoreLike
 
 if TYPE_CHECKING:
