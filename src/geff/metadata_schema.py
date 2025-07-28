@@ -140,7 +140,7 @@ class PropMetadata(BaseModel):
 
     identifier: str
     dtype: str  # TODO: investigate how other packages deal with data types
-    unit: str
+    unit: str | None = None
     name: str | None = None
     shortname: str | None = None  # TODO: do we keep this?
     description: str | None = None
