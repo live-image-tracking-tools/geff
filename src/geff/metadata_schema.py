@@ -152,8 +152,8 @@ class PropMetadata(BaseModel):
         ...,
         description=(
             "Data type of the property. Must be a non-empty string. "
-            "Valid values are: "
-            f"{', '.join(str(dtype) for dtype in ALLOWED_DTYPES)}"
+            "Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. "
+            "Examples of invalid values: 'integer', 'np.int16', 'number', 'string'."
         ),
     )
     encoding: str | None = Field(
@@ -183,9 +183,13 @@ class PropMetadata(BaseModel):
         if not self.dtype:
             raise ValueError("Property dtype cannot be an empty string.")
 
-        if not validate_data_type(self.dtype):
+        try:
+            dtype_is_valid = validate_data_type(self.dtype)
+        except TypeError:
+            dtype_is_valid = False
+        if not dtype_is_valid:
             warnings.warn(
-                f"Data type {self.dtype} not in valid data types {ALLOWED_DTYPES}. "
+                f"Data type {self.dtype} cannot be matched to a valid data type {ALLOWED_DTYPES}. "
                 "Reader applications may not know what to do with this information.",
                 stacklevel=2,
             )
