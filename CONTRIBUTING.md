@@ -86,8 +86,9 @@ On github pull requests, [pre-commit.ci](https://pre-commit.ci/), will always ru
 
 In order to deploy a new version, tag the commit with a version number and push
 it to github. This will trigger a github action that will build and deploy to
-PyPI. (see the "deploy" step in [workflows/ci.yaml](./.github/workflows/ci.yaml)). The version number is
-determined automatically based on the tag.
+PyPI. (see the "build-and-inspect-package" and "upload-to-pypi" steps in
+[workflows/ci.yaml](./.github/workflows/ci.yaml)). The version number is
+determined automatically based on the tag (using `setuptools-scm`)
 
 ```sh
 git tag -a v0.1.0 -m v0.1.0
@@ -96,7 +97,7 @@ git push --follow-tags
 
 ## Docs
 
-Docs are written with MkDocs.
+Docs are written with [MkDocs](https://www.mkdocs.org).
 
 `mkdocs` commands below must either be run in a virtual environment with the
 `docs` group installed (`pip install -e . --group docs`)
