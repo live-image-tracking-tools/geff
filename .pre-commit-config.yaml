@@ -30,3 +30,7 @@ repos:
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
+          - networkx
+          - typer
+          # codebase not ready for this one yet
+          # - pydantic
