@@ -162,8 +162,8 @@ jobs:
     needs: build-and-inspect-package
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
-      contents: write
+      id-token: write  # this permission is required for trusted publishing
+      contents: write  # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
         uses: actions/download-artifact@v4
@@ -172,8 +172,6 @@ jobs:
           path: dist
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
