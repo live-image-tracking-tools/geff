@@ -9,7 +9,7 @@ repos:
     hooks:
       - id: update-json
         name: Update geff-schema.json
-        entry: pixi run -e dev update-json
+        entry: pixi run update-json
         language: python
         types: [python]
         pass_filenames: false

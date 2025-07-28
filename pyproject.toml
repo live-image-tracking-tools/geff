@@ -34,26 +34,21 @@ classifiers = [
 spatial-graph = ["spatial-graph"]
 ctc = ["dask", "scikit-image", "tifffile", "imagecodecs"]
 rx = ["rustworkx>=0.16.0"]
-trackmate_xml = ["lxml"]
+lxml = ["lxml"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
-dev = [
+test-third-party = [
     { include-group = "test" },
+    "geff[spatial-graph,ctc,rx,lxml]",
+]
+dev = [
+    { include-group = "test-third-party" },
     "mypy",
     "pre-commit",
     "ruff",
     "ipython",
     "types-PyYAML",
-    "spatial-graph",
-    "rustworkx",
-    # ctc stuff:
-    "dask",
-    "scikit-image",
-    "tifffile",
-    "imagecodecs",
-    # trackmate_xml stuff
-    "lxml",
 ]
 docs = [
     "mkdocs-material",
@@ -86,19 +81,15 @@ geff = { path = ".", editable = true }
 python = "3.12.*"
 
 [tool.pixi.environments]
-default = { solve-group = "default" }
-dev = { features = ["dev"], solve-group = "default" }
+default = ["dev", "spatial-graph", "ctc", "rx", "lxml"]
 build = { features = ["build"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 bench = { features = ["dev", "bench"], solve-group = "default" }
 
 [tool.pixi.tasks]
 update-json = "python scripts/export_json_schema.py"
-
-[tool.pixi.feature.dev.tasks]
 test = "coverage run -m pytest"
 test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
-benchmark = { cmd = "pytest tests/bench.py" }
 
 [tool.pixi.feature.bench.tasks]
 benchmark = "pytest tests/bench.py"
@@ -110,7 +101,7 @@ build = "*"
 build = "python -m build"
 
 [tool.pixi.feature.docs.tasks]
-preview-docs = {cmd = "mkdocs serve"}
+preview-docs = { cmd = "mkdocs serve" }
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
