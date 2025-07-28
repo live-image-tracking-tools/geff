@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753709036245,
+  "lastUpdate": 1753730504866,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3559,6 +3559,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.9678044830405319",
             "extra": "mean: 9.117036290666675 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "33941387+lxenard@users.noreply.github.com",
+            "name": "Laura Xénard",
+            "username": "lxenard"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d645cfc3d421aa2e4d6896ed6388f905a9fef486",
+          "message": "Add properties metadata to GeffMetadata specification (#253)\n\n# Proposed Change\nContributes towards #244, but additional work is needed to close the\nissue\n\nAdd the following optional fields to GeffMetadata:\n- node_props_metadata\n- edge_props_metadata\n- tracklet_props_metadata\n- lineage_props_metadata\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- New feature or enhancement\n\nWhich topics does your change affect? Delete those that do not apply.\n- Specification\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [ ] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n## If you changed the specification\n- [ ] I have checked that any validation functions and tests reflect the\nchanges.\n- [x] I have updated the GeffMetadata and the json schema using `pixi\nrun update-json` if necessary.\n- [ ] I have updated docs/specification.md to reflect the change.\n- [ ] I have updated implementations to reflect the change. (This can\nhappen in separate PRs on a feature branch, but must be complete before\nmerging into main.)\n\n# Further Comments\nNo tests written for the new classes/functions for now => I will write\nthem in the other PR\nBut the current tests all pass (except spatial-graph because I don't\nhave the dependency)\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2025-07-28T15:18:50-04:00",
+          "tree_id": "d2f55dc2fa0e4506ae800c18e81a9af315aa1f94",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/d645cfc3d421aa2e4d6896ed6388f905a9fef486"
+        },
+        "date": 1753730503913,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.12627086295459514,
+            "unit": "iter/sec",
+            "range": "stddev: 1.2284971240947906",
+            "extra": "mean: 7.919483375666665 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 19.66427149940453,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00029420452341311147",
+            "extra": "mean: 50.8536510000018 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.06667651303182663,
+            "unit": "iter/sec",
+            "range": "stddev: 0.33373184013149193",
+            "extra": "mean: 14.997784895 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.11292800377872272,
+            "unit": "iter/sec",
+            "range": "stddev: 0.9221948290929106",
+            "extra": "mean: 8.855199477000005 sec\nrounds: 3"
           }
         ]
       }
