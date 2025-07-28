@@ -136,6 +136,10 @@ disallow_subclassing_any = false
 show_error_codes = true
 pretty = true
 
+[tool.pyright]
+# in a pydantic-heavy project, there are many false positives
+reportCallIssue = false
+
 # https://coverage.readthedocs.io/en/6.4/config.html
 [tool.coverage.report]
 exclude_lines = [
@@ -176,7 +180,6 @@ docs = { features = ["docs"], solve-group = "default" }
 bench = { features = ["dev", "bench"], solve-group = "default" }
 
 [tool.pixi.tasks]
-update-json = "python scripts/export_json_schema.py"
 test = "coverage run -m pytest"
 test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
 
