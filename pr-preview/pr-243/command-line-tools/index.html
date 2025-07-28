@@ -547,8 +547,12 @@
 </code></pre></div>
 <p>Options:</p>
 <div class="highlight"><pre><span></span><code>  CTC_PATH                      The path to the directory containing ctc
-                                tracks  \[required]
-  GEFF_PATH                     Path to save the output geff  \[required]
+                                tracks (man_track.txt or res_track.txt), e.g.
+                                data/01_GT/TRA or data/01_RES  \[required]
+  GEFF_PATH                     Path to save the output geff,  including the
+                                geff directory name (eg.
+                                ~/folder/folder/data.zarr/tracks.geff)
+                                \[required]
   --segm-path PATH              The path to export the segmentation file, if
                                 not provided, it won&#39;t be exported.
   --input-image-dir PATH        The path to the input image directory. If not
@@ -569,7 +573,10 @@
 <p>Options:</p>
 <div class="highlight"><pre><span></span><code>  XML_PATH                        The path to the TrackMate XML file
                                   \[required]
-  GEFF_PATH                       The path to the GEFF file  \[required]
+  GEFF_PATH                       Path to save the output geff,  including the
+                                  geff directory name (eg.
+                                  ~/folder/folder/data.zarr/tracks.geff)
+                                  \[required]
   --discard-filtered-spots / --no-discard-filtered-spots
                                   True to discard the spots filtered out in
                                   TrackMate, False otherwise.  \[default: no-
@@ -588,7 +595,7 @@
 <div class="highlight"><pre><span></span><code> info [OPTIONS] INPUT_PATH
 </code></pre></div>
 <p>Options:</p>
-<div class="highlight"><pre><span></span><code>  INPUT_PATH  Path to the GEFF file  \[required]
+<div class="highlight"><pre><span></span><code>  INPUT_PATH  Path to the GEFF folder, e.g. data.zarr/tracks.geff  \[required]
 </code></pre></div>
 <h3 id="validate">validate</h3>
 <p>Validate a GEFF file.</p>
@@ -596,7 +603,7 @@
 <div class="highlight"><pre><span></span><code> validate [OPTIONS] INPUT_PATH
 </code></pre></div>
 <p>Options:</p>
-<div class="highlight"><pre><span></span><code>  INPUT_PATH  Path to the GEFF file  \[required]
+<div class="highlight"><pre><span></span><code>  INPUT_PATH  Path to the GEFF folder, e.g. data.zarr/tracks.geff  \[required]
 </code></pre></div>
 <h2 id="running-command-line-tools">Running command line tools</h2>
 <p>Without pip-installing <code>geff</code>, you can run the tools as 
