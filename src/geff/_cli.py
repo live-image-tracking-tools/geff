@@ -53,7 +53,7 @@ def convert_ctc(
     geff_path: Annotated[
         Path,
         typer.Argument(
-            help="Path to save the output geff,  including the geff directory name "
+            help="Path to save the output geff, including the geff directory name "
             "(eg. ~/folder/folder/data.zarr/tracks.geff)",
             show_default=False,
         ),
@@ -121,7 +121,7 @@ def convert_trackmate_xml(
     geff_path: Annotated[
         Path,
         typer.Argument(
-            help="Path to save the output geff,  including the geff directory name"
+            help="Path to save the output geff, including the geff directory name"
             " (eg. ~/folder/folder/data.zarr/tracks.geff)",
             show_default=False,
         ),
