@@ -5,7 +5,7 @@
 For local development, clone the repo:
 
 ```sh
-git clone https://github.com/funkelab/geff.git
+git clone https://github.com/live-image-tracking-tools/geff.git
 cd geff
 ```
 
