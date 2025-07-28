@@ -14,14 +14,14 @@ logging.captureWarnings(True)
 
 
 @app.command()
-def validate(input_path: str = typer.Argument(..., help="Path to the GEFF file")):
+def validate(input_path: str = typer.Argument(..., help="Path to the GEFF file")) -> None:
     """Validate a GEFF file."""
     utils.validate(input_path)
     print(f"{input_path} is valid")
 
 
 @app.command()
-def info(input_path: str = typer.Argument(..., help="Path to the GEFF file")):
+def info(input_path: str = typer.Argument(..., help="Path to the GEFF file")) -> None:
     """Display information about a GEFF file."""
     metadata = GeffMetadata.read(zarr.open(input_path, mode="r"))
     print(metadata.model_dump_json(indent=2))

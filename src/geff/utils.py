@@ -51,7 +51,7 @@ def remove_tilde(store: StoreLike) -> StoreLike:
     return store
 
 
-def validate(store: StoreLike):
+def validate(store: StoreLike) -> None:
     """Check that the structure of the zarr conforms to geff specification
 
     Args:

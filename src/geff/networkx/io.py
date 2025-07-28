@@ -51,7 +51,7 @@ def write_nx(
     axis_units: list[str | None] | None = None,
     axis_types: list[str | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
-):
+) -> None:
     """Write a networkx graph to the geff file format
 
     Args:

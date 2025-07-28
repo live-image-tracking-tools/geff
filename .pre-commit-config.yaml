@@ -5,15 +5,6 @@ ci:
   autofix_prs: false
 
 repos:
-  - repo: local
-    hooks:
-      - id: update-json
-        name: Update geff-schema.json
-        entry: pixi run update-json
-        language: python
-        types: [python]
-        pass_filenames: false
-        stages: [manual]
   - repo: https://github.com/crate-ci/typos
     rev: v1.34.0
     hooks:
@@ -23,7 +14,7 @@ repos:
     rev: v0.12.4
     hooks:
       - id: ruff-check
-        args: [--fix]
+        args: [--fix, --unsafe-fixes]
       - id: ruff-format
 
   - repo: https://github.com/abravalheri/validate-pyproject
@@ -39,3 +30,8 @@ repos:
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
+          - types-networkx
+          - pydantic
+          - typer
+          # - numpy
+          # - zarr

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import json
 import warnings
-from collections.abc import Sequence  # noqa: TC003
+from collections.abc import (
+    Sequence,  # noqa: TC003
+)
 from importlib.metadata import version
-from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
@@ -20,6 +21,9 @@ from .units import (
     validate_space_unit,
     validate_time_unit,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
@@ -244,7 +248,7 @@ class GeffMetadata(BaseModel):
 
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: Sequence[Axis] | None = Field(
-        None,
+        default=None,
         description="Optional list of Axis objects defining the axes of each node in the graph.\n"
         "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
@@ -253,14 +257,14 @@ class GeffMetadata(BaseModel):
     )
 
     node_props_metadata: dict[str, PropMetadata] | None = Field(
-        None,
+        default=None,
         description=(
             "Metadata for node properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
         ),
     )
     edge_props_metadata: dict[str, PropMetadata] | None = Field(
-        None,
+        default=None,
         description=(
             "Metadata for edge properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
@@ -268,7 +272,7 @@ class GeffMetadata(BaseModel):
     )
 
     sphere: str | None = Field(
-        None,
+        default=None,
         title="Node property: Detections as spheres",
         description=(
             """
@@ -281,7 +285,7 @@ class GeffMetadata(BaseModel):
         ),
     )
     ellipsoid: str | None = Field(
-        None,
+        default=None,
         title="Node property: Detections as ellipsoids",
         description=(
             """
@@ -305,7 +309,7 @@ class GeffMetadata(BaseModel):
         ),
     )
     track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
-        None,
+        default=None,
         description=(
             "Node properties denoting tracklet and/or lineage IDs.\n"
             "A tracklet is defined as a simple path of connected nodes "
@@ -318,7 +322,7 @@ class GeffMetadata(BaseModel):
         ),
     )
     related_objects: Sequence[RelatedObject] | None = Field(
-        None,
+        default=None,
         description=(
             "A list of dictionaries of related objects such as labels or images. "
             "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
@@ -332,15 +336,16 @@ class GeffMetadata(BaseModel):
         ),
     )
     affine: Affine | None = Field(
-        None,
+        default=None,
         description="Affine transformation matrix to transform the graph coordinates to the "
         "physical coordinates. The matrix must have the same number of dimensions as the number of "
         "axes in the graph.",
     )
     display_hints: DisplayHint | None = Field(
-        None, description="Metadata indicating how spatiotemporal axes are displayed by a viewer"
+        default=None,
+        description="Metadata indicating how spatiotemporal axes are displayed by a viewer",
     )
-    extra: Any = Field(
+    extra: dict[str, Any] = Field(
         default_factory=dict,
         description="Extra metadata that is not part of the schema",
     )
@@ -405,17 +410,15 @@ class GeffMetadata(BaseModel):
 
         return self
 
-    def write(self, group: zarr.Group | Path | str):
+    def write(self, group: zarr.Group | Path | str) -> None:
         """Helper function to write GeffMetadata into the zarr geff group.
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
             group (zarr.Group | Path): The geff group to write the metadata to
         """
-        if isinstance(group, Path | str):
-            group = zarr.open(group)
-
-        group.attrs["geff"] = self.model_dump(mode="json")
+        _group = group if isinstance(group, zarr.Group) else zarr.open(group)
+        _group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
     def read(cls, group: zarr.Group | Path) -> GeffMetadata:
@@ -427,25 +430,24 @@ class GeffMetadata(BaseModel):
         Returns:
             GeffMetadata: The GeffMetadata object
         """
-        if isinstance(group, Path):
-            group = zarr.open(group)
+        _group = group if isinstance(group, zarr.Group) else zarr.open(group)
 
         # Check if geff_version exists in zattrs
-        if "geff" not in group.attrs:
+        if "geff" not in _group.attrs:
             raise ValueError(
-                f"No geff key found in {group}. This may indicate the path is incorrect or "
+                f"No geff key found in {_group}. This may indicate the path is incorrect or "
                 f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
                 f"/dataset.zarr/)."
             )
 
-        return cls(**group.attrs["geff"])
+        return cls.model_validate(dict(_group.attrs["geff"]))
 
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
 
 
-def write_metadata_schema(outpath: Path):
+def write_metadata_schema(outpath: Path) -> None:
     """Write the current geff metadata schema to a json file
 
     Args:

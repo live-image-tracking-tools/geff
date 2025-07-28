@@ -21,7 +21,7 @@ def write_arrays(
     node_props_unsquish: dict[str, list[str]] | None = None,
     edge_props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
-):
+) -> None:
     """Write a geff file from already constructed arrays of node and edge ids and props
 
     Currently does not do any validation that the arrays are valid, but could be added

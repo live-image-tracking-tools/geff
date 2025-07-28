@@ -4,7 +4,7 @@ import pandas as pd
 import typer
 
 
-def load_stats(path):
+def load_stats(path: str) -> tuple[str, pd.DataFrame]:
     with open(path) as f:
         data = json.load(f)
 
@@ -17,7 +17,7 @@ def load_stats(path):
     return commit, pd.DataFrame(rows)
 
 
-def make_report(old_path, new_path, out_file):
+def make_report(old_path: str, new_path: str, out_file: str) -> None:
     old = load_stats(old_path)
     new = load_stats(new_path)
 

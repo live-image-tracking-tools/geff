@@ -37,7 +37,7 @@ class GeffReader:
         ... in_memory_geff
     """
 
-    def __init__(self, source: StoreLike, validate: bool = True):
+    def __init__(self, source: StoreLike, validate: bool = True) -> None:
         """
         File reader class that allows subset reading to an intermediate dict representation.
 
@@ -73,7 +73,7 @@ class GeffReader:
         else:
             self.edge_prop_names = []
 
-    def read_node_props(self, names: list[str] | None = None):
+    def read_node_props(self, names: list[str] | None = None) -> None:
         """
         Read the node property with the name `name` from a GEFF.
 
@@ -95,7 +95,7 @@ class GeffReader:
                 prop_dict["missing"] = prop_group["missing"]
             self.node_props[name] = prop_dict
 
-    def read_edge_props(self, names: list[str] | None = None):
+    def read_edge_props(self, names: list[str] | None = None) -> None:
         """
         Read the edge property with the name `name` from a GEFF.
 

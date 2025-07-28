@@ -1,10 +1,12 @@
+from typing import Any, Literal, TypeAlias, TypeGuard, get_args
+
 import numpy as np
+import numpy.typing as npt
 
 # OME-NGFF 0.5 units
 # https://github.com/ome/ngff/blob/7ac3430c74a66e5bcf53e41c429143172d68c0a4/index.bs#L240-L245
 
-VALID_SPACE_UNITS = [
-    None,
+SpaceUnits: TypeAlias = Literal[
     "angstrom",
     "attometer",
     "centimeter",
@@ -33,8 +35,7 @@ VALID_SPACE_UNITS = [
     "zettameter",
 ]
 
-VALID_TIME_UNITS = [
-    None,
+TimeUnits: TypeAlias = Literal[
     "attosecond",
     "centisecond",
     "day",
@@ -60,11 +61,13 @@ VALID_TIME_UNITS = [
     "zettasecond",
 ]
 
-VALID_AXIS_TYPES = [
+
+AxisType: TypeAlias = Literal[
     "space",
     "time",
     "channel",  # TODO: discuss
 ]
+
 
 # -----------------------------------------------------------------------------
 # Data-type validation
@@ -78,7 +81,7 @@ VALID_AXIS_TYPES = [
 # References:
 #   https://github.com/zarr-developers/zarr-java/blob/e758d5465d4ff8bb0ccaf2e632c8096b02a9d51c/src/main/java/dev/zarr/zarrjava/v3/DataType.java#L41
 #   https://numpy.org/doc/stable/reference/arrays.dtypes.html
-ALLOWED_DTYPES: set[np.dtype] = {
+ValidDTypes: set[npt.DTypeLike] = {
     np.bool_,
     np.int8,
     np.int16,
@@ -94,8 +97,13 @@ ALLOWED_DTYPES: set[np.dtype] = {
     np.str_,
 }
 
+VALID_SPACE_UNITS: tuple[SpaceUnits, ...] = get_args(SpaceUnits)
+VALID_TIME_UNITS: tuple[TimeUnits, ...] = get_args(TimeUnits)
+VALID_AXIS_TYPES: tuple[AxisType, ...] = get_args(AxisType)
+ALLOWED_DTYPES: tuple[npt.DTypeLike, ...] = get_args(ValidDTypes)
 
-def validate_data_type(data_type: np.dtype | str | type) -> bool:
+
+def validate_data_type(data_type: Any) -> TypeGuard[npt.DTypeLike]:
     """Return *True* when *data_type* is allowed for Java-Zarr.
 
     The function is intentionally *permissive* in what it accepts - any object
@@ -115,7 +123,7 @@ def validate_data_type(data_type: np.dtype | str | type) -> bool:
     return np.dtype(data_type).type in ALLOWED_DTYPES
 
 
-def validate_axis_type(axis_type: str) -> bool:
+def validate_axis_type(axis_type: str) -> TypeGuard[AxisType]:
     """Validate axis type against standard list
 
     Args:
@@ -127,7 +135,7 @@ def validate_axis_type(axis_type: str) -> bool:
     return axis_type in VALID_AXIS_TYPES
 
 
-def validate_space_unit(unit_name: str) -> bool:
+def validate_space_unit(unit_name: str) -> TypeGuard[SpaceUnits]:
     """Checks space unit against ome-zarr supported units
 
     Args:
@@ -140,7 +148,7 @@ def validate_space_unit(unit_name: str) -> bool:
     return unit_name in VALID_SPACE_UNITS
 
 
-def validate_time_unit(unit_name: str) -> bool:
+def validate_time_unit(unit_name: str) -> TypeGuard[TimeUnits]:
     """Check time unit against ome-zarr supported units
 
     Args:

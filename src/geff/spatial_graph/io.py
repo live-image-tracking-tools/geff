@@ -31,7 +31,7 @@ def write_sg(
     axis_units: list[str] | None = None,
     axis_types: list[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
-):
+) -> None:
     """Write a SpatialGraph to the geff file format.
 
     Because SpatialGraph does not support ragged or missing node/edge attributes,
@@ -161,7 +161,7 @@ def read_sg(
     position_attrs = [axis.name for axis in metadata.axes]
     ndims = len(position_attrs)
 
-    def get_dtype_str(dataset):
+    def get_dtype_str(dataset: np.ndarray) -> str:
         dtype = dataset.dtype
         shape = dataset.shape
         if len(shape) > 1:
