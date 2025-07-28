@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753730504866,
+  "lastUpdate": 1753736733479,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3611,6 +3611,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.9221948290929106",
             "extra": "mean: 8.855199477000005 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "talley.lambert@gmail.com",
+            "name": "Talley Lambert",
+            "username": "tlambert03"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9d3c579cbe26c670a7b2acc59b7a897672dd6c38",
+          "message": "De-emphasize pixi (but don't entirely remove), use uv for CI (#250)\n\nthis is still WIP... it will:\n\n- de-emphasize pixi as a \"primary\" dev tool. without removing support\nfor it for those who want to use it.\n- use uv on ci... which nicely facilitates testing across all stated\ndependencies (both minimum stated and latest versions)\n- updates minimum pinnings on pyproject.toml\n\n- [x] this PR includes #248, which should be resolved before this one\n\n---------\n\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>\nCo-authored-by: Laura Xénard <33941387+lxenard@users.noreply.github.com>",
+          "timestamp": "2025-07-28T17:02:57-04:00",
+          "tree_id": "d18dbc23131d874649873a97c10ee1998bba6058",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/9d3c579cbe26c670a7b2acc59b7a897672dd6c38"
+        },
+        "date": 1753736732697,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11588754630197631,
+            "unit": "iter/sec",
+            "range": "stddev: 1.5128159703730175",
+            "extra": "mean: 8.629054906333332 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 21.042677727880463,
+            "unit": "iter/sec",
+            "range": "stddev: 0.001936850384993635",
+            "extra": "mean: 47.522468999990984 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.07929227471086661,
+            "unit": "iter/sec",
+            "range": "stddev: 0.33702061701537045",
+            "extra": "mean: 12.61156907966666 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.10941111943926037,
+            "unit": "iter/sec",
+            "range": "stddev: 1.1343648543944465",
+            "extra": "mean: 9.139838849333321 sec\nrounds: 3"
           }
         ]
       }
