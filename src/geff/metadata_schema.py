@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
@@ -377,5 +376,3 @@ class GeffMetadata(BaseModel):
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
-
-
