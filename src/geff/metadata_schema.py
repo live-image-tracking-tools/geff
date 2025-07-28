@@ -256,7 +256,6 @@ class GeffMetadata(BaseModel):
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
 
-    # PROPOSITION 1: separate metadata by component type
     node_props_metadata: dict[str, PropMetadata] | None = Field(
         None,
         description=(
