@@ -16,12 +16,11 @@ build:
 
 # build docs and start a local server to preview them
 docs-serve:
-    uv run --group docs mkdocs serve
-
+    uv run --group docs --isolated mkdocs serve
 
 # build docs in strict mode
 docs-build:
-    uv run --group docs mkdocs build --strict
+    uv run --group docs --isolated mkdocs build --strict
 
 # tag and release <version>
 release version:
