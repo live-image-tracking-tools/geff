@@ -123,9 +123,8 @@ class TestMetadataModel:
             extra=True,
         )
         zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, mode="a")
-        meta.write(group)
-        compare = GeffMetadata.read(group)
+        meta.write(zpath)
+        compare = GeffMetadata.read(zpath)
         assert compare == meta
 
         meta.directed = False
@@ -156,9 +155,8 @@ class TestMetadataModel:
             extra={"foo": "bar", "bar": {"baz": "qux"}},
         )
         zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, mode="a")
-        meta.write(group)
-        compare = GeffMetadata.read(group)
+        meta.write(zpath)
+        compare = GeffMetadata.read(zpath)
         assert compare.extra["foo"] == "bar"
         assert compare.extra["bar"]["baz"] == "qux"
 
@@ -325,9 +323,8 @@ class TestAffineTransformation:
 
         # Write and read back
         zpath = tmp_path / "test_affine.zarr"
-        group = zarr.open(zpath, mode="a")
-        original_metadata.write(group)
-        loaded_metadata = GeffMetadata.read(group)
+        original_metadata.write(zpath)
+        loaded_metadata = GeffMetadata.read(zpath)
 
         # Verify everything matches
         assert loaded_metadata == original_metadata

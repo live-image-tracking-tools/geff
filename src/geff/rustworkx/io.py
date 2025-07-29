@@ -157,7 +157,7 @@ def write_rx(
         isinstance(graph, rx.PyDiGraph),
         axes,
     )
-    metadata.write(group)
+    metadata.write(store)
 
 
 def _ingest_dict_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:

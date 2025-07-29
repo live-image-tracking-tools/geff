@@ -29,7 +29,7 @@ def test_validate_command_prints_valid(example_geff_path):
 
 def test_info_command_prints_metadata(example_geff_path):
     result = runner.invoke(app, ["info", example_geff_path])
-    metadata = GeffMetadata.read(zarr.open(example_geff_path, mode="r"))
+    metadata = GeffMetadata.read(example_geff_path)
     assert result.exit_code == 0
     assert result.output == metadata.model_dump_json(indent=2) + "\n"
 

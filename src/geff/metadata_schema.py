@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import zarr
+from zarr.storage import StoreLike
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
@@ -404,30 +405,27 @@ class GeffMetadata(BaseModel):
 
         return self
 
-    def write(self, group: zarr.Group | Path | str):
-        """Helper function to write GeffMetadata into the zarr geff group.
+    def write(self, store: StoreLike):
+        """Helper function to write GeffMetadata into the group of a zarr geff store.
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
-            group (zarr.Group | Path): The geff group to write the metadata to
+            zarr store (zarr store | Path | str): The geff store to write the metadata to
         """
-        if isinstance(group, Path | str):
-            group = zarr.open(group)
-
+        group = zarr.open(store)
         group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
-    def read(cls, group: zarr.Group | Path) -> GeffMetadata:
+    def read(cls, store: StoreLike) -> GeffMetadata:
         """Helper function to read GeffMetadata from a zarr geff group.
 
         Args:
-            group (zarr.Group | Path): The zarr group containing the geff metadata
+            zarr store (zarr store | Path | str): The geff store to read the metadata from
 
         Returns:
             GeffMetadata: The GeffMetadata object
         """
-        if isinstance(group, Path):
-            group = zarr.open(group)
+        group = zarr.open(store)
 
         # Check if geff_version exists in zattrs
         if "geff" not in group.attrs:
