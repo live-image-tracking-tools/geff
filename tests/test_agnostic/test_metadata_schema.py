@@ -1,12 +1,16 @@
+import json
 import re
+import warnings
+from pathlib import Path
 
 import numpy as np
 import pydantic
 import pytest
 import zarr
 
+import geff
 from geff.affine import Affine
-from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, write_metadata_schema
+from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, GeffSchema
 
 
 class TestMetadataModel:
@@ -333,8 +337,72 @@ class TestAffineTransformation:
         )
 
 
-def test_write_schema(tmp_path):
-    schema_path = tmp_path / "schema.json"
-    write_metadata_schema(schema_path)
-    assert schema_path.is_file()
-    assert schema_path.stat().st_size > 0
+def test_schema_and_round_trip() -> None:
+    # Ensure it can be created without error
+    assert GeffSchema.model_json_schema(mode="serialization")
+    assert GeffSchema.model_json_schema(mode="validation")
+
+    model = GeffSchema(
+        geff=GeffMetadata(
+            geff_version="0.1.0",
+            directed=True,
+            axes=[
+                {"name": "x", "type": "space", "unit": "micrometer"},
+                {"name": "y", "type": "space", "unit": "micrometer"},
+            ],
+            affine=Affine.from_matrix_offset([[1.0, 0.0], [0.0, 1.0]], [0.0, 0.0]),
+            related_objects=[
+                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
+                {"type": "image", "path": "raw/"},
+            ],
+            display_hints={"display_horizontal": "x", "display_vertical": "y"},
+        )
+    )
+
+    # ensure round trip
+    # it's important to test model_dump_json on a fully-populated model
+    # to test that all fields can be serialized
+    model2 = GeffSchema.model_validate_json(model.model_dump_json())
+    assert model2 == model
+
+
+pydantic_version = tuple(int(x) for x in pydantic.__version__.split(".")[:2])
+
+
+@pytest.mark.skipif(
+    pydantic_version < (2, 10),
+    reason="Schema output was different in pydantic < 2.10",
+)
+def test_schema_file_updated(pytestconfig: pytest.Config) -> None:
+    """Ensure that geff-schema.json at the repo root is up to date.
+
+    To update the schema file, run `pytest --update-schema`.
+    """
+    root = Path(geff.__file__).parent.parent.parent
+    schema_path = root / "geff-schema.json"
+    if schema_path.is_file():
+        current_schema_text = schema_path.read_text()
+    else:
+        if not pytestconfig.getoption("--update-schema"):
+            raise AssertionError(
+                f"could not find geff-schema.json at {schema_path}. "
+                "Please run `pytest` with the `--update-schema` flag to create it."
+            )
+        current_schema_text = ""
+
+    new_schema_text = json.dumps(GeffSchema.model_json_schema(), indent=2)
+    if current_schema_text != new_schema_text:
+        if pytestconfig.getoption("--update-schema"):
+            schema_path.write_text(new_schema_text)
+            # with our current pytest settings, this will fail tests...
+            # but only once (the schema will be up to date next time tests are run)
+            warnings.warn(
+                "The geff_metadata_schema.json file has been updated. "
+                "Please commit the changes to the repository.",
+                stacklevel=2,
+            )
+        else:
+            raise AssertionError(
+                "The geff_metadata_schema.json file is out of date. "
+                "Please rerun `pytest` with the `--update-schema` flag to update it."
+            )
