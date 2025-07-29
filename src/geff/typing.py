@@ -1,6 +1,5 @@
 from typing import Any, TypedDict
 
-import numpy as np
 import zarr
 from numpy.typing import NDArray
 from typing_extensions import NotRequired
