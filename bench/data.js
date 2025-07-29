@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753748359924,
+  "lastUpdate": 1753785301863,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3715,6 +3715,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 1.072289297831668",
             "extra": "mean: 8.939773469999997 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "45037215+TeunHuijben@users.noreply.github.com",
+            "name": "Teun Huijben",
+            "username": "TeunHuijben"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "99bf35ec633e961704e8633d0086ccaf800f2559",
+          "message": "changes np.bool to np.bool_, to work with any numpy version (#258)",
+          "timestamp": "2025-07-29T06:31:28-04:00",
+          "tree_id": "bb335d295b510208287efb4cad687deca0093977",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/99bf35ec633e961704e8633d0086ccaf800f2559"
+        },
+        "date": 1753785300858,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11606658419746385,
+            "unit": "iter/sec",
+            "range": "stddev: 1.5239107904566818",
+            "extra": "mean: 8.615744203333337 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 21.39324720440649,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0012552799957897486",
+            "extra": "mean: 46.74372199999747 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.07872691489208328,
+            "unit": "iter/sec",
+            "range": "stddev: 0.3736922405571385",
+            "extra": "mean: 12.702136256333338 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.10840496035678351,
+            "unit": "iter/sec",
+            "range": "stddev: 1.114049884755314",
+            "extra": "mean: 9.224670132333335 sec\nrounds: 3"
           }
         ]
       }
