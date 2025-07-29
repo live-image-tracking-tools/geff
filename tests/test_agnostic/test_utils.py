@@ -35,6 +35,7 @@ def test_validate(tmp_path):
         "roi_min": [0, 0],
         "roi_max": [100, 100],
     }
+
     # No nodes
     with pytest.raises(AssertionError, match="graph group must contain a nodes group"):
         validate(zpath)
@@ -129,5 +130,47 @@ def test_validate(tmp_path):
         validate(zpath)
     del z["edges/props/badshape"]["missing"]
 
-    # everything passes
+    # Property metadata has no matching data
+    geff_attrs = z.attrs["geff"]
+    geff_attrs["node_props_metadata"] = {
+        "prop1": {"identifier": "prop1", "dtype": "float32"},
+        "prop2": {"identifier": "prop2", "dtype": "int"},
+    }
+    z.attrs["geff"] = geff_attrs
+    with pytest.raises(
+        AssertionError,
+        match="Node property prop1 described in metadata is not present in props arrays",
+    ):
+        validate(zpath)
+
+    # Insconsistent property metadata dtype
+    z["nodes/props/prop1/values"] = np.zeros(n_node, dtype=np.float32)
+    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype=np.float32)
+    with pytest.raises(
+        AssertionError,
+        match=(
+            "Node property prop2 with dtype float32 does not match "
+            "metadata dtype <class 'numpy.int64'>"
+        ),
+    ):
+        validate(zpath)
+
+    # Another type of dtype mismatch
+    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int16")
+    with pytest.raises(
+        AssertionError,
+        match=(
+            "Node property prop2 with dtype int16 does not match "
+            "metadata dtype <class 'numpy.int64'>"
+        ),
+    ):
+        validate(zpath)
+
+    # Clean up by creating the property with the correct dtype
+    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int")
+
+    # No error raised when property with no matching prop metadata
+    z["nodes/props/prop3/values"] = np.zeros(n_node, dtype="bool")
+
+    # Everything passes
     validate(zpath)

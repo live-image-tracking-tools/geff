@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
+import numpy as np
 import zarr
 
 if TYPE_CHECKING:
@@ -76,7 +77,7 @@ def validate(store: StoreLike):
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    GeffMetadata.read(graph)
+    metadata = GeffMetadata.read(graph)
 
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
@@ -135,6 +136,24 @@ def validate(store: StoreLike):
                         f"Edge property {prop} missing mask has length {missing_len}, "
                         f"which does not match id length {edge_id_len}"
                     )
+
+    # Properties metadata validation
+    if metadata.node_props_metadata is not None:
+        id_dtype_map = {
+            prop.identifier: np.dtype(prop.dtype).type
+            for prop in metadata.node_props_metadata.values()
+        }
+        for prop_id, prop_dtype in id_dtype_map.items():
+            # Properties described in metadata should be present in zarr arrays
+            assert prop_id in nodes["props"].keys(), (
+                f"Node property {prop_id} described in metadata is not present in props arrays"
+            )
+            # dtype in metadata should match dtype in zarr arrays
+            array_dtype = nodes["props"][prop_id]["values"].dtype
+            assert array_dtype == prop_dtype, (
+                f"Node property {prop_id} with dtype {array_dtype} does not match "
+                f"metadata dtype {prop_dtype}"
+            )
 
 
 def nx_is_equal(g1: nx.Graph, g2: nx.Graph) -> bool:
