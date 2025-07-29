@@ -16,14 +16,6 @@ cd geff
 pip install -e . --group dev
 ```
 
-### Install with pixi
-
-If you are using [pixi](https://pixi.sh/):
-
-```sh
-pixi install
-```
-
 ### Install with uv
 
 If you are using [uv](https://docs.astral.sh/uv/):
@@ -34,7 +26,22 @@ uv sync
 
 > [!IMPORTANT]
 > **All commands below assume an activate virtual environment, but you
-> may also use `pixi run <COMMAND>` or `uv run <COMMAND>` to run them.**
+> may also use `uv run <COMMAND>` to run them without activating an env.**
+
+## Running Tasks
+
+Many of the tasks listed below can be run quickly with the
+[`just`](https://github.com/casey/just) task runner. [Install
+just](https://just.systems/man/en/packages.html) (e.g. `brew install just` or
+`winget install --id Casey.Just --exact`).  Since most of the tasks require uv,
+you will also need to [install
+uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+To list available tasks, run:
+
+```sh
+just --list
+```
 
 ## Testing
 
@@ -106,12 +113,6 @@ or via uv:
 
 ```sh
 uv run --group docs mkdocs <command>
-```
-
-or via pixi:  
-
-```sh
-pixi run -e docs mkdocs <command>
 ```
 
 - `mkdocs serve` - Start the live-reloading docs server.
