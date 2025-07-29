@@ -16,6 +16,8 @@ dependencies = [
     "zarr>=2.18,<4",
     "pydantic>=2.9",
     "networkx>=3.2.1",
+    "numpy>=1.25",
+    "numpy>=2.1; python_version >= '3.13'",
     "numcodecs>=0.13,<0.16",                           # TODO: remove pin once the 16 release is stable
     "numcodecs>=0.15,<0.16; python_version >= '3.13'", # TODO: remove pin once the 16 release is stable
 ]
