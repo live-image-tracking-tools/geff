@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753785301863,
+  "lastUpdate": 1753800662085,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3767,6 +3767,79 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 1.114049884755314",
             "extra": "mean: 9.224670132333335 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "09d0f9e3f91033cf1ac904b5f7824201e7765254",
+          "message": "Refactor sg/rx to have a construct function (#246)\n\n# Proposed Change\nCloses #238 \n- Rename rx function to construct_rx\n- Create sg construct function\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Bugfix (non-breaking change which fixes an issue)\n\nWhich topics does your change affect? Delete those that do not apply.\n- spatial-graph, rustworkx\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [x] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n---------\n\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>",
+          "timestamp": "2025-07-29T10:45:53-04:00",
+          "tree_id": "c9a63afda2965e0f40f2acaf836f15b86aba6694",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/09d0f9e3f91033cf1ac904b5f7824201e7765254"
+        },
+        "date": 1753800661266,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.08599805749737678,
+            "unit": "iter/sec",
+            "range": "stddev: 2.5058811376258365",
+            "extra": "mean: 11.628169624999998 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_write[write_rx]",
+            "value": 0.09555881146241908,
+            "unit": "iter/sec",
+            "range": "stddev: 2.0622769238419663",
+            "extra": "mean: 10.46475970866669 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_write[write_sg]",
+            "value": 2.009668240590557,
+            "unit": "iter/sec",
+            "range": "stddev: 0.010490944263519012",
+            "extra": "mean: 497.5945680000109 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 21.36039712738475,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00027247477565558174",
+            "extra": "mean: 46.81560899998279 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.07154639950405679,
+            "unit": "iter/sec",
+            "range": "stddev: 0.573700685013331",
+            "extra": "mean: 13.976943730666676 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.09729538276503645,
+            "unit": "iter/sec",
+            "range": "stddev: 0.2295411030610619",
+            "extra": "mean: 10.277980018999983 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_sg]",
+            "value": 0.1599648748018823,
+            "unit": "iter/sec",
+            "range": "stddev: 5.805643521390148",
+            "extra": "mean: 6.251372379333323 sec\nrounds: 3"
           }
         ]
       }
