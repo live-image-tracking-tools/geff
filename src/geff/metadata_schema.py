@@ -414,6 +414,10 @@ class GeffMetadata(BaseModel):
         Args:
             store (zarr store | Path | str): The geff store to write the metadata to
         """
+
+        if isinstance(store, zarr.Group):
+            raise TypeError(f"Unsupported type for store_like: {type(store)}")
+
         group = zarr.open_group(store)
         group.attrs["geff"] = self.model_dump(mode="json")
 
@@ -427,6 +431,10 @@ class GeffMetadata(BaseModel):
         Returns:
             GeffMetadata: The GeffMetadata object
         """
+
+        if isinstance(store, zarr.Group):
+            raise TypeError(f"Unsupported type for store_like: {type(store)}")
+
         group = zarr.open_group(store)
 
         # Check if geff_version exists in zattrs
