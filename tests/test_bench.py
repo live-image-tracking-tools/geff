@@ -18,10 +18,8 @@ from typing import TYPE_CHECKING, Any
 
 import networkx as nx
 import numpy as np
-import rustworkx as rx
 
-import geff.networkx.io as geff_nx
-import geff.rustworkx.io as geff_rx
+import geff
 from geff.utils import validate
 
 if TYPE_CHECKING:
@@ -72,54 +70,46 @@ def create_nx_graph(num_nodes: int) -> nx.DiGraph:
     return graph
 
 
-def create_rx_graph(num_nodes: int) -> rx.PyDiGraph:
-    graph = rx.PyDiGraph()
-    nodes, edges = node_data(num_nodes), edge_data(num_nodes)
-    graph.add_nodes_from(nodes.items())
-    graph.add_edges_from(((u, v, dd) for (u, v), dd in edges.items()))
-    return graph
-
-
 @cache
 def graph_file_path(num_nodes: int) -> Path:
     tmp_dir = tempfile.mkdtemp(suffix=".zarr")
     atexit.register(shutil.rmtree, tmp_dir, ignore_errors=True)
-    geff_nx.write_nx(
-        graph=create_nx_graph(num_nodes), store=tmp_dir, axis_names=["t", "z", "y", "x"]
-    )
+    geff.write_nx(graph=create_nx_graph(num_nodes), store=tmp_dir, axis_names=["t", "z", "y", "x"])
     return Path(tmp_dir)
 
 
-CREATE_FUNCS: Mapping[Callable, Callable[[int], Any]] = {
-    geff_nx.write_nx: create_nx_graph,
-    geff_rx.write_rx: create_rx_graph,
-}
-
 # ###########################   TESTS   ##################################
+
+READ_PATH: Mapping[Callable, Callable[[Path], tuple[Any, Any]]] = {
+    geff.read_nx: lambda path: geff.read_nx(path, validate=False),
+    geff.read_rx: lambda path: geff.read_rx(path, validate=False),
+    geff.read_sg: lambda path: geff.read_sg(path, validate=False),
+}
 
 
 @pytest.mark.parametrize("nodes", [500])
-@pytest.mark.parametrize("write_func", [geff_nx.write_nx])
+@pytest.mark.parametrize("write_func", [geff.write_nx, geff.write_rx, geff.write_sg])
 def test_bench_write(
     write_func: Callable, benchmark: BenchmarkFixture, tmp_path: Path, nodes: int
 ) -> None:
     path = tmp_path / "test_write.zarr"
-    big_graph = CREATE_FUNCS[write_func](nodes)
+    read_func = getattr(geff, f"read_{write_func.__name__.split('_')[1]}")
+    graph = read_func(graph_file_path(nodes))[0]
     benchmark.pedantic(
         write_func,
-        kwargs={"graph": big_graph, "axis_names": ["t", "z", "y", "x"], "store": path},
+        kwargs={"graph": graph, "axis_names": ["t", "z", "y", "x"], "store": path},
         setup=lambda **__: shutil.rmtree(path, ignore_errors=True),  # delete previous zarr
     )
 
 
 @pytest.mark.parametrize("nodes", [500])
 def test_bench_validate(benchmark: BenchmarkFixture, nodes: int) -> None:
-    big_graph_path = graph_file_path(nodes)
-    benchmark(validate, store=big_graph_path)
+    graph_path = graph_file_path(nodes)
+    benchmark(validate, store=graph_path)
 
 
 @pytest.mark.parametrize("nodes", [500])
-@pytest.mark.parametrize("read_func", [geff_nx.read_nx, geff_rx.read_rx])
+@pytest.mark.parametrize("read_func", [geff.read_nx, geff.read_rx, geff.read_sg])
 def test_bench_read(read_func: Callable, benchmark: BenchmarkFixture, nodes: int) -> None:
-    big_graph_path = graph_file_path(nodes)
-    benchmark(read_func, big_graph_path, validate=False)
+    graph_path = graph_file_path(nodes)
+    benchmark(read_func, graph_path, validate=False)
