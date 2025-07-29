@@ -6,6 +6,7 @@ from importlib.metadata import version
 from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
+from zarr.storage import StoreLike
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
 
