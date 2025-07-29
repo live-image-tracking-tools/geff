@@ -413,7 +413,7 @@ class GeffMetadata(BaseModel):
         Args:
             store (zarr store | Path | str): The geff store to write the metadata to
         """
-        group = zarr.open(store)
+        group = zarr.open_group(store)
         group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
@@ -426,7 +426,7 @@ class GeffMetadata(BaseModel):
         Returns:
             GeffMetadata: The GeffMetadata object
         """
-        group = zarr.open(store)
+        group = zarr.open_group(store)
 
         # Check if geff_version exists in zattrs
         if "geff" not in group.attrs:
