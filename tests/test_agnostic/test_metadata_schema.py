@@ -6,10 +6,12 @@ from pathlib import Path
 import numpy as np
 import pydantic
 import pytest
+import zarr
 
 import geff
 from geff.affine import Affine
 from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, GeffSchema
+from geff.testing.data import create_simple_2d_geff
 
 
 class TestMetadataModel:
@@ -130,6 +132,27 @@ class TestMetadataModel:
         meta.write(zpath)
         compare = GeffMetadata.read(zpath)
         assert compare == meta
+
+    def test_meta_write_raises_type_error_upon_group(self):
+        # Create a GeffMetadata instance
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            axes=[{"name": "test"}],
+        )
+
+        # Create a Zarr group
+        store, _ = create_simple_2d_geff()
+        # geff_path = tmp_path / "test.geff"
+
+        group = zarr.open_group(store=store)
+
+        # Assert that a TypeError is raised when meta.write is called with a Group
+        with pytest.raises(TypeError, match="Unsupported type for store_like: 'Group'"):
+            meta.write(group)
+
+        with pytest.raises(TypeError, match="Unsupported type for store_like: 'Group'"):
+            meta.read(group)
 
     def test_model_mutation(self):
         """Test that invalid model mutations raise errors."""

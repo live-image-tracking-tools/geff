@@ -2,7 +2,6 @@ import logging
 import sys
 
 import typer
-import zarr
 
 from . import utils
 from .metadata_schema import GeffMetadata
@@ -23,7 +22,7 @@ def validate(input_path: str = typer.Argument(..., help="Path to the GEFF file")
 @app.command()
 def info(input_path: str = typer.Argument(..., help="Path to the GEFF file")):
     """Display information about a GEFF file."""
-    metadata = GeffMetadata.read(zarr.open(input_path, mode="r"))
+    metadata = GeffMetadata.read(input_path)
     print(metadata.model_dump_json(indent=2))
 
 
