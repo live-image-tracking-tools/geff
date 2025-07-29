@@ -1,3 +1,5 @@
+from typing import cast
+
 import networkx as nx
 import numpy as np
 from numpy.typing import ArrayLike
@@ -39,7 +41,7 @@ def validate_nodes_for_edges(
     return all_edges_valid, invalid_edges
 
 
-def validate_no_self_edges(edge_ids: ArrayLike) -> tuple[bool, list[tuple[int, int]]]:
+def validate_no_self_edges(edge_ids: ArrayLike) -> tuple[bool, np.ndarray]:
     """
     Validates that there are no self-edges in the provided array of edges.
 
@@ -53,13 +55,13 @@ def validate_no_self_edges(edge_ids: ArrayLike) -> tuple[bool, list[tuple[int, i
             - problematic_nodes (np.ndarray): Array of node IDs that have self-edges.
               Empty if valid.
     """
-
+    edge_ids = np.asarray(edge_ids)
     mask = edge_ids[:, 0] == edge_ids[:, 1]
     problematic_nodes = np.unique(edge_ids[mask, 0])
     return (len(problematic_nodes) == 0, problematic_nodes)
 
 
-def validate_no_repeated_edges(edge_ids: ArrayLike) -> tuple[bool, list[tuple[int, int]]]:
+def validate_no_repeated_edges(edge_ids: ArrayLike) -> tuple[bool, np.ndarray]:
     """
     Validates that there are no repeated edges in the array.
 
@@ -73,7 +75,7 @@ def validate_no_repeated_edges(edge_ids: ArrayLike) -> tuple[bool, list[tuple[in
             - repeated_edges (np.ndarray): An array of duplicated edges. Empty if valid.
 
     """
-
+    edge_ids = np.asarray(edge_ids)
     edges_view = np.ascontiguousarray(edge_ids).view([("", edge_ids.dtype)] * edge_ids.shape[1])
     _, idx, counts = np.unique(edges_view, return_index=True, return_counts=True)
     repeated_mask = counts > 1
@@ -101,18 +103,17 @@ def validate_tracklets(
     """
     errors = []
 
-    ID_DTYPE = np.int64
-    nodes = node_ids.astype(ID_DTYPE, copy=False)
-    edges = edge_ids.astype(ID_DTYPE, copy=False)
-    tracklets = tracklet_ids.astype(ID_DTYPE, copy=False)
+    nodes = np.asarray(node_ids, dtype=np.int64, copy=False)
+    edges = np.asarray(edge_ids, dtype=np.int64, copy=False)
+    tracklets = np.asarray(tracklet_ids, dtype=np.int64, copy=False)
 
     # Group nodes by tracklet ID.
-    tracklet_to_nodes: dict[np.int64, list[np.int64]] = {}
+    tracklet_to_nodes: dict[int, list[int]] = {}
     for node, t_id in zip(nodes, tracklets, strict=False):
         tracklet_to_nodes.setdefault(t_id, []).append(node)
 
     # Build the graph.
-    G = nx.DiGraph(tuple(edge) for edge in edges)
+    G: nx.DiGraph[int] = nx.DiGraph(tuple(edge) for edge in edges)
     # Ensure all nodes from node_ids are in the graph, even if isolated.
     G.add_nodes_from(nodes)
 
@@ -123,7 +124,7 @@ def validate_tracklets(
             continue
 
         # Gets a subgraph for the current tracklet.
-        S = G.subgraph(t_nodes)
+        S = cast("nx.DiGraph[int]", G.subgraph(t_nodes))
 
         # Check - no branches or merges (junctions).
         max_in_degree = max((d for _, d in S.in_degree()), default=0)

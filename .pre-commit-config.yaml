@@ -30,8 +30,8 @@ repos:
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
-          - types-networkx
+          # - types-networkx
           - pydantic
           - typer
-          # - numpy
+          - numpy
           # - zarr

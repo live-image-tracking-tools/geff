@@ -1,12 +1,19 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 import zarr
-from numpy.typing import NDArray
-from zarr.storage import StoreLike
 
 from geff.metadata_schema import GeffMetadata
-from geff.typing import InMemoryGeff, PropDictNpArray, PropDictZArray
 
 from . import utils
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+    from zarr.storage import StoreLike
+
+    from geff.typing import InMemoryGeff, PropDictNpArray, PropDictZArray
 
 
 class GeffReader:
@@ -119,8 +126,8 @@ class GeffReader:
 
     def build(
         self,
-        node_mask: NDArray[np.bool] | None = None,
-        edge_mask: NDArray[np.bool] | None = None,
+        node_mask: NDArray[np.bool_] | None = None,
+        edge_mask: NDArray[np.bool_] | None = None,
     ) -> InMemoryGeff:
         """
         Build an `InMemoryGeff` by loading the data from a GEFF zarr.
@@ -158,7 +165,7 @@ class GeffReader:
             if edge_mask is not None:
                 edge_mask = np.logical_and(edge_mask, edge_mask_removed_nodes)
             else:
-                edge_mask = edge_mask_removed_nodes
+                edge_mask = np.astype(edge_mask_removed_nodes, bool)
         edges = edges[edge_mask if edge_mask is not None else ...]
 
         edge_props: dict[str, PropDictNpArray] = {}

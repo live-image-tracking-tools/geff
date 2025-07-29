@@ -273,8 +273,10 @@
           "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer"
         },
         "extra": {
+          "additionalProperties": true,
           "description": "Extra metadata that is not part of the schema",
-          "title": "Extra"
+          "title": "Extra",
+          "type": "object"
         }
       },
       "required": [

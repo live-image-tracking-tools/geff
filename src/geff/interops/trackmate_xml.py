@@ -159,18 +159,18 @@ def _convert_attributes(
         if key in attrs_metadata:
             if attrs_metadata[key]["isint"] == "true":
                 try:
-                    attrs[key] = int(attrs[key])  # type: ignore
+                    attrs[key] = int(attrs[key])
                 except ValueError as err:
                     raise ValueError(f"Invalid integer value for {key}: {attrs[key]}") from err
             else:
                 try:
-                    attrs[key] = float(attrs[key])  # type: ignore
+                    attrs[key] = float(attrs[key])
                 except ValueError:
                     # Then it's a string and no need to convert.
                     pass
         elif key == "ID" or key == "ROI_N_POINTS":
             # IDs are always integers in TrackMate.
-            attrs[key] = int(attrs[key])  # type: ignore
+            attrs[key] = int(attrs[key])
         elif key == "name":
             pass  # "name" is a string so we don't need to convert it.
         else:
@@ -567,8 +567,7 @@ def from_trackmate_xml_to_geff_cli(
     discard_filtered_spots: bool = False,
     discard_filtered_tracks: bool = False,
     overwrite: bool = False,
-    zarr_format: int = 2,  # type: ignore
-    # because of Typer not supporting Literal types
+    zarr_format: int = 2,
 ) -> None:
     """
     Convert a TrackMate XML file to a GEFF file.

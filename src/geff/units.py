@@ -81,7 +81,7 @@ AxisType: TypeAlias = Literal[
 # References:
 #   https://github.com/zarr-developers/zarr-java/blob/e758d5465d4ff8bb0ccaf2e632c8096b02a9d51c/src/main/java/dev/zarr/zarrjava/v3/DataType.java#L41
 #   https://numpy.org/doc/stable/reference/arrays.dtypes.html
-ValidDTypes: set[npt.DTypeLike] = {
+ALLOWED_DTYPES: set[npt.DTypeLike] = {
     np.bool_,
     np.int8,
     np.int16,
@@ -100,7 +100,6 @@ ValidDTypes: set[npt.DTypeLike] = {
 VALID_SPACE_UNITS: tuple[SpaceUnits, ...] = get_args(SpaceUnits)
 VALID_TIME_UNITS: tuple[TimeUnits, ...] = get_args(TimeUnits)
 VALID_AXIS_TYPES: tuple[AxisType, ...] = get_args(AxisType)
-ALLOWED_DTYPES: tuple[npt.DTypeLike, ...] = get_args(ValidDTypes)
 
 
 def validate_data_type(data_type: Any) -> TypeGuard[npt.DTypeLike]:
@@ -123,11 +122,11 @@ def validate_data_type(data_type: Any) -> TypeGuard[npt.DTypeLike]:
     return np.dtype(data_type).type in ALLOWED_DTYPES
 
 
-def validate_axis_type(axis_type: str) -> TypeGuard[AxisType]:
+def validate_axis_type(axis_type: Any) -> TypeGuard[AxisType]:
     """Validate axis type against standard list
 
     Args:
-        axis_type (str): Axis type to check
+        axis_type : Axis type to check
 
     Returns:
         bool: False if the axis is not in valid types
@@ -135,11 +134,11 @@ def validate_axis_type(axis_type: str) -> TypeGuard[AxisType]:
     return axis_type in VALID_AXIS_TYPES
 
 
-def validate_space_unit(unit_name: str) -> TypeGuard[SpaceUnits]:
+def validate_space_unit(unit_name: Any) -> TypeGuard[SpaceUnits]:
     """Checks space unit against ome-zarr supported units
 
     Args:
-        unit_name (str): Unit name to check
+        unit_name : Unit name to check
 
     Returns:
         bool: True if a space unit is a KNOWN valid unit.
@@ -148,11 +147,11 @@ def validate_space_unit(unit_name: str) -> TypeGuard[SpaceUnits]:
     return unit_name in VALID_SPACE_UNITS
 
 
-def validate_time_unit(unit_name: str) -> TypeGuard[TimeUnits]:
+def validate_time_unit(unit_name: Any) -> TypeGuard[TimeUnits]:
     """Check time unit against ome-zarr supported units
 
     Args:
-        unit_name (str): Unit name to check
+        unit_name : Unit name to check
 
     Returns:
         bool: True if a time unit is a KNOWN valid unit.

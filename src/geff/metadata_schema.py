@@ -36,32 +36,33 @@ class Axis(BaseModel):
 
     @model_validator(mode="after")
     def _validate_model(self) -> Axis:
-        if (self.min is None) != (self.max is None):  # type: ignore
+        if (self.min is None) != (self.max is None):
             raise ValueError(
                 f"Min and max must both be None or neither: got min {self.min} and max {self.max}"
             )
-        if self.min is not None and self.min > self.max:  # type: ignore
+        if self.min is not None and self.max is not None and self.min > self.max:
             raise ValueError(f"Min {self.min} is greater than max {self.max}")
 
-        if self.type is not None and not validate_axis_type(self.type):  # type: ignore
+        if self.type is not None and not validate_axis_type(self.type):
             warnings.warn(
                 f"Type {self.type} not in valid types {VALID_AXIS_TYPES}. "
                 "Reader applications may not know what to do with this information.",
                 stacklevel=2,
             )
 
-        if self.type == "space" and not validate_space_unit(self.unit):  # type: ignore
-            warnings.warn(
-                f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
-        elif self.type == "time" and not validate_time_unit(self.unit):  # type: ignore
-            warnings.warn(
-                f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
+        if self.unit:
+            if self.type == "space" and not validate_space_unit(self.unit):
+                warnings.warn(
+                    f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
+                    "Reader applications may not know what to do with this information.",
+                    stacklevel=2,
+                )
+            elif self.type == "time" and not validate_time_unit(self.unit):
+                warnings.warn(
+                    f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
+                    "Reader applications may not know what to do with this information.",
+                    stacklevel=2,
+                )
 
         return self
 

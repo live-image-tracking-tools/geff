@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -20,7 +22,7 @@ from geff.write_arrays import write_arrays
         np.bool_,
     ],
 )
-def test_validate_data_type_allowed(dtype_in):
+def test_validate_data_type_allowed(dtype_in: Any) -> None:
     """All allowed dtypes should return *True*."""
     assert validate_data_type(dtype_in) is True
 

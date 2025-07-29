@@ -176,13 +176,13 @@ def from_ctc_to_geff(
     if "z" in node_props:
         axis_names.insert(1, Axis(name="z", type="space"))
 
-    node_ids = np.asarray(node_props.pop("id"), dtype=int)
+    nodes = np.asarray(node_props.pop("id"), dtype=int)
 
     write_arrays(
         geff_store=geff_path,
-        node_ids=node_ids,
+        node_ids=nodes,
         node_props={name: (np.asarray(values), None) for name, values in node_props.items()},
-        edge_ids=np.asarray(edges, dtype=node_ids.dtype),
+        edge_ids=np.asarray(edges, dtype=nodes.dtype),
         edge_props={},
         metadata=GeffMetadata(
             geff_version=geff.__version__,

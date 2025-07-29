@@ -124,7 +124,7 @@ class Affine(BaseModel):
         # Extract non-homogeneous coordinates
         result = result_homo[:, :-1]
 
-        return result.reshape(original_shape)
+        return result.reshape(original_shape)  # type: ignore[no-any-return]
 
     def __call__(self, points: NDArray[np.floating]) -> NDArray[np.floating]:
         """Apply transformation to points (callable interface)."""
