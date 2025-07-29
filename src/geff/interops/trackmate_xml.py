@@ -4,10 +4,9 @@ import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
-import typer
 
 if TYPE_CHECKING:
     import xml.etree.ElementTree as ET
@@ -559,42 +558,3 @@ def from_trackmate_xml_to_geff(
         metadata=metadata,
         zarr_format=zarr_format,
     )
-
-
-def from_trackmate_xml_to_geff_cli(
-    xml_path: Path,
-    geff_path: Path,
-    discard_filtered_spots: bool = False,
-    discard_filtered_tracks: bool = False,
-    overwrite: bool = False,
-    zarr_format: int = 2,  # type: ignore
-    # because of Typer not supporting Literal types
-) -> None:
-    """
-    Convert a TrackMate XML file to a GEFF file.
-
-    Args:
-        xml_path (Path | str): The path to the TrackMate XML file.
-        geff_path (Path | str): The path to the GEFF file.
-        discard_filtered_spots (bool, optional): True to discard the spots
-            filtered out in TrackMate, False otherwise. False by default.
-        discard_filtered_tracks (bool, optional): True to discard the tracks
-            filtered out in TrackMate, False otherwise. False by default.
-        overwrite (bool, optional): Whether to overwrite the GEFF file if it already exists.
-        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
-    """
-    from_trackmate_xml_to_geff(
-        xml_path=xml_path,
-        geff_path=geff_path,
-        discard_filtered_spots=discard_filtered_spots,
-        discard_filtered_tracks=discard_filtered_tracks,
-        overwrite=overwrite,
-        zarr_format=cast("Literal[2, 3]", zarr_format),
-    )
-
-
-app = typer.Typer()
-app.command()(from_trackmate_xml_to_geff_cli)
-
-if __name__ == "__main__":
-    app()
