@@ -88,6 +88,7 @@ def write_nx(
         node_props,
         edge_props,
         axis_names,
+        zarr_format=zarr_format,
     )
 
     # write metadata
