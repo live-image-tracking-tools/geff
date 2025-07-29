@@ -1,5 +1,3 @@
-import itertools
-
 import pytest
 import zarr
 from typer.testing import CliRunner
@@ -42,10 +40,8 @@ def test_main_invalid_command():
     assert result.exit_code != 0
 
 
-@pytest.mark.parametrize(
-    "is_gt,tczyx",
-    list(itertools.product([True, False], [True, False])),
-)
+@pytest.mark.parametrize("is_gt", [True, False])
+@pytest.mark.parametrize("tczyx", [True, False])
 def test_convert_ctc(tmp_path, is_gt, tczyx):
     ctc_path = create_mock_data(tmp_path, is_gt)
     geff_path = ctc_path / "little.geff"

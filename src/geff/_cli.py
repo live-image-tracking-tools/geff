@@ -1,5 +1,3 @@
-import logging
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, cast
 
@@ -13,9 +11,6 @@ if TYPE_CHECKING:
     from typing import Literal
 
 app = typer.Typer(help="GEFF Command Line Interface")
-
-logging.basicConfig(stream=sys.stderr, level=logging.WARNING, format="%(levelname)s: %(message)s")
-logging.captureWarnings(True)
 
 
 @app.command()
@@ -143,7 +138,7 @@ def convert_trackmate_xml(
     """
     Convert a TrackMate XML file to a GEFF file.
     """
-    from geff.interops import from_trackmate_xml_to_geff  # noqa: I001 import at call time to avoid optional dependency issues
+    from geff.interops import from_trackmate_xml_to_geff
 
     from_trackmate_xml_to_geff(
         xml_path=xml_path,

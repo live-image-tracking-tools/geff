@@ -3,11 +3,10 @@ import pytest
 try:
     import tifffile
 
-    from geff.interops import ctc
+    from geff.interops import ctc_tiffs_to_zarr, from_ctc_to_geff
 except ImportError:
     pytest.skip("geff[ctc] not installed", allow_module_level=True)
 
-import itertools
 from pathlib import Path
 
 import numpy as np
@@ -62,10 +61,8 @@ def create_mock_data(
     return tmp_path
 
 
-@pytest.mark.parametrize(
-    "is_gt,tczyx",
-    list(itertools.product([True, False], [True, False])),
-)
+@pytest.mark.parametrize("is_gt", [True, False])
+@pytest.mark.parametrize("tczyx", [True, False])
 def test_ctc_to_geff(
     tmp_path: Path,
     is_gt: bool,
@@ -75,7 +72,7 @@ def test_ctc_to_geff(
     geff_path = ctc_path / "little.geff"
     segm_path = ctc_path / "segm.zarr"
 
-    ctc.from_ctc_to_geff(
+    from_ctc_to_geff(
         ctc_path=ctc_path,
         geff_path=geff_path,
         segmentation_store=segm_path,
@@ -114,7 +111,7 @@ def test_ctc_image_to_zarr(tmp_path: Path, ctzyx: bool) -> None:
     ctc_path = create_mock_data(tmp_path, is_gt=False)
     zarr_path = tmp_path / "segm.zarr"
 
-    ctc.ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=ctzyx)
+    ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=ctzyx)
 
     expected_arr = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
     copied_arr = zarr.open(zarr_path, mode="r")
