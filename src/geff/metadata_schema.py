@@ -3,13 +3,14 @@ from __future__ import annotations
 import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
-from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
-from zarr.storage import StoreLike
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
+
+if TYPE_CHECKING:
+    from zarr.storage import StoreLike
 
 from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
@@ -410,7 +411,7 @@ class GeffMetadata(BaseModel):
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
-            zarr store (zarr store | Path | str): The geff store to write the metadata to
+            store (zarr store | Path | str): The geff store to write the metadata to
         """
         group = zarr.open(store)
         group.attrs["geff"] = self.model_dump(mode="json")
@@ -420,7 +421,7 @@ class GeffMetadata(BaseModel):
         """Helper function to read GeffMetadata from a zarr geff group.
 
         Args:
-            zarr store (zarr store | Path | str): The geff store to read the metadata from
+            store (zarr store | Path | str): The geff store to read the metadata from
 
         Returns:
             GeffMetadata: The GeffMetadata object

@@ -19,7 +19,6 @@ from geff.io_utils import (
     calculate_roi_from_nodes,
     create_or_update_metadata,
     get_graph_existing_metadata,
-    setup_zarr_group,
 )
 from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.write_dicts import write_dicts
@@ -86,8 +85,6 @@ def write_rx(
         axis_types: The types of the axes.
         zarr_format: The zarr format to use.
     """
-
-    group = setup_zarr_group(store, zarr_format)
 
     axis_names, axis_units, axis_types = get_graph_existing_metadata(
         metadata, axis_names, axis_units, axis_types

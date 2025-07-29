@@ -1,5 +1,4 @@
 import pytest
-import zarr
 from typer.testing import CliRunner
 
 import geff

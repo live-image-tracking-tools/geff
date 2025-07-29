@@ -6,7 +6,6 @@ from pathlib import Path
 import numpy as np
 import pydantic
 import pytest
-import zarr
 
 import geff
 from geff.affine import Affine
