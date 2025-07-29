@@ -100,7 +100,7 @@ jobs:
         if: steps.cache_baseline.outputs.cache-hit != 'true'
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
-          uv run --group bench pytest tests/bench.py -v --benchmark-json baseline.json
+          uv run --group bench --no-dev pytest tests/bench.py -v --benchmark-json baseline.json
 
       - name: Cache baseline results
         uses: actions/cache/save@v4
@@ -112,7 +112,7 @@ jobs:
       - name: Run benchmark on PR head commit
         run: |
           git checkout ${{ github.event.pull_request.head.sha }}
-          uv run --group bench pytest tests/bench.py -v --benchmark-json pr.json
+          uv run --group bench --no-dev pytest tests/bench.py -v --benchmark-json pr.json
 
       - name: Generate report
         run: uv run scripts/benchmark-pr.py baseline.json pr.json report.md
