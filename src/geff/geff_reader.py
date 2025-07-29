@@ -1,7 +1,5 @@
-from typing import TYPE_CHECKING, cast
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+from collections.abc import Sequence
+from typing import cast
 
 import numpy as np
 import zarr
@@ -117,9 +115,15 @@ class GeffReader:
 
         for name in names:
             prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}", mode="r")
-            prop_dict: PropDictZArray = {"values": cast("Array", prop_group["values"])}
+            prop_values = zarr.open_array(
+                self.group.store, path=f"nodes/props/{name}/values", mode="r"
+            )
+            prop_dict: PropDictZArray = {"values": prop_values}
             if "missing" in prop_group.keys():
-                prop_dict["missing"] = cast("Array", prop_group["missing"])
+                prop_missing = zarr.open_array(
+                    self.group.store, path=f"nodes/props/{name}/missing", mode="r"
+                )
+                prop_dict["missing"] = prop_missing
             self.node_props[name] = prop_dict
 
     def read_edge_props(self, names: list[str] | None = None):
@@ -163,9 +167,8 @@ class GeffReader:
             prop_group = zarr.open_group(
                 self.group.store, path=f"nodes/vlen_props/{name}", mode="r"
             )
-            prop_dict: PropDictSequence = {
-                "values": cast("Sequence", deserialize_vlen_property_data(prop_group))
-            }
+            prop_values = deserialize_vlen_property_data(prop_group)
+            prop_dict: PropDictSequence = {"values": prop_values}
             if "missing" in prop_group.keys():
                 prop_dict["missing"] = cast("Array", prop_group["missing"])
             self.node_props[name] = prop_dict
@@ -219,14 +222,19 @@ class GeffReader:
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray | PropDictSequence] = {}
         for name, props in self.node_props.items():
-            if isinstance(props["values"], tuple | list):
+            masked_values: NDArray | Sequence | None = None
+            if isinstance(props["values"], Sequence):
                 masked_values = (
-                    props["values"][node_mask.tolist()]
+                    [
+                        val
+                        for val, mask in zip(props["values"], node_mask.tolist(), strict=False)
+                        if mask
+                    ]
                     if node_mask is not None
-                    else props["values"][:]
+                    else props["values"]
                 )
             else:
-                masked_values = cast("PropDictZArray", props)["values"][
+                masked_values = cast("NDArray", props["values"])[
                     node_mask.tolist() if node_mask is not None else ...
                 ]
             if name in self.vlen_node_prop_names:
@@ -235,35 +243,14 @@ class GeffReader:
                 node_props[name] = {"values": cast("NDArray", np.array(masked_values))}
 
             if "missing" in props:
-                node_masked_missing: Sequence | NDArray[np.bool] | None = None
-                if isinstance(props["missing"], tuple | list):
-                    node_masked_missing = (
-                        tuple(
-                            miss
-                            for miss, mask in zip(
-                                props["missing"], node_mask.tolist(), strict=False
-                            )
-                            if mask
-                        )
-                        if node_mask is not None
-                        else props["missing"][:]
-                    )
-                else:
-                    node_masked_missing = cast("NDArray", props["missing"])[
-                        node_mask.tolist() if node_mask is not None else ...
-                    ]
-                if name in self.vlen_node_prop_names:
-                    cast("PropDictSequence", node_props[name])["missing"] = cast(
-                        "Sequence", node_masked_missing
-                    )
-                else:
-                    node_props[name]["missing"] = cast(
-                        "NDArray",
-                        np.array(
-                            node_masked_missing,
-                            dtype=bool,
-                        ),
-                    )
+                node_masked_missing: NDArray[np.bool] | None = None
+                node_masked_missing = cast("NDArray", props["missing"])[
+                    node_mask.tolist() if node_mask is not None else ...
+                ]
+                cast("PropDictNpArray", node_props[name])["missing"] = np.array(
+                    node_masked_missing,
+                    dtype=bool,
+                )
 
         # remove edges if any of it's nodes has been masked
         edges = np.array(self.edges[:])
@@ -272,19 +259,23 @@ class GeffReader:
             if edge_mask is not None:
                 edge_mask = np.logical_and(edge_mask, edge_mask_removed_nodes)
             else:
-                edge_mask = cast("NDArray[np.bool]", edge_mask_removed_nodes)
+                edge_mask = cast("NDArray", edge_mask_removed_nodes)
         edges = edges[edge_mask if edge_mask is not None else ...]
 
         edge_props: dict[str, PropDictNpArray | PropDictSequence] = {}
         for name, props in self.edge_props.items():
-            if isinstance(props["values"], tuple | list):
+            if isinstance(props["values"], Sequence):
                 masked_values = (
-                    props["values"][edge_mask.tolist()]
+                    [
+                        val
+                        for val, mask in zip(props["values"], edge_mask.tolist(), strict=False)
+                        if mask
+                    ]
                     if edge_mask is not None
-                    else props["values"][:]
+                    else props["values"]
                 )
             else:
-                masked_values = cast("PropDictZArray", props)["values"][
+                masked_values = cast("NDArray", props["values"])[
                     edge_mask.tolist() if edge_mask is not None else ...
                 ]
             if name in self.vlen_edge_prop_names:
@@ -293,34 +284,13 @@ class GeffReader:
                 edge_props[name] = {"values": cast("NDArray", np.array(masked_values))}
             if "missing" in props:
                 edge_masked_missing: Sequence | NDArray[np.bool] | None = None
-                if isinstance(props["missing"], tuple | list):
-                    edge_masked_missing = (
-                        tuple(
-                            miss
-                            for miss, mask in zip(
-                                props["missing"], edge_mask.tolist(), strict=False
-                            )
-                            if mask
-                        )
-                        if edge_mask is not None
-                        else props["missing"][:]
-                    )
-                else:
-                    edge_masked_missing = cast("NDArray", props["missing"])[
-                        edge_mask.tolist() if edge_mask is not None else ...
-                    ]
-                if name in self.vlen_edge_prop_names:
-                    cast("PropDictSequence", edge_props[name])["missing"] = cast(
-                        "Sequence", edge_masked_missing
-                    )
-                else:
-                    edge_props[name]["missing"] = cast(
-                        "NDArray",
-                        np.array(
-                            edge_masked_missing,
-                            dtype=bool,
-                        ),
-                    )
+                edge_masked_missing = cast("NDArray", props["missing"])[
+                    edge_mask.tolist() if edge_mask is not None else ...
+                ]
+                cast("PropDictNpArray", edge_props[name])["missing"] = np.array(
+                    edge_masked_missing,
+                    dtype=bool,
+                )
 
         return {
             "metadata": self.metadata,

@@ -47,11 +47,11 @@ class PropDictSequence(TypedDict):
     """
 
     values: Sequence
-    missing: NotRequired[NDArray[np.bool] | Sequence[Any]]
+    missing: NotRequired[zarr.Array]
 
 
 PropDict: TypeAlias = dict[
-    str, tuple[np.ndarray, np.ndarray | None] | tuple[np.ndarray, np.ndarray | None, np.ndarray]
+    str, tuple[NDArray, NDArray | None] | tuple[NDArray, NDArray | None, NDArray]
 ]
 
 

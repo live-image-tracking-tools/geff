@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import cast
+from typing import cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -69,6 +69,20 @@ def serialize_vlen_property_data(
         np.array(missing, dtype=bool) if missing else None,
         np.array(slices, dtype=np.uint64),
     )
+
+
+@overload
+def deserialize_vlen_property_data(
+    vlen_props: Group | dict[str, NDArray],
+    index: int,
+) -> NDArray | None: ...
+
+
+@overload
+def deserialize_vlen_property_data(
+    vlen_props: Group | dict[str, NDArray],
+    index: None = None,
+) -> Sequence[NDArray | None]: ...
 
 
 def deserialize_vlen_property_data(
