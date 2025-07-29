@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -14,6 +13,7 @@ from geff import _path
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+    from pathlib import Path
 
     from numpy.typing import ArrayLike
 

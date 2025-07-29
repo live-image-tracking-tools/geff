@@ -1,6 +1,6 @@
 import warnings
-from collections.abc import Sequence
-from typing import Any, Iterable, Literal
+from collections.abc import Iterable, Sequence
+from typing import Any, Literal
 
 import numpy as np
 from zarr.storage import StoreLike
