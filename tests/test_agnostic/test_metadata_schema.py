@@ -10,7 +10,14 @@ import zarr
 
 import geff
 from geff.affine import Affine
-from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, GeffSchema
+from geff.metadata_schema import (
+    VERSION_PATTERN,
+    Axis,
+    GeffMetadata,
+    GeffSchema,
+    PropMetadata,
+    validate_props_metadata,
+)
 
 
 class TestMetadataModel:
@@ -257,6 +264,88 @@ class TestAxis:
         # Min > max
         with pytest.raises(ValueError, match=r"Min .* is greater than max .*"):
             Axis(name="test", min=0, max=-10)
+
+
+class TestPropMetadata:
+    def test_valid(self):
+        # Minimal valid metadata
+        PropMetadata(identifier="prop_1", name="property", dtype="int32")
+
+        # All fields
+        PropMetadata(
+            identifier="prop_2",
+            dtype="float64",
+            encoding="utf-8",
+            unit="micrometer",
+            name="property 2",
+            description="A property with all fields set.",
+        )
+
+    def test_invalid_identifier(self):
+        # identifier must be a string
+        with pytest.raises(pydantic.ValidationError):
+            PropMetadata(identifier=123, name="property", dtype="int16")
+
+        # identifier must be a non-empty string
+        with pytest.raises(ValueError, match="Property identifier cannot be an empty string."):
+            PropMetadata(identifier="", dtype="int16")
+
+    def test_invalid_dtype(self):
+        # dtype must be a string
+        with pytest.raises(pydantic.ValidationError):
+            PropMetadata(identifier="prop", dtype=123)
+        with pytest.raises(pydantic.ValidationError):
+            PropMetadata(identifier="prop", dtype=None)
+
+        # dtype must be a non-empty string
+        with pytest.raises(ValueError, match="Property dtype cannot be an empty string."):
+            PropMetadata(identifier="prop", dtype="")
+
+        # dtype must be in allowed data types
+        with pytest.warns(
+            UserWarning, match=r"Data type .* cannot be matched to a valid data type"
+        ):
+            PropMetadata(identifier="prop", dtype="nope")
+
+    def test_invalid_encoding(self):
+        # encoding must be a string
+        with pytest.raises(pydantic.ValidationError):
+            PropMetadata(identifier="prop", dtype="int16", encoding=123)
+
+        # encoding must be a valid string encoding
+        with pytest.warns(UserWarning, match=r"Encoding .* not in valid encodings"):
+            PropMetadata(identifier="prop", dtype="float", encoding="invalid_encoding")
+
+
+def test_validate_props_metadata():
+    # Matching key / identifier
+    props_md = {
+        "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
+        "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
+        "prop3": PropMetadata(identifier="prop3", name="Property 3", dtype="str"),
+    }
+    validate_props_metadata(props_md, "node")
+
+    # Empty metadata
+    props_md = {}
+    validate_props_metadata(props_md, "edge")
+
+    # Non matching key / identifier
+    props_md = {
+        "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
+        "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
+        "prop3": PropMetadata(identifier="prop4", name="Property 3", dtype="str"),
+    }
+    with pytest.raises(ValueError, match=r".* property key .* does not match "):
+        validate_props_metadata(props_md, "node")
+
+    # Incorrect component type
+    props_md = {
+        "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
+        "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
+    }
+    with pytest.raises(pydantic.ValidationError):
+        validate_props_metadata(props_md, "nodeeeee")
 
 
 class TestAffineTransformation:

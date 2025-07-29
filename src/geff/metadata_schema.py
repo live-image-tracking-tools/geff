@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import zarr
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, validate_call
 from pydantic.config import ConfigDict
 
 from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
@@ -203,6 +203,7 @@ class PropMetadata(BaseModel):
         return self
 
 
+@validate_call
 def validate_props_metadata(
     props_metadata: dict[str, PropMetadata],
     c_type: Literal["node", "edge", "tracklet", "lineage"],
