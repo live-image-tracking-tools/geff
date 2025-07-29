@@ -103,9 +103,9 @@ def validate_tracklets(
     """
     errors = []
 
-    nodes = np.asarray(node_ids, dtype=np.int64, copy=False)
-    edges = np.asarray(edge_ids, dtype=np.int64, copy=False)
-    tracklets = np.asarray(tracklet_ids, dtype=np.int64, copy=False)
+    nodes = np.asarray(node_ids, dtype=np.int64)
+    edges = np.asarray(edge_ids, dtype=np.int64)
+    tracklets = np.asarray(tracklet_ids, dtype=np.int64)
 
     # Group nodes by tracklet ID.
     tracklet_to_nodes: dict[int, list[int]] = {}
