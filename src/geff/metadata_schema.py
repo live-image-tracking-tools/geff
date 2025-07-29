@@ -226,7 +226,7 @@ class RelatedObject(BaseModel):
         return self
 
 
-GEFF_VERSION = ".".join(geff.__version__.split(".")[:3])
+GEFF_VERSION = ".".join(geff.__version__.split(".")[:2])
 
 
 class GeffMetadata(BaseModel):
