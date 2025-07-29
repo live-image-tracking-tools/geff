@@ -7,7 +7,7 @@ import zarr
 
 from geff.metadata_schema import GeffMetadata
 
-from . import utils
+from . import _path, utils
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -61,27 +61,23 @@ class GeffReader:
             utils.validate(source)
         self.group = zarr.open_group(source, mode="r")
         self.metadata = GeffMetadata.read(self.group)
-        self.nodes = zarr.open_array(source, path=utils.NODE_IDS_KEY, mode="r")
-        self.edges = zarr.open_array(source, path=utils.EDGE_IDS_KEY, mode="r")
+        self.nodes = zarr.open_array(source, path=_path.NODE_IDS, mode="r")
+        self.edges = zarr.open_array(source, path=_path.EDGE_IDS, mode="r")
         self.node_props: dict[str, PropDictZArray] = {}
         self.edge_props: dict[str, PropDictZArray] = {}
 
         # get node properties names
-        nodes_group = utils.expect_group(self.group, utils.NODES_KEY, "graph")
-        if "props" in nodes_group.keys():
-            node_props_group = zarr.open_group(
-                self.group.store, path=utils.NODE_PROPS_KEY, mode="r"
-            )
+        nodes_group = utils.expect_group(self.group, _path.NODES)
+        if _path.PROPS in nodes_group.keys():
+            node_props_group = zarr.open_group(self.group.store, path=_path.NODE_PROPS, mode="r")
             self.node_prop_names: list[str] = [*node_props_group.group_keys()]
         else:
             self.node_prop_names = []
 
         # get edge property names
-        edges_group = utils.expect_group(self.group, utils.EDGES_KEY, "graph")
-        if "props" in edges_group.keys():
-            edge_props_group = zarr.open_group(
-                self.group.store, path=utils.EDGE_PROPS_KEY, mode="r"
-            )
+        edges_group = utils.expect_group(self.group, _path.EDGES)
+        if _path.PROPS in edges_group.keys():
+            edge_props_group = zarr.open_group(self.group.store, path=_path.EDGE_PROPS, mode="r")
             self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
         else:
             self.edge_prop_names = []
@@ -103,12 +99,13 @@ class GeffReader:
 
         for name in names:
             prop_group = zarr.open_group(
-                self.group.store, path=f"{utils.NODE_PROPS_KEY}/{name}", mode="r"
+                self.group.store, path=f"{_path.NODE_PROPS}/{name}", mode="r"
             )
-            values = utils.expect_array(prop_group, utils.VALUES_KEY, "node")
+            values = utils.expect_array(prop_group, _path.VALUES, "node")
             prop_dict: PropDictZArray = {"values": values}
-            if utils.MISSING_KEY in prop_group.keys():
-                prop_dict[utils.MISSING_KEY] = prop_group[utils.MISSING_KEY]
+            if _path.MISSING in prop_group.keys():
+                missing = utils.expect_array(prop_group, _path.MISSING, "node")
+                prop_dict[_path.MISSING] = missing
             self.node_props[name] = prop_dict
 
     def read_edge_props(self, names: list[str] | None = None) -> None:
@@ -127,10 +124,14 @@ class GeffReader:
             names = self.edge_prop_names
 
         for name in names:
-            prop_group = zarr.open_group(self.group.store, path=f"edges/props/{name}", mode="r")
-            prop_dict: PropDictZArray = {"values": prop_group["values"]}
-            if "missing" in prop_group.keys():
-                prop_dict["missing"] = prop_group["missing"]
+            prop_group = zarr.open_group(
+                self.group.store, path=f"{_path.EDGE_PROPS}/{name}", mode="r"
+            )
+            values = utils.expect_array(prop_group, _path.VALUES, "edge")
+            prop_dict: PropDictZArray = {"values": values}
+            if _path.MISSING in prop_group.keys():
+                missing = utils.expect_array(prop_group, _path.MISSING, "edge")
+                prop_dict[_path.MISSING] = missing
             self.edge_props[name] = prop_dict
 
     def build(
@@ -157,13 +158,13 @@ class GeffReader:
         node_props: dict[str, PropDictNpArray] = {}
         for name, props in self.node_props.items():
             node_props[name] = {
-                "values": np.array(
-                    props["values"][node_mask.tolist() if node_mask is not None else ...]
+                _path.VALUES: np.array(
+                    props[_path.VALUES][node_mask.tolist() if node_mask is not None else ...]
                 )
             }
-            if "missing" in props:
-                node_props[name]["missing"] = np.array(
-                    props["missing"][node_mask.tolist() if node_mask is not None else ...],
+            if _path.MISSING in props:
+                node_props[name][_path.MISSING] = np.array(
+                    props[_path.MISSING][node_mask.tolist() if node_mask is not None else ...],
                     dtype=bool,
                 )
 
@@ -180,12 +181,12 @@ class GeffReader:
         edge_props: dict[str, PropDictNpArray] = {}
         for name, props in self.edge_props.items():
             edge_props[name] = {
-                "values": np.array(
-                    props["values"][edge_mask.tolist() if edge_mask is not None else ...]
+                _path.VALUES: np.array(
+                    props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...]
                 )
             }
-            if "missing" in props:
-                edge_props[name]["missing"] = np.array(
+            if _path.MISSING in props:
+                edge_props[name][_path.MISSING] = np.array(
                     props["missing"][edge_mask.tolist() if edge_mask is not None else ...],
                     dtype=bool,
                 )

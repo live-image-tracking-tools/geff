@@ -8,6 +8,8 @@ import numpy as np
 import zarr
 import zarr.storage
 
+from geff import _path
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -33,16 +35,16 @@ def has_valid_seg_id(
 
     errors: list[str] = []
     if isinstance(store, str | Path):
-        store = zarr.DirectoryStore(str(store))
+        store = zarr.open(store, mode="r").store
     elif not isinstance(store, zarr.storage.StoreLike):
         errors.append(f"Unsupported store type: {type(store)}")
 
     group = zarr.open_group(store, mode="r")
+    node_ids = np.asarray(group[_path.NODE_IDS])
 
     # check that 'seg_id' property is present in the nodes group.
     try:
-        node_ids = group["nodes"]["ids"][:]
-        seg_ids = group["nodes"]["props"][seg_id]["values"][:]
+        seg_ids = np.asarray(group[_path.NODE_PROPS][seg_id][_path.VALUES])  # type: ignore
     except KeyError as e:
         errors.append(f"Missing seg_id property in Zarr store: {e}")
         return False, errors
@@ -82,7 +84,7 @@ def axes_match_seg_dims(
 
     errors: list[str] = []
     group = zarr.open_group(store, mode="r")
-    metadata = dict(group.attrs)
+    metadata: dict = dict(group.attrs)
 
     axes = metadata.get("geff", {}).get("axes")
 
@@ -119,7 +121,7 @@ def graph_is_in_seg_bounds(
 
     errors: list[str] = []
     group = zarr.open_group(store, mode="r")
-    metadata = dict(group.attrs)
+    metadata: dict = dict(group.attrs)
     axes = metadata.get("geff", {}).get("axes")
 
     segmentation = np.asanyarray(segmentation)
@@ -187,7 +189,7 @@ def has_seg_ids_at_time_points(
         # load the axes metadata to extract the axes order. If it is not present, assume
         # that time is the first axes.
         group = zarr.open_group(store, mode="r")
-        metadata = dict(group.attrs)
+        metadata: dict = dict(group.attrs)
         axes = metadata.get("geff", {}).get("axes")
 
         # check the metadata to see if an alternative time index is provided there.

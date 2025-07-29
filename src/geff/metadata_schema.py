@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 import warnings
 from collections.abc import (
-    Sequence,  # noqa: TC003
+    Mapping,
+    Sequence,
 )
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -439,8 +440,9 @@ class GeffMetadata(BaseModel):
                 f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
                 f"/dataset.zarr/)."
             )
-
-        return cls.model_validate(dict(_group.attrs["geff"]))
+        if not isinstance(geff_dict := _group.attrs["geff"], Mapping):
+            raise ValueError(f"Expected geff metadata to be a Mapping. Got {type(geff_dict)}")
+        return cls.model_validate(geff_dict)
 
 
 class GeffSchema(BaseModel):
