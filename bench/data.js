@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753736733479,
+  "lastUpdate": 1753748359924,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3663,6 +3663,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 1.1343648543944465",
             "extra": "mean: 9.139838849333321 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "talley.lambert@gmail.com",
+            "name": "Talley Lambert",
+            "username": "tlambert03"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b0be688f95940b2ba671d110de3ac09f3f344287",
+          "message": "Ensure schema is updated in tests, rather than in pre-commit & ci (#255)\n\nCurrently, in order to make sure that `geff-schema.json` is up to date\nwith the schema. the `Check json schema` step runs on CI, and simply\nfails if the file needs updating. There is also a `pre-commit` local\nhook. but because it requires a fully competent environment with geff\ninstalled, it only works via pixi/uv, and must be hidden from\npre-commit.ci using the \"manual\" hook stage; as a result, most people\nwill never use it unless they explicitly opt in to manual hook stages.\n\nThis PR dispenses with both of those strategies and just checks that the\nschema is up to date in tests itself. If the schema is not up to date,\ntests will fail with a message that you should run `pytest` with the\n`--update-schema` flag to allow pytest to update the schema file in\nplace (this is to avoid side-effects without explicit opt-in). If you\nthen run `pytest --update-schema` it will update the file in place if\nneeded, *and emit a warning that the changes need to be checked in*.\nbecause warnings are errors, that will still be a failure on CI.\nHowever, locally, the user just needs to check in the changes and then\ntests will pass again.",
+          "timestamp": "2025-07-28T20:16:04-04:00",
+          "tree_id": "04028020ea0eb3dc27aecb94a6de1aa429c1fe02",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/b0be688f95940b2ba671d110de3ac09f3f344287"
+        },
+        "date": 1753748358475,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.11838458515579453,
+            "unit": "iter/sec",
+            "range": "stddev: 1.3854691826898267",
+            "extra": "mean: 8.447045691666668 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 21.266067985269576,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0016432308851145857",
+            "extra": "mean: 47.023267333325215 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.07960271523444735,
+            "unit": "iter/sec",
+            "range": "stddev: 0.3363071208173639",
+            "extra": "mean: 12.562385555 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.11185965766982689,
+            "unit": "iter/sec",
+            "range": "stddev: 1.072289297831668",
+            "extra": "mean: 8.939773469999997 sec\nrounds: 3"
           }
         ]
       }
