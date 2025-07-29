@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import zarr
-import zarr.abc
-import zarr.abc.store
 import zarr.storage
 
 from geff import _path
