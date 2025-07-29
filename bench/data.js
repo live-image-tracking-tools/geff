@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1753800662085,
+  "lastUpdate": 1753803035045,
   "repoUrl": "https://github.com/live-image-tracking-tools/geff",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3840,6 +3840,79 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 5.805643521390148",
             "extra": "mean: 6.251372379333323 sec\nrounds: 3"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a7c1c8aca9ab9612142cc61705ce17ee75399d78",
+          "message": "Reorganize cli to contain conversion functions in cli file (#243)\n\n# Proposed Change\n- Closes #220 \n- Improves handling of imports for conversion functions which require\noptional dependencies\n\nCurrently there still isn't any testing of raising errors when optional\nimports are missing, but that's outside the scope of this PR.\n\n# Types of Changes\nWhat types of changes does your code introduce? Delete those that do not\napply.\n- Maintenance (e.g. dependencies, CI, releases, etc.)\n\nWhich topics does your change affect? Delete those that do not apply.\n\n# Checklist\nPut an x in the boxes that apply. You can also fill these out after\ncreating the PR. If you're unsure about any of them, don't hesitate to\nask. We're here to help! This is simply a reminder of what we are going\nto look for before merging your code.\n\n- [x] I have read the\n[developer/contributing](https://github.com/live-image-tracking-tools/geff/blob/main/CONTRIBUTING)\ndocs.\n- [x] I have added tests that prove that my feature works in various\nsituations or tests the bugfix (if appropriate).\n- [ ] I have checked that I maintained or improved code coverage.\n- [x] I have written docstrings and checked that they render correctly\nby looking at the docs preview (link left as a comment on the PR).\n\n---------\n\nCo-authored-by: Teun Huijben <teun.huijben@czbiohub.org>\nCo-authored-by: Teun Huijben <45037215+TeunHuijben@users.noreply.github.com>",
+          "timestamp": "2025-07-29T11:25:46-04:00",
+          "tree_id": "649f7121ca0a0777198d490f971aaf7940f98326",
+          "url": "https://github.com/live-image-tracking-tools/geff/commit/a7c1c8aca9ab9612142cc61705ce17ee75399d78"
+        },
+        "date": 1753803034238,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_write[write_nx]",
+            "value": 0.101981468959921,
+            "unit": "iter/sec",
+            "range": "stddev: 1.9355866194915983",
+            "extra": "mean: 9.805703037999999 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_write[write_rx]",
+            "value": 0.12047458114185539,
+            "unit": "iter/sec",
+            "range": "stddev: 1.3719120612828108",
+            "extra": "mean: 8.300506135999996 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_write[write_sg]",
+            "value": 2.4211259645959995,
+            "unit": "iter/sec",
+            "range": "stddev: 0.001702668173848952",
+            "extra": "mean: 413.03096766667596 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_validate",
+            "value": 21.600254571957528,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00024732578339142487",
+            "extra": "mean: 46.295750666672575 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_nx]",
+            "value": 0.07795143013625214,
+            "unit": "iter/sec",
+            "range": "stddev: 0.38264110685324126",
+            "extra": "mean: 12.828501006999991 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_rx]",
+            "value": 0.1082650235786581,
+            "unit": "iter/sec",
+            "range": "stddev: 0.24149797639214046",
+            "extra": "mean: 9.236593379333328 sec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_read[read_sg]",
+            "value": 0.3682690480507737,
+            "unit": "iter/sec",
+            "range": "stddev: 0.21075098682060703",
+            "extra": "mean: 2.7154060469999877 sec\nrounds: 3"
           }
         ]
       }
