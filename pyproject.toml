@@ -67,6 +67,7 @@ docs = [
     "mkdocs-include-markdown-plugin>=7.1.6",
     "mkdocs-material>=9.6.16",
     "mkdocstrings-python>=1.16.12",
+    "mkdocs-typer>=0.0.3",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
 ]
