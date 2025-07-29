@@ -50,7 +50,22 @@ class TestMetadataModel:
         assert model.axes is None
 
         # Complete metadata
-        model = GeffMetadata(geff_version="0.0.1", directed=True, axes=[{"name": "test"}])
+        node_props = {"prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32")}
+        edge_props = {
+            "prop2": PropMetadata(identifier="prop2", dtype="float32"),
+            "prop3": PropMetadata(identifier="prop3", dtype="str"),
+        }
+        model = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            axes=[{"name": "test"}],
+            node_props_metadata=node_props,
+            edge_props_metadata=edge_props,
+            related_objects=[
+                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
+                {"type": "image", "path": "raw/"},
+            ],
+        )
         assert len(model.axes) == 1
 
         # Multiple axes
@@ -106,6 +121,52 @@ class TestMetadataModel:
     def test_invalid_version(self):
         with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
             GeffMetadata(geff_version="aljkdf", directed=True)
+
+    def test_props_metadata(self):
+        # Valid props metadata
+        node_props = {
+            "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
+            "prop2": PropMetadata(identifier="prop2", dtype="float32"),
+        }
+        edge_props = {
+            "prop3": PropMetadata(identifier="prop3", dtype="str"),
+        }
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            node_props_metadata=node_props,
+            edge_props_metadata=edge_props,
+        )
+        assert len(meta.node_props_metadata) == 2
+        assert len(meta.edge_props_metadata) == 1
+
+        # Unmatching keys and identifiers
+        with pytest.raises(ValueError, match=r".* property key .* does not match identifier .*"):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                node_props_metadata={
+                    "prop1": PropMetadata(identifier="prop2", name="Property 1", dtype="int32")
+                },
+            )
+
+        # Missing mandatory props metadata
+        with pytest.raises(pydantic.ValidationError):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                node_props_metadata={
+                    "": PropMetadata(identifier="", name="Empty Property", dtype="int32")
+                },
+            )
+        with pytest.raises(pydantic.ValidationError):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                edge_props_metadata={
+                    "prop4": PropMetadata(identifier="prop4", name="Empty Dtype", dtype="")
+                },
+            )
 
     def test_extra_attrs(self):
         # Should not fail
