@@ -82,16 +82,11 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 50 # this is to make sure we obtain the target base commit
       - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-
       - name: Run benchmarks
         uses: CodSpeedHQ/action@v3
         with:
-          run: pytest --codspeed -v  tests/test_bench.py
+          run: uv run --group bench --no-dev pytest --codspeed -v tests/test_bench.py
 
   build-and-inspect-package:
     name: Build & inspect package.
