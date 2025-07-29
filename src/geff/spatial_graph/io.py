@@ -179,12 +179,14 @@ def construct_sg(
             as node_ids.
         node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
             from node property names to (values, missing) arrays, which should have same
-            length as node_ids. Spatial graph does not support missing attributes, so the missing arrays
-            should be None or all False. If present, the missing arrays are ignored with warning
+            length as node_ids. Spatial graph does not support missing attributes, so the missing
+            arrays should be None or all False. If present, the missing arrays are ignored
+            with warning
         edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
             from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids. Spatial graph does not support missing attributes, so the missing arrays
-            should be None or all False. If present, the missing array is ignored with warning.
+            length as edge_ids. Spatial graph does not support missing attributes, so the missing
+            arrays should be None or all False. If present, the missing array is ignored with
+            warning.
         position_attr (str, optional): How to call the position attribute in the returned
             SpatialGraph. Defaults to "position".
 
