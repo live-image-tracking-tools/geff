@@ -1,4 +1,6 @@
-from typing import Any, Literal, Protocol, TypeVar, overload
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
 
 import networkx as nx
 from numpy.typing import NDArray
@@ -7,16 +9,19 @@ from zarr.storage import StoreLike
 from geff.geff_reader import read_to_memory
 from geff.metadata_schema import GeffMetadata
 from geff.networkx.io import construct_nx
+from geff.rustworkx.io import construct_rx
+from geff.spatial_graph.io import construct_sg
 from geff.typing import InMemoryGeff, PropDictNpArray
 
 from .supported_backends import SupportedBackend
 
 R = TypeVar("R", covariant=True)
 
-# !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
+if TYPE_CHECKING:
+    import rustworkx as rx
+    import spatial_graph as sg
 
-# When the GRAPH_DICT option is removed from SupportedBackend enum this can be removed.
-# Currently need 2 options for the overloads to work properly
+# !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
 
 
 class ConstructFunc(Protocol[R]):
@@ -59,42 +64,6 @@ class ConstructFunc(Protocol[R]):
         ...
 
 
-# temporary dummy construct func
-def construct_identity(
-    metadata: GeffMetadata,
-    node_ids: NDArray[Any],
-    edge_ids: NDArray[Any],
-    node_props: dict[str, PropDictNpArray],
-    edge_props: dict[str, PropDictNpArray],
-) -> InMemoryGeff:
-    """
-    This functional is the identity.
-
-    Args:
-        metadata (GeffMetadata): The metadata of the graph.
-        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
-            edge_ids.
-        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
-            as node_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids.
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids.
-
-    Returns:
-        (InMemoryGeff): A dictionary representation of the GEFF data.
-    """
-    return {
-        "metadata": metadata,
-        "node_ids": node_ids,
-        "edge_ids": edge_ids,
-        "node_props": node_props,
-        "edge_props": edge_props,
-    }
-
-
 @overload
 def get_construct_func(
     backend: Literal[SupportedBackend.NETWORKX],
@@ -103,7 +72,13 @@ def get_construct_func(
 
 @overload
 def get_construct_func(
-    backend: Literal[SupportedBackend.GRAPH_DICT],
+    backend: Literal[SupportedBackend.RUSTWORKX],
+) -> ConstructFunc[rx.PyGraph | rx.PyDiGraph]: ...
+
+
+@overload
+def get_construct_func(
+    backend: Literal[SupportedBackend.SPATIAL_GRAPH],
 ) -> ConstructFunc[InMemoryGeff]: ...
 
 
@@ -120,8 +95,10 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
     match backend:
         case SupportedBackend.NETWORKX:
             return construct_nx
-        case SupportedBackend.GRAPH_DICT:
-            return construct_identity
+        case SupportedBackend.RUSTWORKX:
+            return construct_rx
+        case SupportedBackend.SPATIAL_GRAPH:
+            return construct_sg
         # Add cases for new backends, remember to add overloads
         case _:
             raise ValueError(f"Unsupported backend chosen: '{backend.value}'")
@@ -144,9 +121,20 @@ def read(
     validate: bool,
     node_props: list[str] | None,
     edge_props: list[str] | None,
-    backend: Literal[SupportedBackend.GRAPH_DICT],
+    backend: Literal[SupportedBackend.RUSTWORKX],
     backend_kwargs: dict[str, Any] | None = None,
-) -> tuple[InMemoryGeff, GeffMetadata]: ...
+) -> tuple[rx.PyGraph, rx.PyDiGraph, GeffMetadata]: ...
+
+
+@overload
+def read(
+    store: StoreLike,
+    validate: bool,
+    node_props: list[str] | None,
+    edge_props: list[str] | None,
+    backend: Literal[SupportedBackend.SPATIAL_GRAPH],
+    backend_kwargs: dict[str, Any] | None = None,
+) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]: ...
 
 
 def read(
@@ -157,7 +145,8 @@ def read(
     # using Literal because mypy can't seem to narrow the enum type when chaining functions
     backend: Literal[
         SupportedBackend.NETWORKX,
-        SupportedBackend.GRAPH_DICT,
+        SupportedBackend.RUSTWORKX,
+        SupportedBackend.SPATIAL_GRAPH,
     ] = SupportedBackend.NETWORKX,
     backend_kwargs: dict[str, Any] | None = None,
 ) -> tuple[Any, GeffMetadata]:

@@ -3,6 +3,8 @@ from typing import Any
 import networkx as nx
 import numpy as np
 import pytest
+import rustworkx as rx
+import spatial_graph as sg
 from numpy.typing import NDArray
 
 from geff.io import SupportedBackend, read
@@ -34,12 +36,20 @@ def is_expected_type(graph, backend: SupportedBackend):
 def get_nodes(graph) -> set[Any]:
     if isinstance(graph, (nx.Graph | nx.DiGraph)):
         return set(graph.nodes)
+    elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
+        return set(graph.node_indices())
+    elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
+        return set(graph.nodes)
     else:
         raise TypeError(f"No `get_nodes` code path has been defined for type '{type(graph)}'.")
 
 
 def get_edges(graph) -> set[tuple[Any, Any]]:
     if isinstance(graph, (nx.Graph | nx.DiGraph)):
+        return set(graph.edges)
+    elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
+        return set(graph.edge_indices())
+    elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
         return set(graph.edges)
     else:
         raise TypeError(f"No `get_edges` code path has been defined for type '{type(graph)}'.")
@@ -49,6 +59,10 @@ def get_node_prop(graph, name: str, nodes: list[Any]) -> NDArray[Any]:
     if isinstance(graph, (nx.Graph | nx.DiGraph)):
         prop = [graph.nodes[node][name] for node in nodes]
         return np.array(prop)
+    elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
+        return np.array([graph[node][name] for node in nodes])
+    elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
+        return graph.node_attrs[name][nodes]
     else:
         raise TypeError(f"No `get_node_prop` code path has been defined for type '{type(graph)}'.")
 
@@ -57,6 +71,10 @@ def get_edge_prop(graph, name: str, edges: list[Any]) -> NDArray[Any]:
     if isinstance(graph, (nx.Graph | nx.DiGraph)):
         prop = [graph.edges[edge][name] for edge in edges]
         return np.array(prop)
+    elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
+        return np.array([graph[edge][name] for edge in edges])
+    elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
+        return graph.edge_attrs[name][edges]
     else:
         raise TypeError(f"No `get_edge_prop` code path has been defined for type '{type(graph)}'.")
 
@@ -85,9 +103,6 @@ def test_read(
         include_t=include_t,
         include_z=include_z,
     )
-    # temporarily skip dummy example case until it is removed
-    if backend == SupportedBackend.GRAPH_DICT:
-        return
 
     graph, metadata = read(store, backend=backend)
 
