@@ -9,22 +9,22 @@ EDGES: Final = "edges"
 """Path at which we expect to find the Edges group in a GEFF group."""
 
 IDS: Final = "ids"
-"""Path at which we expect to find the IDs group in a Nodes or Edges group."""
+"""Path at which we expect to find the IDs array in a Nodes or Edges group."""
 
 PROPS: Final = "props"
 """Path at which we expect to find the Props group in a Nodes or Edges group."""
 
 VALUES: Final = "values"
-"""Path at which we expect to find the Values group in a Nodes or Edges group."""
+"""Path at which we expect to find the Values array in a Nodes or Edges group."""
 
 MISSING: Final = "missing"
-"""Path at which we expect to find the Missing group in a Nodes or Edges group."""
+"""Path at which we expect to find the Missing array in a Nodes or Edges group."""
 
 NODE_IDS: Final = f"{NODES}/{IDS}"
 """Shortcut for the path to the node IDs in a GEFF."""
 EDGE_IDS: Final = f"{EDGES}/{IDS}"
 """Shortcut for the path to the edge IDs in a GEFF."""
 NODE_PROPS: Final = f"{NODES}/{PROPS}"
-"""Shortcut for the path to the node properties in a GEFF."""
+"""Shortcut for the path to the node properties group in a GEFF."""
 EDGE_PROPS: Final = f"{EDGES}/{PROPS}"
-"""Shortcut for the path to the edge properties in a GEFF."""
+"""Shortcut for the path to the edge properties group in a GEFF."""

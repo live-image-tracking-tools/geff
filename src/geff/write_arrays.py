@@ -1,15 +1,20 @@
-import warnings
-from typing import Literal
+from __future__ import annotations
 
-import numpy as np
+import warnings
+from typing import TYPE_CHECKING, Literal
+
 import zarr
-from zarr.storage import StoreLike
 
 from geff.utils import remove_tilde
 
 from . import _path
-from .metadata_schema import GeffMetadata
 from .units import validate_data_type
+
+if TYPE_CHECKING:
+    import numpy as np
+    from zarr.storage import StoreLike
+
+    from .metadata_schema import GeffMetadata
 
 
 def write_arrays(

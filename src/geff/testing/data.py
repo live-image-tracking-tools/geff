@@ -56,15 +56,19 @@ Examples:
     >>> # graph is a networkx Graph ready for analysis
 """
 
-from typing import Any, Literal, TypedDict, cast, get_args
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, get_args
 
 import networkx as nx
 import numpy as np
 import zarr
 import zarr.storage
-from numpy.typing import NDArray
 
 import geff
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
 NodeIdDTypeStr = Literal["int", "int8", "uint8", "int16", "uint16"]

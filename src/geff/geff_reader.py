@@ -10,6 +10,8 @@ from geff.metadata_schema import GeffMetadata
 from . import _path, utils
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
@@ -82,7 +84,7 @@ class GeffReader:
         else:
             self.edge_prop_names = []
 
-    def read_node_props(self, names: list[str] | None = None) -> None:
+    def read_node_props(self, names: Iterable[str] | None = None) -> None:
         """
         Read the node property with the name `name` from a GEFF.
 
@@ -91,7 +93,7 @@ class GeffReader:
         Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
-            names (lists of str, optional): The names of the node properties to load. If
+            names (iterable of str, optional): The names of the node properties to load. If
             None all node properties will be loaded.
         """
         if names is None:
@@ -108,7 +110,7 @@ class GeffReader:
                 prop_dict[_path.MISSING] = missing
             self.node_props[name] = prop_dict
 
-    def read_edge_props(self, names: list[str] | None = None) -> None:
+    def read_edge_props(self, names: Iterable[str] | None = None) -> None:
         """
         Read the edge property with the name `name` from a GEFF.
 
@@ -117,7 +119,7 @@ class GeffReader:
         Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
-            names (lists of str, optional): The names of the edge properties to load. If
+            names (iterable of str, optional): The names of the edge properties to load. If
             None all node properties will be loaded.
         """
         if names is None:
@@ -205,8 +207,8 @@ class GeffReader:
 def read_to_memory(
     source: StoreLike,
     validate: bool = True,
-    node_props: list[str] | None = None,
-    edge_props: list[str] | None = None,
+    node_props: Iterable[str] | None = None,
+    edge_props: Iterable[str] | None = None,
 ) -> InMemoryGeff:
     """
     Read a GEFF zarr file to into memory as a series of numpy arrays in a dictionary.
@@ -220,9 +222,9 @@ def read_to_memory(
         validate (bool, optional): Flag indicating whether to perform validation on the
             geff file before loading into memory. If set to False and there are
             format issues, will likely fail with a cryptic error. Defaults to True.
-        node_props (list of str, optional): The names of the node properties to load,
+        node_props (iterable of str, optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
-        edge_props (list of str, optional): The names of the edge properties to load,
+        edge_props (iterable of str, optional): The names of the edge properties to load,
             if None all properties will be loaded, defaults to None.
 
     Returns:

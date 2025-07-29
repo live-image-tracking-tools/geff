@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import warnings
-from collections.abc import Iterable, Sequence
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from zarr.storage import StoreLike
 
 from . import _path
 from .utils import remove_tilde
 from .write_arrays import write_id_arrays, write_props_arrays
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
+    from zarr.storage import StoreLike
 
 
 def write_dicts(
@@ -16,7 +21,7 @@ def write_dicts(
     edge_data: Iterable[tuple[Any, dict[str, Any]]],
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
-    axis_names: list[str] | None = None,
+    axis_names: Sequence[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """Write a dict-like graph representation to geff

@@ -1,15 +1,20 @@
+from __future__ import annotations
+
 import copy
 import warnings
-from collections.abc import Callable, Iterable, Mapping
-from typing import Any, Literal, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
 import numpy as np
 import zarr
-from zarr.storage import StoreLike
 
 import geff
 from geff import utils
 from geff.metadata_schema import GeffMetadata
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Mapping
+
+    from zarr.storage import StoreLike
 
 
 def get_graph_existing_metadata(

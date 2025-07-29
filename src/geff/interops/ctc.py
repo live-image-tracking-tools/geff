@@ -144,11 +144,11 @@ def from_ctc_to_geff(
     if len(node_props["id"]) == 0:
         raise ValueError(f"No nodes found in the CTC directory {ctc_path}")
 
-    for node_ids in tracks.values():
+    for _node_ids in tracks.values():
         # connect simple-paths of each track
-        for i in range(len(node_ids) - 1):
+        for i in range(len(_node_ids) - 1):
             # forward in time (parent -> child)
-            edges.append((node_ids[i], node_ids[i + 1]))
+            edges.append((_node_ids[i], _node_ids[i + 1]))
 
     tracks_table = np.loadtxt(tracks_file_path, dtype=int)
 
@@ -171,13 +171,13 @@ def from_ctc_to_geff(
     if "z" in node_props:
         axis_names.insert(1, Axis(name="z", type="space"))
 
-    nodes = np.asarray(node_props.pop("id"), dtype=int)
+    node_ids = np.asarray(node_props.pop("id"), dtype=int)
 
     write_arrays(
         geff_store=geff_path,
-        node_ids=nodes,
+        node_ids=node_ids,
         node_props={name: (np.asarray(values), None) for name, values in node_props.items()},
-        edge_ids=np.asarray(edges, dtype=nodes.dtype),
+        edge_ids=np.asarray(edges, dtype=node_ids.dtype),
         edge_props={},
         metadata=GeffMetadata(
             geff_version=geff.__version__,
