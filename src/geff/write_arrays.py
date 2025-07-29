@@ -7,6 +7,7 @@ from zarr.storage import StoreLike
 
 from geff.utils import remove_tilde
 
+from . import _path
 from .metadata_schema import GeffMetadata
 from .units import validate_data_type
 
@@ -57,11 +58,11 @@ def write_arrays(
     write_id_arrays(geff_store, node_ids, edge_ids)
     if node_props is not None:
         write_props_arrays(
-            geff_store, "nodes", node_props, node_props_unsquish, zarr_format=zarr_format
+            geff_store, _path.NODES, node_props, node_props_unsquish, zarr_format=zarr_format
         )
     if edge_props is not None:
         write_props_arrays(
-            geff_store, "edges", edge_props, edge_props_unsquish, zarr_format=zarr_format
+            geff_store, _path.EDGES, edge_props, edge_props_unsquish, zarr_format=zarr_format
         )
     metadata.write(geff_store)
 
@@ -105,13 +106,13 @@ def write_id_arrays(
         )  # zarr format defaulted to 2
     else:
         geff_root = zarr.open_group(geff_store, mode="a")
-    geff_root["nodes/ids"] = node_ids
-    geff_root["edges/ids"] = edge_ids
+    geff_root[_path.NODE_IDS] = node_ids
+    geff_root[_path.EDGE_IDS] = edge_ids
 
 
 def write_props_arrays(
     geff_store: StoreLike,
-    group: str,
+    group: Literal["nodes", "edges"],
     props: dict[str, tuple[np.ndarray, np.ndarray | None]],
     props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
@@ -123,7 +124,7 @@ def write_props_arrays(
     Args:
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
-        group (str): "nodes" or "edges"
+        group (Literal["nodes", "edges"]): "nodes" or "edges"
         props (dict[str, tuple[np.ndarray, np.ndarray | None]]): a dictionary from
             attr name to (attr_values, attr_missing) arrays.
         props_unsquish (dict[str, list[str]] | None): a dictionary indicication
@@ -139,8 +140,8 @@ def write_props_arrays(
 
     geff_store = remove_tilde(geff_store)
 
-    if group not in ["nodes", "edges"]:
-        raise ValueError(f"Group must be a 'nodes' or 'edges' group. Found {group}")
+    if group not in [_path.NODES, _path.EDGES]:
+        raise ValueError(f"Group must be a {_path.NODES!r} or {_path.EDGES!r} group. Found {group}")
 
     if props_unsquish is not None:
         for name, replace_names in props_unsquish.items():
@@ -159,7 +160,7 @@ def write_props_arrays(
         )  # zarr format defaulted to 2
     else:
         geff_root = zarr.open_group(geff_store, mode="a")
-    props_group = geff_root.require_group(f"{group}/props")
+    props_group = geff_root.require_group(f"{group}/{_path.PROPS}")
     for prop, arrays in props.items():
         # data-type validation - ensure this property can round-trip through
         # Java Zarr readers before any data get written to disk.
@@ -172,6 +173,6 @@ def write_props_arrays(
             )
 
         prop_group = props_group.create_group(prop)
-        prop_group["values"] = values
+        prop_group[_path.VALUES] = values
         if missing is not None:
-            prop_group["missing"] = missing
+            prop_group[_path.MISSING] = missing

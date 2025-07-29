@@ -127,8 +127,9 @@ def validate_tracklets(
         S = cast("nx.DiGraph[int]", G.subgraph(t_nodes))
 
         # Check - no branches or merges (junctions).
-        max_in_degree = max((d for _, d in S.in_degree()), default=0)
-        max_out_degree = max((d for _, d in S.out_degree()), default=0)
+        breakpoint()
+        max_in_degree = max((d for _, d in S.in_degree), default=0)
+        max_out_degree = max((d for _, d in S.out_degree), default=0)
 
         if max_in_degree > 1 or max_out_degree > 1:
             errors.append(f"Tracklet {t_id}: Invalid path structure (branch or merge detected).")
@@ -145,8 +146,8 @@ def validate_tracklets(
             continue
 
         # Check - Tracklet is maximal linear segment.
-        start_node = next(n for n, d in S.in_degree() if d == 0)
-        end_node = next(n for n, d in S.out_degree() if d == 0)
+        start_node = next(n for n, d in S.in_degree if d == 0)
+        end_node = next(n for n, d in S.out_degree if d == 0)
 
         # Check if the path could be extended backward
         preds_in_G = list(G.predecessors(start_node))

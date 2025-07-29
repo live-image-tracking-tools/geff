@@ -456,7 +456,7 @@ def _parse_model_tag(
         dict[str, str]: A dictionary containing the units of the model, with keys
             'spatialunits' and 'timeunits'.
     """
-    graph = nx.DiGraph()
+    graph: nx.DiGraph[int] = nx.DiGraph()
 
     # So as not to load the entire XML file into memory at once, we're
     # using an iterator to browse over the tags one by one.
@@ -465,6 +465,8 @@ def _parse_model_tag(
     it = ET.iterparse(xml_path, events=["start", "end"])
     _, root = next(it)  # Saving the root of the tree for later cleaning.
 
+    units: dict[str, str] = {}
+    attrs_md: dict[str, dict[str, str]] = {}
     for event, element in it:
         if element.tag == "Model" and event == "start":
             units = _get_units(element)

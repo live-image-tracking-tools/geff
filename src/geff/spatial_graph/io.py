@@ -77,10 +77,10 @@ def write_sg(
         return
 
     if axis_names is None:
-        assert graph.dims <= 4, (
+        assert graph.ndims <= 4, (
             "For SpatialGraphs with more than 4 dimension, axis_names has to be provided."
         )
-        axis_names = ["t", "z", "y", "x"][-graph.dims :]
+        axis_names = ["t", "z", "y", "x"][-graph.ndims :]
 
     # create metadata
     roi_min, roi_max = graph.roi

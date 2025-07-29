@@ -70,15 +70,11 @@ def from_ctc_to_geff(
     if not ctc_path.exists():
         raise FileNotFoundError(f"CTC file {ctc_path} does not exist")
 
-    tracks_file_found = False
-
     for tracks_file in ["man_track.txt", "res_track.txt"]:
         tracks_file_path = ctc_path / tracks_file
         if tracks_file_path.exists():
-            tracks_file_found = True
             break
-
-    if not tracks_file_found:
+    else:
         raise FileNotFoundError(
             f"Tracks file {ctc_path}/man_track.txt or {ctc_path}/res_track.txt does not exist"
         )

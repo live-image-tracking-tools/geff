@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import zarr
+import zarr.abc
+import zarr.abc.store
 import zarr.storage
 
 from geff import _path
@@ -34,11 +36,6 @@ def has_valid_seg_id(
     """
 
     errors: list[str] = []
-    if isinstance(store, str | Path):
-        store = zarr.open(store, mode="r").store
-    elif not isinstance(store, zarr.storage.StoreLike):
-        errors.append(f"Unsupported store type: {type(store)}")
-
     group = zarr.open_group(store, mode="r")
     node_ids = np.asarray(group[_path.NODE_IDS])
 

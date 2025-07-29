@@ -57,6 +57,7 @@ dev = [
     "ipython>=8.37.0",
     "mypy>=1.17.0",
     "pre-commit>=4.2.0",
+    "pyright>=1.1.403",
     "ruff>=0.12.5",
     "types-networkx>=3.5.0.20250728",
     "types-pyyaml>=6.0.12.20250516",
@@ -147,10 +148,8 @@ plugins = ["pydantic.mypy"]
 init_forbid_extra = true
 
 [tool.pyright]
-# in a pydantic-heavy project, these give too many false positives
-# and unlike mypy, there is no pyright plugin for pydantic
-reportCallIssue = false
-reportArgumentType = false
+include = ["src"]
+venv = ".venv"
 
 # https://coverage.readthedocs.io/en/6.4/config.html
 [tool.coverage.report]
