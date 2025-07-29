@@ -29,7 +29,7 @@ class PropDictNpArray(TypedDict):
     """
 
     values: NDArray[Any]
-    missing: NotRequired[NDArray[np.bool_]]
+    missing: NotRequired[NDArray[bool]]
 
 
 class PropDictZArray(TypedDict):
