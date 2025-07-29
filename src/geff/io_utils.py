@@ -1,6 +1,6 @@
 import copy
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any, Literal
 
 import numpy as np
@@ -102,7 +102,7 @@ def create_or_update_metadata(
 
 
 def calculate_roi_from_nodes(
-    nodes_iter: Any,
+    nodes_iter: Iterable[Any],
     axis_names: list[str],
     node_accessor_func: Callable,
 ) -> tuple[tuple[float, ...], tuple[float, ...]]:
@@ -118,7 +118,6 @@ def calculate_roi_from_nodes(
     """
     _min = None
     _max = None
-
     for node in nodes_iter:
         node_data = node_accessor_func(node)
         try:
@@ -134,4 +133,4 @@ def calculate_roi_from_nodes(
             _min = np.min([_min, pos], axis=0)
             _max = np.max([_max, pos], axis=0)
 
-    return tuple(_min.tolist()), tuple(_max.tolist())  # type: ignore
+    return tuple(_min.tolist()), tuple(_max.tolist())

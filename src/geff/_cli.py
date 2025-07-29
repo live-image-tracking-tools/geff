@@ -78,7 +78,8 @@ def convert_ctc(
         ),
     ] = False,
     overwrite: Annotated[
-        bool, typer.Option(help="Whether to overwrite the GEFF file if it already exists.")
+        bool,
+        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
 ) -> None:
     """
@@ -89,7 +90,9 @@ def convert_ctc(
     if (input_image_dir is not None and output_image_path is None) or (
         input_image_dir is None and output_image_path is not None
     ):
-        raise ValueError("'input_image_dir' and 'output_image_path' must be provided together")
+        raise ValueError(
+            "'input_image_dir' and 'output_image_path' must be provided together"
+        )
 
     from_ctc_to_geff(
         ctc_path=ctc_path,
@@ -111,7 +114,8 @@ def convert_ctc(
 @app.command()
 def convert_trackmate_xml(
     xml_path: Annotated[
-        Path, typer.Argument(help="The path to the TrackMate XML file", show_default=False)
+        Path,
+        typer.Argument(help="The path to the TrackMate XML file", show_default=False),
     ],
     geff_path: Annotated[
         Path,
@@ -123,16 +127,21 @@ def convert_trackmate_xml(
     ],
     discard_filtered_spots: Annotated[
         bool,
-        typer.Option(help="True to discard the spots filtered out in TrackMate, False otherwise."),
+        typer.Option(
+            help="True to discard the spots filtered out in TrackMate, False otherwise."
+        ),
     ] = False,
     discard_filtered_tracks: Annotated[
         bool,
-        typer.Option(help="True to discard the tracks filtered out in TrackMate, False otherwise."),
+        typer.Option(
+            help="True to discard the tracks filtered out in TrackMate, False otherwise."
+        ),
     ] = False,
     overwrite: Annotated[
-        bool, typer.Option(help="Whether to overwrite the GEFF file if it already exists.")
+        bool,
+        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
-    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,  # type: ignore
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
     # because of Typer not supporting Literal types
 ) -> None:
     """
