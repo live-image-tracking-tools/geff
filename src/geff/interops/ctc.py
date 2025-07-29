@@ -14,7 +14,6 @@ except ImportError as e:
     raise ImportError("Please install with geff[ctc] to use this module.") from e
 
 import numpy as np
-import typer
 import zarr
 from zarr.storage import StoreLike
 
@@ -190,54 +189,3 @@ def from_ctc_to_geff(
             directed=True,
         ),
     )
-
-
-def from_ctc_to_geff_cli(
-    ctc_path: Path,
-    geff_path: Path,
-    segm_path: Path | None = None,
-    input_image_dir: Path | None = None,
-    output_image_path: Path | None = None,
-    tczyx: bool = False,
-    overwrite: bool = False,
-) -> None:
-    """
-    Convert a CTC file to a GEFF file.
-
-    Args:
-        ctc_path: The path to the CTC file.
-        geff_path: The path to the GEFF file.
-        segm_path: The path to export the segmentation file, if not provided, it won't be exported.
-        input_image_dir: The path to the input image directory.
-                         If not provided, it won't be exported.
-        output_image_path: The path to export the image file, if not provided, it won't be exported.
-        tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
-        overwrite: Whether to overwrite the GEFF file if it already exists.
-    """
-    if (input_image_dir is not None and output_image_path is None) or (
-        input_image_dir is None and output_image_path is not None
-    ):
-        raise ValueError("'input_image_dir' and 'output_image_path' must be provided together")
-
-    from_ctc_to_geff(
-        ctc_path=ctc_path,
-        geff_path=geff_path,
-        segmentation_store=segm_path,
-        tczyx=tczyx,
-        overwrite=overwrite,
-    )
-
-    if input_image_dir is not None:
-        ctc_tiffs_to_zarr(
-            ctc_path=input_image_dir,
-            output_store=output_image_path,
-            ctzyx=tczyx,
-            overwrite=overwrite,
-        )
-
-
-app = typer.Typer()
-app.command()(from_ctc_to_geff_cli)
-
-if __name__ == "__main__":
-    app()
