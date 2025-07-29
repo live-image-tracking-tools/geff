@@ -6,12 +6,10 @@ from pathlib import Path
 import numpy as np
 import pydantic
 import pytest
-import zarr
 
 import geff
 from geff.affine import Affine
 from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, GeffSchema
-from geff.testing.data import create_simple_2d_geff
 
 
 class TestMetadataModel:
