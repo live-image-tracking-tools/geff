@@ -77,14 +77,14 @@ jobs:
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
   benchmark:
-    name: Benchmark
+    name: Run Benchmarks
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - name: Run benchmarks
-        uses: CodSpeedHQ/action@v3
+        with:
+          python-version: "3.13"
+      - uses: CodSpeedHQ/action@v3
         with:
           run: uv run --group bench --no-dev pytest --codspeed -v tests/test_bench.py
 
