@@ -127,7 +127,6 @@ def validate_tracklets(
         S = cast("nx.DiGraph[int]", G.subgraph(t_nodes))
 
         # Check - no branches or merges (junctions).
-        breakpoint()
         max_in_degree = max((d for _, d in S.in_degree), default=0)
         max_out_degree = max((d for _, d in S.out_degree), default=0)
 
