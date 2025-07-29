@@ -165,7 +165,7 @@ class GeffReader:
             if edge_mask is not None:
                 edge_mask = np.logical_and(edge_mask, edge_mask_removed_nodes)
             else:
-                edge_mask = np.astype(edge_mask_removed_nodes, bool)
+                edge_mask = edge_mask_removed_nodes  # type: ignore[assignment]
         edges = edges[edge_mask if edge_mask is not None else ...]
 
         edge_props: dict[str, PropDictNpArray] = {}

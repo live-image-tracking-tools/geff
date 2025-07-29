@@ -4,12 +4,13 @@ import warnings
 from collections.abc import (
     Sequence,  # noqa: TC003
 )
-from importlib.metadata import version
 from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
+
+import geff
 
 from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
@@ -225,6 +226,9 @@ class RelatedObject(BaseModel):
         return self
 
 
+GEFF_VERSION = ".".join(geff.__version__.split(".")[:3])
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -237,7 +241,7 @@ class GeffMetadata(BaseModel):
     )
 
     geff_version: str = Field(
-        ...,
+        default=GEFF_VERSION,
         pattern=VERSION_PATTERN,
         description=(
             "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
@@ -349,13 +353,6 @@ class GeffMetadata(BaseModel):
         default_factory=dict,
         description="Extra metadata that is not part of the schema",
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_model_before(cls, values: dict) -> dict:
-        if values.get("geff_version") is None:
-            values["geff_version"] = version("geff")
-        return values
 
     @model_validator(mode="after")
     def _validate_model_after(self) -> GeffMetadata:

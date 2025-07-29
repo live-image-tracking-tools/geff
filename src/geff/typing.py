@@ -1,11 +1,15 @@
-from typing import Any, TypedDict
+from __future__ import annotations
 
-import numpy as np
-import zarr
-from numpy.typing import NDArray
+from typing import TYPE_CHECKING, Any, TypedDict
+
 from typing_extensions import NotRequired
 
-from .metadata_schema import GeffMetadata
+if TYPE_CHECKING:
+    import numpy as np
+    import zarr
+    from numpy.typing import NDArray
+
+    from .metadata_schema import GeffMetadata
 
 # From python 3.11 TypeDicts can also inherit from Generic
 # While python 3.10 is support two PropDicts for NDArray and zarr.Array are defined
@@ -29,7 +33,7 @@ class PropDictNpArray(TypedDict):
     """
 
     values: NDArray[Any]
-    missing: NotRequired[NDArray[np.bool]]
+    missing: NotRequired[NDArray[np.bool_]]
 
 
 class PropDictZArray(TypedDict):
