@@ -293,7 +293,7 @@
           "type": "string"
         },
         "dtype": {
-          "description": "Data type of the property. Must be a non-empty string. Valid values are: <class 'numpy.str_'>, <class 'numpy.int16'>, <class 'numpy.bytes_'>, <class 'numpy.uint16'>, <class 'numpy.float64'>, <class 'numpy.int8'>, <class 'numpy.bool'>, <class 'numpy.uint8'>, <class 'numpy.float32'>, <class 'numpy.int64'>, <class 'numpy.uint64'>, <class 'numpy.int32'>, <class 'numpy.uint32'>",
+          "description": "Data type of the property. Must be a non-empty string. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
           "title": "Dtype",
           "type": "string"
         },
