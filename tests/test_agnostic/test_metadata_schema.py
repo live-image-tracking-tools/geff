@@ -1,4 +1,3 @@
-import json
 import re
 import warnings
 from pathlib import Path
@@ -10,7 +9,13 @@ import zarr
 
 import geff
 from geff.affine import Affine
-from geff.metadata_schema import VERSION_PATTERN, Axis, GeffMetadata, GeffSchema
+from geff.metadata_schema import (
+    VERSION_PATTERN,
+    Axis,
+    GeffMetadata,
+    GeffSchema,
+    formatted_schema_json,
+)
 
 
 class TestMetadataModel:
@@ -390,7 +395,7 @@ def test_schema_file_updated(pytestconfig: pytest.Config) -> None:
             )
         current_schema_text = ""
 
-    new_schema_text = json.dumps(GeffSchema.model_json_schema(), indent=2)
+    new_schema_text = formatted_schema_json()
     if current_schema_text != new_schema_text:
         if pytestconfig.getoption("--update-schema"):
             schema_path.write_text(new_schema_text)

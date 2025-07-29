@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import warnings
 from collections.abc import (
     Sequence,  # noqa: TC003
@@ -442,3 +443,19 @@ class GeffMetadata(BaseModel):
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
+
+
+def formatted_schema_json() -> str:
+    """Get the formatted JSON schema for the GeffMetadata model."""
+    schema = GeffSchema.model_json_schema()
+
+    # this is a hacky way to ensure that the schema says geff_version is required
+    # while still being able to instantiate GeffMetadata without it.
+    # Once we cleanly version the schema independently, this *might* be a bit cleaner
+    # Note: one could also pass a custom `schema_generator` to `model_json_schema()`
+    # above... but this is simpler for now.
+    geff_meta = schema["$defs"]["GeffMetadata"]
+    geff_meta["properties"]["geff_version"].pop("default")
+    geff_meta["required"].append("geff_version")
+
+    return json.dumps(schema, indent=2)
