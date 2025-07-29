@@ -416,7 +416,7 @@ class GeffMetadata(BaseModel):
         """
 
         if isinstance(store, zarr.Group):
-            raise TypeError(f"Unsupported type for store_like: {type(store)}")
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
 
         group = zarr.open_group(store)
         group.attrs["geff"] = self.model_dump(mode="json")
@@ -433,7 +433,7 @@ class GeffMetadata(BaseModel):
         """
 
         if isinstance(store, zarr.Group):
-            raise TypeError(f"Unsupported type for store_like: {type(store)}")
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
 
         group = zarr.open_group(store)
 

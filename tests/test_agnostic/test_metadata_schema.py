@@ -150,12 +150,12 @@ class TestMetadataModel:
         # Assert that a TypeError is raised when meta.write is called with a Group
         with pytest.raises(
             TypeError,
-            match=r"Unsupported type for store_like: <class 'zarr\.hierarchy\.Group'>",
+            match=r"Unsupported type for store_like: should be a zarr store | Path | str",
         ):
             meta.write(group)
 
         with pytest.raises(
-            TypeError, match=r"Unsupported type for store_like: <class 'zarr\.hierarchy\.Group'>"
+            TypeError, match=r"Unsupported type for store_like: should be a zarr store | Path | str"
         ):
             meta.read(group)
 
