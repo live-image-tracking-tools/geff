@@ -80,49 +80,13 @@ jobs:
     name: Benchmark
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 50 # this is to make sure we obtain the target base commit
       - uses: astral-sh/setup-uv@v6
+      - name: Run benchmarks
+        uses: CodSpeedHQ/action@v3
         with:
-          enable-cache: true
-
-      - name: Retrieve cached baseline if available
-        uses: actions/cache/restore@v4
-        id: cache_baseline
-        with:
-          path: baseline.json
-          key: ${{ github.event.pull_request.base.sha }}
-
-      - name: Run baseline benchmark if not in cache
-        if: steps.cache_baseline.outputs.cache-hit != 'true'
-        run: |
-          git checkout ${{ github.event.pull_request.base.sha }}
-          uv run --group bench pytest tests/bench.py -v --benchmark-json baseline.json
-
-      - name: Cache baseline results
-        uses: actions/cache/save@v4
-        if: steps.cache_baseline.outputs.cache-hit != 'true'
-        with:
-          path: baseline.json
-          key: ${{ github.event.pull_request.base.sha }}
-
-      - name: Run benchmark on PR head commit
-        run: |
-          git checkout ${{ github.event.pull_request.head.sha }}
-          uv run --group bench pytest tests/bench.py -v --benchmark-json pr.json
-
-      - name: Generate report
-        run: uv run scripts/benchmark-pr.py baseline.json pr.json report.md
-
-      - name: Comment on commit with report for non-forks
-        uses: peter-evans/commit-comment@v3
-        if: github.event.pull_request.head.repo.fork == false
-        with:
-          body-path: report.md
-          token: ${{ secrets.COMMIT_MESSAGE_TOKEN }}
+          run: uv run --group bench --no-dev pytest --codspeed -v tests/test_bench.py
 
   build-and-inspect-package:
     name: Build & inspect package.
@@ -140,8 +104,8 @@ jobs:
     needs: build-and-inspect-package
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # this permission is required for trusted publishing
-      contents: write  # this permission is required for generate_release_notes
+      id-token: write # this permission is required for trusted publishing
+      contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
         uses: actions/download-artifact@v4
