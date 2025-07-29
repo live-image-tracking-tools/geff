@@ -1,7 +1,7 @@
 import copy
 import warnings
-from collections.abc import Callable, Iterable
-from typing import Any, Literal
+from collections.abc import Callable, Iterable, Mapping
+from typing import Any, Literal, TypeVar
 
 import numpy as np
 import zarr
@@ -101,10 +101,13 @@ def create_or_update_metadata(
     return metadata
 
 
+T = TypeVar("T")
+
+
 def calculate_roi_from_nodes(
-    nodes_iter: Iterable[Any],
+    nodes_iter: Iterable[T],
     axis_names: list[str],
-    node_accessor_func: Callable,
+    node_accessor_func: Callable[[T], Mapping[str, Any]],
 ) -> tuple[tuple[float, ...], tuple[float, ...]]:
     """Calculate ROI (region of interest) from graph nodes.
 
@@ -120,6 +123,7 @@ def calculate_roi_from_nodes(
     _max = None
     for node in nodes_iter:
         node_data = node_accessor_func(node)
+
         try:
             pos = np.array([node_data[name] for name in axis_names])
         except KeyError as e:
@@ -132,5 +136,8 @@ def calculate_roi_from_nodes(
         else:
             _min = np.min([_min, pos], axis=0)
             _max = np.max([_max, pos], axis=0)
+
+    if _min is None or _max is None:
+        raise ValueError("No nodes found to calculate ROI")
 
     return tuple(_min.tolist()), tuple(_max.tolist())

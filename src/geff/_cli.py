@@ -90,9 +90,7 @@ def convert_ctc(
     if (input_image_dir is not None and output_image_path is None) or (
         input_image_dir is None and output_image_path is not None
     ):
-        raise ValueError(
-            "'input_image_dir' and 'output_image_path' must be provided together"
-        )
+        raise ValueError("'input_image_dir' and 'output_image_path' must be provided together")
 
     from_ctc_to_geff(
         ctc_path=ctc_path,
@@ -127,15 +125,11 @@ def convert_trackmate_xml(
     ],
     discard_filtered_spots: Annotated[
         bool,
-        typer.Option(
-            help="True to discard the spots filtered out in TrackMate, False otherwise."
-        ),
+        typer.Option(help="True to discard the spots filtered out in TrackMate, False otherwise."),
     ] = False,
     discard_filtered_tracks: Annotated[
         bool,
-        typer.Option(
-            help="True to discard the tracks filtered out in TrackMate, False otherwise."
-        ),
+        typer.Option(help="True to discard the tracks filtered out in TrackMate, False otherwise."),
     ] = False,
     overwrite: Annotated[
         bool,
