@@ -1,8 +1,13 @@
 import numpy as np
 import pytest
-import spatial_graph as sg
 
-import geff
+try:
+    import spatial_graph as sg
+
+    from geff import read_sg, write_sg
+except ImportError:
+    pytest.skip("geff[spatial-graph] not installed", allow_module_level=True)
+
 from geff.testing.data import create_memory_mock_geff
 
 node_dtypes = ["int8", "uint8", "int16", "uint16"]
@@ -35,7 +40,7 @@ def test_read_write_consistency(
     # with pytest.warns(UserWarning, match="Potential missing values for attr"):
     # TODO: make sure test data has missing values, otherwise this warning will
     # not be triggered
-    graph = geff.read_sg(store, position_attr="pos")
+    graph, _ = read_sg(store, position_attr="pos")
 
     np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(graph_attrs["nodes"]))
     np.testing.assert_array_equal(np.sort(graph.edges), np.sort(graph_attrs["edges"]))
@@ -61,4 +66,4 @@ def test_write_empty_graph():
         position_attr="pos",
     )
     with pytest.warns(match="Graph is empty - not writing anything "):
-        geff.write_sg(graph, store=".")
+        write_sg(graph, store=".")

@@ -1,7 +1,6 @@
 from collections.abc import Sequence
 from typing import Any, TypeAlias, TypedDict
 
-import numpy as np
 import zarr
 from numpy.typing import NDArray
 from typing_extensions import NotRequired
@@ -30,7 +29,7 @@ class PropDictNpArray(TypedDict):
     """
 
     values: NDArray[Any]
-    missing: NotRequired[NDArray[np.bool]]
+    missing: NotRequired[NDArray[bool]]
 
 
 class PropDictZArray(TypedDict):
