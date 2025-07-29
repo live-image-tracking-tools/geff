@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
@@ -135,6 +134,49 @@ class DisplayHint(BaseModel):
     )
 
 
+class PropMetadata(BaseModel):
+    """Metadata describing a property in the geff graph."""
+
+    identifier: str
+    dtype: str  # TODO: investigate how other packages deal with data types
+    encoding: str | None = None
+    unit: str | None = None
+    name: str | None = None
+    description: str | None = None
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> PropMetadata:
+        if not self.identifier:
+            raise ValueError("Property identifier cannot be an empty string.")
+        if not self.dtype:
+            raise ValueError("Property dtype cannot be an empty string.")
+        return self
+
+
+def validate_props_metadata(
+    props_metadata: dict[str, PropMetadata],
+    c_type: Literal["node", "edge", "tracklet", "lineage"],
+) -> None:
+    """Check that the keys in the property metadata dictionary match the identifiers
+    in the PropMetadata objects.
+
+    Args:
+        props_metadata (dict[str, PropMetadata]): The property metadata dictionary
+            where keys are property identifiers and values are PropMetadata objects.
+        c_type (Literal["node", "edge", "tracklet", "lineage"]): The type of component
+            to which the property belongs.
+
+    Raises:
+        ValueError: If the key does not match the identifier.
+    """
+    for key, prop_md in props_metadata.items():
+        if key != prop_md.identifier:
+            raise ValueError(
+                f"{c_type.capitalize()} property key '{key}' does not match "
+                f"identifier {prop_md.identifier}"
+            )
+
+
 class RelatedObject(BaseModel):
     type: str = Field(
         ...,
@@ -208,6 +250,22 @@ class GeffMetadata(BaseModel):
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
+
+    node_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for node properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+    edge_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for edge properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+
     sphere: str | None = Field(
         None,
         title="Node property: Detections as spheres",
@@ -337,6 +395,13 @@ class GeffMetadata(BaseModel):
                     f"Display hint display_depth name {self.display_hints.display_depth} "
                     f"not found in axes {ax_names}"
                 )
+
+        # Property metadata validation
+        if self.node_props_metadata is not None:
+            validate_props_metadata(self.node_props_metadata, "node")
+        if self.edge_props_metadata is not None:
+            validate_props_metadata(self.edge_props_metadata, "edge")
+
         return self
 
     def write(self, group: zarr.Group | Path | str):
@@ -377,14 +442,3 @@ class GeffMetadata(BaseModel):
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
-
-
-def write_metadata_schema(outpath: Path):
-    """Write the current geff metadata schema to a json file
-
-    Args:
-        outpath (Path): The file to write the schema to
-    """
-    metadata_schema = GeffSchema.model_json_schema()
-    with open(outpath, "w") as f:
-        f.write(json.dumps(metadata_schema, indent=2))
