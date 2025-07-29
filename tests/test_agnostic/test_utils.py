@@ -130,7 +130,7 @@ def test_validate(tmp_path):
         validate(zpath)
     del z["edges/props/badshape"]["missing"]
 
-    # Property metadata has no matching data
+    # Nodes: property metadata has no matching data
     geff_attrs = z.attrs["geff"]
     geff_attrs["node_props_metadata"] = {
         "prop1": {"identifier": "prop1", "dtype": "float32"},
@@ -143,7 +143,7 @@ def test_validate(tmp_path):
     ):
         validate(zpath)
 
-    # Insconsistent property metadata dtype
+    # Nodes: inconsistent property metadata dtype
     z["nodes/props/prop1/values"] = np.zeros(n_node, dtype=np.float32)
     z["nodes/props/prop2/values"] = np.zeros(n_node, dtype=np.float32)
     with pytest.raises(
@@ -154,7 +154,6 @@ def test_validate(tmp_path):
         ),
     ):
         validate(zpath)
-
     # Another type of dtype mismatch
     z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int16")
     with pytest.raises(
@@ -165,12 +164,39 @@ def test_validate(tmp_path):
         ),
     ):
         validate(zpath)
+    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int")  # clean up
 
-    # Clean up by creating the property with the correct dtype
-    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int")
+    # Edges: property metadata has no matching data
+    geff_attrs["edge_props_metadata"] = {
+        "prop3": {"identifier": "prop3", "dtype": "bool"},
+    }
+    z.attrs["geff"] = geff_attrs
+    with pytest.raises(
+        AssertionError,
+        match="Edge property prop3 described in metadata is not present in props arrays",
+    ):
+        validate(zpath)
+
+    # Edges: inconsistent property metadata dtype
+    z["edges/props/prop3/values"] = np.zeros(n_edges, dtype=np.float32)
+    with pytest.raises(
+        AssertionError,
+        match=(
+            "Edge property prop3 with dtype float32 does not match "
+            "metadata dtype <class 'numpy.bool'>"
+        ),
+    ):
+        validate(zpath)
+    z["edges/props/prop3/values"] = np.zeros(n_edges, dtype="bool")  # clean up
 
     # No error raised when property with no matching prop metadata
-    z["nodes/props/prop3/values"] = np.zeros(n_node, dtype="bool")
+    z["nodes/props/prop4/values"] = np.zeros(n_node, dtype="bool")
+    z["edges/props/prop4/values"] = np.zeros(n_edges, dtype="uint8")
+
+    # No error when identical property identifiers across node and edge props
+    geff_attrs["node_props_metadata"] = {"prop4": {"identifier": "prop4", "dtype": "bool"}}
+    geff_attrs["edge_props_metadata"] = {"prop4": {"identifier": "prop4", "dtype": "uint8"}}
+    z.attrs["geff"] = geff_attrs
 
     # Everything passes
     validate(zpath)
