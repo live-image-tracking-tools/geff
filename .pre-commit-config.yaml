@@ -5,15 +5,6 @@ ci:
   autofix_prs: false
 
 repos:
-  - repo: local
-    hooks:
-      - id: update-json
-        name: Update geff-schema.json
-        entry: uv run scripts/export_json_schema.py
-        language: system
-        pass_filenames: false
-        stages: [manual]
-
   - repo: https://github.com/crate-ci/typos
     rev: v1.34.0
     hooks:

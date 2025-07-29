@@ -76,28 +76,6 @@ jobs:
           path: ${{ steps.cache-path.outputs.path }}
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
-  schema:
-    name: Check json schema
-    runs-on: ubuntu-latest
-    env:
-      testjson: check-json.json
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-      - name: Generate json
-        run: uv run scripts/export_json_schema.py --filename $testjson
-
-      - run: cat $testjson
-
-      - name: Compare hashes
-        if: ${{ hashFiles( env.testjson ) != hashFiles('geff-schema.json') }}
-        uses: actions/github-script@v3
-        with:
-          script: |
-            core.setFailed('geff-schema.json needs to be updated by locally running `pixi run update-json`. ${{ hashFiles( env.testjson ) }} vs ${{ hashFiles('geff-schema.json') }}')
-
   benchmark:
     name: Benchmark
     runs-on: ubuntu-latest

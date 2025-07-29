@@ -16,6 +16,8 @@ dependencies = [
     "zarr>=2.18,<4",
     "pydantic>=2.9",
     "networkx>=3.2.1",
+    "numpy>=1.25",
+    "numpy>=2.1; python_version >= '3.13'",
     "numcodecs>=0.13,<0.16",                           # TODO: remove pin once the 16 release is stable
     "numcodecs>=0.15,<0.16; python_version >= '3.13'", # TODO: remove pin once the 16 release is stable
 ]
@@ -136,6 +138,10 @@ disallow_subclassing_any = false
 show_error_codes = true
 pretty = true
 
+[tool.pyright]
+# in a pydantic-heavy project, there are many false positives
+reportCallIssue = false
+
 # https://coverage.readthedocs.io/en/6.4/config.html
 [tool.coverage.report]
 exclude_lines = [
@@ -176,7 +182,6 @@ docs = { features = ["docs"], solve-group = "default" }
 bench = { features = ["dev", "bench"], solve-group = "default" }
 
 [tool.pixi.tasks]
-update-json = "python scripts/export_json_schema.py"
 test = "coverage run -m pytest"
 test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
 
