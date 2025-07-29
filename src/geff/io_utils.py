@@ -6,6 +6,7 @@ from typing import Any, Literal
 import numpy as np
 import zarr
 from pydantic import validate_call
+from zarr.storage import StoreLike
 
 import geff
 from geff.metadata_schema import GeffMetadata, PropMetadata
@@ -54,7 +55,7 @@ def get_graph_existing_metadata(
     return axis_names, axis_units, axis_types
 
 
-def setup_zarr_group(store: Any, zarr_format: Literal[2, 3] = 2) -> zarr.Group:
+def setup_zarr_group(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> zarr.Group:
     """Set up and return a zarr group for writing.
 
     Args:

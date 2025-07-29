@@ -18,6 +18,7 @@ from geff.metadata_schema import (
     PropMetadata,
     validate_key_identifier_equality,
 )
+from geff.testing.data import create_simple_2d_geff
 
 
 class TestMetadataModel:
@@ -191,15 +192,40 @@ class TestMetadataModel:
             extra=True,
         )
         zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, mode="a")
-        meta.write(group)
-        compare = GeffMetadata.read(group)
+        meta.write(zpath)
+        compare = GeffMetadata.read(zpath)
         assert compare == meta
 
         meta.directed = False
         meta.write(zpath)
         compare = GeffMetadata.read(zpath)
         assert compare == meta
+
+    def test_meta_write_raises_type_error_upon_group(self):
+        # Create a GeffMetadata instance
+        meta = GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            axes=[{"name": "test"}],
+        )
+
+        # Create a Zarr group
+        store, _ = create_simple_2d_geff()
+        # geff_path = tmp_path / "test.geff"
+
+        group = zarr.open_group(store=store)
+
+        # Assert that a TypeError is raised when meta.write is called with a Group
+        with pytest.raises(
+            TypeError,
+            match=r"Unsupported type for store_like: should be a zarr store | Path | str",
+        ):
+            meta.write(group)
+
+        with pytest.raises(
+            TypeError, match=r"Unsupported type for store_like: should be a zarr store | Path | str"
+        ):
+            meta.read(group)
 
     def test_model_mutation(self):
         """Test that invalid model mutations raise errors."""
@@ -224,9 +250,8 @@ class TestMetadataModel:
             extra={"foo": "bar", "bar": {"baz": "qux"}},
         )
         zpath = tmp_path / "test.zarr"
-        group = zarr.open(zpath, mode="a")
-        meta.write(group)
-        compare = GeffMetadata.read(group)
+        meta.write(zpath)
+        compare = GeffMetadata.read(zpath)
         assert compare.extra["foo"] == "bar"
         assert compare.extra["bar"]["baz"] == "qux"
 
@@ -475,9 +500,8 @@ class TestAffineTransformation:
 
         # Write and read back
         zpath = tmp_path / "test_affine.zarr"
-        group = zarr.open(zpath, mode="a")
-        original_metadata.write(group)
-        loaded_metadata = GeffMetadata.read(group)
+        original_metadata.write(zpath)
+        loaded_metadata = GeffMetadata.read(zpath)
 
         # Verify everything matches
         assert loaded_metadata == original_metadata

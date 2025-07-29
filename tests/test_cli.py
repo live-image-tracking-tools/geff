@@ -1,11 +1,11 @@
 import pytest
-import zarr
 from typer.testing import CliRunner
 
 import geff
 from geff._cli import app
 from geff.metadata_schema import GeffMetadata
 from geff.testing.data import create_simple_temporal_geff
+from tests.test_interops.test_ctc import create_mock_data
 
 runner = CliRunner()
 
@@ -29,7 +29,7 @@ def test_validate_command_prints_valid(example_geff_path):
 
 def test_info_command_prints_metadata(example_geff_path):
     result = runner.invoke(app, ["info", example_geff_path])
-    metadata = GeffMetadata.read(zarr.open(example_geff_path, mode="r"))
+    metadata = GeffMetadata.read(example_geff_path)
     assert result.exit_code == 0
     assert result.output == metadata.model_dump_json(indent=2) + "\n"
 
@@ -37,3 +37,45 @@ def test_info_command_prints_metadata(example_geff_path):
 def test_main_invalid_command():
     result = runner.invoke(app, ["invalid"])
     assert result.exit_code != 0
+
+
+@pytest.mark.parametrize("is_gt", [True, False])
+@pytest.mark.parametrize("tczyx", [True, False])
+def test_convert_ctc(tmp_path, is_gt, tczyx):
+    ctc_path = create_mock_data(tmp_path, is_gt)
+    geff_path = ctc_path / "little.geff"
+    segm_path = ctc_path / "segm.zarr"
+
+    cmd_args = [
+        "convert-ctc",
+        str(ctc_path),
+        str(geff_path),
+        "--segm-path",
+        str(segm_path),
+        "--input-image-dir",
+        str(ctc_path),
+        "--output-image-path",
+        str(tmp_path / "output_image.zarr"),
+    ]
+    if tczyx:
+        cmd_args.append("--tczyx")
+    result = CliRunner().invoke(app, cmd_args)
+    assert result.exit_code == 0, (
+        f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
+    )
+
+
+@pytest.mark.parametrize(
+    "other_arg", [None, "--discard-filtered-spots", "--discard-filtered-tracks", "--overwrite"]
+)
+def test_convert_trackmate_xml(tmp_path, other_arg):
+    geff_output = str(tmp_path / "test.geff")
+    in_data = "tests/data/FakeTracks.xml"
+
+    cmd_args = ["convert-trackmate-xml", in_data, geff_output]
+    if other_arg is not None:
+        cmd_args.append(other_arg)
+    result = CliRunner().invoke(app, cmd_args)
+    assert result.exit_code == 0, (
+        f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
+    )

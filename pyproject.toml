@@ -16,6 +16,9 @@ dependencies = [
     "zarr>=2.18,<4",
     "pydantic>=2.9",
     "networkx>=3.2.1",
+    "numpy>=1.24",
+    "numpy>=1.26; python_version >= '3.12'",
+    "numpy>=2.1; python_version >= '3.13'",
     "numcodecs>=0.13,<0.16",                           # TODO: remove pin once the 16 release is stable
     "numcodecs>=0.15,<0.16; python_version >= '3.13'", # TODO: remove pin once the 16 release is stable
 ]
@@ -65,15 +68,14 @@ docs = [
     "mkdocs-include-markdown-plugin>=7.1.6",
     "mkdocs-material>=9.6.16",
     "mkdocstrings-python>=1.16.12",
+    "mkdocs-typer>=0.0.3",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
 ]
 bench = [
     { include-group = "test" },
-    "geff[rx]",
-    "pandas>=2.3.1",
-    "pytest-benchmark>=5.1.0",
-    "tabulate>=0.9.0",
+    "pytest-codspeed",
+    "geff[rx, spatial-graph]",
 ]
 
 
@@ -158,39 +160,7 @@ omit = ["*/__init__.py"]
 extend-ignore-identifiers-re = ["(?i)ome"]
 
 [project.scripts]
-ctc2geff = "geff.interops.ctc:app"
 geff = "geff._cli:app"
 
 [tool.uv.sources]
 geff = { workspace = true }
-
-# ------------------- pixi ---------------------
-
-[tool.pixi.project]
-channels = ["conda-forge"]
-platforms = ["osx-arm64", "linux-64", "win-64", "osx-64"]
-
-[tool.pixi.pypi-dependencies]
-geff = { path = ".", editable = true }
-
-[tool.pixi.environments]
-default = ["dev", "spatial-graph", "ctc", "rx"]
-build = { features = ["build"], solve-group = "default" }
-docs = { features = ["docs"], solve-group = "default" }
-bench = { features = ["dev", "bench"], solve-group = "default" }
-
-[tool.pixi.tasks]
-test = "coverage run -m pytest"
-test-cov = "coverage run -m pytest && coverage xml && coverage report --show-missing"
-
-[tool.pixi.feature.bench.tasks]
-benchmark = "pytest tests/bench.py"
-
-[tool.pixi.feature.build.pypi-dependencies]
-build = "*"
-
-[tool.pixi.feature.build.tasks]
-build = "python -m build"
-
-[tool.pixi.feature.docs.tasks]
-preview-docs = { cmd = "mkdocs serve" }
