@@ -31,7 +31,7 @@ def info(
     ),
 ) -> None:
     """Display information about a GEFF file."""
-    metadata = GeffMetadata.read(zarr.open(input_path, mode="r"))
+    metadata = GeffMetadata.read(zarr.open_group(input_path, mode="r"))
     print(metadata.model_dump_json(indent=2))
 
 

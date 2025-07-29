@@ -61,21 +61,27 @@ class GeffReader:
             utils.validate(source)
         self.group = zarr.open_group(source, mode="r")
         self.metadata = GeffMetadata.read(self.group)
-        self.nodes = zarr.open_array(source, path="nodes/ids", mode="r")
-        self.edges = zarr.open_array(source, path="edges/ids", mode="r")
+        self.nodes = zarr.open_array(source, path=utils.NODE_IDS_KEY, mode="r")
+        self.edges = zarr.open_array(source, path=utils.EDGE_IDS_KEY, mode="r")
         self.node_props: dict[str, PropDictZArray] = {}
         self.edge_props: dict[str, PropDictZArray] = {}
 
         # get node properties names
-        if "props" in self.group["nodes"].keys():
-            node_props_group = zarr.open_group(self.group.store, path="nodes/props", mode="r")
+        nodes_group = utils.expect_group(self.group, utils.NODES_KEY, "graph")
+        if "props" in nodes_group.keys():
+            node_props_group = zarr.open_group(
+                self.group.store, path=utils.NODE_PROPS_KEY, mode="r"
+            )
             self.node_prop_names: list[str] = [*node_props_group.group_keys()]
         else:
             self.node_prop_names = []
 
         # get edge property names
-        if "props" in self.group["edges"].keys():
-            edge_props_group = zarr.open_group(self.group.store, path="edges/props", mode="r")
+        edges_group = utils.expect_group(self.group, utils.EDGES_KEY, "graph")
+        if "props" in edges_group.keys():
+            edge_props_group = zarr.open_group(
+                self.group.store, path=utils.EDGE_PROPS_KEY, mode="r"
+            )
             self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
         else:
             self.edge_prop_names = []
@@ -96,10 +102,13 @@ class GeffReader:
             names = self.node_prop_names
 
         for name in names:
-            prop_group = zarr.open_group(self.group.store, path=f"nodes/props/{name}", mode="r")
-            prop_dict: PropDictZArray = {"values": prop_group["values"]}
-            if "missing" in prop_group.keys():
-                prop_dict["missing"] = prop_group["missing"]
+            prop_group = zarr.open_group(
+                self.group.store, path=f"{utils.NODE_PROPS_KEY}/{name}", mode="r"
+            )
+            values = utils.expect_array(prop_group, utils.VALUES_KEY, "node")
+            prop_dict: PropDictZArray = {"values": values}
+            if utils.MISSING_KEY in prop_group.keys():
+                prop_dict[utils.MISSING_KEY] = prop_group[utils.MISSING_KEY]
             self.node_props[name] = prop_dict
 
     def read_edge_props(self, names: list[str] | None = None) -> None:

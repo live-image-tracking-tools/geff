@@ -30,8 +30,7 @@ def test_validate(tmp_path: Path) -> None:
         validate(non_zarr_path)
 
     zpath = tmp_path / "test.zarr"
-    z = zarr.open(zpath)
-    assert isinstance(z, zarr.Group)
+    z = zarr.open_group(zpath)
 
     # Missing metadata
     with pytest.raises(ValueError, match="No geff key found in"):

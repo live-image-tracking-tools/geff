@@ -7,8 +7,8 @@ import numpy as np
 import zarr
 
 import geff
+from geff import utils
 from geff.metadata_schema import GeffMetadata
-from geff.utils import remove_tilde
 
 
 def get_graph_existing_metadata(
@@ -63,7 +63,7 @@ def setup_zarr_group(store: Any, zarr_format: Literal[2, 3] = 2) -> zarr.Group:
     Returns:
         The opened zarr group
     """
-    store = remove_tilde(store)
+    store = utils.remove_tilde(store)
 
     # open/create zarr container
     if zarr.__version__.startswith("3"):

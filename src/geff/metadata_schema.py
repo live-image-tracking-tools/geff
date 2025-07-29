@@ -26,6 +26,8 @@ from .units import (
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from zarr.storage import StoreLike
+
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
 
@@ -408,14 +410,14 @@ class GeffMetadata(BaseModel):
 
         return self
 
-    def write(self, group: zarr.Group | Path | str) -> None:
+    def write(self, group: StoreLike) -> None:
         """Helper function to write GeffMetadata into the zarr geff group.
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
-            group (zarr.Group | Path): The geff group to write the metadata to
+            group (StoreLike): The geff group to write the metadata to
         """
-        _group = group if isinstance(group, zarr.Group) else zarr.open(group)
+        _group = group if isinstance(group, zarr.Group) else zarr.open_group(group)
         _group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
@@ -428,7 +430,7 @@ class GeffMetadata(BaseModel):
         Returns:
             GeffMetadata: The GeffMetadata object
         """
-        _group = group if isinstance(group, zarr.Group) else zarr.open(group)
+        _group = group if isinstance(group, zarr.Group) else zarr.open_group(group)
 
         # Check if geff_version exists in zattrs
         if "geff" not in _group.attrs:

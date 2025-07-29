@@ -100,11 +100,11 @@ def write_id_arrays(
         )
 
     if zarr.__version__.startswith("3"):
-        geff_root = zarr.open(
+        geff_root = zarr.open_group(
             geff_store, mode="a", zarr_format=zarr_format
         )  # zarr format defaulted to 2
     else:
-        geff_root = zarr.open(geff_store, mode="a")
+        geff_root = zarr.open_group(geff_store, mode="a")
     geff_root["nodes/ids"] = node_ids
     geff_root["edges/ids"] = edge_ids
 
@@ -154,11 +154,11 @@ def write_props_arrays(
             props.update(replace_arrays)
 
     if zarr.__version__.startswith("3"):
-        geff_root = zarr.open(
+        geff_root = zarr.open_group(
             geff_store, mode="a", zarr_format=zarr_format
         )  # zarr format defaulted to 2
     else:
-        geff_root = zarr.open(geff_store, mode="a")
+        geff_root = zarr.open_group(geff_store, mode="a")
     props_group = geff_root.require_group(f"{group}/props")
     for prop, arrays in props.items():
         # data-type validation - ensure this property can round-trip through

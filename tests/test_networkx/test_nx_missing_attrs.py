@@ -44,7 +44,7 @@ def graph_sparse_edge_props():
     return graph
 
 
-def test_sparse_node_props(tmp_path):
+def test_sparse_node_props(tmp_path) -> None:
     zarr_path = Path(tmp_path) / "test.zarr"
     graph, positions = graph_sparse_node_props()
     geff.write_nx(graph, axis_names=["t", "y", "x"], store=zarr_path)
@@ -52,7 +52,7 @@ def test_sparse_node_props(tmp_path):
     assert Path(zarr_path).exists()
     geff.validate(zarr_path)
 
-    zroot = zarr.open(zarr_path, mode="r")
+    zroot = zarr.open_group(zarr_path, mode="r")
     node_props = zroot["nodes"]["props"]
     t = node_props["t"]["values"][:]
     # TODO: test other dimensions
@@ -70,7 +70,7 @@ def test_sparse_node_props(tmp_path):
         assert read_graph.nodes[node] == data
 
 
-def test_sparse_edge_props(tmp_path):
+def test_sparse_edge_props(tmp_path) -> None:
     zarr_path = Path(tmp_path) / "test.zarr"
     graph = graph_sparse_edge_props()
     geff.write_nx(graph, axis_names=["t", "y", "x"], store=zarr_path)
@@ -78,7 +78,7 @@ def test_sparse_edge_props(tmp_path):
     assert Path(zarr_path).exists()
     geff.validate(zarr_path)
 
-    zroot = zarr.open(zarr_path, mode="r")
+    zroot = zarr.open_group(zarr_path, mode="r")
     edge_props = zroot["edges"]["props"]
     scores = edge_props["score"]["values"][:]
     assert scores[0] == 0.1
@@ -93,7 +93,7 @@ def test_sparse_edge_props(tmp_path):
         assert read_graph.edges[u, v] == data
 
 
-def test_missing_pos_prop(tmp_path):
+def test_missing_pos_prop(tmp_path) -> None:
     zarr_path = Path(tmp_path) / "test1.zarr"
     graph, _ = graph_sparse_node_props()
     # wrong property name

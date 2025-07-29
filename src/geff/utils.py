@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Final, cast
 
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
@@ -14,6 +14,17 @@ if TYPE_CHECKING:
 from urllib.parse import urlparse
 
 from .metadata_schema import GeffMetadata
+
+NODES_KEY: Final = "nodes"
+EDGES_KEY: Final = "edges"
+IDS_KEY: Final = "ids"
+PROPS_KEY: Final = "props"
+VALUES_KEY: Final = "values"
+MISSING_KEY: Final = "missing"
+NODE_IDS_KEY: Final = f"{NODES_KEY}/{IDS_KEY}"
+EDGE_IDS_KEY: Final = f"{EDGES_KEY}/{IDS_KEY}"
+NODE_PROPS_KEY: Final = f"{NODES_KEY}/{PROPS_KEY}"
+EDGE_PROPS_KEY: Final = f"{EDGES_KEY}/{PROPS_KEY}"
 
 
 def is_remote_url(path: str) -> bool:
@@ -51,14 +62,6 @@ def remove_tilde(store: StoreLike) -> StoreLike:
     return store
 
 
-NODES_KEY = "nodes"
-EDGES_KEY = "edges"
-IDS_KEY = "ids"
-PROPS_KEY = "props"
-VALUES_KEY = "values"
-MISSING_KEY = "missing"
-
-
 def validate(store: StoreLike) -> None:
     """Ensure that the structure of the zarr conforms to geff specification
 
@@ -86,7 +89,7 @@ def validate(store: StoreLike) -> None:
     # Raises pydantic.ValidationError or ValueError
     GeffMetadata.read(graph_group)
 
-    nodes_group = _expect_group(graph_group, NODES_KEY, "graph")
+    nodes_group = expect_group(graph_group, NODES_KEY, "graph")
     _validate_nodes_group(nodes_group)
 
     # TODO: Do we want to prevent missing values on spatialtemporal properties
@@ -99,7 +102,7 @@ def validate(store: StoreLike) -> None:
 # -----------------------------------------------------------------------------#
 
 
-def _expect_array(parent: zarr.Group, key: str, parent_name: str) -> zarr.Array:
+def expect_array(parent: zarr.Group, key: str, parent_name: str) -> zarr.Array:
     """Return an array in the parent group with the given key, or raise ValueError."""
     arr = parent.get(key)
     if not isinstance(arr, zarr.Array):
@@ -107,7 +110,7 @@ def _expect_array(parent: zarr.Group, key: str, parent_name: str) -> zarr.Array:
     return arr
 
 
-def _expect_group(parent: zarr.Group, key: str, parent_name: str) -> zarr.Group:
+def expect_group(parent: zarr.Group, key: str, parent_name: str) -> zarr.Group:
     """Return a group in the parent group with the given key, or raise ValueError."""
     grp = parent.get(key)
     if not isinstance(grp, zarr.Group):
@@ -158,9 +161,9 @@ def _validate_props_group(
 
 def _validate_nodes_group(nodes_group: zarr.Group) -> None:
     """Validate the structure of a nodes group in a GEFF zarr store."""
-    node_ids = _expect_array(nodes_group, IDS_KEY, NODES_KEY)
+    node_ids = expect_array(nodes_group, IDS_KEY, NODES_KEY)
     id_len = node_ids.shape[0]
-    node_props = _expect_group(nodes_group, PROPS_KEY, NODES_KEY)
+    node_props = expect_group(nodes_group, PROPS_KEY, NODES_KEY)
     _validate_props_group(node_props, id_len, "Node")
 
 
@@ -172,7 +175,7 @@ def _validate_edges_group(edges_group: Any) -> None:
         )
 
     # Edges only require ids which contain nodes for each edge
-    edges_ids = _expect_array(edges_group, IDS_KEY, EDGES_KEY)
+    edges_ids = expect_array(edges_group, IDS_KEY, EDGES_KEY)
     if edges_ids.shape[-1] != 2:
         raise ValueError(
             f"edges ids must have a last dimension of size 2, received shape {edges_ids.shape}"

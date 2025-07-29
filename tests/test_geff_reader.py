@@ -25,7 +25,7 @@ def test_build_w_masked_nodes(
     node_axis_dtypes,
     extra_edge_props,
     directed,
-):
+) -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype=node_id_dtype,
         node_axis_dtypes=node_axis_dtypes,
@@ -60,7 +60,7 @@ def test_build_w_masked_edges(
     node_axis_dtypes,
     extra_edge_props,
     directed,
-):
+) -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype=node_id_dtype,
         node_axis_dtypes=node_axis_dtypes,
@@ -90,7 +90,7 @@ def test_build_w_masked_nodes_edges(
     node_axis_dtypes,
     extra_edge_props,
     directed,
-):
+) -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype=node_id_dtype,
         node_axis_dtypes=node_axis_dtypes,
@@ -125,7 +125,7 @@ def test_build_w_masked_nodes_edges(
     _ = construct_nx(**in_memory_geff)
 
 
-def test_read_node_props():
+def test_read_node_props() -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
         node_axis_dtypes={"position": "double", "time": "double"},
@@ -154,7 +154,7 @@ def test_read_node_props():
     _ = construct_nx(**in_memory_geff)
 
 
-def test_read_edge_props():
+def test_read_edge_props() -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="uint8",
         node_axis_dtypes={"position": "double", "time": "double"},
