@@ -16,7 +16,7 @@ from geff.metadata_schema import (
     GeffMetadata,
     GeffSchema,
     PropMetadata,
-    validate_props_metadata,
+    validate_key_identifier_equality,
 )
 
 
@@ -378,18 +378,18 @@ class TestPropMetadata:
             PropMetadata(identifier="prop", dtype="float", encoding="invalid_encoding")
 
 
-def test_validate_props_metadata():
+def test_validate_key_identifier_equality():
     # Matching key / identifier
     props_md = {
         "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
         "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
         "prop3": PropMetadata(identifier="prop3", name="Property 3", dtype="str"),
     }
-    validate_props_metadata(props_md, "node")
+    validate_key_identifier_equality(props_md, "node")
 
     # Empty metadata
     props_md = {}
-    validate_props_metadata(props_md, "edge")
+    validate_key_identifier_equality(props_md, "edge")
 
     # Non matching key / identifier
     props_md = {
@@ -398,7 +398,7 @@ def test_validate_props_metadata():
         "prop3": PropMetadata(identifier="prop4", name="Property 3", dtype="str"),
     }
     with pytest.raises(ValueError, match=r".* property key .* does not match "):
-        validate_props_metadata(props_md, "node")
+        validate_key_identifier_equality(props_md, "node")
 
     # Incorrect component type
     props_md = {
@@ -406,7 +406,7 @@ def test_validate_props_metadata():
         "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
     }
     with pytest.raises(pydantic.ValidationError):
-        validate_props_metadata(props_md, "nodeeeee")
+        validate_key_identifier_equality(props_md, "nodeeeee")
 
 
 class TestAffineTransformation:

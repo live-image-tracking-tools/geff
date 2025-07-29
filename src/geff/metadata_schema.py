@@ -204,7 +204,7 @@ class PropMetadata(BaseModel):
 
 
 @validate_call
-def validate_props_metadata(
+def validate_key_identifier_equality(
     props_metadata: dict[str, PropMetadata],
     c_type: Literal["node", "edge", "tracklet", "lineage"],
 ) -> None:
@@ -449,9 +449,9 @@ class GeffMetadata(BaseModel):
 
         # Property metadata validation
         if self.node_props_metadata is not None:
-            validate_props_metadata(self.node_props_metadata, "node")
+            validate_key_identifier_equality(self.node_props_metadata, "node")
         if self.edge_props_metadata is not None:
-            validate_props_metadata(self.edge_props_metadata, "edge")
+            validate_key_identifier_equality(self.edge_props_metadata, "edge")
 
         return self
 
