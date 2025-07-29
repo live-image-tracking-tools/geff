@@ -1,6 +1,5 @@
 from typing import Any, TypedDict
 
-import numpy as np
 import zarr
 from numpy.typing import NDArray
 from typing_extensions import NotRequired
@@ -29,7 +28,7 @@ class PropDictNpArray(TypedDict):
     """
 
     values: NDArray[Any]
-    missing: NotRequired[NDArray[np.bool]]
+    missing: NotRequired[NDArray[bool]]
 
 
 class PropDictZArray(TypedDict):
