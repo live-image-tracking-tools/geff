@@ -173,8 +173,8 @@ def validate_data_type(data_type: np.dtype | str | type) -> bool:
 # For example, "utf-8" is allowed, but "utf8" is not.
 
 exceptions = ["aliases"]
-VALID_STR_ENCODINGS = (
-    name for _, name, _ in pkgutil.iter_modules(encodings.__path__) if name not in exceptions
+VALID_STR_ENCODINGS = list(
+    {name for _, name, _ in pkgutil.iter_modules(encodings.__path__) if name not in exceptions}
 )
 
 
