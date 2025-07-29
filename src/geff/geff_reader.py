@@ -60,7 +60,7 @@ class GeffReader:
         if validate:
             utils.validate(source)
         self.group = zarr.open_group(source, mode="r")
-        self.metadata = GeffMetadata.read(self.group)
+        self.metadata = GeffMetadata.read(source)
         self.nodes = zarr.open_array(source, path=_path.NODE_IDS, mode="r")
         self.edges = zarr.open_array(source, path=_path.EDGE_IDS, mode="r")
         self.node_props: dict[str, PropDictZArray] = {}

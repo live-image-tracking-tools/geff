@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, cast
 
 import typer
-import zarr
 
 from . import utils
 from .metadata_schema import GeffMetadata
@@ -31,7 +30,7 @@ def info(
     ),
 ) -> None:
     """Display information about a GEFF file."""
-    metadata = GeffMetadata.read(zarr.open_group(input_path, mode="r"))
+    metadata = GeffMetadata.read(input_path)
     print(metadata.model_dump_json(indent=2))
 
 

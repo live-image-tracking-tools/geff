@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-import zarr
 from typer.testing import CliRunner
 
 import geff
@@ -27,16 +26,16 @@ def example_geff_path(tmp_path: Path) -> str:
     return file_path
 
 
-def test_validate_command_prints_valid(example_geff_path) -> None:
+def test_validate_command_prints_valid(example_geff_path: str) -> None:
     """Test that the validate command prints the expected output."""
     result = runner.invoke(app, ["validate", example_geff_path])
     assert result.exit_code == 0
     assert f"{example_geff_path} is valid" in result.output
 
 
-def test_info_command_prints_metadata(example_geff_path) -> None:
+def test_info_command_prints_metadata(example_geff_path: str) -> None:
     result = runner.invoke(app, ["info", example_geff_path])
-    metadata = GeffMetadata.read(zarr.open_group(example_geff_path, mode="r"))
+    metadata = GeffMetadata.read(example_geff_path)
     assert result.exit_code == 0
     assert result.output == metadata.model_dump_json(indent=2) + "\n"
 

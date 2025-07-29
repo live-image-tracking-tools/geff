@@ -78,7 +78,7 @@ def validate(store: StoreLike) -> None:
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    GeffMetadata.read(graph_group)
+    GeffMetadata.read(store)
 
     nodes_group = expect_group(graph_group, _path.NODES)
     _validate_nodes_group(nodes_group)

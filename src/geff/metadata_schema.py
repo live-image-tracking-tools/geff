@@ -2,15 +2,13 @@ from __future__ import annotations
 
 import json
 import warnings
-from collections.abc import (
-    Mapping,
-    Sequence,
-)
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
+from zarr.storage import StoreLike
 
 import geff
 
@@ -25,9 +23,8 @@ from .units import (
 )
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from zarr.storage import StoreLike
+
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
@@ -411,36 +408,44 @@ class GeffMetadata(BaseModel):
 
         return self
 
-    def write(self, group: StoreLike) -> None:
-        """Helper function to write GeffMetadata into the zarr geff group.
+    def write(self, store: StoreLike) -> None:
+        """Helper function to write GeffMetadata into the group of a zarr geff store.
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
-            group (StoreLike): The geff group to write the metadata to
+            store (zarr store | Path | str): The geff store to write the metadata to
         """
-        _group = group if isinstance(group, zarr.Group) else zarr.open_group(group)
-        _group.attrs["geff"] = self.model_dump(mode="json")
+
+        if isinstance(store, zarr.Group):
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+
+        group = zarr.open_group(store)
+        group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
-    def read(cls, group: zarr.Group | Path) -> GeffMetadata:
+    def read(cls, store: StoreLike) -> GeffMetadata:
         """Helper function to read GeffMetadata from a zarr geff group.
 
         Args:
-            group (zarr.Group | Path): The zarr group containing the geff metadata
+            store (zarr store | Path | str): The geff store to read the metadata from
 
         Returns:
             GeffMetadata: The GeffMetadata object
         """
-        _group = group if isinstance(group, zarr.Group) else zarr.open_group(group)
+
+        if isinstance(store, zarr.Group):
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+
+        group = zarr.open_group(store)
 
         # Check if geff_version exists in zattrs
-        if "geff" not in _group.attrs:
+        if "geff" not in group.attrs:
             raise ValueError(
-                f"No geff key found in {_group}. This may indicate the path is incorrect or "
+                f"No geff key found in {group}. This may indicate the path is incorrect or "
                 f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
                 f"/dataset.zarr/)."
             )
-        if not isinstance(geff_dict := _group.attrs["geff"], Mapping):
+        if not isinstance(geff_dict := group.attrs["geff"], Mapping):
             raise ValueError(f"Expected geff metadata to be a Mapping. Got {type(geff_dict)}")
         return cls.model_validate(geff_dict)
 
