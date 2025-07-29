@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
@@ -443,14 +442,3 @@ class GeffMetadata(BaseModel):
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
-
-
-def write_metadata_schema(outpath: Path):
-    """Write the current geff metadata schema to a json file
-
-    Args:
-        outpath (Path): The file to write the schema to
-    """
-    metadata_schema = GeffSchema.model_json_schema()
-    with open(outpath, "w") as f:
-        f.write(json.dumps(metadata_schema, indent=2))
