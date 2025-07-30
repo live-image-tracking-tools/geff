@@ -20,17 +20,17 @@
 
 ## Units
 
-::: geff.units.validate_axis_type
+::: geff.valid_values.validate_axis_type
 
-::: geff.units.VALID_AXIS_TYPES
+::: geff.valid_values.VALID_AXIS_TYPES
 
-::: geff.units.validate_space_unit
+::: geff.valid_values.validate_space_unit
 
-::: geff.units.VALID_SPACE_UNITS
+::: geff.valid_values.VALID_SPACE_UNITS
 
-::: geff.units.validate_time_unit
+::: geff.valid_values.validate_time_unit
 
-::: geff.units.VALID_TIME_UNITS
+::: geff.valid_values.VALID_TIME_UNITS
 
 ## Writing Helpers
 
