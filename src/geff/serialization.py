@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from logging import warning
 from typing import cast, overload
 
 import numpy as np
@@ -63,14 +62,11 @@ def serialize_vlen_property_data(
                     "All elements must have the same number of dimensions: "
                     f"expected {ndim}, got {element.ndim}."
                 )
-    if ndim is None:
-        warning("All elements are None, returning empty arrays.")
-        return np.array([], dtype=dtype), None, np.array([], dtype=np.uint64)
 
     # Convert elements to arrays and build the values, missing, and data arrays
     for element in prop_data:
         if element is None:
-            values.append((offset,) + (0,) * ndim)
+            values.append((offset,) + (0,) * ndim if ndim is not None else ())
             missing.append(True)
         else:
             element = np.asarray(element, dtype=dtype)
@@ -82,7 +78,7 @@ def serialize_vlen_property_data(
     return (
         np.asarray(values, dtype=np.int64),
         np.array(missing, dtype=bool) if missing else None,
-        np.concatenate([d.ravel() for d in data]),
+        np.concatenate([d.ravel() for d in data]) if data else np.array([], dtype=dtype),
     )
 
 
