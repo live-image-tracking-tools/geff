@@ -747,33 +747,35 @@ def _get_feature_dtype(feat_md: dict[str, Any], feat_type: str) -> str:
 
 
 def _process_feature_metadata(
-    feat_md: dict[str, Any], feat_type: str, prop_type: str, props_metadata: dict[str, Any]
+    feat_md: dict[str, Any], geff_dict: dict[str, Any], feat_type: str
 ) -> None:
     """Process a single feature metadata entry and add it to props_metadata.
 
     Args:
         feat_md: The feature metadata dictionary from XML.
+        geff_dict: The dictionary to update with the processed metadata.
         feat_type: The feature type (for error/warning messages).
-        prop_type: The property type (node, edge, or lineage).
-        props_metadata: The dictionary to update with the processed metadata.
 
     Raises:
         ValueError: If the feature key is missing or duplicated.
     """
+    # print("feat_md", feat_md)
     key = _validate_feature_key(feat_md.get("@feature"), feat_type)
 
-    if key in props_metadata:
+    if key in geff_dict:
         raise ValueError(
             f"Duplicate feature identifier '{key}' found in 'FeatureDeclarations' tag."
         )
 
-    props_metadata[key] = {
+    geff_dict[key] = {
+        "identifier": key,
         "name": _get_feature_name(feat_md, key, feat_type),
-        "shortname": _get_feature_shortname(feat_md, key, feat_type),
-        "dimension": _get_feature_dimension(feat_md, feat_type),
         "dtype": _get_feature_dtype(feat_md, feat_type),
-        "prop_type": prop_type,
+        # Below fields are not present in GEFF metadata current specification.
+        # "shortname": _get_feature_shortname(feat_md, key, feat_type),
+        # "dimension": _get_feature_dimension(feat_md, feat_type),
     }
+    # print("geff_dict[key]", geff_dict[key])
 
 
 def _extract_props_metadata(xml_path: Path) -> dict[str, Any]:
@@ -802,25 +804,33 @@ def _extract_props_metadata(xml_path: Path) -> dict[str, Any]:
         raise ValueError(
             "No 'FeatureDeclarations' tag found in the XML file. Please check the XML file."
         )
-
     xml_md = tags_data["FeatureDeclarations"]
-    props_metadata = {}  # type: dict[str, Any]
-
-    # Mapping from TrackMate feature types to GEFF property types
+    node_props_metadata = {}  # type: dict[str, Any]
+    edge_props_metadata = {}  # type: dict[str, Any]
+    lineage_props_metadata = {}  # type: dict[str, Any]
+    props_metadata = {
+        "node_props_metadata": node_props_metadata,
+        "edge_props_metadata": edge_props_metadata,
+        "lineage_props_metadata": lineage_props_metadata,
+    }
+    # Mapping TrackMate feature types to GEFF metadata fields.
     mapping_feat_type = {
-        "SpotFeatures": "node",
-        "EdgeFeatures": "edge",
-        "TrackFeatures": "lineage",
+        "SpotFeatures": node_props_metadata,
+        "EdgeFeatures": edge_props_metadata,
+        "TrackFeatures": lineage_props_metadata,
     }
 
     for feat_type, feat_tag in xml_md.items():
-        prop_type = mapping_feat_type[feat_type]
+        # print("feat_type, feat_tag", feat_type, feat_tag)
+        geff_field = mapping_feat_type[feat_type]
         for feats_md in feat_tag.values():
+            # print("feats_md", feats_md)
             if isinstance(feats_md, dict):
                 feats_md = [feats_md]
             for feat_md in feats_md:
-                _process_feature_metadata(feat_md, feat_type, prop_type, props_metadata)
+                _process_feature_metadata(feat_md, geff_field, feat_type)
 
+    # print("node_props_metadata", node_props_metadata)
     return props_metadata
 
 
@@ -847,7 +857,7 @@ def _build_geff_metadata(
     extra = {
         "trackmate_version": _get_trackmate_version(xml_path),
         "provenance": "trackmate",
-        "props_metadata": props_metadata,  # FeatureDeclarations in TrackMate
+        "lineage_props_metadata": props_metadata["lineage_props_metadata"],
         "trackmate": {
             "log": trackmate_metadata.get("Log", None),
             "settings": trackmate_metadata.get("Settings", None),
@@ -864,6 +874,8 @@ def _build_geff_metadata(
             Axis(name="POSITION_T", type="time", unit=units.get("timeunits", "frame")),
         ],
         directed=True,
+        node_props_metadata=props_metadata["node_props_metadata"],
+        edge_props_metadata=props_metadata["edge_props_metadata"],
         track_node_props={"lineage": "TRACK_ID"},
         related_objects=[{"type": "image", "path": img_path}],
         extra=extra,
@@ -974,5 +986,5 @@ if __name__ == "__main__":
     )
 
     graph, md = read_nx(store=geff_file, validate=True)
-    print(graph)
-    print(md)
+    # print(graph)
+    # print(md.node_props_metadata)
