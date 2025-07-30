@@ -16,7 +16,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
@@ -24,7 +24,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
       
       
 
@@ -1258,7 +1258,7 @@ Defaults to 2.</p>
   </span>
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="n">Group</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeffMetadata</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeffMetadata</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1279,14 +1279,14 @@ Defaults to 2.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>group</code>
+                <code>store</code>
             </td>
             <td>
-                  <code><span title="zarr.Group">Group</span> | <a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></code>
+                  <code>zarr store | Path | str</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The zarr group containing the geff metadata</p>
+                <p>The geff store to read the metadata from</p>
               </div>
             </td>
             <td>
@@ -1332,12 +1332,12 @@ Defaults to 2.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="n">Group</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Helper function to write GeffMetadata into the zarr geff group.
+        <p>Helper function to write GeffMetadata into the group of a zarr geff store.
 Maintains consistency by preserving ignored attributes with their original values.</p>
 
 
@@ -1354,14 +1354,14 @@ Maintains consistency by preserving ignored attributes with their original value
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>group</code>
+                <code>store</code>
             </td>
             <td>
-                  <code><span title="zarr.Group">Group</span> | <a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></code>
+                  <code>zarr store | Path | str</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The geff group to write the metadata to</p>
+                <p>The geff store to write the metadata to</p>
               </div>
             </td>
             <td>
@@ -2200,7 +2200,7 @@ as three individual properties called "z", "y", and "x".</p>
       <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.56ea9cef.min.js"></script>
+      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
       
         <script src="../js/schema_doc.min.js"></script>
       
