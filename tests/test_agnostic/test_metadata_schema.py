@@ -67,7 +67,7 @@ class TestMetadataModel:
                 {"type": "image", "path": "raw/"},
             ],
         )
-        assert len(model.axes) == 1
+        assert model.axes and len(model.axes) == 1
 
         # Multiple axes
         model = GeffMetadata(
@@ -78,7 +78,7 @@ class TestMetadataModel:
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
             ],
         )
-        assert len(model.axes) == 2
+        assert model.axes and len(model.axes) == 2
 
     def test_duplicate_axes_names(self) -> None:
         # duplicate names not allowed
@@ -123,7 +123,7 @@ class TestMetadataModel:
         with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
             GeffMetadata(geff_version="aljkdf", directed=True)
 
-    def test_props_metadata(self):
+    def test_props_metadata(self) -> None:
         # Valid props metadata
         node_props = {
             "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
@@ -169,7 +169,7 @@ class TestMetadataModel:
                 },
             )
 
-    def test_extra_attrs(self):
+    def test_extra_attrs(self) -> None:
         # Should not fail
         GeffMetadata(
             geff_version="0.0.1",
@@ -353,7 +353,7 @@ class TestAxis:
 
 
 class TestPropMetadata:
-    def test_valid(self):
+    def test_valid(self) -> None:
         # Minimal valid metadata
         PropMetadata(identifier="prop_1", name="property", dtype="int32")
 
@@ -367,16 +367,16 @@ class TestPropMetadata:
             description="A property with all fields set.",
         )
 
-    def test_invalid_identifier(self):
+    def test_invalid_identifier(self) -> None:
         # identifier must be a string
         with pytest.raises(pydantic.ValidationError):
             PropMetadata(identifier=123, name="property", dtype="int16")
 
         # identifier must be a non-empty string
-        with pytest.raises(ValueError, match="Property identifier cannot be an empty string."):
+        with pytest.raises(ValueError, match="String should have at least 1 character"):
             PropMetadata(identifier="", dtype="int16")
 
-    def test_invalid_dtype(self):
+    def test_invalid_dtype(self) -> None:
         # dtype must be a string
         with pytest.raises(pydantic.ValidationError):
             PropMetadata(identifier="prop", dtype=123)
@@ -384,7 +384,7 @@ class TestPropMetadata:
             PropMetadata(identifier="prop", dtype=None)
 
         # dtype must be a non-empty string
-        with pytest.raises(ValueError, match="Property dtype cannot be an empty string."):
+        with pytest.raises(ValueError, match="String should have at least 1 character"):
             PropMetadata(identifier="prop", dtype="")
 
         # dtype must be in allowed data types
@@ -393,7 +393,7 @@ class TestPropMetadata:
         ):
             PropMetadata(identifier="prop", dtype="nope")
 
-    def test_invalid_encoding(self):
+    def test_invalid_encoding(self) -> None:
         # encoding must be a string
         with pytest.raises(pydantic.ValidationError):
             PropMetadata(identifier="prop", dtype="int16", encoding=123)
@@ -403,7 +403,7 @@ class TestPropMetadata:
             PropMetadata(identifier="prop", dtype="float", encoding="invalid_encoding")
 
 
-def test_validate_key_identifier_equality():
+def test_validate_key_identifier_equality() -> None:
     # Matching key / identifier
     props_md = {
         "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),

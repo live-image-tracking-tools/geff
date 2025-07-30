@@ -308,7 +308,7 @@ class GeffMetadata(BaseModel):
     )
 
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
-    axes: Sequence[Axis] | None = Field(
+    axes: list[Axis] | None = Field(
         default=None,
         description="Optional list of Axis objects defining the axes of each node in the graph.\n"
         "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
@@ -382,7 +382,7 @@ class GeffMetadata(BaseModel):
             "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
         ),
     )
-    related_objects: Sequence[RelatedObject] | None = Field(
+    related_objects: list[RelatedObject] | None = Field(
         default=None,
         description=(
             "A list of dictionaries of related objects such as labels or images. "
