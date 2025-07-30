@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import os
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
+import numpy as np
 import zarr
 
 if TYPE_CHECKING:
     from zarr.storage import StoreLike
+
+    from geff.typing import PropDictNpArray, VarLenPropDictNpArray
 
 from urllib.parse import urlparse
 
@@ -49,6 +53,73 @@ def remove_tilde(store: StoreLike) -> StoreLike:
         if "~" in store_str:
             store = os.path.expanduser(store_str)
     return store
+
+
+def encode_string_data(data: PropDictNpArray, encoding: str = "utf-8") -> VarLenPropDictNpArray:
+    """Encode a string array into a data array, values array, and missing array
+
+
+    Args:
+        data (PropDictNpArray): A 2d numpy array representing a list of strings, one per
+            node or edge, potentially with empty strings appended at the end to make it
+            non-ragged, along with a 1D missing array.
+        encoding (str, optional): The encoding to use to encode the string to bytes.
+            Defaults to "utf-8". Other options are: https://docs.python.org/3/library/codecs.html#standard-encodings
+    TODO: Check which ones are supported in java
+
+    Raises:
+        TypeError: If the input values are not a string array
+
+    Returns:
+        VarLenPropDictNpArray: new data, values, and missing array to write to the props group
+    """
+    str_values = data["values"]
+    missing = data["missing"]
+    if not str_values.dtype.kind == "U":
+        raise TypeError("Cannot encode non-string array")
+
+    warnings.warn(
+        f"Property '{data}' is a string array. Automatically casting it to bytes",
+        stacklevel=2,
+    )
+    data = np.array([str(row).encode(encoding) for row in data], dtype="S")
+    shapes = np.asarray(tuple(len(s) for s in str_values), dtype=np.int64)
+    offsets = np.concatenate(([0], np.cumsum(shapes[:-1])))
+    new_values = np.vstack((offsets, shapes)).T
+    return {"values": new_values, "missing": missing, "data": data}
+
+
+def decode_string_data(data: VarLenPropDictNpArray, encoding: str = "utf-8") -> PropDictNpArray:
+    """Turns encoded string values back into a native python string array of values
+
+    Args:
+        data (VarLenPropDictNpArray): The values, data, and missing arrays read from disk
+            containing encoded string values of varying lengths
+        encoding (str, optional): The encoding used to encode the strings.
+            Defaults to "utf-8". Supports TODO
+
+    Raises:
+        TypeError: If the data array is not a byte array
+
+    Returns:
+        PropDictNpArray: The values and missing arrays representing the string values
+            for each node/edge as native python strings in a numpy string array
+    """
+    encoded_data = data["data"]
+    if not encoded_data.dtype.kind == "S":
+        raise TypeError("Cannot decode non-bytes array")
+    decoded_data = encoded_data.tobytes().decode(encoding)
+    offset_shape = data["values"]
+    missing = data["missing"]
+    str_values = []
+    for i in range(offset_shape):
+        offset = offset_shape[i][0]
+        shape = offset_shape[i][1:]
+        size = shape.prod()
+        str_val = decoded_data[offset : offset + size]
+        str_values.append(str_val)
+    new_values = np.array(str_values)
+    return {"values": new_values, "missing": missing}
 
 
 def validate(store: StoreLike):
