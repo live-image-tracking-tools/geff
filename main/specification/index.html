@@ -317,7 +317,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.units.VALID_AXIS_TYPES" class="md-nav__link">
+  <a href="#geff.valid_values.VALID_AXIS_TYPES" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_AXIS_TYPES
     </span>
@@ -326,7 +326,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.units.VALID_SPACE_UNITS" class="md-nav__link">
+  <a href="#geff.valid_values.VALID_SPACE_UNITS" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_SPACE_UNITS
     </span>
@@ -335,7 +335,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.units.VALID_TIME_UNITS" class="md-nav__link">
+  <a href="#geff.valid_values.VALID_TIME_UNITS" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_TIME_UNITS
     </span>
@@ -539,7 +539,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.units.VALID_AXIS_TYPES" class="md-nav__link">
+  <a href="#geff.valid_values.VALID_AXIS_TYPES" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_AXIS_TYPES
     </span>
@@ -548,7 +548,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.units.VALID_SPACE_UNITS" class="md-nav__link">
+  <a href="#geff.valid_values.VALID_SPACE_UNITS" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_SPACE_UNITS
     </span>
@@ -557,7 +557,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.units.VALID_TIME_UNITS" class="md-nav__link">
+  <a href="#geff.valid_values.VALID_TIME_UNITS" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_TIME_UNITS
     </span>
@@ -2152,7 +2152,8 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
             />
         </svg>
     <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_identifier" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_identifier')">identifier</a></div><h4>Identifier</h4><span class="badge badge-dark value-type">Type: string</span><br/>
-
+<span class="description"><p>Identifier of the property. Must be unique within its own component subgroup (nodes or edges). Must be a non-empty string.</p>
+</span>
 
 
 
@@ -2220,7 +2221,8 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
             />
         </svg>
     <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_dtype" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_dtype')">dtype</a></div><h4>Dtype</h4><span class="badge badge-dark value-type">Type: string</span><br/>
-
+<span class="description"><p>Data type of the property. Must be a non-empty string. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.</p>
+</span>
 
 
 
@@ -2288,7 +2290,8 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
             />
         </svg>
     <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding')">encoding</a></div><h4>Encoding</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf"><h2 class="handle">
+<span class="description"><p>Optional encoding when the property is stored as a string. For example, but not limited to, 'utf-8' or 'ascii'.</p>
+</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf"><h2 class="handle">
   <label>Any of</label>
 </h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
@@ -2505,7 +2508,8 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
             />
         </svg>
     <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit')">unit</a></div><h4>Unit</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf"><h2 class="handle">
+<span class="description"><p>Optional unit of the property.</p>
+</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf"><h2 class="handle">
   <label>Any of</label>
 </h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
@@ -2722,7 +2726,8 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
             />
         </svg>
     <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name')">name</a></div><h4>Name</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf"><h2 class="handle">
+<span class="description"><p>Optional human friendly name of the property</p>
+</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf"><h2 class="handle">
   <label>Any of</label>
 </h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
@@ -2939,7 +2944,8 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
             />
         </svg>
     <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description')">description</a></div><h4>Description</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf"><h2 class="handle">
+<span class="description"><p>Optional description of the property.</p>
+</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf"><h2 class="handle">
   <label>Any of</label>
 </h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
@@ -5329,8 +5335,8 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
 
 
 
-<h3 id="geff.units.VALID_AXIS_TYPES" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">geff.units.VALID_AXIS_TYPES</span>
+<h3 id="geff.valid_values.VALID_AXIS_TYPES" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">geff.valid_values.VALID_AXIS_TYPES</span>
 
 
   <span class="doc doc-labels">
@@ -5351,8 +5357,8 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
 
 
 
-<h3 id="geff.units.VALID_SPACE_UNITS" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">geff.units.VALID_SPACE_UNITS</span>
+<h3 id="geff.valid_values.VALID_SPACE_UNITS" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">geff.valid_values.VALID_SPACE_UNITS</span>
 
 
   <span class="doc doc-labels">
@@ -5401,8 +5407,8 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
 
 
 
-<h3 id="geff.units.VALID_TIME_UNITS" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">geff.units.VALID_TIME_UNITS</span>
+<h3 id="geff.valid_values.VALID_TIME_UNITS" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-attribute"></code>            <span class="doc doc-object-name doc-attribute-name">geff.valid_values.VALID_TIME_UNITS</span>
 
 
   <span class="doc doc-labels">
