@@ -32,6 +32,10 @@ class PropDictNpArray(TypedDict):
     missing: NotRequired[NDArray[bool]]
 
 
+class VarLenPropDictNpArray(PropDictNpArray):
+    data: NDArray[Any]
+
+
 class PropDictZArray(TypedDict):
     """
     A prop dictionary which has the keys "values" and optionally "missing", stored as zarr arrays.
