@@ -27,6 +27,8 @@ def is_expected_type(graph, backend: SupportedBackend):
     match backend:
         case SupportedBackend.NETWORKX:
             return isinstance(graph, nx.Graph | nx.DiGraph)
+        case SupportedBackend.RUSTWORKX:
+            return isinstance(graph, rx.PyGraph | rx.PyDiGraph)
         case _:
             raise TypeError(
                 f"No `is_expected_type` code path has been defined for backend '{backend.value}'."
@@ -48,7 +50,7 @@ def get_edges(graph) -> set[tuple[Any, Any]]:
     if isinstance(graph, (nx.Graph | nx.DiGraph)):
         return set(graph.edges)
     elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
-        return set(graph.edge_indices())
+        return set(graph.edge_list())
     elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
         return set(graph.edges)
     else:
@@ -72,7 +74,8 @@ def get_edge_prop(graph, name: str, edges: list[Any]) -> NDArray[Any]:
         prop = [graph.edges[edge][name] for edge in edges]
         return np.array(prop)
     elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
-        return np.array([graph[edge][name] for edge in edges])
+        # return np.array([graph[edge][name] for edge in edges])
+        return np.array([graph.get_edge_data(*edge)[name] for edge in edges])
     elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
         return graph.edge_attrs[name][edges]
     else:
