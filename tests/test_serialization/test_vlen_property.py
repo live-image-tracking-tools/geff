@@ -1,9 +1,11 @@
 from collections.abc import Sequence
+from typing import cast
 
 import numpy as np
 import pytest
 import zarr
-from numpy.typing import ArrayLike
+import zarr.storage
+from numpy.typing import ArrayLike, NDArray
 
 from geff.serialization import (
     deserialize_vlen_property_data,
@@ -62,20 +64,20 @@ class TestSerialization:
     """Test validation of polygon properties."""
 
     def test_serialize_polygons_as_dict(self, polygons: Sequence[ArrayLike]):
-        serialized = serialize_vlen_property_data_as_dict(polygons)
+        serialized = serialize_vlen_property_data_as_dict(polygons, dtype=np.float32)
         assert "values" in serialized
         assert "missing" in serialized
-        assert "slices" in serialized
-        assert serialized["values"].dtype == np.float32
-        assert serialized["missing"].dtype == np.bool_
-        assert serialized["slices"].dtype == np.uint64
+        assert "data" in serialized
+        assert cast("NDArray", serialized["values"]).dtype == np.int64
+        assert cast("NDArray", serialized["missing"]).dtype == np.bool_
+        assert cast("NDArray", serialized["data"]).dtype == np.float32
 
     def test_serialize_polygons(self, polygons: Sequence[ArrayLike]):
         serialized = serialize_vlen_property_data(polygons)
         assert len(serialized) == 3
-        assert serialized[0].dtype == np.float32  # values
-        assert serialized[1].dtype == np.bool_  # missing
-        assert serialized[2].dtype == np.uint64  # slices
+        assert serialized[0].dtype == np.int64  # values
+        assert cast("NDArray", serialized[1]).dtype == np.bool_  # missing
+        assert serialized[2].dtype == np.float32  # data
 
     def test_deserialize_polygons_as_dict(self, polygons):
         serialized = serialize_vlen_property_data_as_dict(polygons)
@@ -90,7 +92,7 @@ class TestSerialization:
         group = zarr.group(store, overwrite=True)
         group["values"] = serialized[0]
         group["missing"] = serialized[1]
-        group["slices"] = serialized[2]
+        group["data"] = serialized[2]
         deserialized = deserialize_vlen_property_data(group)
         assert len(deserialized) == len(polygons)
         for orig, des in zip(polygons, deserialized, strict=False):

@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from logging import warning
 from typing import cast, overload
 
 import numpy as np
@@ -7,86 +8,130 @@ from zarr import Group
 
 
 def serialize_vlen_property_data_as_dict(
-    data: Sequence[ArrayLike | None],
+    prop_data: Sequence[ArrayLike | None],
+    dtype: type = np.float32,
 ) -> dict[str, NDArray | None]:
     """
     Serialize a sequence of vlen property data into a structured format as a dictionary.
     Args:
-        data (Sequence[ArrayLike | None]): A sequence of property data, where each element can be
-            a numpy array or None.
+        prop_data (Sequence[ArrayLike | None]): A sequence of property data, where each element
+            can be a numpy array or None.
+        dtype (type): The data type to use for the values array. Default is np.float32.
     Returns:
-        dict[str, NDArray]: A dictionary with keys 'values', 'missing', and 'slices'.
+        dict[str, NDArray]: A dictionary with keys 'values', 'missing', and 'data'.
     """
-    values, missing, slices = serialize_vlen_property_data(data)
+    values, missing, data = serialize_vlen_property_data(prop_data, dtype=dtype)
     return {
         "values": values,
         "missing": missing,
-        "slices": slices,
+        "data": data,
     }
 
 
 def serialize_vlen_property_data(
-    data: Sequence[ArrayLike | None],
+    prop_data: Sequence[ArrayLike | None],
+    dtype: type = np.float32,
 ) -> tuple[NDArray, NDArray | None, NDArray]:
     """
     Serialize a sequence of property data into a structured format.
     Args:
-        data (Sequence[ArrayLike | None]): A sequence of property data, where each element can be
-            an ArrayLike object or None.
+        prop_data (Sequence[ArrayLike | None]): A sequence of property data, where each element can
+            be an ArrayLike object or None.
+        dtype (type): The data type to use for the values array. Default is np.float32.
     Returns:
         tuple[NDArray, NDArray | None, NDArray]: A tuple containing:
-            - 'values': a NDArray of the property values.
-            - 'missing': a 1D array of booleans indicating missing values,
-            - 'slices': a NDArray of slices indicating the start and end indices of each property
+            - 'values': a NDArray of data indicating the offset indices and shapes of each property
               in the values array.
-            The return value will be a tuple of (values, missing, slices).
+            - 'missing': a 1D NArray of booleans indicating missing values,
+            - 'data': a 1D NDArray of data that contains the serialized property data.
+            The return value will be a tuple of (values, missing, data).
     """
-    slices = []
-    missing = []
     values = []
+    missing = []
+    data = []
     offset = 0
-    n_col = None
-    for element in data:
+    ndim = None
+
+    # Determine the number of dimensions
+    for element in prop_data:
+        if element is not None:
+            element = np.asarray(element, dtype=dtype)
+            if ndim is None:
+                ndim = element.ndim
+            elif element.ndim != ndim:
+                raise ValueError(
+                    "All elements must have the same number of dimensions: "
+                    f"expected {ndim}, got {element.ndim}."
+                )
+    if ndim is None:
+        warning("All elements are None, returning empty arrays.")
+        return np.array([], dtype=dtype), None, np.array([], dtype=np.uint64)
+
+    # Convert elements to arrays and build the values, missing, and data arrays
+    for element in prop_data:
         if element is None:
-            slices.append((0, 0))
+            values.append((offset,) + (0,) * ndim)
             missing.append(True)
         else:
-            element = np.asarray(element, dtype=np.float32)
-            if n_col is None:
-                n_col = element.shape[1]
-            elif element.shape[1] != n_col:
-                raise ValueError(
-                    "All elements must have the same number of columns: "
-                    f"expected {n_col}, got {element.shape[1]}."
-                )
-            slices.append((offset, offset + element.shape[0]))
+            element = np.asarray(element, dtype=dtype)
+            values.append((offset, *element.shape))
             missing.append(False)
-            values.append(element)
-            offset += element.shape[0]
+            data.append(element)
+            offset += np.asarray(element.shape).prod()
 
     return (
-        np.vstack(values),
+        np.asarray(values, dtype=np.int64),
         np.array(missing, dtype=bool) if missing else None,
-        np.array(slices, dtype=np.uint64),
+        np.concatenate([d.ravel() for d in data]),
     )
+
+
+def _deserialize_vlen_array(
+    values: NDArray,
+    missing: NDArray | None,
+    data: NDArray,
+    index: int,
+) -> NDArray | None:
+    """
+    Deserialize a variable-length array from the data and values arrays.
+
+    Args:
+        values (NDArray): The AND array containing the offset indices and shapes of
+            each property. (e.g., [[offset, shape_dim0, shape_dim1], ...]).
+            expected shape is (N, ndim + 1) where N is the number of nodes or edges.
+        missing (NDArray): The 1D array indicating missing values. expected shape is (N,).
+        data (NDArray): The 1D array containing the serialized property data.
+            expected shape is (total_data_length,).
+        index (int): The index of the property to deserialize.
+
+    Returns:
+        NDArray: The deserialized variable-length array.
+    """
+    if index < 0 or index >= values.shape[0]:
+        raise IndexError(f"Index {index} out of bounds for property data.")
+    if missing is not None and missing[index]:
+        return None
+    offset = values[index][0]
+    shape = values[index][1:]
+    return data[offset : offset + np.prod(shape)].reshape(shape)
 
 
 @overload
 def deserialize_vlen_property_data(
-    vlen_props: Group | dict[str, NDArray],
+    vlen_props: Group | dict[str, NDArray | None],
     index: int,
 ) -> NDArray | None: ...
 
 
 @overload
 def deserialize_vlen_property_data(
-    vlen_props: Group | dict[str, NDArray],
+    vlen_props: Group | dict[str, NDArray | None],
     index: None = None,
 ) -> Sequence[NDArray | None]: ...
 
 
 def deserialize_vlen_property_data(
-    vlen_props: Group | dict[str, NDArray],
+    vlen_props: Group | dict[str, NDArray | None],
     index: int | None = None,
 ) -> NDArray | Sequence[NDArray | None] | None:
     """
@@ -103,32 +148,21 @@ def deserialize_vlen_property_data(
     """
     if "values" not in vlen_props:
         raise ValueError(f"Group {vlen_props} does not contain 'values'.")
-    if "slices" not in vlen_props:
-        raise ValueError(f"Group {vlen_props} does not contain 'slices'.")
-    slices = cast("NDArray", vlen_props["slices"])
+    if "data" not in vlen_props:
+        raise ValueError(f"Group {vlen_props} does not contain 'data'.")
+    data = cast("NDArray", vlen_props["data"])
     values = cast("NDArray", vlen_props["values"])
     if "missing" in vlen_props:
         missing = cast("NDArray | None", vlen_props["missing"])
-        if missing is not None and missing.shape[0] != slices.shape[0]:
+        if missing is not None and missing.shape[0] != values.shape[0]:
             raise ValueError(
-                f"Length of 'missing' ({missing.shape[0]}) does not match length of 'slices'"
-                + f"({len(slices)})."
+                f"Length of 'missing' ({missing.shape[0]}) does not match length of 'values'"
+                + f"({values.shape[0]})."
             )
     else:
         missing = None
 
     if index is not None:
-        if index < 0 or index >= len(slices):
-            raise IndexError(f"Index {index} out of bounds for property data.")
-        if missing is not None and missing[index]:
-            return None
-        start, end = slices[index]
-        return values[start:end]
+        return _deserialize_vlen_array(values, missing, data, index)
 
-    if missing is not None and np.any(missing):
-        return [
-            values[slice(start, end)] if not miss else None
-            for (start, end), miss in zip(slices, missing, strict=False)
-        ]
-
-    return [values[slice(start, end)] for start, end in slices]
+    return [_deserialize_vlen_array(values, missing, data, i) for i in range(values.shape[0])]

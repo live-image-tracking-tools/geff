@@ -63,6 +63,22 @@ def data():
         (
             np.array(
                 [
+                    [0, 0, 0],
+                    [0, 3, 2],
+                    [6, 14, 2],
+                    [34, 0, 0],
+                ]
+            ),
+            np.array(
+                [
+                    True,
+                    False,
+                    False,
+                    True,
+                ]
+            ),
+            np.array(
+                [
                     [11, 13],
                     [111, 113],
                     [22, 246],
@@ -82,36 +98,23 @@ def data():
                     [512, 160],
                 ]
             ),
-            np.array(
-                [
-                    True,
-                    False,
-                    False,
-                    True,
-                ]
-            ),
-            np.array(
-                [
-                    [0, 0],
-                    [0, 3],
-                    [3, 17],
-                    [0, 0],
-                ]
-            ),
         )
     ],
 )
 def test_dict_prop_to_arr(data, expected):
     props_dict = dict_vlen_props_to_arr(data, ["polygon"])
-    values, missing, slices = props_dict["polygon"]
-    ex_values, ex_missing, ex_slices = expected
+    assert props_dict["polygon"] is not None
+    assert isinstance(props_dict["polygon"], tuple)
+    assert len(props_dict["polygon"]) == 3
+    values, missing, data = props_dict["polygon"]
+    ex_values, ex_missing, ex_data = expected
     ex_values = np.array(ex_values)
     ex_missing = np.array(ex_missing, dtype=bool) if ex_missing is not None else None
-    ex_slices = np.array(ex_slices) if ex_slices is not None else None
+    ex_data = np.array(ex_data).ravel() if ex_data is not None else None
 
     np.testing.assert_array_equal(missing, ex_missing)
     np.testing.assert_array_equal(values, ex_values)
-    np.testing.assert_array_equal(slices, ex_slices)
+    np.testing.assert_array_equal(data, ex_data)
 
 
 def test_write_dicts(tmp_path, data):

@@ -185,7 +185,7 @@ def construct_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:
     indices = np.arange(len(node_ids))
 
     for name, prop_dict in graph_dict["node_props"].items():
-        values = prop_dict["values"]
+        values: np.ndarray = prop_dict["values"]
         if "missing" in prop_dict:
             current_indices = indices[~prop_dict["missing"]]
             values = values[current_indices]
