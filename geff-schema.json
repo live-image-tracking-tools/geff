@@ -290,10 +290,12 @@
       "description": "Metadata describing a property in the geff graph.",
       "properties": {
         "identifier": {
+          "description": "Identifier of the property. Must be unique within its own component subgroup (nodes or edges). Must be a non-empty string.",
           "title": "Identifier",
           "type": "string"
         },
         "dtype": {
+          "description": "Data type of the property. Must be a non-empty string. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
           "title": "Dtype",
           "type": "string"
         },
@@ -307,6 +309,7 @@
             }
           ],
           "default": null,
+          "description": "Optional encoding when the property is stored as a string. For example, but not limited to, 'utf-8' or 'ascii'.",
           "title": "Encoding"
         },
         "unit": {
@@ -319,6 +322,7 @@
             }
           ],
           "default": null,
+          "description": "Optional unit of the property.",
           "title": "Unit"
         },
         "name": {
@@ -331,6 +335,7 @@
             }
           ],
           "default": null,
+          "description": "Optional human friendly name of the property",
           "title": "Name"
         },
         "description": {
@@ -343,6 +348,7 @@
             }
           ],
           "default": null,
+          "description": "Optional description of the property.",
           "title": "Description"
         }
       },

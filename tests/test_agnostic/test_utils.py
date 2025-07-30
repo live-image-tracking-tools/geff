@@ -41,6 +41,7 @@ def test_validate(tmp_path: Path) -> None:
         "roi_min": [0, 0],
         "roi_max": [100, 100],
     }
+
     # No nodes
     with pytest.raises(ValueError, match="'graph' group must contain a group named 'nodes'"):
         validate(zpath)
@@ -135,5 +136,73 @@ def test_validate(tmp_path: Path) -> None:
         validate(zpath)
     del z["edges/props/badshape"]["missing"]
 
-    # everything passes
+    # Nodes: property metadata has no matching data
+    geff_attrs = z.attrs["geff"]
+    geff_attrs["node_props_metadata"] = {
+        "prop1": {"identifier": "prop1", "dtype": "float32"},
+        "prop2": {"identifier": "prop2", "dtype": "int"},
+    }
+    z.attrs["geff"] = geff_attrs
+    with pytest.raises(
+        AssertionError,
+        match="Node property prop1 described in metadata is not present in props arrays",
+    ):
+        validate(zpath)
+
+    # Nodes: inconsistent property metadata dtype
+    z["nodes/props/prop1/values"] = np.zeros(n_node, dtype=np.float32)
+    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype=np.float32)
+    with pytest.raises(
+        AssertionError,
+        match=(
+            "Node property prop2 with dtype float32 does not match "
+            "metadata dtype <class 'numpy.int64'>"
+        ),
+    ):
+        validate(zpath)
+    # Another type of dtype mismatch
+    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int16")
+    with pytest.raises(
+        AssertionError,
+        match=(
+            "Node property prop2 with dtype int16 does not match "
+            "metadata dtype <class 'numpy.int64'>"
+        ),
+    ):
+        validate(zpath)
+    z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int")  # clean up
+
+    # Edges: property metadata has no matching data
+    geff_attrs["edge_props_metadata"] = {
+        "prop3": {"identifier": "prop3", "dtype": "bool"},
+    }
+    z.attrs["geff"] = geff_attrs
+    with pytest.raises(
+        AssertionError,
+        match="Edge property prop3 described in metadata is not present in props arrays",
+    ):
+        validate(zpath)
+
+    # Edges: inconsistent property metadata dtype
+    z["edges/props/prop3/values"] = np.zeros(n_edges, dtype=np.float32)
+    with pytest.raises(
+        AssertionError,
+        match=(
+            r"Edge property prop3 with dtype float32 does not match "
+            r"metadata dtype <class 'numpy.bool_*'>"
+        ),
+    ):
+        validate(zpath)
+    z["edges/props/prop3/values"] = np.zeros(n_edges, dtype="bool")  # clean up
+
+    # No error raised when property with no matching prop metadata
+    z["nodes/props/prop4/values"] = np.zeros(n_node, dtype="bool")
+    z["edges/props/prop4/values"] = np.zeros(n_edges, dtype="uint8")
+
+    # No error when identical property identifiers across node and edge props
+    geff_attrs["node_props_metadata"] = {"prop4": {"identifier": "prop4", "dtype": "bool"}}
+    geff_attrs["edge_props_metadata"] = {"prop4": {"identifier": "prop4", "dtype": "uint8"}}
+    z.attrs["geff"] = geff_attrs
+
+    # Everything passes
     validate(zpath)

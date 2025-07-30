@@ -8,7 +8,8 @@ import zarr
 from geff.utils import remove_tilde
 
 from . import _path
-from .units import validate_data_type
+from .metadata_schema import GeffMetadata
+from .valid_values import validate_data_type
 
 if TYPE_CHECKING:
     import numpy as np

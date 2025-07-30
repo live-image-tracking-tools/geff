@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
+import numpy as np
 import zarr
 
 from . import _path
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from zarr.storage import StoreLike
 
 from urllib.parse import urlparse
@@ -53,6 +56,37 @@ def remove_tilde(store: StoreLike) -> StoreLike:
     return store
 
 
+def _validate_props_metadata(
+    props_metadata_dict: Mapping, props_group: zarr.Group, component_type: str
+) -> None:
+    """Validate that properties described in metadata are compatible with the data in zarr arrays.
+
+    Args:
+        props_metadata_dict (dict): Dictionary of property metadata with identifier keys
+            and PropMetadata values
+        props_group (zarr.Group): Zarr group containing the component properties (nodes or edges)
+        component_type (str): Component type for error messages ("Node" or "Edge")
+
+    Raises:
+        AssertionError: If properties in metadata don't match zarr arrays
+    """
+    id_dtype_map = {
+        prop.identifier: np.dtype(prop.dtype).type for prop in props_metadata_dict.values()
+    }
+    for prop_id, prop_dtype in id_dtype_map.items():
+        # Properties described in metadata should be present in zarr arrays
+        assert prop_id in props_group.keys(), (
+            f"{component_type} property {prop_id} described in metadata is not present "
+            f"in props arrays"
+        )
+        # dtype in metadata should match dtype in zarr arrays
+        array_dtype = props_group[prop_id][_path.VALUES].dtype  # type: ignore
+        assert array_dtype == prop_dtype, (
+            f"{component_type} property {prop_id} with dtype {array_dtype} does not match "
+            f"metadata dtype {prop_dtype}"
+        )
+
+
 def validate(store: StoreLike) -> None:
     """Ensure that the structure of the zarr conforms to geff specification
 
@@ -78,14 +112,15 @@ def validate(store: StoreLike) -> None:
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    GeffMetadata.read(store)
+    metadata = GeffMetadata.read(store)
 
     nodes_group = expect_group(graph_group, _path.NODES)
-    _validate_nodes_group(nodes_group)
+    _validate_nodes_group(nodes_group, metadata)
 
     # TODO: Do we want to prevent missing values on spatialtemporal properties
-    if (edges_group := graph_group.get(_path.EDGES)) is not None:
-        _validate_edges_group(edges_group)
+    if _path.EDGES in graph_group.keys():
+        edges_group = expect_group(graph_group, _path.EDGES)
+        _validate_edges_group(edges_group, metadata)
 
 
 # -----------------------------------------------------------------------------#
@@ -150,21 +185,20 @@ def _validate_props_group(
                 )
 
 
-def _validate_nodes_group(nodes_group: zarr.Group) -> None:
+def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> None:
     """Validate the structure of a nodes group in a GEFF zarr store."""
     node_ids = expect_array(nodes_group, _path.IDS, _path.NODES)
     id_len = node_ids.shape[0]
     node_props = expect_group(nodes_group, _path.PROPS, _path.NODES)
     _validate_props_group(node_props, id_len, "Node")
 
+    # Node properties metadata validation
+    if metadata.node_props_metadata is not None:
+        _validate_props_metadata(metadata.node_props_metadata, node_props, "Node")
 
-def _validate_edges_group(edges_group: Any) -> None:
+
+def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> None:
     """Validate the structure of an edges group in a GEFF zarr store."""
-    if not isinstance(edges_group, zarr.Group):
-        raise ValueError(
-            f"Graph group named {_path.EDGES!r} must be a zarr group. Got {type(edges_group)}"
-        )
-
     # Edges only require ids which contain nodes for each edge
     edges_ids = expect_array(edges_group, _path.IDS, _path.EDGES)
     if edges_ids.shape[-1] != 2:
@@ -182,6 +216,9 @@ def _validate_edges_group(edges_group: Any) -> None:
             f"{_path.EDGES!r} group must contain a {_path.PROPS!r} group. Got {type(edge_props)}"
         )
     _validate_props_group(edge_props, edge_id_len, "Edge")
+    # Edge properties metadata validation
+    if metadata.edge_props_metadata is not None:
+        _validate_props_metadata(metadata.edge_props_metadata, edge_props, "Edge")
 
 
 def nx_is_equal(g1: nx.Graph, g2: nx.Graph) -> bool:

@@ -2,19 +2,24 @@ from __future__ import annotations
 
 import copy
 import warnings
+from collections.abc import Sequence  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
 import numpy as np
 import zarr
+from pydantic import validate_call
+from zarr.storage import StoreLike
 
 import geff
 from geff import utils
-from geff.metadata_schema import GeffMetadata
+from geff.metadata_schema import GeffMetadata, PropMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
 
     from zarr.storage import StoreLike
+
+    T = TypeVar("T")
 
 
 def get_graph_existing_metadata(
@@ -107,7 +112,45 @@ def create_or_update_metadata(
     return metadata
 
 
-T = TypeVar("T")
+@validate_call
+def create_or_update_props_metadata(
+    metadata: GeffMetadata,
+    props_md: Sequence[PropMetadata],
+    c_type: Literal["node", "edge"],
+) -> GeffMetadata:
+    """Create new props metadata or update existing metadata with new props metadata.
+
+    Args:
+        metadata (GeffMetadata): Existing metadata object
+        props_md (Sequence[PropMetadata]): The props metadata to add to the metadata.
+        c_type (Literal["node", "edge"]): The type of the props metadata.
+
+    Returns:
+        GeffMetadata object with updated props metadata.
+
+    Warning:
+        If a key in props_md already exists in the properties metadata, it will be overwritten.
+    """
+    metadata = copy.deepcopy(metadata)
+    md_dict = {prop.identifier: prop for prop in props_md}
+    match c_type:
+        case "node":
+            md_to_update = metadata.node_props_metadata
+        case "edge":
+            md_to_update = metadata.edge_props_metadata
+
+    if md_to_update is None:
+        md_to_update = md_dict
+    else:
+        md_to_update.update(md_dict)
+
+    match c_type:
+        case "node":
+            metadata.node_props_metadata = md_to_update
+        case "edge":
+            metadata.edge_props_metadata = md_to_update
+
+    return metadata
 
 
 def calculate_roi_from_nodes(
