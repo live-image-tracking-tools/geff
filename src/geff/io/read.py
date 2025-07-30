@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 # !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
 
 # import construct funcs only if relevant modules are installed
-
 rx_spec = find_spec("rustworkx")
 if rx_spec is not None:
     # ruff complains about redefining imports without this pattern
@@ -116,14 +115,14 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
             if construct_rx is None:
                 raise ImportError(
                     "rustworkx is not installed. To read a GEFF to the rustworkx backend please "
-                    "use `pip install 'geff[rx]'"
+                    "use `pip install 'geff[rx]'`"
                 )
             return construct_rx
         case SupportedBackend.SPATIAL_GRAPH:
             if construct_sg is None:
                 raise ImportError(
                     "spatial-graph is not installed. To read a GEFF to the spatial-graph backend "
-                    "please use `pip install 'geff[spatial-graph]'"
+                    "please use `pip install 'geff[spatial-graph]'`"
                 )
             return construct_sg
         # Add cases for new backends, remember to add overloads
