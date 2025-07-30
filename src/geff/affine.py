@@ -1,19 +1,68 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, Field, GetCoreSchemaHandler, model_validator
+from pydantic_core import core_schema
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from numpy.typing import NDArray
+    from numpy.typing import DTypeLike, NDArray
+
+
+def _validate_tform(val: Any) -> np.ndarray:
+    try:
+        arr = np.asarray(val, dtype=float)
+    except Exception as e:
+        raise ValueError(f"Matrix must be convertible to numpy array: {e}") from e
+
+    if arr.ndim != 2:
+        raise ValueError(f"Matrix must be 2D, got {arr.ndim}D")
+
+    nr, nc = arr.shape
+    if nr != nc:
+        raise ValueError(f"Matrix must be square, got shape {arr.shape}")
+    if nr < 2:
+        raise ValueError(
+            f"Matrix must be at least 2x2 for homogeneous coordinates, got {arr.shape}"
+        )
+
+    # Check that bottom row is [0, 0, ..., 1]
+    expected_bottom_row = [0.0] * (nc - 1) + [1.0]
+    if not np.allclose(arr[-1], expected_bottom_row):
+        raise ValueError(
+            f"Bottom row of homogeneous matrix must be {expected_bottom_row}, got {arr[-1]}"
+        )
+
+    return arr
+
+
+class TFormMeta:
+    """Pydantic-compatible 4x4 numpy array."""
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        list_of_float = core_schema.list_schema(core_schema.float_schema())
+        list_of_list_of_float = core_schema.list_schema(list_of_float)
+        return core_schema.no_info_before_validator_function(
+            _validate_tform,
+            core_schema.is_instance_schema(np.ndarray),
+            # this is the schema for the input (i.e. "validation" mode)
+            json_schema_input_schema=list_of_list_of_float,
+            # this is the schema for the output (i.e. "serialization" mode)
+            serialization=core_schema.plain_serializer_function_set_schema(
+                np.ndarray.tolist,
+                return_schema=list_of_list_of_float,
+            ),
+        )
 
 
 class Affine(BaseModel):
-    """
-    Affine transformation class following scipy conventions.
+    """Affine transformation matrix following scipy conventions.
 
     Internally stores transformations as homogeneous coordinate matrices (N+1, N+1).
     The transformation matrix follows scipy.ndimage.affine_transform convention
@@ -24,55 +73,31 @@ class Affine(BaseModel):
     where p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]
 
     Attributes:
-        matrix: Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)
+        matrix (np.ndarray) : square, homogeneous transformation matrix (ndim+1, ndim+1)
     """
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    matrix: Any = Field(
-        ..., description="Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)"
+    matrix: Annotated[np.ndarray, TFormMeta] = Field(
+        ...,
+        description="Homogeneous transformation matrix (ndim+1, ndim+1)",
     )
 
-    @model_validator(mode="after")
-    def validate_matrix(self) -> Affine:
-        """Validate that matrix is a proper homogeneous transformation matrix.
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_input(cls, v: Any) -> dict:
+        # if a numpy array or list is provided directly
+        # assign it to the matrix (as a convenience)
+        if isinstance(v, np.ndarray | list):
+            v = {"matrix": v}
+        return v
 
-        Converts to list of lists format.
-        """
-        # Convert input to numpy array for validation
-        try:
-            matrix_array = np.asarray(self.matrix, dtype=float)
-        except (ValueError, TypeError) as e:
-            raise ValueError(f"Matrix must be convertible to numpy array: {e}") from e
+    def __array__(self, dtype: DTypeLike | None = None) -> np.ndarray:
+        """Convert the transform to a numpy array."""
+        return self.matrix.astype(dtype)
 
-        if matrix_array.ndim != 2:
-            raise ValueError(f"Matrix must be 2D, got {matrix_array.ndim}D")
-
-        if matrix_array.shape[0] != matrix_array.shape[1]:
-            raise ValueError(f"Matrix must be square, got shape {matrix_array.shape}")
-
-        if matrix_array.shape[0] < 2:
-            raise ValueError(
-                f"Matrix must be at least 2x2 for homogeneous coordinates, got {matrix_array.shape}"
-            )
-
-        # Check that bottom row is [0, 0, ..., 1]
-        expected_bottom_row = np.zeros(matrix_array.shape[1])
-        expected_bottom_row[-1] = 1.0
-
-        if not np.allclose(matrix_array[-1, :], expected_bottom_row):
-            raise ValueError(
-                f"Bottom row of homogeneous matrix must be [0, 0, ..., 1], "
-                f"got {matrix_array[-1, :]}"
-            )
-
-        # Convert to list of lists for storage
-        self.matrix = matrix_array.tolist()
-        return self
-
-    def numpy(self) -> NDArray[np.floating]:
-        """Convert the stored list of lists matrix to numpy array."""
-        return np.array(self.matrix, dtype=float)
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, Affine):
+            return NotImplemented
+        return np.array_equal(self.matrix, value.matrix)
 
     @property
     def ndim(self) -> int:
@@ -82,14 +107,12 @@ class Affine(BaseModel):
     @property
     def linear_matrix(self) -> NDArray[np.floating]:
         """Extract the linear transformation part (ndim, ndim)."""
-        matrix_array = self.numpy()
-        return matrix_array[:-1, :-1].copy()
+        return self.matrix[:-1, :-1].copy()
 
     @property
     def offset(self) -> NDArray[np.floating]:
         """Extract the translation offset (ndim,)."""
-        matrix_array = self.numpy()
-        return matrix_array[:-1, -1].copy()
+        return self.matrix[:-1, -1].copy()
 
     def transform_points(self, points: NDArray[np.floating]) -> NDArray[np.floating]:
         """
@@ -118,8 +141,7 @@ class Affine(BaseModel):
         points_homo = np.concatenate([points_flat, ones], axis=1)
 
         # Transform using numpy conversion
-        matrix_array = self.numpy()
-        result_homo = (matrix_array @ points_homo.T).T
+        result_homo = (self.matrix @ points_homo.T).T
 
         # Extract non-homogeneous coordinates
         result = result_homo[:, :-1]

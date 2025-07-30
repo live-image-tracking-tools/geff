@@ -316,9 +316,6 @@ class TestAffineTransformation:
         with pytest.raises(
             ValueError, match="Affine transformation matrix must have 3 dimensions, got 2"
         ):
-            # Homogeneous matrix of a 2D affine transformation
-            matrix = np.diag([1.0, 1.0, 1.0])
-            affine = Affine(matrix=matrix)
             GeffMetadata(
                 geff_version="0.1.0",
                 directed=True,
@@ -327,7 +324,8 @@ class TestAffineTransformation:
                     {"name": "y", "type": "space", "unit": "micrometer"},
                     {"name": "z", "type": "space", "unit": "micrometer"},
                 ],
-                affine=affine,
+                # Homogeneous matrix of a 2D affine transformation
+                affine=np.eye(3),
             )
 
     def test_affine_serialization_with_metadata(self, tmp_path):
