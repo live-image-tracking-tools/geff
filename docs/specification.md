@@ -54,10 +54,15 @@ The `nodes\props` group is optional and will contain one or more `node property`
 
     When writing a graph with missing properties to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the property, in order to keep the indices aligned with the node ids. 
 
-### The `vlen_props` group and `node vlen property` groups
-The `nodes\vlen_props` group is optional and will contain one or more `node vlen property` groups, each with a `data` array, a `values` array and an optional `missing` array. These properties are stored as a list of arrays, where each element in the array can have a variable length. This is useful for properties that are not fixed-length, such as polygons or other complex shapes.
 
-The `nodes\vlen_props` is optional. If you do not have any node vlen properties, the `nodes\vlen_props` can be absent.
+#### Variable length properties
+While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have a property of a variable length. This is useful for properties that are not fixed-length, such as polygons or other complex shapes, as well as string properties.
+
+Variable length properties will have a `data` array in addition to the `values` and `missing` arrays. In addition, the "shape" value in the property metadata will contain the string literal "variable". For variable length properties, the `data` array will contain a 1D flattened array of the actual values for all the nodes, and the `values` array will contain the offset and shape of the relevant section of data in the `data` array. 
+
+![vlen properties overview](./assets/vlen_props.png)
+
+Note: The current specification does not support lists/arrays of strings stored as a single property.
 
 ## The `edges` group
 Similar to the `nodes` group, the `edges` group will contain an `ids` array and an optional `props` group.
@@ -68,21 +73,12 @@ Each row represents an edge between two nodes. For directed graphs, the first co
 Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.
 
 ### The `props` group and `edge property` groups
-The `edges\props` group will contain zero or more `edge property` groups, each with a `values` array and an optional `missing` array.
+The `edges\props` group will contain zero or more `edge property` groups, each with a `values` array and an optional `missing` array. Variable length edge properties operate the same as variable length node properties, with an additional `data` array that the `values` array refers to.
 
 - `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the `edges\ids` array, such that each row of the property `values` array stores the property for the edge at that index in the ids array.
 - The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A `1` at an index in the `missing` array indicates that the `value` of that property for the edge at that index is missing, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all edges have values for the property.
 
 The `edges/props` is optional. If you do not have any edge properties, the `edges\props` can be absent. 
-
-### The `vlen_props` group and `edge vlen property` groups
-The `edges\vlen_props` group is optional and will contain one or more `edge vlen property` groups, each with a `data` array, a `values` array and an optional `missing` array. These properties are stored as a list of arrays, where each element in the array can have a variable length. This is useful for properties that are not fixed-length.
-
-The `edges\vlen_props` is optional. If you do not have any edge vlen properties, the `edges\vlen_props` can be absent.
-
-## Variable-length (vlen) properties overview
-
-![vlen properties overview](./assets/vlen_props.png)
 
 ## Example file structure and metadata
 Here is a schematic of the expected file structure.
@@ -110,7 +106,6 @@ Here is a schematic of the expected file structure.
                 color/
                     values # shape: (N, 4) dtype: float16
                     missing # shape: (N,) dtype: bool
-            vlen_props/
                 polygon/
                     data # shape: (V, 2) dtype: any
                     values # shape: (N, 2) dtype: int64
