@@ -466,9 +466,6 @@ class TestAffineTransformation:
         with pytest.raises(
             ValueError, match="Affine transformation matrix must have 3 dimensions, got 2"
         ):
-            # Homogeneous matrix of a 2D affine transformation
-            matrix = np.diag([1.0, 1.0, 1.0])
-            affine = Affine(matrix=matrix)
             GeffMetadata(
                 geff_version="0.1.0",
                 directed=True,
@@ -477,7 +474,8 @@ class TestAffineTransformation:
                     {"name": "y", "type": "space", "unit": "micrometer"},
                     {"name": "z", "type": "space", "unit": "micrometer"},
                 ],
-                affine=affine,
+                # Homogeneous matrix of a 2D affine transformation
+                affine=np.eye(3),
             )
 
     def test_affine_serialization_with_metadata(self, tmp_path: Path) -> None:
@@ -540,13 +538,6 @@ def test_schema_and_round_trip() -> None:
     assert model2 == model
 
 
-pydantic_version = tuple(int(x) for x in pydantic.__version__.split(".")[:2])
-
-
-@pytest.mark.skipif(
-    pydantic_version < (2, 10),
-    reason="Schema output was different in pydantic < 2.10",
-)
 def test_schema_file_updated(pytestconfig: pytest.Config) -> None:
     """Ensure that geff-schema.json at the repo root is up to date.
 
