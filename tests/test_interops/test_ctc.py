@@ -1,15 +1,18 @@
-import itertools
+import pytest
+
+try:
+    import tifffile
+
+    from geff.interops import ctc_tiffs_to_zarr, from_ctc_to_geff
+except ImportError:
+    pytest.skip("geff[ctc] not installed", allow_module_level=True)
+
 from pathlib import Path
 
 import numpy as np
-import pytest
 import zarr
-from typer.testing import CliRunner
 
-from geff.interops.ctc import app, ctc_tiffs_to_zarr, from_ctc_to_geff
 from geff.networkx.io import read_nx
-
-tifffile = pytest.importorskip("tifffile")
 
 
 def create_mock_data(
@@ -58,13 +61,10 @@ def create_mock_data(
     return tmp_path
 
 
-@pytest.mark.parametrize(
-    "cli,is_gt,tczyx",
-    list(itertools.product([False, True], [True, False], [True, False])),
-)
+@pytest.mark.parametrize("is_gt", [True, False])
+@pytest.mark.parametrize("tczyx", [True, False])
 def test_ctc_to_geff(
     tmp_path: Path,
-    cli: bool,
     is_gt: bool,
     tczyx: bool,
 ) -> None:
@@ -72,31 +72,12 @@ def test_ctc_to_geff(
     geff_path = ctc_path / "little.geff"
     segm_path = ctc_path / "segm.zarr"
 
-    if cli:
-        cmd_args = [
-            str(ctc_path),
-            str(geff_path),
-            "--segm-path",
-            str(segm_path),
-            "--input-image-dir",
-            str(ctc_path),
-            "--output-image-path",
-            str(tmp_path / "output_image.zarr"),
-        ]
-        if tczyx:
-            cmd_args.append("--tczyx")
-        result = CliRunner().invoke(app, cmd_args)
-        assert result.exit_code == 0, (
-            f"{cmd_args} failed with exit code {result.exit_code} and "
-            f"message:\n{result.stdout}\n{result.stderr}"
-        )
-    else:
-        from_ctc_to_geff(
-            ctc_path=ctc_path,
-            geff_path=geff_path,
-            segmentation_store=segm_path,
-            tczyx=True,
-        )
+    from_ctc_to_geff(
+        ctc_path=ctc_path,
+        geff_path=geff_path,
+        segmentation_store=segm_path,
+        tczyx=True,
+    )
 
     assert geff_path.exists()
 

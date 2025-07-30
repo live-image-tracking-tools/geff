@@ -8,12 +8,8 @@ import geff
 
 try:
     import rustworkx as rx
-
-    HAS_RUSTWORKX = True
 except ImportError:
-    HAS_RUSTWORKX = False
-
-pytestmark = pytest.mark.skipif(not HAS_RUSTWORKX, reason="rustworkx not available")
+    pytest.skip("geff[rustworkx] not installed", allow_module_level=True)
 
 
 def create_rx_graph_sparse_node_props():

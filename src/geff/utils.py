@@ -76,7 +76,7 @@ def validate(store: StoreLike):
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    GeffMetadata.read(graph)
+    GeffMetadata.read(store)
 
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]

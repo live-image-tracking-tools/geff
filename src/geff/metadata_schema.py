@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-import json
 import warnings
 from collections.abc import Sequence  # noqa: TC003
 from importlib.metadata import version
-from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
 from pydantic import BaseModel, Field, model_validator
 from pydantic.config import ConfigDict
+from zarr.storage import StoreLike
+
+if TYPE_CHECKING:
+    from zarr.storage import StoreLike
 
 from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
 from .units import (
@@ -135,6 +137,49 @@ class DisplayHint(BaseModel):
     )
 
 
+class PropMetadata(BaseModel):
+    """Metadata describing a property in the geff graph."""
+
+    identifier: str
+    dtype: str  # TODO: investigate how other packages deal with data types
+    encoding: str | None = None
+    unit: str | None = None
+    name: str | None = None
+    description: str | None = None
+
+    @model_validator(mode="after")
+    def _validate_model(self) -> PropMetadata:
+        if not self.identifier:
+            raise ValueError("Property identifier cannot be an empty string.")
+        if not self.dtype:
+            raise ValueError("Property dtype cannot be an empty string.")
+        return self
+
+
+def validate_props_metadata(
+    props_metadata: dict[str, PropMetadata],
+    c_type: Literal["node", "edge", "tracklet", "lineage"],
+) -> None:
+    """Check that the keys in the property metadata dictionary match the identifiers
+    in the PropMetadata objects.
+
+    Args:
+        props_metadata (dict[str, PropMetadata]): The property metadata dictionary
+            where keys are property identifiers and values are PropMetadata objects.
+        c_type (Literal["node", "edge", "tracklet", "lineage"]): The type of component
+            to which the property belongs.
+
+    Raises:
+        ValueError: If the key does not match the identifier.
+    """
+    for key, prop_md in props_metadata.items():
+        if key != prop_md.identifier:
+            raise ValueError(
+                f"{c_type.capitalize()} property key '{key}' does not match "
+                f"identifier {prop_md.identifier}"
+            )
+
+
 class RelatedObject(BaseModel):
     type: str = Field(
         ...,
@@ -208,6 +253,22 @@ class GeffMetadata(BaseModel):
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
+
+    node_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for node properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+    edge_props_metadata: dict[str, PropMetadata] | None = Field(
+        None,
+        description=(
+            "Metadata for edge properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+
     sphere: str | None = Field(
         None,
         title="Node property: Detections as spheres",
@@ -337,32 +398,44 @@ class GeffMetadata(BaseModel):
                     f"Display hint display_depth name {self.display_hints.display_depth} "
                     f"not found in axes {ax_names}"
                 )
+
+        # Property metadata validation
+        if self.node_props_metadata is not None:
+            validate_props_metadata(self.node_props_metadata, "node")
+        if self.edge_props_metadata is not None:
+            validate_props_metadata(self.edge_props_metadata, "edge")
+
         return self
 
-    def write(self, group: zarr.Group | Path | str):
-        """Helper function to write GeffMetadata into the zarr geff group.
+    def write(self, store: StoreLike):
+        """Helper function to write GeffMetadata into the group of a zarr geff store.
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
-            group (zarr.Group | Path): The geff group to write the metadata to
+            store (zarr store | Path | str): The geff store to write the metadata to
         """
-        if isinstance(group, Path | str):
-            group = zarr.open(group)
 
+        if isinstance(store, zarr.Group):
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+
+        group = zarr.open_group(store)
         group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
-    def read(cls, group: zarr.Group | Path) -> GeffMetadata:
+    def read(cls, store: StoreLike) -> GeffMetadata:
         """Helper function to read GeffMetadata from a zarr geff group.
 
         Args:
-            group (zarr.Group | Path): The zarr group containing the geff metadata
+            store (zarr store | Path | str): The geff store to read the metadata from
 
         Returns:
             GeffMetadata: The GeffMetadata object
         """
-        if isinstance(group, Path):
-            group = zarr.open(group)
+
+        if isinstance(store, zarr.Group):
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+
+        group = zarr.open_group(store)
 
         # Check if geff_version exists in zattrs
         if "geff" not in group.attrs:
@@ -377,14 +450,3 @@ class GeffMetadata(BaseModel):
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
-
-
-def write_metadata_schema(outpath: Path):
-    """Write the current geff metadata schema to a json file
-
-    Args:
-        outpath (Path): The file to write the schema to
-    """
-    metadata_schema = GeffSchema.model_json_schema()
-    with open(outpath, "w") as f:
-        f.write(json.dumps(metadata_schema, indent=2))

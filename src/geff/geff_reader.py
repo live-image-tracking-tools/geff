@@ -53,7 +53,7 @@ class GeffReader:
         if validate:
             utils.validate(source)
         self.group = zarr.open_group(source, mode="r")
-        self.metadata = GeffMetadata.read(self.group)
+        self.metadata = GeffMetadata.read(source)
         self.nodes = zarr.open_array(source, path="nodes/ids", mode="r")
         self.edges = zarr.open_array(source, path="edges/ids", mode="r")
         self.node_props: dict[str, PropDictZArray] = {}
@@ -119,8 +119,8 @@ class GeffReader:
 
     def build(
         self,
-        node_mask: NDArray[np.bool] | None = None,
-        edge_mask: NDArray[np.bool] | None = None,
+        node_mask: NDArray[bool] | None = None,
+        edge_mask: NDArray[bool] | None = None,
     ) -> InMemoryGeff:
         """
         Build an `InMemoryGeff` by loading the data from a GEFF zarr.
