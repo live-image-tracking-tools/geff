@@ -103,6 +103,32 @@ def validate(store: StoreLike):
                 f"Node property {prop} missing mask has length {missing_len}, which "
                 f"does not match id length {id_len}"
             )
+    if "vlen_props" in nodes.group_keys():
+        for vlen_props in nodes["vlen_props"].keys():
+            prop_group = nodes["vlen_props"][vlen_props]
+            assert "slices" in prop_group.array_keys(), (
+                f"node vlen property group {vlen_props} must have slices group"
+            )
+            prop_len = prop_group["slices"].shape[0]
+            assert prop_len == id_len, (
+                f"Node vlen property {vlen_props} slices has length {prop_len}, "
+                f"which does not match id length {id_len}"
+            )
+            assert "values" in prop_group.array_keys(), (
+                f"node vlen property group {vlen_props} must have values group"
+            )
+            values_len = prop_group["values"].shape[0]
+            max_slice = prop_group["slices"][:].max()
+            assert values_len == max_slice, (
+                f"Node vlen property {vlen_props} values has length {values_len}, "
+                f"which does not match max slice value {max_slice}"
+            )
+            if "missing" in prop_group.array_keys():
+                missing_len = prop_group["missing"].shape[0]
+                assert missing_len == id_len, (
+                    f"Node vlen property {vlen_props} missing mask has length "
+                    f"{missing_len}, which does not match id length {id_len}"
+                )
 
     # TODO: Do we want to prevent missing values on spatialtemporal properties
 
