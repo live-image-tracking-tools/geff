@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
+import numpy as np
 import zarr
 
 if TYPE_CHECKING:
@@ -51,6 +52,35 @@ def remove_tilde(store: StoreLike) -> StoreLike:
     return store
 
 
+def validate_props_metadata(props_metadata_dict, component_group, component_type):
+    """Validate that properties described in metadata are compatible with the data in zarr arrays.
+
+    Args:
+        props_metadata_dict (dict): Dictionary of property metadata with identifier keys
+            and PropMetadata values
+        component_group: Zarr group containing the component data (nodes or edges)
+        component_type (str): Component type for error messages ("Node" or "Edge")
+
+    Raises:
+        AssertionError: If properties in metadata don't match zarr arrays
+    """
+    id_dtype_map = {
+        prop.identifier: np.dtype(prop.dtype).type for prop in props_metadata_dict.values()
+    }
+    for prop_id, prop_dtype in id_dtype_map.items():
+        # Properties described in metadata should be present in zarr arrays
+        assert prop_id in component_group["props"].keys(), (
+            f"{component_type} property {prop_id} described in metadata is not present "
+            f"in props arrays"
+        )
+        # dtype in metadata should match dtype in zarr arrays
+        array_dtype = component_group["props"][prop_id]["values"].dtype
+        assert array_dtype == prop_dtype, (
+            f"{component_type} property {prop_id} with dtype {array_dtype} does not match "
+            f"metadata dtype {prop_dtype}"
+        )
+
+
 def validate(store: StoreLike):
     """Check that the structure of the zarr conforms to geff specification
 
@@ -76,7 +106,7 @@ def validate(store: StoreLike):
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
-    GeffMetadata.read(store)
+    metadata = GeffMetadata.read(store)
 
     assert "nodes" in graph, "graph group must contain a nodes group"
     nodes = graph["nodes"]
@@ -103,6 +133,9 @@ def validate(store: StoreLike):
                 f"Node property {prop} missing mask has length {missing_len}, which "
                 f"does not match id length {id_len}"
             )
+    # Node properties metadata validation
+    if metadata.node_props_metadata is not None:
+        validate_props_metadata(metadata.node_props_metadata, nodes, "Node")
 
     # TODO: Do we want to prevent missing values on spatialtemporal properties
 
@@ -135,6 +168,10 @@ def validate(store: StoreLike):
                         f"Edge property {prop} missing mask has length {missing_len}, "
                         f"which does not match id length {edge_id_len}"
                     )
+
+        # Edge properties metadata validation
+        if metadata.edge_props_metadata is not None:
+            validate_props_metadata(metadata.edge_props_metadata, edges, "Edge")
 
 
 def nx_is_equal(g1: nx.Graph, g2: nx.Graph) -> bool:
