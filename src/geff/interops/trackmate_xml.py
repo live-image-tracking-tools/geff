@@ -4,11 +4,11 @@ import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import networkx as nx
 import typer
 import xmltodict
-from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
     import xml.etree.ElementTree as ET
@@ -527,9 +527,13 @@ def _get_trackmate_version(
             If the version cannot be found, "unknown" is returned.
     """
     with open(xml_path, "rb") as f:
-        it = ET.iterparse(f, tag="TrackMate", events=["start"])
+        it = ET.iterparse(f)
         for _, element in it:
-            return str(element.attrib["version"])
+            if element.tag == "TrackMate":
+                version = element.attrib.get("version")
+                return str(version) if version else "unknown"
+            else:
+                element.clear()
     return "unknown"
 
 
@@ -556,11 +560,15 @@ def _get_specific_tags(
         dictionary representing the XML structure of that tag.
     """
     with open(xml_path, "rb") as f:
-        it = ET.iterparse(f, tag=tag_names, events=["start", "end"])
+        it = ET.iterparse(f, events=["start", "end"])
         dict_tags = {}
         for event, element in it:
-            if event == "start":
-                dict_tags[element.tag] = xmltodict.parse(ET.tostring(element))
+            if event == "start" and element.tag in tag_names:
+                parsed = xmltodict.parse(ET.tostring(element))
+                # Extract the content from the wrapper dict created by xmltodict
+                content = parsed[element.tag]
+                # Handle empty tags that xmltodict parses as None
+                dict_tags[element.tag] = content if content is not None else {}
                 tag_names.remove(element.tag)
                 if not tag_names:
                     # All the tags have been found.
@@ -572,11 +580,11 @@ def _get_specific_tags(
     return dict_tags
 
 
-def _extract_image_path(settings_md: dict[str, dict[str, Any]]) -> str | None:
+def _extract_image_path(settings_md: dict[str, Any]) -> str | None:
     """Extract the image path from the TrackMate settings metadata.
 
     Args:
-        settings_md (dict[str, dict[str, Any]]): The settings metadata extracted from the XML file.
+        settings_md (dict[str, Any]): The settings metadata extracted from the XML file.
 
     Returns:
         str | None: The image path if found, otherwise None.
@@ -585,8 +593,7 @@ def _extract_image_path(settings_md: dict[str, dict[str, Any]]) -> str | None:
         UserWarning: If the 'Settings' or 'ImageData' tags are not found in the XML file,
             or if the image path cannot be constructed from the available data.
     """
-    settings = settings_md.get("Settings", None)
-    if settings is None:
+    if not settings_md:
         warnings.warn(
             (
                 "No 'Settings' tag found in the XML file. "
@@ -595,7 +602,7 @@ def _extract_image_path(settings_md: dict[str, dict[str, Any]]) -> str | None:
             stacklevel=2,
         )
         return None
-    image_data = settings.get("ImageData", None)
+    image_data = settings_md.get("ImageData", None)
     if image_data is None:
         warnings.warn(
             (
@@ -796,7 +803,7 @@ def _extract_props_metadata(xml_path: Path) -> dict[str, Any]:
             "No 'FeatureDeclarations' tag found in the XML file. Please check the XML file."
         )
 
-    xml_md = tags_data["FeatureDeclarations"].get("FeatureDeclarations", {})
+    xml_md = tags_data["FeatureDeclarations"]
     props_metadata = {}  # type: dict[str, Any]
 
     # Mapping from TrackMate feature types to GEFF property types

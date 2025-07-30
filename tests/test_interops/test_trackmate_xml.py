@@ -1,5 +1,6 @@
 import io
 from copy import deepcopy
+from pathlib import Path
 
 import networkx as nx
 import pytest
@@ -522,6 +523,71 @@ def test_get_filtered_tracks_ID():
         ),
     ):
         tm_xml._get_filtered_tracks_ID(it, element)
+
+
+def test_get_trackmate_version(tmp_path):
+    # Normal case with version attribute
+    xml_path = Path("tests/data/FakeTracks.xml")
+    obtained = tm_xml._get_trackmate_version(xml_path)
+    assert obtained == "8.0.0-SNAPSHOT-f411154ed1a4b9de350bbfe91c230cf3ae7639a3"
+
+    # Several attributes in TrackMate element
+    xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+        <TrackMate attr_before="before" version="1" other_attr="value" and_another="test">
+            <Log>Some log content</Log>
+        </TrackMate>
+    """
+    xml_file = tmp_path / "with_multiple_attributes.xml"
+    xml_file.write_text(xml_data, encoding="utf-8")
+    obtained = tm_xml._get_trackmate_version(xml_file)
+    assert obtained == "1"
+
+    # No version attribute - TrackMate element without version
+    xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+        <TrackMate>
+            <Log>Some log content</Log>
+        </TrackMate>
+    """
+    xml_file = tmp_path / "no_version.xml"
+    xml_file.write_text(xml_data, encoding="utf-8")
+    obtained = tm_xml._get_trackmate_version(xml_file)
+    assert obtained == "unknown"
+
+    # No TrackMate element at all
+    xml_data = """<?xml version="1.0" encoding="UTF-8"?>
+        <SomeOtherRoot>
+            <Data>content</Data>
+        </SomeOtherRoot>
+    """
+    xml_file = tmp_path / "no_trackmate.xml"
+    xml_file.write_text(xml_data, encoding="utf-8")
+    obtained = tm_xml._get_trackmate_version(xml_file)
+    assert obtained == "unknown"
+
+
+def test_get_specific_tags():
+    xml_path = Path("tests/data/FakeTracks.xml")
+    tag_names = [
+        "FeaturePenalties",  # empty element
+        "GUIState",  # simple element with attrib
+        "TrackFilterCollection",  # nested elements with attribs
+    ]
+    obtained = tm_xml._get_specific_tags(xml_path, tag_names)
+    expected = {
+        "FeaturePenalties": {},
+        "GUIState": {"@state": "ConfigureViews"},
+        "TrackFilterCollection": {
+            "Filter": [
+                {"@feature": "TRACK_START", "@value": "77.9607843137255", "@isabove": "false"},
+                {
+                    "@feature": "TOTAL_DISTANCE_TRAVELED",
+                    "@value": "20.75402586236767",
+                    "@isabove": "true",
+                },
+            ]
+        },
+    }
+    assert obtained == expected
 
 
 def test_from_trackmate_xml_to_geff(tmp_path):
