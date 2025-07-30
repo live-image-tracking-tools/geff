@@ -8,7 +8,7 @@ from zarr.storage import StoreLike
 from geff.utils import remove_tilde
 
 from .metadata_schema import GeffMetadata
-from .units import validate_data_type
+from .valid_values import validate_data_type
 
 
 def write_arrays(

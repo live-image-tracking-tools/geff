@@ -6,7 +6,7 @@ from importlib.metadata import version
 from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, validate_call
 from pydantic.config import ConfigDict
 from zarr.storage import StoreLike
 
@@ -14,12 +14,16 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
 from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
-from .units import (
+from .valid_values import (
+    ALLOWED_DTYPES,
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
+    VALID_STR_ENCODINGS,
     VALID_TIME_UNITS,
     validate_axis_type,
+    validate_data_type,
     validate_space_unit,
+    validate_str_encoding,
     validate_time_unit,
 )
 
@@ -140,12 +144,40 @@ class DisplayHint(BaseModel):
 class PropMetadata(BaseModel):
     """Metadata describing a property in the geff graph."""
 
-    identifier: str
-    dtype: str  # TODO: investigate how other packages deal with data types
-    encoding: str | None = None
-    unit: str | None = None
-    name: str | None = None
-    description: str | None = None
+    identifier: str = Field(
+        ...,
+        description=(
+            "Identifier of the property. Must be unique within its own component "
+            "subgroup (nodes or edges). Must be a non-empty string."
+        ),
+    )
+    dtype: str = Field(
+        ...,
+        description=(
+            "Data type of the property. Must be a non-empty string. "
+            "Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. "
+            "Examples of invalid values: 'integer', 'np.int16', 'number', 'string'."
+        ),
+    )
+    encoding: str | None = Field(
+        None,
+        description=(
+            "Optional encoding when the property is stored as a string. For example, "
+            "but not limited to, 'utf-8' or 'ascii'."
+        ),
+    )
+    unit: str | None = Field(
+        None,
+        description=("Optional unit of the property."),
+    )
+    name: str | None = Field(
+        None,
+        description=("Optional human friendly name of the property"),
+    )
+    description: str | None = Field(
+        None,
+        description=("Optional description of the property."),
+    )
 
     @model_validator(mode="after")
     def _validate_model(self) -> PropMetadata:
@@ -153,10 +185,29 @@ class PropMetadata(BaseModel):
             raise ValueError("Property identifier cannot be an empty string.")
         if not self.dtype:
             raise ValueError("Property dtype cannot be an empty string.")
+
+        try:
+            dtype_is_valid = validate_data_type(self.dtype)
+        except TypeError:
+            dtype_is_valid = False
+        if not dtype_is_valid:
+            warnings.warn(
+                f"Data type {self.dtype} cannot be matched to a valid data type {ALLOWED_DTYPES}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+        if self.encoding is not None and not validate_str_encoding(self.encoding):
+            warnings.warn(
+                f"Encoding {self.encoding} not in valid encodings {VALID_STR_ENCODINGS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+
         return self
 
 
-def validate_props_metadata(
+@validate_call
+def validate_key_identifier_equality(
     props_metadata: dict[str, PropMetadata],
     c_type: Literal["node", "edge", "tracklet", "lineage"],
 ) -> None:
@@ -401,9 +452,9 @@ class GeffMetadata(BaseModel):
 
         # Property metadata validation
         if self.node_props_metadata is not None:
-            validate_props_metadata(self.node_props_metadata, "node")
+            validate_key_identifier_equality(self.node_props_metadata, "node")
         if self.edge_props_metadata is not None:
-            validate_props_metadata(self.edge_props_metadata, "edge")
+            validate_key_identifier_equality(self.edge_props_metadata, "edge")
 
         return self
 
