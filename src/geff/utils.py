@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -77,16 +76,17 @@ def encode_string_data(data: PropDictNpArray, encoding: str = "utf-8") -> VarLen
     missing = data["missing"]
     if not str_values.dtype.kind == "U":
         raise TypeError("Cannot encode non-string array")
+    # TODO: Warn here or outside? Or no warn because it's now expected?
+    # warnings.warn(
+    #     f"Property '{data}' is a string array. Automatically casting it to bytes",
+    #     stacklevel=2,
+    # )
 
-    warnings.warn(
-        f"Property '{data}' is a string array. Automatically casting it to bytes",
-        stacklevel=2,
-    )
-    data = np.array([str(row).encode(encoding) for row in data], dtype="S")
+    encoded_data = np.array("".join([str(row) for row in str_values]).encode(encoding))
     shapes = np.asarray(tuple(len(s) for s in str_values), dtype=np.int64)
     offsets = np.concatenate(([0], np.cumsum(shapes[:-1])))
     new_values = np.vstack((offsets, shapes)).T
-    return {"values": new_values, "missing": missing, "data": data}
+    return {"values": new_values, "missing": missing, "data": encoded_data}
 
 
 def decode_string_data(data: VarLenPropDictNpArray, encoding: str = "utf-8") -> PropDictNpArray:
@@ -112,7 +112,7 @@ def decode_string_data(data: VarLenPropDictNpArray, encoding: str = "utf-8") -> 
     offset_shape = data["values"]
     missing = data["missing"]
     str_values = []
-    for i in range(offset_shape):
+    for i in range(len(offset_shape)):
         offset = offset_shape[i][0]
         shape = offset_shape[i][1:]
         size = shape.prod()
