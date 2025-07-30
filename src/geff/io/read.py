@@ -2,24 +2,24 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
 
-import networkx as nx
-from numpy.typing import NDArray
-from zarr.storage import StoreLike
-
 from geff.geff_reader import read_to_memory
-from geff.metadata_schema import GeffMetadata
 from geff.networkx.io import construct_nx
 from geff.rustworkx.io import construct_rx
 from geff.spatial_graph.io import construct_sg
-from geff.typing import InMemoryGeff, PropDictNpArray
 
 from .supported_backends import SupportedBackend
 
 R = TypeVar("R", covariant=True)
 
 if TYPE_CHECKING:
+    import networkx as nx
     import rustworkx as rx
     import spatial_graph as sg
+    from numpy.typing import NDArray
+    from zarr.storage import StoreLike
+
+    from geff.metadata_schema import GeffMetadata
+    from geff.typing import InMemoryGeff, PropDictNpArray
 
 # !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
 
@@ -111,7 +111,6 @@ def read(
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
     backend: Literal[SupportedBackend.NETWORKX] = SupportedBackend.NETWORKX,
-    backend_kwargs: dict[str, Any] | None = None,
 ) -> tuple[nx.Graph | nx.DiGraph, GeffMetadata]: ...
 
 
@@ -122,8 +121,7 @@ def read(
     node_props: list[str] | None,
     edge_props: list[str] | None,
     backend: Literal[SupportedBackend.RUSTWORKX],
-    backend_kwargs: dict[str, Any] | None = None,
-) -> tuple[rx.PyGraph, rx.PyDiGraph, GeffMetadata]: ...
+) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]: ...
 
 
 @overload
@@ -133,7 +131,8 @@ def read(
     node_props: list[str] | None,
     edge_props: list[str] | None,
     backend: Literal[SupportedBackend.SPATIAL_GRAPH],
-    backend_kwargs: dict[str, Any] | None = None,
+    *,
+    position_attr: str = "position",
 ) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]: ...
 
 
@@ -148,7 +147,7 @@ def read(
         SupportedBackend.RUSTWORKX,
         SupportedBackend.SPATIAL_GRAPH,
     ] = SupportedBackend.NETWORKX,
-    backend_kwargs: dict[str, Any] | None = None,
+    **backend_kwargs: Any,
 ) -> tuple[Any, GeffMetadata]:
     """
     Read a GEFF to a chosen backend.
@@ -164,14 +163,12 @@ def read(
         edge_props (list of str, optional): The names of the edge properties to load,
             if None all properties will be loaded, defaults to None.
         backend (SupportedBackend): Flag for the chosen backend, default is "networkx".
-        backend_kwargs (dict of {str: Any}): Additional kwargs that may be accepted by
+        backend_kwargs (Any): Additional kwargs that may be accepted by
             the backend when reading the data.
 
     Returns:
         tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
     """
     construct_func = get_construct_func(backend)
-    if backend_kwargs is None:
-        backend_kwargs = {}
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
     return construct_func(**in_memory_geff, **backend_kwargs), in_memory_geff["metadata"]
