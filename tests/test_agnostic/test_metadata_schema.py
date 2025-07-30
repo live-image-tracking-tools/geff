@@ -392,8 +392,8 @@ pydantic_version = tuple(int(x) for x in pydantic.__version__.split(".")[:2])
 
 
 @pytest.mark.skipif(
-    pydantic_version < (2, 10),
-    reason="Schema output was different in pydantic < 2.10",
+    pydantic_version < (2, 11),
+    reason="Schema generation requires pydantic >= 2.11",
 )
 def test_schema_file_updated(pytestconfig: pytest.Config) -> None:
     """Ensure that geff-schema.json at the repo root is up to date.

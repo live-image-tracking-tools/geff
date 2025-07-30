@@ -3,13 +3,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any
 
 import numpy as np
-from pydantic import BaseModel, Field, GetCoreSchemaHandler, model_validator
+from pydantic import BaseModel, Field, GetCoreSchemaHandler, model_validator, version
 from pydantic_core import core_schema
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from numpy.typing import DTypeLike, NDArray
+
+
+PYDANTIC_211 = tuple(int(x) for x in version.VERSION.split(".")[:2]) >= (2, 11)
 
 
 def _validate_tform(val: Any) -> np.ndarray:
@@ -48,16 +51,23 @@ class TFormMeta:
     ) -> core_schema.CoreSchema:
         list_of_float = core_schema.list_schema(core_schema.float_schema())
         list_of_list_of_float = core_schema.list_schema(list_of_float)
+
+        if PYDANTIC_211:
+            # this is the schema for the input (i.e. "validation" mode)
+            # only available in Pydantic 2.11+
+            kwargs = {"json_schema_input_schema": list_of_list_of_float}
+        else:
+            kwargs = {}
+
         return core_schema.no_info_before_validator_function(
             _validate_tform,
             core_schema.is_instance_schema(np.ndarray),
-            # this is the schema for the input (i.e. "validation" mode)
-            json_schema_input_schema=list_of_list_of_float,
             # this is the schema for the output (i.e. "serialization" mode)
             serialization=core_schema.plain_serializer_function_ser_schema(
                 np.ndarray.tolist,
                 return_schema=list_of_list_of_float,
             ),
+            **kwargs,  # type: ignore[arg-type]
         )
 
 
