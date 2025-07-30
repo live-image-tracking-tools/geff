@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 from urllib.parse import urlparse
 
-from .metadata_schema import GeffMetadata
+from .metadata_schema import GeffMetadata, PropMetadata
 
 
 def is_remote_url(path: str) -> bool:
@@ -57,34 +57,40 @@ def remove_tilde(store: StoreLike) -> StoreLike:
 
 
 def _validate_props_metadata(
-    props_metadata_dict: Mapping, props_group: zarr.Group, component_type: str
+    props_metadata_dict: Mapping[str, PropMetadata],
+    component_props: zarr.Group,
+    component_type: str,
 ) -> None:
     """Validate that properties described in metadata are compatible with the data in zarr arrays.
 
     Args:
         props_metadata_dict (dict): Dictionary of property metadata with identifier keys
             and PropMetadata values
-        props_group (zarr.Group): Zarr group containing the component properties (nodes or edges)
+        component_props (zarr.Group): Zarr group containing the component properties (nodes
+            or edges)
         component_type (str): Component type for error messages ("Node" or "Edge")
 
     Raises:
         AssertionError: If properties in metadata don't match zarr arrays
     """
-    id_dtype_map = {
-        prop.identifier: np.dtype(prop.dtype).type for prop in props_metadata_dict.values()
-    }
-    for prop_id, prop_dtype in id_dtype_map.items():
+    for prop in props_metadata_dict.values():
+        prop_id = prop.identifier
         # Properties described in metadata should be present in zarr arrays
-        assert prop_id in props_group.keys(), (
-            f"{component_type} property {prop_id} described in metadata is not present "
-            f"in props arrays"
-        )
+        if not isinstance(props_group := component_props.get(prop_id), zarr.Group):
+            raise ValueError(
+                f"{component_type} property {prop_id} described in metadata is not present "
+                f"in props arrays"
+            )
+
         # dtype in metadata should match dtype in zarr arrays
-        array_dtype = props_group[prop_id][_path.VALUES].dtype  # type: ignore
-        assert array_dtype == prop_dtype, (
-            f"{component_type} property {prop_id} with dtype {array_dtype} does not match "
-            f"metadata dtype {prop_dtype}"
-        )
+        values_array = expect_array(props_group, _path.VALUES, component_type)
+        array_dtype = values_array.dtype
+        prop_dtype = np.dtype(prop.dtype).type
+        if array_dtype != prop_dtype:
+            raise ValueError(
+                f"{component_type} property {prop_id} with dtype {array_dtype} does not match "
+                f"metadata dtype {prop_dtype}"
+            )
 
 
 def validate(store: StoreLike) -> None:

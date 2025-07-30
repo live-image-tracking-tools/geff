@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import warnings
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 import zarr
-from pydantic import BaseModel, Field, model_validator, validate_call
+from annotated_types import MinLen
+from pydantic import BaseModel, Field, field_validator, model_validator, validate_call
 from pydantic.config import ConfigDict
 from zarr.storage import StoreLike
 
@@ -134,28 +135,34 @@ class DisplayHint(BaseModel):
     """Metadata indicating how spatiotemporal axes are displayed by a viewer"""
 
     display_horizontal: str = Field(
-        ..., description="Which spatial axis to use for horizontal display"
+        ...,
+        description="Which spatial axis to use for horizontal display",
     )
-    display_vertical: str = Field(..., description="Which spatial axis to use for vertical display")
+    display_vertical: str = Field(
+        ...,
+        description="Which spatial axis to use for vertical display",
+    )
     display_depth: str | None = Field(
-        None, description="Optional, which spatial axis to use for depth display"
+        default=None,
+        description="Optional, which spatial axis to use for depth display",
     )
     display_time: str | None = Field(
-        None, description="Optional, which temporal axis to use for time"
+        None,
+        description="Optional, which temporal axis to use for time",
     )
 
 
 class PropMetadata(BaseModel):
     """Metadata describing a property in the geff graph."""
 
-    identifier: str = Field(
+    identifier: Annotated[str, MinLen(1)] = Field(
         ...,
         description=(
             "Identifier of the property. Must be unique within its own component "
             "subgroup (nodes or edges). Must be a non-empty string."
         ),
     )
-    dtype: str = Field(
+    dtype: Annotated[str, MinLen(1)] = Field(
         ...,
         description=(
             "Data type of the property. Must be a non-empty string. "
@@ -175,7 +182,7 @@ class PropMetadata(BaseModel):
         description=("Optional unit of the property."),
     )
     name: str | None = Field(
-        None,
+        default=None,
         description=("Optional human friendly name of the property"),
     )
     description: str | None = Field(
@@ -183,31 +190,29 @@ class PropMetadata(BaseModel):
         description=("Optional description of the property."),
     )
 
-    @model_validator(mode="after")
-    def _validate_model(self) -> PropMetadata:
-        if not self.identifier:
-            raise ValueError("Property identifier cannot be an empty string.")
-        if not self.dtype:
-            raise ValueError("Property dtype cannot be an empty string.")
-
+    @field_validator("dtype", mode="after")
+    @classmethod
+    def _validate_dtype(cls, value: str) -> str:
         try:
-            dtype_is_valid = validate_data_type(self.dtype)
+            validate_data_type(value)
         except TypeError:
-            dtype_is_valid = False
-        if not dtype_is_valid:
             warnings.warn(
-                f"Data type {self.dtype} cannot be matched to a valid data type {ALLOWED_DTYPES}. "
+                f"Data type {value} cannot be matched to a valid data type {ALLOWED_DTYPES}. "
                 "Reader applications may not know what to do with this information.",
                 stacklevel=2,
             )
-        if self.encoding is not None and not validate_str_encoding(self.encoding):
-            warnings.warn(
-                f"Encoding {self.encoding} not in valid encodings {VALID_STR_ENCODINGS}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
+        return value
 
-        return self
+    @field_validator("encoding", mode="after")
+    @classmethod
+    def _validate_encoding(cls, value: str | None) -> str | None:
+        if value is not None and not validate_str_encoding(value):
+            warnings.warn(
+                f"Encoding {value} not in valid encodings {VALID_STR_ENCODINGS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+        return value
 
 
 @validate_call
@@ -254,7 +259,7 @@ class RelatedObject(BaseModel):
         ),
     )
     label_prop: str | None = Field(
-        None,
+        default=None,
         description=(
             "Property name for label objects. This is the node property that will be used "
             "to identify the labels in the related object. "
