@@ -182,8 +182,8 @@ def test_validate(tmp_path):
     with pytest.raises(
         AssertionError,
         match=(
-            "Edge property prop3 with dtype float32 does not match "
-            "metadata dtype <class 'numpy.bool'>"
+            r"Edge property prop3 with dtype float32 does not match "
+            r"metadata dtype <class 'numpy.bool_*'>"
         ),
     ):
         validate(zpath)
