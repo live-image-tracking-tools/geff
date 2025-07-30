@@ -7,6 +7,7 @@ import rustworkx as rx
 import spatial_graph as sg
 from numpy.typing import NDArray
 
+from geff import GeffMetadata
 from geff.io import SupportedBackend, read
 from geff.testing.data import create_memory_mock_geff
 
@@ -29,6 +30,8 @@ def is_expected_type(graph, backend: SupportedBackend):
             return isinstance(graph, nx.Graph | nx.DiGraph)
         case SupportedBackend.RUSTWORKX:
             return isinstance(graph, rx.PyGraph | rx.PyDiGraph)
+        case SupportedBackend.SPATIAL_GRAPH:
+            return isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph)
         case _:
             raise TypeError(
                 f"No `is_expected_type` code path has been defined for backend '{backend.value}'."
@@ -52,19 +55,27 @@ def get_edges(graph) -> set[tuple[Any, Any]]:
     elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
         return set(graph.edge_list())
     elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
-        return set(graph.edges)
+        return {tuple(edge.tolist()) for edge in graph.edges}
     else:
         raise TypeError(f"No `get_edges` code path has been defined for type '{type(graph)}'.")
 
 
-def get_node_prop(graph, name: str, nodes: list[Any]) -> NDArray[Any]:
+def get_node_prop(graph, name: str, nodes: list[Any], metadata: GeffMetadata) -> NDArray[Any]:
     if isinstance(graph, (nx.Graph | nx.DiGraph)):
         prop = [graph.nodes[node][name] for node in nodes]
         return np.array(prop)
     elif isinstance(graph, rx.PyGraph | rx.PyDiGraph):
         return np.array([graph[node][name] for node in nodes])
     elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
-        return graph.node_attrs[name][nodes]
+        axes = metadata.axes
+        if axes is None:
+            raise ValueError("No axes found for spatial props")
+        axes_names = [ax.name for ax in axes]
+        if name in axes_names:
+            return sg_get_node_spatial_props(graph, name, nodes, axes_names)
+        else:
+            # TODO: is this the best way to access node attributes?
+            return getattr(graph.node_attrs[nodes], name)
     else:
         raise TypeError(f"No `get_node_prop` code path has been defined for type '{type(graph)}'.")
 
@@ -77,9 +88,23 @@ def get_edge_prop(graph, name: str, edges: list[Any]) -> NDArray[Any]:
         # return np.array([graph[edge][name] for edge in edges])
         return np.array([graph.get_edge_data(*edge)[name] for edge in edges])
     elif isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph):
-        return graph.edge_attrs[name][edges]
+        # TODO: is this the best way to access edge attributes?
+        return getattr(graph.edge_attrs[edges], name)
     else:
         raise TypeError(f"No `get_edge_prop` code path has been defined for type '{type(graph)}'.")
+
+
+# This is not the most elegant solution but the idea is:
+#   spatial graph takes the spatial properties defined in axes and combines them into a single attr
+#   so to compare with the results we need to index each position separately
+def sg_get_node_spatial_props(
+    graph: sg.SpatialGraph | sg.SpatialDiGraph, name: str, nodes: list[Any], axes_names: list[str]
+):
+    if name not in axes_names:
+        raise ValueError(f"Node property '{name}' not found in axes names {axes_names}")
+    idx = axes_names.index(name)
+    position = getattr(graph.node_attrs[nodes], graph.position_attr)
+    return position[:, idx]
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
@@ -123,11 +148,12 @@ def test_read(
         spatial_node_properties.append("z")
     for name in spatial_node_properties:
         np.testing.assert_array_equal(
-            get_node_prop(graph, name, graph_props["nodes"].tolist()), graph_props[name]
+            get_node_prop(graph, name, graph_props["nodes"].tolist(), metadata=metadata),
+            graph_props[name],
         )
     for name, values in graph_props["extra_node_props"].items():
         np.testing.assert_array_equal(
-            get_node_prop(graph, name, graph_props["nodes"].tolist()), values
+            get_node_prop(graph, name, graph_props["nodes"].tolist(), metadata=metadata), values
         )
     # check edge properties are correct
     for name, values in graph_props["extra_edge_props"].items():
