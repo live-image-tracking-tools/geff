@@ -54,7 +54,7 @@ class TFormMeta:
             # this is the schema for the input (i.e. "validation" mode)
             json_schema_input_schema=list_of_list_of_float,
             # this is the schema for the output (i.e. "serialization" mode)
-            serialization=core_schema.plain_serializer_function_set_schema(
+            serialization=core_schema.plain_serializer_function_ser_schema(
                 np.ndarray.tolist,
                 return_schema=list_of_list_of_float,
             ),
