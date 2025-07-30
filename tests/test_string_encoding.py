@@ -18,7 +18,8 @@ def test_encode_decode(values, missing):
     orig_props = {"values": values, "missing": missing}
     new_props = encode_string_data(orig_props)
 
-    expected_encoding = b"himynameis"
+    expected_encoding = np.array(b"himynameis")
+    assert isinstance(new_props["data"], np.ndarray)
     assert_array_equal(expected_encoding, new_props["data"])
     expected_values = [[0, 2], [2, 2], [4, 4], [8, 2]]
     assert_array_equal(expected_values, new_props["values"])

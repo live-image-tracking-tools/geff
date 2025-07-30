@@ -56,9 +56,9 @@ The `nodes\props` group is optional and will contain one or more `node property`
 
 
 #### Variable length properties
-While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have a property of a variable length. This is useful for properties that are not fixed-length, such as polygons or other complex shapes, as well as string properties.
+While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have a property of a variable length. This is useful for properties that are not fixed-length, such as polygons or other complex shapes, as well as string properties. 
 
-Variable length properties will have a `data` array in addition to the `values` and `missing` arrays. In addition, the "shape" value in the property metadata will contain the string literal "variable". For variable length properties, the `data` array will contain a 1D flattened array of the actual values for all the nodes, and the `values` array will contain the offset and shape of the relevant section of data in the `data` array. 
+Variable length properties will have a `data` array in addition to the `values` and `missing` arrays. In addition, the "shape" value in the property metadata will contain the string literal "variable". For variable length properties, the `data` array will contain a 1D flattened array of the actual values for all the nodes. The `values` array will contain the offset and shape of the relevant section of data in the `data` array. String `data` contains the bytes encoded with `utf-8`, and the offset and shape contained in the `values` array refer to the un-encoded string characters.
 
 ![vlen properties overview](./assets/vlen_props.png)
 
