@@ -3,7 +3,6 @@ from __future__ import annotations
 from importlib.util import find_spec
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
 
-import geff
 from geff.geff_reader import read_to_memory
 from geff.networkx.io import construct_nx
 
@@ -27,12 +26,17 @@ if TYPE_CHECKING:
 
 rx_spec = find_spec("rustworkx")
 if rx_spec is not None:
-    construct_rx: ConstructFunc | None = geff.rustworkx.io.construct_rx
+    # ruff complains about redefining imports without this pattern
+    import geff.rustworkx.io as rx_io
+
+    construct_rx: ConstructFunc | None = rx_io.construct_rx
 else:
     construct_rx = None
 sg_spec = find_spec("spatial_graph")
 if sg_spec is not None:
-    construct_sg: ConstructFunc | None = geff.spatial_graph.io.construct_sg
+    import geff.spatial_graph.io as sg_io
+
+    construct_sg: ConstructFunc | None = sg_io.construct_sg
 else:
     construct_sg = None
 
