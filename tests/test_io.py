@@ -3,13 +3,14 @@ from typing import Any
 import networkx as nx
 import numpy as np
 import pytest
-import rustworkx as rx
-import spatial_graph as sg
 from numpy.typing import NDArray
 
 from geff import GeffMetadata
 from geff.io import SupportedBackend, read
 from geff.testing.data import create_memory_mock_geff
+
+rx = pytest.importorskip("rustworkx")
+sg = pytest.importorskip("spatial_graph")
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_axis_dtypes = [
