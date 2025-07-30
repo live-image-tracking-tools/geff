@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff.metadata_schema import GeffMetadata
-    from geff.typing import InMemoryGeff, PropDictNpArray
+    from geff.typing import PropDictNpArray
 
 # !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
 
@@ -95,7 +95,7 @@ def get_construct_func(
 @overload
 def get_construct_func(
     backend: Literal[SupportedBackend.SPATIAL_GRAPH],
-) -> ConstructFunc[InMemoryGeff]: ...
+) -> ConstructFunc[sg.SpatialGraph | sg.SpatialDiGraph]: ...
 
 
 def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
