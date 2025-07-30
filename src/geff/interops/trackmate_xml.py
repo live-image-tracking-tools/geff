@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import shutil
 import warnings
 from copy import deepcopy
@@ -882,6 +883,67 @@ def _build_geff_metadata(
     )
 
 
+def _check_component_props_consistency(
+    component_data: Iterator[dict[str, Any]],
+    metadata_dict: dict[str, Any],
+    component_type: str,
+) -> None:
+    """Check consistency between component data and metadata properties.
+
+    Args:
+        component_data: Iterator over component data dictionaries.
+        metadata_dict: Dictionary containing metadata for the component type.
+        component_type: Type of component ("node", "edge", or "lineage").
+
+    Note:
+        If any properties defined in the metadata are not present in the graph data,
+        they will be removed from the metadata and an info message will be logged.
+    """
+    removed_props = []
+    props = list(metadata_dict.keys())
+
+    for prop in props:
+        if not any(prop in data for data in component_data):
+            metadata_dict.pop(prop)
+            removed_props.append(prop)
+
+    if removed_props:
+        plural1 = "ies were" if len(removed_props) > 1 else "y was"
+        plural2 = "they are" if len(removed_props) > 1 else "it is"
+        logging.info(
+            f"The following {component_type} property{plural1} removed from the metadata "
+            f"because {plural2} not present in the data: {', '.join(removed_props)}."
+        )
+
+
+def _ensure_data_metadata_consistency(
+    graph: nx.DiGraph,
+    metadata: dict[str, Any],
+) -> None:
+    """Ensure that the graph data and metadata are consistent.
+
+    Geff specification requires that all metadata properties
+    defined in the GEFF file are present in the graph data.
+
+    Args:
+        graph (nx.DiGraph): The graph to check.
+        metadata (dict[str, Any]): The metadata to check and update.
+    """
+    # Nodes
+    _check_component_props_consistency(
+        component_data=(node_data for _, node_data in graph.nodes(data=True)),
+        metadata_dict=metadata.get("node_props_metadata", {}),
+        component_type="node",
+    )
+
+    # Edges
+    _check_component_props_consistency(
+        component_data=(edge_data for _, _, edge_data in graph.edges(data=True)),
+        metadata_dict=metadata.get("edge_props_metadata", {}),
+        component_type="edge",
+    )
+
+
 def from_trackmate_xml_to_geff(
     xml_path: Path | str,
     geff_path: Path | str,
@@ -918,6 +980,7 @@ def from_trackmate_xml_to_geff(
     tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
     img_path = _extract_image_path(tm_md.get("Settings", {}))
     props_metadata = _extract_props_metadata(xml_path)
+    _ensure_data_metadata_consistency(graph=graph, metadata=props_metadata)
     metadata = _build_geff_metadata(
         xml_path=xml_path,
         units=units,
