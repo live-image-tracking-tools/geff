@@ -145,13 +145,11 @@ def _get_attributes_metadata(
         event, element = next(it)  # Feature.
         while (event, element) != ("end", ancestor):
             if element.tag == "Feature" and event == "start":
-                # print(f"Feature found: {element.attrib.get('feature')}")
                 attrs = deepcopy(element.attrib)
                 attrs_md[attrs["feature"]] = attrs
                 attrs_md[attrs["feature"]].pop("feature", None)
             element.clear()
             event, element = next(it)
-    # print(f"Attributes metadata: {attrs_md}")
     return attrs_md
 
 
@@ -588,13 +586,10 @@ def _get_specific_tags(
         for event, element in it:
             if event == "start" and element.tag in tag_names:
                 parsed = xmltodict.parse(ET.tostring(element))
-                # Extract the content from the wrapper dict created by xmltodict
                 content = parsed[element.tag]
-                # Handle empty tags that xmltodict parses as None
                 dict_tags[element.tag] = content if content is not None else {}
                 tag_names.remove(element.tag)
                 if not tag_names:
-                    # All the tags have been found.
                     break
 
             if event == "end":
@@ -806,7 +801,6 @@ def _process_feature_metadata(
     Raises:
         ValueError: If the feature key is missing or duplicated.
     """
-    # print("feat_md", feat_md)
     key = _validate_feature_key(feat_md.get("@feature"), feat_type)
 
     if key in geff_dict:
@@ -819,11 +813,7 @@ def _process_feature_metadata(
         "name": _get_feature_name(feat_md, key, feat_type),
         "dtype": _get_feature_dtype(feat_md, feat_type),
         "unit": _get_feature_unit(feat_md, feat_type, units),
-        # Below fields are not present in GEFF metadata current specification.
-        # "shortname": _get_feature_shortname(feat_md, key, feat_type),
-        # "dimension": _get_feature_dimension(feat_md, feat_type),
     }
-    # print("geff_dict[key]", geff_dict[key])
 
 
 def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, Any]:
@@ -870,16 +860,13 @@ def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, 
     }
 
     for feat_type, feat_tag in xml_md.items():
-        # print("feat_type, feat_tag", feat_type, feat_tag)
         geff_field = mapping_feat_type[feat_type]
         for feats_md in feat_tag.values():
-            # print("feats_md", feats_md)
             if isinstance(feats_md, dict):
                 feats_md = [feats_md]
             for feat_md in feats_md:
                 _process_feature_metadata(feat_md, geff_field, feat_type, units)
 
-    # print("node_props_metadata", node_props_metadata)
     return props_metadata
 
 
@@ -1028,7 +1015,6 @@ def from_trackmate_xml_to_geff(
         discard_filtered_spots=discard_filtered_spots,
         discard_filtered_tracks=discard_filtered_tracks,
     )
-
     # Metadata
     tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
     img_path = _extract_image_path(tm_md.get("Settings", {}))
@@ -1041,7 +1027,6 @@ def from_trackmate_xml_to_geff(
         trackmate_metadata=tm_md,
         props_metadata=props_metadata,
     )
-
     # Create the GEFF :D
     write_nx(
         graph,
