@@ -10,5 +10,5 @@ class SupportedBackend(str, Enum):
     """
 
     NETWORKX = "networkx"
-    # GRAPH_DICT can be removed when another backend is added, it is currently needed for overloads
-    GRAPH_DICT = "graph_dict"
+    RUSTWORKX = "rustworkx"
+    SPATIAL_GRAPH = "spatial_graph"
