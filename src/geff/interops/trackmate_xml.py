@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 import networkx as nx
 import typer
-import xmltodict
 
 if TYPE_CHECKING:
     import xml.etree.ElementTree as ET
@@ -27,7 +26,6 @@ else:
         import xml.etree.ElementTree as ET
 
 from geff.metadata_schema import Axis, DisplayHint, GeffMetadata
-from geff.networkx.io import read_nx, write_nx
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
 # used in ctc_to_geff. Need to wait for CTC PR.
@@ -561,48 +559,45 @@ def _get_trackmate_version(
 def _get_specific_tags(
     xml_path: Path,
     tag_names: list[str],
-) -> dict[str, dict[str, Any]]:
+) -> dict[str, ET.Element]:
     """
-    Extract specific tags from an XML file and returns them in a dictionary.
+    Extract specific tags from an XML file and return them in a dictionary.
 
-    This function parses an XML file, searching for specific tag names
-    provided by the user. Once a tag is found, the children elements
-    are extracted and stored in a dictionary with the tag name as the key.
-    The search stops when all specified tags have been found
-    or when the end of the file is reached.
+    This function parses an XML file, searching for specific tag names.
+    Once a tag is found, the children elements are extracted and stored
+    in a dictionary with the tag name as the key. The search stops when
+    all specified tags have been found or when the end of the file is reached.
 
     Args:
     xml_path (Path): The file path of the XML file to be parsed.
     tag_names (list[str]): A list of tag names to search for in the XML file.
 
     Returns:
-        dict[str, dict[str, Any]]: A dictionary where each key is a tag name
-        that was found in the XML file, and the corresponding value is a nested
-        dictionary representing the XML structure of that tag.
+        dict[str, ET.Element]: A dictionary where each key is a tag name from
+        `tag_names` that was found in the XML file, and the corresponding value
+        is the deep copied `ET.Element` object for that tag.
     """
     with open(xml_path, "rb") as f:
         it = ET.iterparse(f, events=["start", "end"])
         dict_tags = {}
         for event, element in it:
             if event == "start" and element.tag in tag_names:
-                parsed = xmltodict.parse(ET.tostring(element))
-                content = parsed[element.tag]
-                dict_tags[element.tag] = content if content is not None else {}
+                dict_tags[element.tag] = deepcopy(element)
                 tag_names.remove(element.tag)
-                if not tag_names:
+                if not tag_names:  # All the tags have been found.
                     break
 
             if event == "end":
                 element.clear()
-
+    print(f"Extracted tags: {dict_tags.keys()}")
     return dict_tags
 
 
-def _extract_image_path(settings_md: dict[str, Any]) -> str | None:
+def _extract_image_path(settings_md: ET.Element | None) -> str | None:
     """Extract the image path from the TrackMate settings metadata.
 
     Args:
-        settings_md (dict[str, Any]): The settings metadata extracted from the XML file.
+        settings_md (ET.Element | None): The XML element containing the settings metadata.
 
     Returns:
         str | None: The image path if found, otherwise None.
@@ -611,7 +606,7 @@ def _extract_image_path(settings_md: dict[str, Any]) -> str | None:
         UserWarning: If the 'Settings' or 'ImageData' tags are not found in the XML file,
             or if the image path cannot be constructed from the available data.
     """
-    if not settings_md:
+    if settings_md is None:
         warnings.warn(
             (
                 "No 'Settings' tag found in the XML file. "
@@ -620,7 +615,7 @@ def _extract_image_path(settings_md: dict[str, Any]) -> str | None:
             stacklevel=2,
         )
         return None
-    image_data = settings_md.get("ImageData", None)
+    image_data = settings_md.find("ImageData")
     if image_data is None:
         warnings.warn(
             (
@@ -631,8 +626,8 @@ def _extract_image_path(settings_md: dict[str, Any]) -> str | None:
         )
         return None
 
-    filename = image_data.get("@filename", None)
-    folder = image_data.get("@folder", None)
+    filename = image_data.attrib["filename"]
+    folder = image_data.attrib["folder"]
     if not filename and not folder:
         warnings.warn(
             "No image path found in the XML file. The GEFF file will not point to a related image.",
@@ -677,18 +672,18 @@ def _validate_feature_key(key: str | None, feat_type: str) -> str:
     return key
 
 
-def _get_feature_name(feat_md: dict[str, Any], key: str, feat_type: str) -> str:
+def _get_feature_name(feat: ET.Element, key: str, feat_type: str) -> str:
     """Extract and validate the feature name, using key as fallback.
 
     Args:
-        feat_md: The feature metadata dictionary.
+        feat: The feature metadata element.
         key: The feature key to use as fallback.
         feat_type: The feature type for warning messages.
 
     Returns:
         The feature name.
     """
-    name = feat_md.get("@name")
+    name = feat.attrib["name"]
     if name is None:
         warnings.warn(
             f"Missing field 'name' in 'FeatureDeclarations' {feat_type} tag. "
@@ -699,54 +694,11 @@ def _get_feature_name(feat_md: dict[str, Any], key: str, feat_type: str) -> str:
     return name
 
 
-def _get_feature_shortname(feat_md: dict[str, Any], key: str, feat_type: str) -> str:
-    """Extract and validate the feature shortname, using key as fallback.
-
-    Args:
-        feat_md: The feature metadata dictionary.
-        key: The feature key to use as fallback.
-        feat_type: The feature type for warning messages.
-
-    Returns:
-        The feature shortname.
-    """
-    shortname = feat_md.get("@shortname")
-    if shortname is None:
-        warnings.warn(
-            f"Missing field 'shortname' in 'FeatureDeclarations' {feat_type} tag. "
-            "Using the feature identifier as shortname.",
-            stacklevel=3,
-        )
-        shortname = key
-    return shortname
-
-
-def _get_feature_dimension(feat_md: dict[str, Any], feat_type: str) -> str | None:
-    """Extract and process the feature dimension.
-
-    Args:
-        feat_md: The feature metadata dictionary.
-        feat_type: The feature type for warning messages.
-
-    Returns:
-        The feature dimension or None.
-    """
-    dimension = feat_md.get("@dimension")
-    if dimension is None:
-        warnings.warn(
-            f"Missing field 'dimension' in 'FeatureDeclarations' {feat_type} tag. "
-            "Using None as dimension.",
-            stacklevel=3,
-        )
-        return None
-    return None if dimension == "NONE" else dimension
-
-
-def _get_feature_dtype(feat_md: dict[str, Any], feat_type: str) -> str:
+def _get_feature_dtype(feat: ET.Element, feat_type: str) -> str:
     """Extract and convert the feature data type.
 
     Args:
-        feat_md: The feature metadata dictionary.
+        feat: The feature metadata element.
         feat_type: The feature type for error messages.
 
     Returns:
@@ -755,7 +707,7 @@ def _get_feature_dtype(feat_md: dict[str, Any], feat_type: str) -> str:
     Raises:
         ValueError: If the dtype field is missing.
     """
-    dtype = feat_md.get("@isint")
+    dtype = feat.attrib.get("isint")
     if dtype is None:
         raise ValueError(
             f"Missing field 'isint' in 'FeatureDeclarations' {feat_type} tag. "
@@ -764,18 +716,18 @@ def _get_feature_dtype(feat_md: dict[str, Any], feat_type: str) -> str:
     return "int" if dtype == "true" else "float"
 
 
-def _get_feature_unit(feat_md: dict[str, Any], feat_type: str, units: dict[str, str]) -> str:
+def _get_feature_unit(feat: ET.Element, feat_type: str, units: dict[str, str]) -> str:
     """Infer the feature unit from TrackMate 'dimension'.
 
     Args:
-        feat_md: The feature metadata dictionary.
+        feat: The feature metadata element.
         feat_type: The feature type for warning messages.
         units: A dictionary containing the units of the model.
 
     Returns:
         The feature unit.
     """
-    dimension = feat_md.get("@dimension")
+    dimension = feat.attrib.get("dimension")
     if dimension not in _DIMENSION_UNIT_TEMPLATES:
         raise ValueError(
             f"Unknown dimension '{dimension}' in 'FeatureDeclarations' '{feat_type}' tag. "
@@ -788,12 +740,12 @@ def _get_feature_unit(feat_md: dict[str, Any], feat_type: str, units: dict[str, 
 
 
 def _process_feature_metadata(
-    feat_md: dict[str, Any], geff_dict: dict[str, Any], feat_type: str, units: dict[str, str]
+    feat: ET.Element, geff_dict: dict[str, Any], feat_type: str, units: dict[str, str]
 ) -> None:
     """Process a single feature metadata entry and add it to props_metadata.
 
     Args:
-        feat_md: The feature metadata dictionary from XML.
+        feat: The feature metadata element from XML.
         geff_dict: The dictionary to update with the processed metadata.
         feat_type: The feature type (for error/warning messages).
         units: A dictionary containing the units of the model.
@@ -801,7 +753,7 @@ def _process_feature_metadata(
     Raises:
         ValueError: If the feature key is missing or duplicated.
     """
-    key = _validate_feature_key(feat_md.get("@feature"), feat_type)
+    key = _validate_feature_key(feat.attrib["feature"], feat_type)
 
     if key in geff_dict:
         raise ValueError(
@@ -810,9 +762,9 @@ def _process_feature_metadata(
 
     geff_dict[key] = {
         "identifier": key,
-        "name": _get_feature_name(feat_md, key, feat_type),
-        "dtype": _get_feature_dtype(feat_md, feat_type),
-        "unit": _get_feature_unit(feat_md, feat_type, units),
+        "name": _get_feature_name(feat, key, feat_type),
+        "dtype": _get_feature_dtype(feat, feat_type),
+        "unit": _get_feature_unit(feat, feat_type, units),
     }
 
 
@@ -838,12 +790,7 @@ def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, 
             If a feature identifier is missing a 'dimension' field in the 'FeatureDeclarations' tag,
             None will be used.
     """
-    tags_data = _get_specific_tags(xml_path, ["FeatureDeclarations"])
-    if "FeatureDeclarations" not in tags_data:
-        raise ValueError(
-            "No 'FeatureDeclarations' tag found in the XML file. Please check the XML file."
-        )
-    xml_md = tags_data["FeatureDeclarations"]
+    # Dictionaries of metadata for GEFF properties.
     node_props_metadata = {}  # type: dict[str, Any]
     edge_props_metadata = {}  # type: dict[str, Any]
     lineage_props_metadata = {}  # type: dict[str, Any]
@@ -859,13 +806,22 @@ def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, 
         "TrackFeatures": lineage_props_metadata,
     }
 
-    for feat_type, feat_tag in xml_md.items():
-        geff_field = mapping_feat_type[feat_type]
-        for feats_md in feat_tag.values():
-            if isinstance(feats_md, dict):
-                feats_md = [feats_md]
-            for feat_md in feats_md:
-                _process_feature_metadata(feat_md, geff_field, feat_type, units)
+    # TODO: rewrite based on the _add_all_features just below since now
+    # _get_specific_tags returns a dict of ET.Element.
+    tags_data = _get_specific_tags(xml_path, ["FeatureDeclarations"])
+    if "FeatureDeclarations" not in tags_data:
+        raise ValueError(
+            "No 'FeatureDeclarations' tag found in the XML file. Please check the XML file."
+        )
+    xml_md = tags_data["FeatureDeclarations"]
+    print("PROCESSING FEATURES METADATA")
+    # Get an iterator on the ET.Element xml_md
+    for feat_type in xml_md:
+        if feat_type.tag in mapping_feat_type:
+            for feat in feat_type.findall("Feature"):
+                _process_feature_metadata(
+                    feat, mapping_feat_type[feat_type.tag], feat_type.tag, units
+                )
 
     return props_metadata
 
@@ -1016,24 +972,25 @@ def from_trackmate_xml_to_geff(
         discard_filtered_tracks=discard_filtered_tracks,
     )
     # Metadata
-    tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
-    img_path = _extract_image_path(tm_md.get("Settings", {}))
+    # TODO: rewrite since now _get_specific_tags returns a dict of ET.Element.
     props_metadata = _extract_props_metadata(xml_path, units)
     _ensure_data_metadata_consistency(graph=graph, metadata=props_metadata)
-    metadata = _build_geff_metadata(
-        xml_path=xml_path,
-        units=units,
-        img_path=img_path,
-        trackmate_metadata=tm_md,
-        props_metadata=props_metadata,
-    )
-    # Create the GEFF :D
-    write_nx(
-        graph,
-        store=geff_path,
-        metadata=metadata,
-        zarr_format=zarr_format,
-    )
+    # tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
+    # img_path = _extract_image_path(tm_md.get("Settings", None))
+    # metadata = _build_geff_metadata(
+    #     xml_path=xml_path,
+    #     units=units,
+    #     img_path=img_path,
+    #     trackmate_metadata=tm_md,
+    #     props_metadata=props_metadata,
+    # )
+    # # Create the GEFF :D
+    # write_nx(
+    #     graph,
+    #     store=geff_path,
+    #     metadata=metadata,
+    #     zarr_format=zarr_format,
+    # )
 
 
 def from_trackmate_xml_to_geff_cli(
@@ -1087,11 +1044,11 @@ if __name__ == "__main__":
         overwrite=True,
     )
 
-    graph, md = read_nx(store=geff_file, validate=True)
-    print(graph)
-    for node_id, node_data in graph.nodes(data=True):
-        print(f"Node {node_id}: {node_data}")
-        break
-    if md.node_props_metadata:
-        for k, v in md.node_props_metadata.items():
-            print(f"{k} -> {v}")
+    # graph, md = read_nx(store=geff_file, validate=True)
+    # print(graph)
+    # for node_id, node_data in graph.nodes(data=True):
+    #     print(f"Node {node_id}: {node_data}")
+    #     break
+    # if md.node_props_metadata:
+    #     for k, v in md.node_props_metadata.items():
+    #         print(f"{k} -> {v}")
