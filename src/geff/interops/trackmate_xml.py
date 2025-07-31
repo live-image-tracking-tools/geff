@@ -26,7 +26,7 @@ else:
     except ImportError:  # pragma: no cover
         import xml.etree.ElementTree as ET
 
-from geff.metadata_schema import Axis, GeffMetadata
+from geff.metadata_schema import Axis, DisplayHint, GeffMetadata
 from geff.networkx.io import read_nx, write_nx
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
@@ -922,6 +922,12 @@ def _build_geff_metadata(
             Axis(name="POSITION_Z", type="space", unit=units.get("spatialunits", "pixel")),
             Axis(name="POSITION_T", type="time", unit=units.get("timeunits", "frame")),
         ],
+        display_hints=DisplayHint(
+            display_horizontal="POSITION_X",
+            display_vertical="POSITION_Y",
+            display_depth="POSITION_Z",
+            display_time="POSITION_T",
+        ),
         directed=True,
         node_props_metadata=props_metadata["node_props_metadata"],
         edge_props_metadata=props_metadata["edge_props_metadata"],
@@ -983,7 +989,6 @@ def _ensure_data_metadata_consistency(
         metadata_dict=metadata.get("node_props_metadata", {}),
         component_type="node",
     )
-
     # Edges
     _check_component_props_consistency(
         component_data=(edge_data for _, _, edge_data in graph.edges(data=True)),
