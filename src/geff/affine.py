@@ -84,7 +84,7 @@ class Affine(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def _validate_input(cls, v: Any) -> dict:
+    def _validate_input(cls, v: Any) -> Any:
         # if a numpy array or list is provided directly
         # assign it to the matrix (as a convenience)
         if isinstance(v, np.ndarray | list):
