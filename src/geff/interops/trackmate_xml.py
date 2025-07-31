@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import logging
 import shutil
 import warnings
@@ -946,15 +947,13 @@ def _check_component_props_consistency(
         If any properties defined in the metadata are not present in the graph data,
         they will be removed from the metadata and an info message will be logged.
     """
+    props_to_check = list(metadata_dict.keys())
+    iterators = itertools.tee(component_data, len(props_to_check))  # one iterator per prop
     removed_props = []
-    props = list(metadata_dict.keys())
-
-    for prop in props:
-        if not any(prop in data for data in component_data):
+    for prop, data_iter in zip(props_to_check, iterators, strict=True):
+        if not any(prop in data for data in data_iter):  # early termination when prop found
             metadata_dict.pop(prop)
             removed_props.append(prop)
-
-    print(f"Removed properties: {removed_props}")
 
     if removed_props:
         plural1 = "ies were" if len(removed_props) > 1 else "y was"
