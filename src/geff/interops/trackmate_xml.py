@@ -32,6 +32,25 @@ from geff.networkx.io import read_nx, write_nx
 # used in ctc_to_geff. Need to wait for CTC PR.
 
 
+# Template mapping for TrackMate dimension to unit conversion
+_DIMENSION_UNIT_TEMPLATES = {
+    "NONE": lambda space, time: "None",
+    "QUALITY": lambda space, time: "None",
+    "COST": lambda space, time: "None",
+    "INTENSITY": lambda space, time: "None",
+    "INTENSITY_SQUARED": lambda space, time: "None",
+    "STRING": lambda space, time: "None",
+    "POSITION": lambda space, time: space,
+    "LENGTH": lambda space, time: space,
+    "TIME": lambda space, time: time,
+    "VELOCITY": lambda space, time: f"{space} / {time}",
+    "AREA": lambda space, time: f"{space}^2",
+    "ANGLE": lambda space, time: "radian",
+    "RATE": lambda space, time: f"1 / {time}",
+    "ANGLE_RATE": lambda space, time: f"radian / {time}",
+}
+
+
 def _preliminary_checks(
     xml_path: Path,
     geff_path: Path,
@@ -125,11 +144,13 @@ def _get_attributes_metadata(
         event, element = next(it)  # Feature.
         while (event, element) != ("end", ancestor):
             if element.tag == "Feature" and event == "start":
+                # print(f"Feature found: {element.attrib.get('feature')}")
                 attrs = deepcopy(element.attrib)
                 attrs_md[attrs["feature"]] = attrs
                 attrs_md[attrs["feature"]].pop("feature", None)
             element.clear()
             event, element = next(it)
+    # print(f"Attributes metadata: {attrs_md}")
     return attrs_md
 
 
@@ -747,8 +768,31 @@ def _get_feature_dtype(feat_md: dict[str, Any], feat_type: str) -> str:
     return "int" if dtype == "true" else "float"
 
 
+def _get_feature_unit(feat_md: dict[str, Any], feat_type: str, units: dict[str, str]) -> str:
+    """Infer the feature unit from TrackMate 'dimension'.
+
+    Args:
+        feat_md: The feature metadata dictionary.
+        feat_type: The feature type for warning messages.
+        units: A dictionary containing the units of the model.
+
+    Returns:
+        The feature unit.
+    """
+    dimension = feat_md.get("@dimension")
+    if dimension not in _DIMENSION_UNIT_TEMPLATES:
+        raise ValueError(
+            f"Unknown dimension '{dimension}' in 'FeatureDeclarations' '{feat_type}' tag. "
+            "Please check the XML file."
+        )
+    space = units.get("spatialunits", "pixel")
+    time = units.get("timeunits", "frame")
+
+    return _DIMENSION_UNIT_TEMPLATES[dimension](space, time)
+
+
 def _process_feature_metadata(
-    feat_md: dict[str, Any], geff_dict: dict[str, Any], feat_type: str
+    feat_md: dict[str, Any], geff_dict: dict[str, Any], feat_type: str, units: dict[str, str]
 ) -> None:
     """Process a single feature metadata entry and add it to props_metadata.
 
@@ -756,6 +800,7 @@ def _process_feature_metadata(
         feat_md: The feature metadata dictionary from XML.
         geff_dict: The dictionary to update with the processed metadata.
         feat_type: The feature type (for error/warning messages).
+        units: A dictionary containing the units of the model.
 
     Raises:
         ValueError: If the feature key is missing or duplicated.
@@ -772,6 +817,7 @@ def _process_feature_metadata(
         "identifier": key,
         "name": _get_feature_name(feat_md, key, feat_type),
         "dtype": _get_feature_dtype(feat_md, feat_type),
+        "unit": _get_feature_unit(feat_md, feat_type, units),
         # Below fields are not present in GEFF metadata current specification.
         # "shortname": _get_feature_shortname(feat_md, key, feat_type),
         # "dimension": _get_feature_dimension(feat_md, feat_type),
@@ -779,11 +825,12 @@ def _process_feature_metadata(
     # print("geff_dict[key]", geff_dict[key])
 
 
-def _extract_props_metadata(xml_path: Path) -> dict[str, Any]:
+def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, Any]:
     """Extract properties metadata from the TrackMate XML file.
 
     Args:
         xml_path: The file path of the XML file to be parsed.
+        units: A dictionary containing the units of the model.
 
     Returns:
         dict[str, Any]
@@ -829,7 +876,7 @@ def _extract_props_metadata(xml_path: Path) -> dict[str, Any]:
             if isinstance(feats_md, dict):
                 feats_md = [feats_md]
             for feat_md in feats_md:
-                _process_feature_metadata(feat_md, geff_field, feat_type)
+                _process_feature_metadata(feat_md, geff_field, feat_type, units)
 
     # print("node_props_metadata", node_props_metadata)
     return props_metadata
@@ -907,6 +954,8 @@ def _check_component_props_consistency(
             metadata_dict.pop(prop)
             removed_props.append(prop)
 
+    print(f"Removed properties: {removed_props}")
+
     if removed_props:
         plural1 = "ies were" if len(removed_props) > 1 else "y was"
         plural2 = "they are" if len(removed_props) > 1 else "it is"
@@ -979,7 +1028,7 @@ def from_trackmate_xml_to_geff(
     # Metadata
     tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
     img_path = _extract_image_path(tm_md.get("Settings", {}))
-    props_metadata = _extract_props_metadata(xml_path)
+    props_metadata = _extract_props_metadata(xml_path, units)
     _ensure_data_metadata_consistency(graph=graph, metadata=props_metadata)
     metadata = _build_geff_metadata(
         xml_path=xml_path,
@@ -989,6 +1038,7 @@ def from_trackmate_xml_to_geff(
         props_metadata=props_metadata,
     )
 
+    # Create the GEFF :D
     write_nx(
         graph,
         store=geff_path,
@@ -1037,9 +1087,9 @@ if __name__ == "__main__":
     # app()
 
     xml_file = "tests/data/FakeTracks.xml"
-    geff_file = (
-        "C:/Users/lxenard/Documents/Janelia_Cell_Trackathon/test_trackmate_to_geff/FakeTracks.geff"
-    )
+    geff_file = "C:/Users/lxenard/Desktop/FakeTracks.geff"
+    # xml_file = "C:/Users/lxenard/Documents/Code/pycellin/sample_data/Ecoli_growth_on_agar_pad.xml"
+    # geff_file = "C:/Users/lxenard/Desktop/Ecoli_growth_on_agar_pad.geff"
     from_trackmate_xml_to_geff(
         xml_path=xml_file,
         geff_path=geff_file,
@@ -1049,5 +1099,10 @@ if __name__ == "__main__":
     )
 
     graph, md = read_nx(store=geff_file, validate=True)
-    # print(graph)
-    # print(md.node_props_metadata)
+    print(graph)
+    for node_id, node_data in graph.nodes(data=True):
+        print(f"Node {node_id}: {node_data}")
+        break
+    if md.node_props_metadata:
+        for k, v in md.node_props_metadata.items():
+            print(f"{k} -> {v}")
