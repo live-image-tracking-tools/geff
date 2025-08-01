@@ -33,7 +33,7 @@ def test_read_write_consistency(
     directed,
     include_t,
     include_z,
-):
+) -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
@@ -69,7 +69,7 @@ def test_read_write_consistency(
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_no_spatial(
     tmp_path, node_id_dtype, node_axis_dtypes, extra_edge_props, directed
-):
+) -> None:
     graph = nx.DiGraph() if directed else nx.Graph()
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_id_dtype)
@@ -107,12 +107,12 @@ def test_read_write_no_spatial(
         assert graph.edges[edge.tolist()]["color"] == compare.edges[edge.tolist()]["color"]
 
 
-def test_write_empty_graph(tmp_path):
+def test_write_empty_graph(tmp_path) -> None:
     graph = nx.DiGraph()
     geff.write_nx(graph, axis_names=["t", "y", "x"], store=tmp_path / "empty.zarr")
 
 
-def test_write_nx_with_metadata(tmp_path):
+def test_write_nx_with_metadata(tmp_path) -> None:
     """Test write_nx with explicit metadata parameter"""
 
     graph = nx.Graph()
@@ -148,7 +148,7 @@ def test_write_nx_with_metadata(tmp_path):
     assert read_metadata.axes[1].min == 2.0 and read_metadata.axes[1].max == 4.0
 
 
-def test_write_nx_metadata_extra_properties(tmp_path):
+def test_write_nx_metadata_extra_properties(tmp_path) -> None:
     from geff.metadata_schema import GeffMetadata, axes_from_lists
 
     graph = nx.Graph()
@@ -175,7 +175,7 @@ def test_write_nx_metadata_extra_properties(tmp_path):
     assert compare.extra["bar"]["baz"] == "qux"
 
 
-def test_write_nx_metadata_override_precedence(tmp_path):
+def test_write_nx_metadata_override_precedence(tmp_path) -> None:
     """Test that explicit axis parameters override metadata"""
     from geff.metadata_schema import GeffMetadata, axes_from_lists
 
@@ -215,7 +215,7 @@ def test_write_nx_metadata_override_precedence(tmp_path):
     assert axis_types == ["space", "space", "space"]
 
 
-def test_write_nx_different_store_types(tmp_path):
+def test_write_nx_different_store_types(tmp_path) -> None:
     """Test write_nx with different store types: path, string, and zarr.store"""
 
     # Create a simple test graph

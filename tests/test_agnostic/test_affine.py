@@ -7,21 +7,21 @@ from geff.affine import Affine
 class TestAffineValidation:
     """Test validation of Affine transformation matrices."""
 
-    def test_valid_2d_homogeneous_matrix(self):
+    def test_valid_2d_homogeneous_matrix(self) -> None:
         """Test creation with valid 2D homogeneous matrix."""
         matrix = np.array([[1, 0, 5], [0, 1, 10], [0, 0, 1]])
         affine = Affine(matrix=matrix)
         assert affine.ndim == 2
         np.testing.assert_array_equal(affine.matrix, matrix)
 
-    def test_valid_3d_homogeneous_matrix(self):
+    def test_valid_3d_homogeneous_matrix(self) -> None:
         """Test creation with valid 3D homogeneous matrix."""
         matrix = np.array([[2, 0, 0, 1], [0, 2, 0, 2], [0, 0, 2, 3], [0, 0, 0, 1]])
         affine = Affine(matrix=matrix)
         assert affine.ndim == 3
         np.testing.assert_array_equal(affine.matrix, matrix)
 
-    def test_invalid_non_2d_matrix(self):
+    def test_invalid_non_2d_matrix(self) -> None:
         """Test rejection of non-2D matrices."""
         with pytest.raises(ValueError, match="Matrix must be 2D"):
             Affine(matrix=np.array([1, 2, 3]))
@@ -29,17 +29,17 @@ class TestAffineValidation:
         with pytest.raises(ValueError, match="Matrix must be 2D"):
             Affine(matrix=np.zeros((2, 2, 2)))
 
-    def test_invalid_non_square_matrix(self):
+    def test_invalid_non_square_matrix(self) -> None:
         """Test rejection of non-square matrices."""
         with pytest.raises(ValueError, match="Matrix must be square"):
             Affine(matrix=np.zeros((2, 3)))
 
-    def test_invalid_small_matrix(self):
+    def test_invalid_small_matrix(self) -> None:
         """Test rejection of matrices smaller than 2x2."""
         with pytest.raises(ValueError, match="Matrix must be at least 2x2"):
             Affine(matrix=np.array([[1]]))
 
-    def test_invalid_bottom_row(self):
+    def test_invalid_bottom_row(self) -> None:
         """Test rejection of invalid homogeneous bottom row."""
         # Wrong bottom row [1, 0, 1]
         matrix = np.array(
@@ -67,7 +67,7 @@ class TestAffineValidation:
 class TestAffineProperties:
     """Test properties of Affine transformations."""
 
-    def test_ndim_property(self):
+    def test_ndim_property(self) -> None:
         """Test ndim property calculation."""
         # 2D case
         matrix_2d = np.array([[1, 0, 5], [0, 1, 10], [0, 0, 1]])
@@ -79,7 +79,7 @@ class TestAffineProperties:
         affine_3d = Affine(matrix=matrix_3d)
         assert affine_3d.ndim == 3
 
-    def test_linear_matrix_property(self):
+    def test_linear_matrix_property(self) -> None:
         """Test extraction of linear transformation matrix."""
         matrix = np.array([[2, 1, 5], [0, 3, 10], [0, 0, 1]])
         affine = Affine(matrix=matrix)
@@ -92,7 +92,7 @@ class TestAffineProperties:
         linear[0, 0] = 999
         assert affine.matrix[0][0] == 2  # Original unchanged
 
-    def test_offset_property(self):
+    def test_offset_property(self) -> None:
         """Test extraction of translation offset."""
         matrix = np.array([[2, 1, 5], [0, 3, 10], [0, 0, 1]])
         affine = Affine(matrix=matrix)
@@ -109,7 +109,7 @@ class TestAffineProperties:
 class TestAffineTransformation:
     """Test point transformation functionality."""
 
-    def test_identity_transformation_2d(self):
+    def test_identity_transformation_2d(self) -> None:
         """Test identity transformation in 2D."""
         identity_matrix = np.eye(3)
         affine = Affine(matrix=identity_matrix)
@@ -119,7 +119,7 @@ class TestAffineTransformation:
 
         np.testing.assert_array_almost_equal(transformed, points)
 
-    def test_translation_transformation_2d(self):
+    def test_translation_transformation_2d(self) -> None:
         """Test pure translation in 2D."""
         matrix = np.array([[1, 0, 5], [0, 1, 10], [0, 0, 1]])
         affine = Affine(matrix=matrix)
@@ -130,7 +130,7 @@ class TestAffineTransformation:
         expected = np.array([[5, 10], [6, 11]])
         np.testing.assert_array_almost_equal(transformed, expected)
 
-    def test_scaling_transformation_2d(self):
+    def test_scaling_transformation_2d(self) -> None:
         """Test scaling transformation in 2D."""
         # Note: scipy convention - inverse scaling for pull transform
         matrix = np.diag([0.5, 0.25, 1])  # Scale by 2 in x, 4 in y
@@ -142,7 +142,7 @@ class TestAffineTransformation:
         expected = np.array([[1, 1]])  # 2*0.5=1, 4*0.25=1
         np.testing.assert_array_almost_equal(transformed, expected)
 
-    def test_rotation_transformation_2d(self):
+    def test_rotation_transformation_2d(self) -> None:
         """Test 2D rotation transformation."""
         # 90 degree counter-clockwise rotation
         angle = np.pi / 2
@@ -156,7 +156,7 @@ class TestAffineTransformation:
         expected = np.array([[0, 1], [-1, 0]])
         np.testing.assert_array_almost_equal(transformed, expected, decimal=10)
 
-    def test_combined_transformation_2d(self):
+    def test_combined_transformation_2d(self) -> None:
         """Test combined scaling, rotation, and translation."""
         # Scale by 2, rotate 90°, translate by (1, 2)
         matrix = np.array(
@@ -175,7 +175,7 @@ class TestAffineTransformation:
         expected = np.array([[1, 3]])
         np.testing.assert_array_almost_equal(transformed, expected)
 
-    def test_3d_transformation(self):
+    def test_3d_transformation(self) -> None:
         """Test 3D transformation."""
         matrix = np.array([[2, 0, 0, 1], [0, 2, 0, 2], [0, 0, 2, 3], [0, 0, 0, 1]])
         affine = Affine(matrix=matrix)
@@ -186,7 +186,7 @@ class TestAffineTransformation:
         expected = np.array([[3, 4, 5]])  # [2*1+1, 2*1+2, 2*1+3]
         np.testing.assert_array_almost_equal(transformed, expected)
 
-    def test_batch_point_transformation(self):
+    def test_batch_point_transformation(self) -> None:
         """Test transformation of multiple points."""
         matrix = np.array([[1, 0, 1], [0, 1, 1], [0, 0, 1]])
         affine = Affine(matrix=matrix)
@@ -197,7 +197,7 @@ class TestAffineTransformation:
         expected = np.array([[1, 1], [2, 1], [1, 2], [2, 2]])
         np.testing.assert_array_almost_equal(transformed, expected)
 
-    def test_multidimensional_point_arrays(self):
+    def test_multidimensional_point_arrays(self) -> None:
         """Test transformation of multidimensional point arrays."""
         matrix = np.array([[1, 0, 1], [0, 1, 2], [0, 0, 1]])
         affine = Affine(matrix=matrix)
@@ -212,7 +212,7 @@ class TestAffineTransformation:
         # Verify shape is preserved
         assert transformed.shape == points.shape
 
-    def test_callable_interface(self):
+    def test_callable_interface(self) -> None:
         """Test that Affine can be called directly."""
         matrix = np.array([[1, 0, 5], [0, 1, 10], [0, 0, 1]])
         affine = Affine(matrix=matrix)
@@ -225,7 +225,7 @@ class TestAffineTransformation:
 
         np.testing.assert_array_equal(result1, result2)
 
-    def test_invalid_point_dimensions(self):
+    def test_invalid_point_dimensions(self) -> None:
         """Test error on mismatched point dimensions."""
         matrix = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         affine = Affine(matrix=matrix)  # 2D transformation
@@ -244,7 +244,7 @@ class TestAffineTransformation:
 class TestFromMatrixOffset:
     """Test the from_matrix_offset static method."""
 
-    def test_basic_matrix_offset(self):
+    def test_basic_matrix_offset(self) -> None:
         """Test basic matrix and offset conversion."""
         linear_matrix = np.array([[2, 1], [0, 3]])
         offset = np.array([5, 10])
@@ -255,7 +255,7 @@ class TestFromMatrixOffset:
         np.testing.assert_array_equal(affine.matrix, expected_matrix)
         assert affine.ndim == 2
 
-    def test_scalar_offset(self):
+    def test_scalar_offset(self) -> None:
         """Test scalar offset (broadcasted to all dimensions)."""
         linear_matrix = np.eye(2)
         offset = 5.0
@@ -265,7 +265,7 @@ class TestFromMatrixOffset:
         expected_matrix = np.array([[1, 0, 5], [0, 1, 5], [0, 0, 1]])
         np.testing.assert_array_equal(affine.matrix, expected_matrix)
 
-    def test_zero_offset(self):
+    def test_zero_offset(self) -> None:
         """Test with zero offset."""
         linear_matrix = np.array([[2, 1], [0, 3]])
 
@@ -274,7 +274,7 @@ class TestFromMatrixOffset:
         expected_matrix = np.array([[2, 1, 0], [0, 3, 0], [0, 0, 1]])
         np.testing.assert_array_equal(affine.matrix, expected_matrix)
 
-    def test_3d_matrix_offset(self):
+    def test_3d_matrix_offset(self) -> None:
         """Test 3D matrix and offset."""
         linear_matrix = np.diag([2, 3, 4])
         offset = np.array([1, 2, 3])
@@ -285,7 +285,7 @@ class TestFromMatrixOffset:
         np.testing.assert_array_equal(affine.matrix, expected_matrix)
         assert affine.ndim == 3
 
-    def test_list_inputs(self):
+    def test_list_inputs(self) -> None:
         """Test with list inputs instead of numpy arrays."""
         linear_matrix = [[1, 0], [0, 1]]
         offset = [5, 10]
@@ -295,7 +295,7 @@ class TestFromMatrixOffset:
         expected_matrix = np.array([[1, 0, 5], [0, 1, 10], [0, 0, 1]])
         np.testing.assert_array_equal(affine.matrix, expected_matrix)
 
-    def test_invalid_matrix_shape(self):
+    def test_invalid_matrix_shape(self) -> None:
         """Test error on invalid matrix shapes."""
         # Non-square matrix
         with pytest.raises(ValueError, match="Matrix must be square 2D array"):
@@ -309,7 +309,7 @@ class TestFromMatrixOffset:
         with pytest.raises(ValueError, match="Matrix must be square 2D array"):
             Affine.from_matrix_offset(np.zeros((2, 2, 2)), 0)
 
-    def test_invalid_offset_shape(self):
+    def test_invalid_offset_shape(self) -> None:
         """Test error on invalid offset shapes."""
         linear_matrix = np.eye(2)
 
@@ -321,7 +321,7 @@ class TestFromMatrixOffset:
         with pytest.raises(ValueError, match="Offset must be scalar or 1D"):
             Affine.from_matrix_offset(linear_matrix, [[1, 2]])
 
-    def test_functionality_equivalence(self):
+    def test_functionality_equivalence(self) -> None:
         """Test that from_matrix_offset produces equivalent transformations."""
         linear_matrix = np.array([[2, 1], [0, 2]])
         offset = np.array([3, 4])

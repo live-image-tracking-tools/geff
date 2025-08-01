@@ -280,13 +280,15 @@
           "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer"
         },
         "extra": {
+          "additionalProperties": true,
           "description": "Extra metadata that is not part of the schema",
-          "title": "Extra"
+          "title": "Extra",
+          "type": "object"
         }
       },
       "required": [
-        "geff_version",
-        "directed"
+        "directed",
+        "geff_version"
       ],
       "title": "geff_metadata",
       "type": "object"
@@ -296,11 +298,13 @@
       "properties": {
         "identifier": {
           "description": "Identifier of the property. Must be unique within its own component subgroup (nodes or edges). Must be a non-empty string.",
+          "minLength": 1,
           "title": "Identifier",
           "type": "string"
         },
         "dtype": {
           "description": "Data type of the property. Must be a non-empty string. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
+          "minLength": 1,
           "title": "Dtype",
           "type": "string"
         },

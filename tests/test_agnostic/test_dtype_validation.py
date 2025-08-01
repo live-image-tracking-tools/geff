@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -20,7 +22,7 @@ from geff.write_arrays import write_arrays
         np.bool_,
     ],
 )
-def test_validate_data_type_allowed(dtype_in):
+def test_validate_data_type_allowed(dtype_in: Any) -> None:
     """All allowed dtypes should return *True*."""
     assert validate_data_type(dtype_in) is True
 
@@ -29,7 +31,7 @@ def test_validate_data_type_allowed(dtype_in):
     "dtype_in",
     ["float16", np.float16, "complex64", np.dtype("complex128"), ">f2"],
 )
-def test_validate_data_type_disallowed(dtype_in):
+def test_validate_data_type_disallowed(dtype_in) -> None:
     """All disallowed dtypes should return *False*."""
     assert validate_data_type(dtype_in) is False
 
@@ -44,7 +46,7 @@ def _tmp_metadata():
     return GeffMetadata(geff_version="0.0.1", directed=True)
 
 
-def test_write_arrays_rejects_disallowed_id_dtype(tmp_path):
+def test_write_arrays_rejects_disallowed_id_dtype(tmp_path) -> None:
     """write_arrays must fail fast for node/edge ids with unsupported dtype."""
     geff_path = tmp_path / "invalid_ids.geff"
 
@@ -63,7 +65,7 @@ def test_write_arrays_rejects_disallowed_id_dtype(tmp_path):
         )
 
 
-def test_write_arrays_rejects_disallowed_property_dtype(tmp_path):
+def test_write_arrays_rejects_disallowed_property_dtype(tmp_path) -> None:
     """write_arrays must fail fast if any property array has an unsupported dtype."""
     geff_path = tmp_path / "invalid_prop.geff"
 

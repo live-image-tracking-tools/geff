@@ -1,21 +1,27 @@
+from __future__ import annotations
+
 import warnings
-from collections.abc import Sequence
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-from zarr.storage import StoreLike
 
+from . import _path
 from .utils import remove_tilde
 from .write_arrays import write_id_arrays, write_props_arrays
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
+    from zarr.storage import StoreLike
 
 
 def write_dicts(
     geff_store: StoreLike,
-    node_data: Sequence[tuple[Any, dict[str, Any]]],
-    edge_data: Sequence[tuple[Any, dict[str, Any]]],
+    node_data: Iterable[tuple[Any, dict[str, Any]]],
+    edge_data: Iterable[tuple[Any, dict[str, Any]]],
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
-    axis_names: list[str] | None = None,
+    axis_names: Sequence[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """Write a dict-like graph representation to geff
@@ -44,6 +50,8 @@ def write_dicts(
 
     geff_store = remove_tilde(geff_store)
 
+    node_data = list(node_data)
+    edge_data = list(edge_data)
     node_ids = [idx for idx, _ in node_data]
     edge_ids = [idx for idx, _ in edge_data]
 
@@ -74,10 +82,10 @@ def write_dicts(
                     f"Spatiotemporal property '{axis}' not found in : "
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
-    write_props_arrays(geff_store, "nodes", node_props_dict, zarr_format=zarr_format)
+    write_props_arrays(geff_store, _path.NODES, node_props_dict, zarr_format=zarr_format)
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
-    write_props_arrays(geff_store, "edges", edge_props_dict, zarr_format=zarr_format)
+    write_props_arrays(geff_store, _path.EDGES, edge_props_dict, zarr_format=zarr_format)
 
 
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:

@@ -70,15 +70,11 @@ def from_ctc_to_geff(
     if not ctc_path.exists():
         raise FileNotFoundError(f"CTC file {ctc_path} does not exist")
 
-    tracks_file_found = False
-
     for tracks_file in ["man_track.txt", "res_track.txt"]:
         tracks_file_path = ctc_path / tracks_file
         if tracks_file_path.exists():
-            tracks_file_found = True
             break
-
-    if not tracks_file_found:
+    else:
         raise FileNotFoundError(
             f"Tracks file {ctc_path}/man_track.txt or {ctc_path}/res_track.txt does not exist"
         )
@@ -119,7 +115,7 @@ def from_ctc_to_geff(
                 n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
                 expand_dims = (np.newaxis,) * len(n_1_padding)
 
-            segm_array = zarr.open(
+            segm_array = zarr.open_array(
                 segmentation_store,
                 shape=(len(sorted_files), *n_1_padding, *frame.shape),
                 chunks=(1, *n_1_padding, *frame.shape),
@@ -148,11 +144,11 @@ def from_ctc_to_geff(
     if len(node_props["id"]) == 0:
         raise ValueError(f"No nodes found in the CTC directory {ctc_path}")
 
-    for node_ids in tracks.values():
+    for _node_ids in tracks.values():
         # connect simple-paths of each track
-        for i in range(len(node_ids) - 1):
+        for i in range(len(_node_ids) - 1):
             # forward in time (parent -> child)
-            edges.append((node_ids[i], node_ids[i + 1]))
+            edges.append((_node_ids[i], _node_ids[i + 1]))
 
     tracks_table = np.loadtxt(tracks_file_path, dtype=int)
 

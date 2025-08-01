@@ -56,15 +56,19 @@ Examples:
     >>> # graph is a networkx Graph ready for analysis
 """
 
-from typing import Any, Literal, TypedDict, cast, get_args
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, get_args
 
 import networkx as nx
 import numpy as np
 import zarr
 import zarr.storage
-from numpy.typing import NDArray
 
 import geff
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
 NodeIdDTypeStr = Literal["int", "int8", "uint8", "int16", "uint16"]
@@ -182,7 +186,7 @@ def create_dummy_graph_props(
     actual_num_edges = min(num_edges, max_possible_edges)
 
     # Create edges ensuring we don't create duplicates
-    edges: list[list[Any]] = []
+    edges_: list[list[Any]] = []
     edge_count = 0
 
     # For undirected graphs, we need to be more careful about duplicates
@@ -191,7 +195,7 @@ def create_dummy_graph_props(
         for i in range(min(actual_num_edges, num_nodes - 1)):
             source_idx = i
             target_idx = i + 1
-            edges.append([int(source_idx), int(target_idx)])
+            edges_.append([int(source_idx), int(target_idx)])
             edge_count += 1
 
         # Add remaining edges as cross connections
@@ -200,11 +204,11 @@ def create_dummy_graph_props(
             source_idx = i % (num_nodes - 2)
             target_idx = (i + 2) % (num_nodes - 1) + 1
             if source_idx != target_idx:
-                edges.append([int(source_idx), int(target_idx)])
+                edges_.append([int(source_idx), int(target_idx)])
                 edge_count += 1
     else:
         # For directed graphs, we can create more edges efficiently
-        edges = []
+        edges_ = []
         edge_count = 0
         created_edges = set()  # Track created edges to avoid duplicates
 
@@ -214,7 +218,7 @@ def create_dummy_graph_props(
             target_idx = i + 1
             edge_tuple = (int(source_idx), int(target_idx))
             if edge_tuple not in created_edges:
-                edges.append([int(source_idx), int(target_idx)])
+                edges_.append([int(source_idx), int(target_idx)])
                 created_edges.add(edge_tuple)
                 edge_count += 1
 
@@ -228,7 +232,7 @@ def create_dummy_graph_props(
                 if source_idx != target_idx:
                     edge_tuple = (int(source_idx), int(target_idx))
                     if edge_tuple not in created_edges:
-                        edges.append([int(source_idx), int(target_idx)])
+                        edges_.append([int(source_idx), int(target_idx)])
                         created_edges.add(edge_tuple)
                         edge_count += 1
 
@@ -244,7 +248,7 @@ def create_dummy_graph_props(
                     if source_idx != target_idx:
                         edge_tuple = (int(source_idx), int(target_idx))
                         if edge_tuple not in created_edges:
-                            edges.append([int(source_idx), int(target_idx)])
+                            edges_.append([int(source_idx), int(target_idx)])
                             created_edges.add(edge_tuple)
                             edge_count += 1
 
@@ -252,7 +256,7 @@ def create_dummy_graph_props(
                             if edge_count >= actual_num_edges:
                                 break
 
-    edges = np.array(edges, dtype=object if node_id_dtype == "str" else node_id_dtype)
+    edges = np.array(edges_, dtype=node_id_dtype)
     # Generate extra node properties
     extra_node_props_dict = {}
     if extra_node_props is not None:

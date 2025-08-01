@@ -30,7 +30,7 @@ def test_read_write_consistency(
     node_attr_dtypes,
     extra_edge_props,
     directed,
-):
+) -> None:
     store, graph_attrs = create_memory_mock_geff(
         node_id_dtype=node_dtype,
         node_axis_dtypes=node_attr_dtypes,
@@ -56,7 +56,7 @@ def test_read_write_consistency(
             assert getattr(graph.edge_attrs[edge], name) == values[idx].item()
 
 
-def test_write_empty_graph():
+def test_write_empty_graph() -> None:
     create_graph = getattr(sg, "create_graph", sg.SpatialGraph)
     graph = create_graph(
         ndims=3,

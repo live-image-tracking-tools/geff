@@ -13,7 +13,7 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 
-def test_get_units():
+def test_get_units() -> None:
     space_warning = "No space unit found in the XML file. Setting to 'pixel'."
     time_warning = "No time unit found in the XML file. Setting to 'frame'."
 
@@ -56,7 +56,7 @@ def test_get_units():
     assert time_warning in str(warning_list[1].message)
 
 
-def test_get_attributes_metadata():
+def test_get_attributes_metadata() -> None:
     # Several attributes with Feature tags
     xml_data = """
         <FeatureDeclarations>
@@ -98,7 +98,7 @@ def test_get_attributes_metadata():
     assert obtained_attrs == expected_attrs
 
 
-def test_convert_attributes():
+def test_convert_attributes() -> None:
     # Normal conversion with various data types
     attrs_md = {
         "feat_float": {"name": "feat_float", "isint": "false", "random": "info1"},
@@ -148,7 +148,7 @@ def test_convert_attributes():
         tm_xml._convert_attributes(converted_attrs, attrs_md, "node")
 
 
-def test_convert_ROI_coordinates():
+def test_convert_ROI_coordinates() -> None:
     # 2D points
     el_obtained = ET.Element("Spot")
     el_obtained.attrib["ROI_N_POINTS"] = "3"
@@ -194,7 +194,7 @@ def test_convert_ROI_coordinates():
     assert attr_obtained == attr_expected
 
 
-def test_add_all_nodes():
+def test_add_all_nodes() -> None:
     # Several attributes
     xml_data = """
         <data>
@@ -269,7 +269,7 @@ def test_add_all_nodes():
         tm_xml._add_all_nodes(it, element, {}, nx.DiGraph())
 
 
-def test_add_edge():
+def test_add_edge() -> None:
     # Normal case with several attributes
     xml_data = """<data SPOT_SOURCE_ID="1" SPOT_TARGET_ID="2" x="20.5" y="25" />"""
     it = ET.iterparse(io.BytesIO(xml_data.encode("utf-8")), events=["start", "end"])
@@ -346,7 +346,7 @@ def test_add_edge():
         tm_xml._add_edge(element, attrs_md, obtained, 1)
 
 
-def test_build_tracks():
+def test_build_tracks() -> None:
     # Normal case with several attributes
     xml_data = """
         <data>
@@ -475,7 +475,7 @@ def test_build_tracks():
         tm_xml._build_tracks(it, element, attrs_md, nx.DiGraph())
 
 
-def test_get_filtered_tracks_ID():
+def test_get_filtered_tracks_ID() -> None:
     # Normal case with TRACK_ID attributes
     xml_data = """
         <data>
@@ -524,7 +524,7 @@ def test_get_filtered_tracks_ID():
         tm_xml._get_filtered_tracks_ID(it, element)
 
 
-def test_from_trackmate_xml_to_geff(tmp_path):
+def test_from_trackmate_xml_to_geff(tmp_path) -> None:
     # No arguments, should use default values
     geff_output = tmp_path / "test.geff"
     tm_xml.from_trackmate_xml_to_geff("tests/data/FakeTracks.xml", geff_output)

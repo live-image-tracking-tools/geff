@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import re
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -6,10 +9,13 @@ import zarr
 
 from geff.utils import validate
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def test_validate(tmp_path):
+
+def test_validate(tmp_path: Path) -> None:
     # Does not exist
-    with pytest.raises(ValueError, match=r"Path does not exist: does-not-exist"):
+    with pytest.raises(FileNotFoundError, match=r"Path does not exist: does-not-exist"):
         validate("does-not-exist")
 
     # remote zarr path does not raise existence error
@@ -24,7 +30,7 @@ def test_validate(tmp_path):
         validate(non_zarr_path)
 
     zpath = tmp_path / "test.zarr"
-    z = zarr.open(zpath)
+    z = zarr.open_group(zpath)
 
     # Missing metadata
     with pytest.raises(ValueError, match="No geff key found in"):
@@ -37,24 +43,24 @@ def test_validate(tmp_path):
     }
 
     # No nodes
-    with pytest.raises(AssertionError, match="graph group must contain a nodes group"):
+    with pytest.raises(ValueError, match="'graph' group must contain a group named 'nodes'"):
         validate(zpath)
-    z.create_group("nodes")
+    nodes = z.create_group("nodes")
 
     # Nodes missing ids
-    with pytest.raises(AssertionError, match="nodes group must contain an ids array"):
+    with pytest.raises(ValueError, match="'nodes' group must contain an 'ids' array"):
         validate(zpath)
     n_node = 10
     z["nodes/ids"] = np.zeros(n_node)
 
     # Nodes must have a props group
-    with pytest.raises(AssertionError, match="nodes group must contain a props group"):
+    with pytest.raises(ValueError, match="'nodes' group must contain a group named 'props'"):
         validate(zpath)
-    z["nodes"].create_group("props")
+    nodes.create_group("props")
 
     # Subgroups in props must have values
-    z["nodes"].create_group("props/score")
-    with pytest.raises(AssertionError, match="node property group score must have values group"):
+    nodes.create_group("props/score")
+    with pytest.raises(ValueError, match="Node property group 'score' must have a 'values' array"):
         validate(zpath)
     z["nodes/props/score/values"] = np.zeros(n_node)
     validate(zpath)
@@ -62,9 +68,9 @@ def test_validate(tmp_path):
     # Property shape mismatch
     z["nodes/props/badshape/values"] = np.zeros(n_node * 2)
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=(
-            f"Node property badshape values has length {n_node * 2}, "
+            f"Node property 'badshape' values has length {n_node * 2}, "
             f"which does not match id length {n_node}"
         ),
     ):
@@ -75,9 +81,9 @@ def test_validate(tmp_path):
     z["nodes/props/badshape/values"] = np.zeros(shape=(n_node))
     z["nodes/props/badshape/missing"] = np.zeros(shape=(n_node * 2))
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=(
-            f"Node property badshape missing mask has length {n_node * 2}, "
+            f"Node property 'badshape' missing mask has length {n_node * 2}, "
             f"which does not match id length {n_node}"
         ),
     ):
@@ -88,7 +94,7 @@ def test_validate(tmp_path):
     z.create_group("edges")
 
     # Missing edge ids
-    with pytest.raises(AssertionError, match="edge group must contain ids array"):
+    with pytest.raises(ValueError, match="'edges' group must contain an 'ids' array"):
         validate(zpath)
 
     # ids array must have last dim size 2
@@ -96,7 +102,7 @@ def test_validate(tmp_path):
     badshape = (n_edges, 3)
     z["edges/ids"] = np.zeros(badshape)
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=re.escape(
             f"edges ids must have a last dimension of size 2, received shape {badshape}"
         ),
@@ -108,9 +114,9 @@ def test_validate(tmp_path):
     # Property values shape mismatch
     z["edges/props/badshape/values"] = np.zeros((n_edges * 2, 2))
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=(
-            f"Edge property badshape values has length {n_edges * 2}, "
+            f"Edge property 'badshape' values has length {n_edges * 2}, "
             f"which does not match id length {n_edges}"
         ),
     ):
@@ -121,9 +127,9 @@ def test_validate(tmp_path):
     z["edges/props/badshape/values"] = np.zeros((n_edges, 2))
     z["edges/props/badshape/missing"] = np.zeros((n_edges * 2, 2))
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=(
-            f"Edge property badshape missing mask has length {n_edges * 2}, "
+            f"Edge property 'badshape' missing mask has length {n_edges * 2}, "
             f"which does not match id length {n_edges}"
         ),
     ):
@@ -138,7 +144,7 @@ def test_validate(tmp_path):
     }
     z.attrs["geff"] = geff_attrs
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match="Node property prop1 described in metadata is not present in props arrays",
     ):
         validate(zpath)
@@ -147,7 +153,7 @@ def test_validate(tmp_path):
     z["nodes/props/prop1/values"] = np.zeros(n_node, dtype=np.float32)
     z["nodes/props/prop2/values"] = np.zeros(n_node, dtype=np.float32)
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=(
             "Node property prop2 with dtype float32 does not match "
             "metadata dtype <class 'numpy.int64'>"
@@ -157,7 +163,7 @@ def test_validate(tmp_path):
     # Another type of dtype mismatch
     z["nodes/props/prop2/values"] = np.zeros(n_node, dtype="int16")
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=(
             "Node property prop2 with dtype int16 does not match "
             "metadata dtype <class 'numpy.int64'>"
@@ -172,7 +178,7 @@ def test_validate(tmp_path):
     }
     z.attrs["geff"] = geff_attrs
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match="Edge property prop3 described in metadata is not present in props arrays",
     ):
         validate(zpath)
@@ -180,7 +186,7 @@ def test_validate(tmp_path):
     # Edges: inconsistent property metadata dtype
     z["edges/props/prop3/values"] = np.zeros(n_edges, dtype=np.float32)
     with pytest.raises(
-        AssertionError,
+        ValueError,
         match=(
             r"Edge property prop3 with dtype float32 does not match "
             r"metadata dtype <class 'numpy.bool_*'>"

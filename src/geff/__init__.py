@@ -2,7 +2,7 @@ from importlib.metadata import PackageNotFoundError, version
 from typing import TYPE_CHECKING, Any
 
 try:
-    __version__ = version("geff")
+    __version__: str = version("geff")
 except PackageNotFoundError:  # pragma: no cover
     __version__ = "uninstalled"
 

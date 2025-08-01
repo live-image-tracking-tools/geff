@@ -6,7 +6,7 @@ from geff.write_arrays import write_arrays
 
 
 class TestWriteArrays:
-    def test_write_arrays_basic(self, tmp_path):
+    def test_write_arrays_basic(self, tmp_path) -> None:
         """Test basic functionality of write_arrays with minimal data."""
         # Create test data
         geff_path = tmp_path / "test.geff"
@@ -28,7 +28,7 @@ class TestWriteArrays:
         assert geff_path.exists()
 
         # Verify node and edge IDs were written correctly
-        root = zarr.open(str(geff_path))
+        root = zarr.open_group(str(geff_path))
         assert "nodes/ids" in root
         assert "edges/ids" in root
 

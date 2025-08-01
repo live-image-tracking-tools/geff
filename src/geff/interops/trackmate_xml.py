@@ -158,18 +158,18 @@ def _convert_attributes(
         if key in attrs_metadata:
             if attrs_metadata[key]["isint"] == "true":
                 try:
-                    attrs[key] = int(attrs[key])  # type: ignore
+                    attrs[key] = int(attrs[key])
                 except ValueError as err:
                     raise ValueError(f"Invalid integer value for {key}: {attrs[key]}") from err
             else:
                 try:
-                    attrs[key] = float(attrs[key])  # type: ignore
+                    attrs[key] = float(attrs[key])
                 except ValueError:
                     # Then it's a string and no need to convert.
                     pass
         elif key == "ID" or key == "ROI_N_POINTS":
             # IDs are always integers in TrackMate.
-            attrs[key] = int(attrs[key])  # type: ignore
+            attrs[key] = int(attrs[key])
         elif key == "name":
             pass  # "name" is a string so we don't need to convert it.
         else:
@@ -456,7 +456,7 @@ def _parse_model_tag(
         dict[str, str]: A dictionary containing the units of the model, with keys
             'spatialunits' and 'timeunits'.
     """
-    graph = nx.DiGraph()
+    graph: nx.DiGraph[int] = nx.DiGraph()
 
     # So as not to load the entire XML file into memory at once, we're
     # using an iterator to browse over the tags one by one.
@@ -465,6 +465,8 @@ def _parse_model_tag(
     it = ET.iterparse(xml_path, events=["start", "end"])
     _, root = next(it)  # Saving the root of the tree for later cleaning.
 
+    units: dict[str, str] = {}
+    attrs_md: dict[str, dict[str, str]] = {}
     for event, element in it:
         if element.tag == "Model" and event == "start":
             units = _get_units(element)

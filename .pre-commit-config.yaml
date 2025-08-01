@@ -11,10 +11,10 @@ repos:
       - id: typos
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.4
+    rev: v0.12.7
     hooks:
       - id: ruff-check
-        args: [--fix]
+        args: [--fix, --unsafe-fixes]
       - id: ruff-format
 
   - repo: https://github.com/abravalheri/validate-pyproject
@@ -30,7 +30,18 @@ repos:
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
-          - networkx
+          # - types-networkx
+          - pydantic
           - typer
-          # codebase not ready for this one yet
-          # - pydantic
+          - numpy
+          - zarr
+
+  - repo: local
+    hooks:
+      - id: pyright
+        stages: [manual]
+        name: pyright (local)
+        entry: uv run pyright
+        language: system
+        types: [python]
+        files: "^src/"
