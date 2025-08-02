@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://live-image-tracking-tools.github.io/geff/</loc>
-         <lastmod>2025-07-31</lastmod>
+         <loc>https://live-image-tracking-tools.github.io/geff/index.html</loc>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
-         <loc>https://live-image-tracking-tools.github.io/geff/api/</loc>
-         <lastmod>2025-07-31</lastmod>
+         <loc>https://live-image-tracking-tools.github.io/geff/api.html</loc>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
-         <loc>https://live-image-tracking-tools.github.io/geff/command-line-tools/</loc>
-         <lastmod>2025-07-31</lastmod>
+         <loc>https://live-image-tracking-tools.github.io/geff/command-line-tools.html</loc>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
-         <loc>https://live-image-tracking-tools.github.io/geff/specification/</loc>
-         <lastmod>2025-07-31</lastmod>
+         <loc>https://live-image-tracking-tools.github.io/geff/specification.html</loc>
+         <lastmod>2025-08-02</lastmod>
     </url>
     <url>
-         <loc>https://live-image-tracking-tools.github.io/geff/what-is-geff/</loc>
-         <lastmod>2025-07-31</lastmod>
+         <loc>https://live-image-tracking-tools.github.io/geff/what-is-geff.html</loc>
+         <lastmod>2025-08-02</lastmod>
     </url>
 </urlset>
