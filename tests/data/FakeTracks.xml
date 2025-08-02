@@ -700,7 +700,7 @@ Computation done in 5 ms.</Log>
     </FilteredTracks>
   </Model>
   <Settings>
-    <ImageData filename="FakeTracks.tif" folder="" width="128" height="128" nslices="1" nframes="50" pixelwidth="1.0" pixelheight="1.0" voxeldepth="1.0" timeinterval="1.0" />
+    <ImageData filename="FakeTracks.tif" folder="path/to/image/folder/" width="128" height="128" nslices="1" nframes="50" pixelwidth="1.0" pixelheight="1.0" voxeldepth="1.0" timeinterval="1.0" />
     <BasicSettings xstart="0" xend="127" ystart="0" yend="127" zstart="0" zend="0" tstart="0" tend="49" />
     <DetectorSettings DETECTOR_NAME="STARDIST_DETECTOR" TARGET_CHANNEL="1" />
     <InitialSpotFilter feature="QUALITY" value="0.4237962850817928" isabove="true" />
