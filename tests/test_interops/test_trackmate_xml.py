@@ -1,4 +1,5 @@
 import io
+import re
 from copy import deepcopy
 from pathlib import Path
 
@@ -573,21 +574,39 @@ def test_get_specific_tags():
         "TrackFilterCollection",  # nested elements with attribs
     ]
     obtained = tm_xml._get_specific_tags(xml_path, tag_names)
-    expected = {
-        "FeaturePenalties": {},
-        "GUIState": {"@state": "ConfigureViews"},
-        "TrackFilterCollection": {
-            "Filter": [
-                {"@feature": "TRACK_START", "@value": "77.9607843137255", "@isabove": "false"},
-                {
-                    "@feature": "TOTAL_DISTANCE_TRAVELED",
-                    "@value": "20.75402586236767",
-                    "@isabove": "true",
-                },
-            ]
+
+    track_filter_collection = ET.Element("TrackFilterCollection")
+    ET.SubElement(
+        track_filter_collection,
+        "Filter",
+        attrib={"feature": "TRACK_START", "value": "77.9607843137255", "isabove": "false"},
+    )
+    ET.SubElement(
+        track_filter_collection,
+        "Filter",
+        attrib={
+            "feature": "TOTAL_DISTANCE_TRAVELED",
+            "value": "20.75402586236767",
+            "isabove": "true",
         },
+    )
+    expected = {
+        "FeaturePenalties": ET.Element("FeaturePenalties"),
+        "GUIState": ET.Element("GUIState", attrib={"state": "ConfigureViews"}),
+        "TrackFilterCollection": track_filter_collection,
     }
-    assert obtained == expected
+
+    def normalize_xml_string(xml_str):
+        """Remove extra whitespace between XML elements."""
+        normalized = re.sub(r">\s+<", "><", xml_str.strip())
+        return normalized
+
+    assert obtained.keys() == expected.keys()
+    for key in obtained:
+        assert key in expected
+        obtained_xml = normalize_xml_string(ET.tostring(obtained[key], encoding="unicode"))
+        expected_xml = normalize_xml_string(ET.tostring(expected[key], encoding="unicode"))
+        assert obtained_xml == expected_xml
 
 
 def test_from_trackmate_xml_to_geff(tmp_path):

@@ -26,6 +26,7 @@ else:
         import xml.etree.ElementTree as ET
 
 from geff.metadata_schema import Axis, DisplayHint, GeffMetadata
+from geff.networkx.io import read_nx, write_nx
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
 # used in ctc_to_geff. Need to wait for CTC PR.
@@ -830,8 +831,8 @@ def _build_geff_metadata(
     xml_path: Path,
     units: dict[str, str],
     img_path: str | None,
-    trackmate_metadata: dict[str, dict[str, Any]],
-    props_metadata: dict[str, Any],
+    trackmate_metadata: dict[str, ET.Element[str]],
+    props_metadata: dict[str, dict[str, Any]],
 ) -> GeffMetadata:
     """Create GEFF metadata from TrackMate XML data.
 
@@ -839,7 +840,7 @@ def _build_geff_metadata(
         xml_path (Path): The path to the TrackMate XML file.
         units (dict[str, str]): A dictionary containing the units of the model.
         img_path (str | None): The path to the related image file.
-        trackmate_metadata (dict[str, dict[str, Any]]): The TrackMate metadata extracted
+        trackmate_metadata (dict[str, dict[str, ET.Element[str]]]): The TrackMate metadata extracted
             from the XML file.
         props_metadata (dict[str, Any]): The properties metadata extracted from the XML file.
 
@@ -851,10 +852,12 @@ def _build_geff_metadata(
         "provenance": "trackmate",
         "lineage_props_metadata": props_metadata["lineage_props_metadata"],
         "trackmate": {
-            "log": trackmate_metadata.get("Log", None),
-            "settings": trackmate_metadata.get("Settings", None),
-            "gui_state": trackmate_metadata.get("GUIState", None),
-            "display_settings": trackmate_metadata.get("DisplaySettings", None),
+            "log": ET.tostring(trackmate_metadata["Log"], encoding="utf-8").decode(),
+            "settings": ET.tostring(trackmate_metadata["Settings"], encoding="utf-8").decode(),
+            "gui_state": ET.tostring(trackmate_metadata["GUIState"], encoding="utf-8").decode(),
+            "display_settings": ET.tostring(
+                trackmate_metadata["DisplaySettings"], encoding="utf-8"
+            ).decode(),
         },
     }
 
@@ -975,22 +978,22 @@ def from_trackmate_xml_to_geff(
     # TODO: rewrite since now _get_specific_tags returns a dict of ET.Element.
     props_metadata = _extract_props_metadata(xml_path, units)
     _ensure_data_metadata_consistency(graph=graph, metadata=props_metadata)
-    # tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
-    # img_path = _extract_image_path(tm_md.get("Settings", None))
-    # metadata = _build_geff_metadata(
-    #     xml_path=xml_path,
-    #     units=units,
-    #     img_path=img_path,
-    #     trackmate_metadata=tm_md,
-    #     props_metadata=props_metadata,
-    # )
-    # # Create the GEFF :D
-    # write_nx(
-    #     graph,
-    #     store=geff_path,
-    #     metadata=metadata,
-    #     zarr_format=zarr_format,
-    # )
+    tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
+    img_path = _extract_image_path(tm_md.get("Settings", None))
+    metadata = _build_geff_metadata(
+        xml_path=xml_path,
+        units=units,
+        img_path=img_path,
+        trackmate_metadata=tm_md,
+        props_metadata=props_metadata,
+    )
+    # Create the GEFF :D
+    write_nx(
+        graph,
+        store=geff_path,
+        metadata=metadata,
+        zarr_format=zarr_format,
+    )
 
 
 def from_trackmate_xml_to_geff_cli(
@@ -1044,11 +1047,11 @@ if __name__ == "__main__":
         overwrite=True,
     )
 
-    # graph, md = read_nx(store=geff_file, validate=True)
-    # print(graph)
+    graph, md = read_nx(store=geff_file, validate=True)
+    print(graph)
     # for node_id, node_data in graph.nodes(data=True):
     #     print(f"Node {node_id}: {node_data}")
     #     break
-    # if md.node_props_metadata:
-    #     for k, v in md.node_props_metadata.items():
-    #         print(f"{k} -> {v}")
+    if md.node_props_metadata:
+        for k, v in md.node_props_metadata.items():
+            print(f"{k} -> {v}")
