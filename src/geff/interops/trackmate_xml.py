@@ -6,10 +6,9 @@ import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
-import typer
 
 if TYPE_CHECKING:
     import xml.etree.ElementTree as ET
@@ -26,7 +25,7 @@ else:
         import xml.etree.ElementTree as ET
 
 from geff.metadata_schema import Axis, DisplayHint, GeffMetadata
-from geff.networkx.io import read_nx, write_nx
+from geff.networkx.io import write_nx
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
 # used in ctc_to_geff. Need to wait for CTC PR.
@@ -68,10 +67,10 @@ def _preliminary_checks(
         FileExistsError: If the GEFF file exists and overwrite is False.
     """
     if not xml_path.exists():
-        raise FileNotFoundError(f"TrackMate XML file {xml_path} does not exist")
+        raise FileNotFoundError(f"TrackMate XML file {xml_path} does not exist.")
 
     if geff_path.exists() and not overwrite:
-        raise FileExistsError(f"GEFF file {geff_path} already exists")
+        raise FileExistsError(f"GEFF file {geff_path} already exists.")
 
     if geff_path.exists() and overwrite:
         shutil.rmtree(geff_path)
@@ -577,6 +576,10 @@ def _get_specific_tags(
         dict[str, ET.Element]: A dictionary where each key is a tag name from
         `tag_names` that was found in the XML file, and the corresponding value
         is the deep copied `ET.Element` object for that tag.
+
+    Raises:
+        ValueError: If any of the specified tags in `tag_names` are not found
+            in the XML file. The error message will list the missing tags.
     """
     with open(xml_path, "rb") as f:
         it = ET.iterparse(f, events=["start", "end"])
@@ -590,7 +593,10 @@ def _get_specific_tags(
 
             if event == "end":
                 element.clear()
-    print(f"Extracted tags: {dict_tags.keys()}")
+
+        if tag_names:
+            raise ValueError(f"Missing tags: {tag_names}. Please check the XML file.")
+
     return dict_tags
 
 
@@ -652,39 +658,18 @@ def _extract_image_path(settings_md: ET.Element | None) -> str | None:
         return str(Path(folder) / filename)
 
 
-def _validate_feature_key(key: str | None, feat_type: str) -> str:
-    """Validate and return the feature key.
-
-    Args:
-        key: The feature key from the XML.
-        feat_type: The feature type for error messages.
-
-    Returns:
-        The validated feature key.
-
-    Raises:
-        ValueError: If the key is None or missing.
-    """
-    if key is None:
-        raise ValueError(
-            f"Missing field 'feature' in 'FeatureDeclarations' {feat_type} tag. "
-            "Please check the XML file."
-        )
-    return key
-
-
 def _get_feature_name(feat: ET.Element, key: str, feat_type: str) -> str:
     """Extract and validate the feature name, using key as fallback.
 
     Args:
         feat: The feature metadata element.
-        key: The feature key to use as fallback.
+        key: The feature identifier to use as fallback.
         feat_type: The feature type for warning messages.
 
     Returns:
         The feature name.
     """
-    name = feat.attrib["name"]
+    name = feat.attrib.get("name", None)
     if name is None:
         warnings.warn(
             f"Missing field 'name' in 'FeatureDeclarations' {feat_type} tag. "
@@ -708,7 +693,7 @@ def _get_feature_dtype(feat: ET.Element, feat_type: str) -> str:
     Raises:
         ValueError: If the dtype field is missing.
     """
-    dtype = feat.attrib.get("isint")
+    dtype = feat.attrib.get("isint", None)
     if dtype is None:
         raise ValueError(
             f"Missing field 'isint' in 'FeatureDeclarations' {feat_type} tag. "
@@ -728,7 +713,7 @@ def _get_feature_unit(feat: ET.Element, feat_type: str, units: dict[str, str]) -
     Returns:
         The feature unit.
     """
-    dimension = feat.attrib.get("dimension")
+    dimension = feat.attrib.get("dimension", None)
     if dimension not in _DIMENSION_UNIT_TEMPLATES:
         raise ValueError(
             f"Unknown dimension '{dimension}' in 'FeatureDeclarations' '{feat_type}' tag. "
@@ -754,7 +739,13 @@ def _process_feature_metadata(
     Raises:
         ValueError: If the feature key is missing or duplicated.
     """
-    key = _validate_feature_key(feat.attrib["feature"], feat_type)
+    if feat.attrib.get("feature") is None:
+        raise KeyError(
+            f"Missing field 'feature' in 'FeatureDeclarations' {feat_type} tag. "
+            "Please check the XML file."
+        )
+    else:
+        key = feat.attrib["feature"]
 
     if key in geff_dict:
         raise ValueError(
@@ -807,16 +798,8 @@ def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, 
         "TrackFeatures": lineage_props_metadata,
     }
 
-    # TODO: rewrite based on the _add_all_features just below since now
-    # _get_specific_tags returns a dict of ET.Element.
     tags_data = _get_specific_tags(xml_path, ["FeatureDeclarations"])
-    if "FeatureDeclarations" not in tags_data:
-        raise ValueError(
-            "No 'FeatureDeclarations' tag found in the XML file. Please check the XML file."
-        )
     xml_md = tags_data["FeatureDeclarations"]
-    print("PROCESSING FEATURES METADATA")
-    # Get an iterator on the ET.Element xml_md
     for feat_type in xml_md:
         if feat_type.tag in mapping_feat_type:
             for feat in feat_type.findall("Feature"):
@@ -831,7 +814,7 @@ def _build_geff_metadata(
     xml_path: Path,
     units: dict[str, str],
     img_path: str | None,
-    trackmate_metadata: dict[str, ET.Element[str]],
+    trackmate_metadata: dict[str, ET.Element],
     props_metadata: dict[str, dict[str, Any]],
 ) -> GeffMetadata:
     """Create GEFF metadata from TrackMate XML data.
@@ -840,7 +823,7 @@ def _build_geff_metadata(
         xml_path (Path): The path to the TrackMate XML file.
         units (dict[str, str]): A dictionary containing the units of the model.
         img_path (str | None): The path to the related image file.
-        trackmate_metadata (dict[str, dict[str, ET.Element[str]]]): The TrackMate metadata extracted
+        trackmate_metadata (dict[str, dict[str, ET.Element]]): The TrackMate metadata extracted
             from the XML file.
         props_metadata (dict[str, Any]): The properties metadata extracted from the XML file.
 
@@ -975,7 +958,6 @@ def from_trackmate_xml_to_geff(
         discard_filtered_tracks=discard_filtered_tracks,
     )
     # Metadata
-    # TODO: rewrite since now _get_specific_tags returns a dict of ET.Element.
     props_metadata = _extract_props_metadata(xml_path, units)
     _ensure_data_metadata_consistency(graph=graph, metadata=props_metadata)
     tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
@@ -994,64 +976,3 @@ def from_trackmate_xml_to_geff(
         metadata=metadata,
         zarr_format=zarr_format,
     )
-
-
-def from_trackmate_xml_to_geff_cli(
-    xml_path: Path,
-    geff_path: Path,
-    discard_filtered_spots: bool = False,
-    discard_filtered_tracks: bool = False,
-    overwrite: bool = False,
-    zarr_format: int = 2,  # type: ignore
-    # because of Typer not supporting Literal types
-) -> None:
-    """
-    Convert a TrackMate XML file to a GEFF file.
-
-    Args:
-        xml_path (Path | str): The path to the TrackMate XML file.
-        geff_path (Path | str): The path to the GEFF file.
-        discard_filtered_spots (bool, optional): True to discard the spots
-            filtered out in TrackMate, False otherwise. False by default.
-        discard_filtered_tracks (bool, optional): True to discard the tracks
-            filtered out in TrackMate, False otherwise. False by default.
-        overwrite (bool, optional): Whether to overwrite the GEFF file if it already exists.
-        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
-    """
-    from_trackmate_xml_to_geff(
-        xml_path=xml_path,
-        geff_path=geff_path,
-        discard_filtered_spots=discard_filtered_spots,
-        discard_filtered_tracks=discard_filtered_tracks,
-        overwrite=overwrite,
-        zarr_format=cast("Literal[2, 3]", zarr_format),
-    )
-
-
-app = typer.Typer()
-app.command()(from_trackmate_xml_to_geff_cli)
-
-
-if __name__ == "__main__":
-    # app()
-
-    xml_file = "tests/data/FakeTracks.xml"
-    geff_file = "C:/Users/lxenard/Desktop/FakeTracks.geff"
-    # xml_file = "C:/Users/lxenard/Documents/Code/pycellin/sample_data/Ecoli_growth_on_agar_pad.xml"
-    # geff_file = "C:/Users/lxenard/Desktop/Ecoli_growth_on_agar_pad.geff"
-    from_trackmate_xml_to_geff(
-        xml_path=xml_file,
-        geff_path=geff_file,
-        # discard_filtered_spots=False,
-        # discard_filtered_tracks=False,
-        overwrite=True,
-    )
-
-    graph, md = read_nx(store=geff_file, validate=True)
-    print(graph)
-    # for node_id, node_data in graph.nodes(data=True):
-    #     print(f"Node {node_id}: {node_data}")
-    #     break
-    if md.node_props_metadata:
-        for k, v in md.node_props_metadata.items():
-            print(f"{k} -> {v}")

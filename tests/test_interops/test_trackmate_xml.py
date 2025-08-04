@@ -15,6 +15,22 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 
+def test_preliminary_checks(tmp_path):
+    xml_path = Path("path/to/xml")
+    geff_path = Path("path/to/geff")
+
+    # Normal case
+    tm_xml._preliminary_checks(tmp_path, geff_path, True)
+
+    # FileNotFoundError for missing XML file
+    with pytest.raises(FileNotFoundError):
+        tm_xml._preliminary_checks(xml_path, geff_path, False)
+
+    # FileExistsError for existing GEFF file
+    with pytest.raises(FileExistsError):
+        tm_xml._preliminary_checks(tmp_path, tmp_path, False)
+
+
 def test_get_units():
     space_warning = "No space unit found in the XML file. Setting to 'pixel'."
     time_warning = "No time unit found in the XML file. Setting to 'frame'."
@@ -567,6 +583,7 @@ def test_get_trackmate_version(tmp_path):
 
 
 def test_get_specific_tags():
+    # Normal case with several tags
     xml_path = Path("tests/data/FakeTracks.xml")
     tag_names = [
         "FeaturePenalties",  # empty element
@@ -607,6 +624,285 @@ def test_get_specific_tags():
         obtained_xml = normalize_xml_string(ET.tostring(obtained[key], encoding="unicode"))
         expected_xml = normalize_xml_string(ET.tostring(expected[key], encoding="unicode"))
         assert obtained_xml == expected_xml
+
+    # Missing tags
+    tag_names = ["FeaturePenalties", "MissingTag", "GUIState", "AnotherMissingTag"]
+    with pytest.raises(
+        ValueError,
+        match=r"Missing tags: \['MissingTag', 'AnotherMissingTag'\]",
+    ):
+        tm_xml._get_specific_tags(xml_path, tag_names)
+
+
+def test_extract_image_path():
+    # Normal case with both filename and folder
+    settings_element = ET.Element("Settings")
+    ET.SubElement(
+        settings_element,
+        "ImageData",
+        attrib={"filename": "test_image.tif", "folder": "/path/to/images"},
+    )
+    obtained = tm_xml._extract_image_path(settings_element)
+    expected = str(Path("/path/to/images") / "test_image.tif")
+    assert obtained == expected
+
+    # Only filename, no folder
+    settings_element = ET.Element("Settings")
+    ET.SubElement(
+        settings_element, "ImageData", attrib={"filename": "test_image.tif", "folder": ""}
+    )
+    with pytest.warns(
+        UserWarning,
+        match="No image folder found in the XML file",
+    ):
+        obtained = tm_xml._extract_image_path(settings_element)
+    expected = str(Path("test_image.tif"))
+    assert obtained == expected
+
+    # Only folder, no filename
+    settings_element = ET.Element("Settings")
+    ET.SubElement(
+        settings_element,
+        "ImageData",
+        attrib={"filename": "", "folder": "/path/to/images"},
+    )
+    with pytest.warns(
+        UserWarning,
+        match="No image name found in the XML file.",
+    ):
+        obtained = tm_xml._extract_image_path(settings_element)
+    expected = str(Path("/path/to/images"))
+    assert obtained == expected
+
+    # Neither filename nor folder
+    settings_element = ET.Element("Settings")
+    ET.SubElement(settings_element, "ImageData", attrib={"filename": "", "folder": ""})
+    with pytest.warns(
+        UserWarning,
+        match="No image path found in the XML file.",
+    ):
+        obtained = tm_xml._extract_image_path(settings_element)
+    assert obtained is None
+
+    # Missing ImageData element
+    settings_element = ET.Element("Settings")
+    with pytest.warns(
+        UserWarning,
+        match="No 'ImageData' tag found in the XML file.",
+    ):
+        obtained = tm_xml._extract_image_path(settings_element)
+    assert obtained is None
+
+    # Missing Settings element (None input)
+    with pytest.warns(
+        UserWarning,
+        match="No 'Settings' tag found in the XML file.",
+    ):
+        obtained = tm_xml._extract_image_path(None)
+    assert obtained is None
+
+
+def test_get_feature_name():
+    # Normal case
+    feature_element = ET.Element("Feature", attrib={"feature": "QUALITY", "name": "Quality"})
+    obtained = tm_xml._get_feature_name(feature_element, "QUALITY", "node")
+    assert obtained == "Quality"
+
+    # Empty element, node
+    feature_element = ET.Element("Feature", attrib={"isint": "false"})
+    with pytest.warns(
+        UserWarning,
+        match="Missing field 'name' in 'FeatureDeclarations' node tag.",
+    ):
+        obtained = tm_xml._get_feature_name(feature_element, "QUALITY", "node")
+        assert obtained == "QUALITY"
+
+    # Empty element, edge
+    feature_element = ET.Element("Feature", attrib={"isint": "false"})
+    with pytest.warns(
+        UserWarning,
+        match="Missing field 'name' in 'FeatureDeclarations' edge tag.",
+    ):
+        obtained = tm_xml._get_feature_name(feature_element, "QUALITY", "edge")
+        assert obtained == "QUALITY"
+
+
+def test_get_feature_dtype():
+    # Normal case, is int
+    feat_element = ET.Element("Feature", attrib={"feature": "QUALITY", "isint": "true"})
+    obtained = tm_xml._get_feature_dtype(feat_element, "node")
+    assert obtained == "int"
+
+    # Normal case, is not int
+    feat_element = ET.Element("Feature", attrib={"feature": "QUALITY", "isint": "false"})
+    obtained = tm_xml._get_feature_dtype(feat_element, "node")
+    assert obtained == "float"
+
+    # Empty element, node
+    feat_element = ET.Element("Feature", attrib={"dimension": "TIME"})
+    with pytest.raises(
+        ValueError,
+        match="Missing field 'isint' in 'FeatureDeclarations' node tag.",
+    ):
+        tm_xml._get_feature_dtype(feat_element, "node")
+
+    # Empty element, edge
+    feat_element = ET.Element("Feature", attrib={"dimension": "TIME"})
+    with pytest.raises(
+        ValueError,
+        match="Missing field 'isint' in 'FeatureDeclarations' edge tag.",
+    ):
+        tm_xml._get_feature_dtype(feat_element, "edge")
+
+
+def test_get_feature_unit():
+    units = {"spatialunits": "micrometer", "timeunits": "second"}
+
+    # NONE dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "NONE"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "None"
+
+    # QUALITY dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "QUALITY"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "None"
+
+    # POSITION dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "POSITION"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "micrometer"
+
+    # LENGTH dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "LENGTH"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "micrometer"
+
+    # TIME dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "TIME"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "second"
+
+    # VELOCITY dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "VELOCITY"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "micrometer / second"
+
+    # AREA dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "AREA"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "micrometer^2"
+
+    # ANGLE dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "ANGLE"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "radian"
+
+    # RATE dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "RATE"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "1 / second"
+
+    # ANGLE_RATE dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "ANGLE_RATE"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+    assert obtained == "radian / second"
+
+    # Empty units dictionary
+    empty_units = {}
+    feature_element = ET.Element("Feature", attrib={"dimension": "POSITION"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", empty_units)
+    assert obtained == "pixel"  # default spatial unit
+
+    feature_element = ET.Element("Feature", attrib={"dimension": "TIME"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", empty_units)
+    assert obtained == "frame"  # default time unit
+
+    # Partial units dictionary
+    partial_units = {"spatialunits": "micrometer"}
+    feature_element = ET.Element("Feature", attrib={"dimension": "VELOCITY"})
+    obtained = tm_xml._get_feature_unit(feature_element, "SpotFeatures", partial_units)
+    assert obtained == "micrometer / frame"  # default time unit
+
+    # Unknown dimension
+    feature_element = ET.Element("Feature", attrib={"dimension": "UNKNOWN_DIM"})
+    with pytest.raises(ValueError, match="Unknown dimension 'UNKNOWN_DIM'"):
+        tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+
+    # Missing dimension attribute
+    feature_element = ET.Element("Feature", attrib={})
+    with pytest.raises(ValueError, match="Unknown dimension 'None'"):
+        tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
+
+
+def test_process_feature_metadata():
+    units = {"spatialunits": "pixel", "timeunits": "frame"}
+
+    # Normal case
+    obtained = {}
+    feature_element = ET.Element(
+        "Feature",
+        attrib={"feature": "QUALITY", "name": "Quality", "isint": "false", "dimension": "QUALITY"},
+    )
+    tm_xml._process_feature_metadata(feature_element, obtained, "SpotFeatures", units)
+    expected = {
+        "QUALITY": {"identifier": "QUALITY", "name": "Quality", "dtype": "float", "unit": "None"}
+    }
+    assert obtained == expected
+
+    # Missing 'feature' field
+    obtained = {}
+    feature_element = ET.Element(
+        "Feature", attrib={"name": "Quality", "isint": "false", "dimension": "QUALITY"}
+    )
+    with pytest.raises(KeyError, match="Missing field 'feature' in 'FeatureDeclarations'"):
+        tm_xml._process_feature_metadata(feature_element, obtained, "SpotFeatures", units)
+
+    # Dict with existing data
+    obtained = {"EXISTING_FEATURE": {"feature": "EXISTING_FEATURE"}}
+    feature_element = ET.Element(
+        "Feature",
+        attrib={
+            "feature": "NEW_FEATURE",
+            "name": "New feature",
+            "isint": "true",
+            "dimension": "TIME",
+        },
+    )
+    tm_xml._process_feature_metadata(feature_element, obtained, "EdgeFeatures", units)
+    expected = {
+        "EXISTING_FEATURE": {"feature": "EXISTING_FEATURE"},
+        "NEW_FEATURE": {
+            "identifier": "NEW_FEATURE",
+            "name": "New feature",
+            "dtype": "int",
+            "unit": "frame",
+        },
+    }
+    assert obtained == expected
+
+    # Duplicate feature identifier
+    obtained = {"QUALITY": {"name": "Quality", "isint": "false", "dimension": "QUALITY"}}
+    feature_element = ET.Element(
+        "Feature",
+        attrib={"feature": "QUALITY", "name": "Quality", "isint": "false", "dimension": "QUALITY"},
+    )
+    with pytest.raises(ValueError, match="Duplicate feature identifier 'QUALITY' found"):
+        tm_xml._process_feature_metadata(feature_element, obtained, "SpotFeatures", units)
+
+    # Error propagation
+    obtained = {}
+    feature_element = ET.Element(
+        "Feature",
+        attrib={
+            "feature": "TEST_FEATURE",
+            "name": "Test",
+            "dimension": "UNKNOWN_DIMENSION",
+            "isint": "false",
+        },
+    )
+    with pytest.raises(ValueError, match="Unknown dimension 'UNKNOWN_DIMENSION'"):
+        tm_xml._process_feature_metadata(feature_element, obtained, "SpotFeatures", units)
 
 
 def test_from_trackmate_xml_to_geff(tmp_path):
