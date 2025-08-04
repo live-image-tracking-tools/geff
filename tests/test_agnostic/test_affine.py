@@ -133,13 +133,7 @@ class TestAffineTransformation:
     def test_scaling_transformation_2d(self):
         """Test scaling transformation in 2D."""
         # Note: scipy convention - inverse scaling for pull transform
-        matrix = np.array(
-            [
-                [0.5, 0, 0],  # Scale by 1/0.5 = 2 in x
-                [0, 0.25, 0],  # Scale by 1/0.25 = 4 in y
-                [0, 0, 1],
-            ]
-        )
+        matrix = np.diag([0.5, 0.25, 1])  # Scale by 2 in x, 4 in y
         affine = Affine(matrix=matrix)
 
         points = np.array([[2, 4]])
