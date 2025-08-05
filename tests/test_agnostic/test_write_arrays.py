@@ -1,12 +1,17 @@
+from pathlib import Path
+from typing import Literal
+
 import numpy as np
 import zarr
+import pytest
 
 from geff.metadata_schema import GeffMetadata
 from geff.write_arrays import write_arrays
 
 
 class TestWriteArrays:
-    def test_write_arrays_basic(self, tmp_path):
+    @pytest.mark.parametrize("zarr_format", [2, 3])
+    def test_write_arrays_basic(self, tmp_path: Path, zarr_format: Literal[2, 3]) -> None:
         """Test basic functionality of write_arrays with minimal data."""
         # Create test data
         geff_path = tmp_path / "test.geff"
@@ -22,6 +27,7 @@ class TestWriteArrays:
             edge_ids=edge_ids,
             edge_props=None,
             metadata=metadata,
+            zarr_format=zarr_format,
         )
 
         # Verify the zarr group was created
