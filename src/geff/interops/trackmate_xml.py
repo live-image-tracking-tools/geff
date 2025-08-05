@@ -783,9 +783,9 @@ def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, 
             None will be used.
     """
     # Dictionaries of metadata for GEFF properties.
-    node_props_metadata = {}  # type: dict[str, Any]
-    edge_props_metadata = {}  # type: dict[str, Any]
-    lineage_props_metadata = {}  # type: dict[str, Any]
+    node_props_metadata: dict[str, Any] = {}
+    edge_props_metadata: dict[str, Any] = {}
+    lineage_props_metadata: dict[str, Any] = {}
     props_metadata = {
         "node_props_metadata": node_props_metadata,
         "edge_props_metadata": edge_props_metadata,
