@@ -908,17 +908,25 @@ def test_process_feature_metadata():
 def test_from_trackmate_xml_to_geff(tmp_path):
     # No arguments, should use default values
     geff_output = tmp_path / "test.geff"
-    tm_xml.from_trackmate_xml_to_geff("tests/data/FakeTracks.xml", geff_output)
+    with pytest.warns() as warning_list:
+        tm_xml.from_trackmate_xml_to_geff("tests/data/FakeTracks.xml", geff_output)
+    warning_messages = [str(warning.message) for warning in warning_list]
+    assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
+    assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
     validate(geff_output)
 
     # Discard filtered spots and tracks
-    tm_xml.from_trackmate_xml_to_geff(
-        "tests/data/FakeTracks.xml",
-        geff_output,
-        discard_filtered_spots=True,
-        discard_filtered_tracks=True,
-        overwrite=True,
-    )
+    with pytest.warns() as warning_list:
+        tm_xml.from_trackmate_xml_to_geff(
+            "tests/data/FakeTracks.xml",
+            geff_output,
+            discard_filtered_spots=True,
+            discard_filtered_tracks=True,
+            overwrite=True,
+        )
+    warning_messages = [str(warning.message) for warning in warning_list]
+    assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
+    assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
     validate(geff_output)
 
     # Geff file already exists

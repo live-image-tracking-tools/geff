@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import itertools
-import logging
 import shutil
 import warnings
 from copy import deepcopy
@@ -831,16 +830,18 @@ def _build_geff_metadata(
         GeffMetadata: The constructed GEFF metadata object.
     """
     extra = {
-        "trackmate_version": _get_trackmate_version(xml_path),
-        "provenance": "trackmate",
-        "lineage_props_metadata": props_metadata["lineage_props_metadata"],
-        "trackmate": {
-            "log": ET.tostring(trackmate_metadata["Log"], encoding="utf-8").decode(),
-            "settings": ET.tostring(trackmate_metadata["Settings"], encoding="utf-8").decode(),
-            "gui_state": ET.tostring(trackmate_metadata["GUIState"], encoding="utf-8").decode(),
-            "display_settings": ET.tostring(
-                trackmate_metadata["DisplaySettings"], encoding="utf-8"
-            ).decode(),
+        "other_trackmate_metadata": {
+            "trackmate_version": _get_trackmate_version(xml_path),
+            # TODO: move into normal metadata once GEFF can store lineage metadata
+            "lineage_props_metadata": props_metadata["lineage_props_metadata"],
+            "trackmate": {
+                "log": ET.tostring(trackmate_metadata["Log"], encoding="utf-8").decode(),
+                "settings": ET.tostring(trackmate_metadata["Settings"], encoding="utf-8").decode(),
+                "gui_state": ET.tostring(trackmate_metadata["GUIState"], encoding="utf-8").decode(),
+                "display_settings": ET.tostring(
+                    trackmate_metadata["DisplaySettings"], encoding="utf-8"
+                ).decode(),
+            },
         },
     }
 
@@ -861,7 +862,7 @@ def _build_geff_metadata(
         node_props_metadata=props_metadata["node_props_metadata"],
         edge_props_metadata=props_metadata["edge_props_metadata"],
         track_node_props={"lineage": "TRACK_ID"},
-        related_objects=[{"type": "image", "path": img_path}],
+        related_objects=[{"type": "image", "path": img_path}] if img_path is not None else None,
         extra=extra,
     )
 
@@ -893,9 +894,10 @@ def _check_component_props_consistency(
     if removed_props:
         plural1 = "ies were" if len(removed_props) > 1 else "y was"
         plural2 = "they are" if len(removed_props) > 1 else "it is"
-        logging.info(
+        warnings.warn(
             f"The following {component_type} property{plural1} removed from the metadata "
-            f"because {plural2} not present in the data: {', '.join(removed_props)}."
+            f"because {plural2} not present in the data: {', '.join(removed_props)}.",
+            stacklevel=2,
         )
 
 
