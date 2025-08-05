@@ -895,7 +895,7 @@ def _check_component_props_consistency(
         plural1 = "ies were" if len(removed_props) > 1 else "y was"
         plural2 = "they are" if len(removed_props) > 1 else "it is"
         warnings.warn(
-            f"The following {component_type} property{plural1} removed from the metadata "
+            f"The following {component_type} propert{plural1} removed from the metadata "
             f"because {plural2} not present in the data: {', '.join(removed_props)}.",
             stacklevel=2,
         )
