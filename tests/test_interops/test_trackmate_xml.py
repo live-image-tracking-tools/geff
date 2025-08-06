@@ -627,9 +627,9 @@ def test_get_specific_tags():
 
     # Missing tags
     tag_names = ["FeaturePenalties", "MissingTag", "GUIState", "AnotherMissingTag"]
-    with pytest.raises(
-        ValueError,
-        match=r"Missing tags: \['MissingTag', 'AnotherMissingTag'\]",
+    with pytest.warns(
+        UserWarning,
+        match=r"Missing tag\(s\): \['MissingTag', 'AnotherMissingTag'\]",
     ):
         tm_xml._get_specific_tags(xml_path, tag_names)
 

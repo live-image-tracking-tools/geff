@@ -576,8 +576,8 @@ def _get_specific_tags(
         `tag_names` that was found in the XML file, and the corresponding value
         is the deep copied `ET.Element` object for that tag.
 
-    Raises:
-        ValueError: If any of the specified tags in `tag_names` are not found
+    Warns:
+        UserWarning: If any of the specified tags in `tag_names` are not found
             in the XML file. The error message will list the missing tags.
     """
     with open(xml_path, "rb") as f:
@@ -594,7 +594,11 @@ def _get_specific_tags(
                 element.clear()
 
         if tag_names:
-            raise ValueError(f"Missing tags: {tag_names}. Please check the XML file.")
+            warnings.warn(
+                f"Missing tag(s): {tag_names}. The associated metadata "
+                "will not be included in the GEFF file.",
+                stacklevel=2,
+            )
 
     return dict_tags
 
@@ -834,16 +838,19 @@ def _build_geff_metadata(
             "trackmate_version": _get_trackmate_version(xml_path),
             # TODO: move into normal metadata once GEFF can store lineage metadata
             "lineage_props_metadata": props_metadata["lineage_props_metadata"],
-            "trackmate": {
-                "log": ET.tostring(trackmate_metadata["Log"], encoding="utf-8").decode(),
-                "settings": ET.tostring(trackmate_metadata["Settings"], encoding="utf-8").decode(),
-                "gui_state": ET.tostring(trackmate_metadata["GUIState"], encoding="utf-8").decode(),
-                "display_settings": ET.tostring(
-                    trackmate_metadata["DisplaySettings"], encoding="utf-8"
-                ).decode(),
-            },
         },
     }
+    md = extra["other_trackmate_metadata"]
+    if "Log" in trackmate_metadata:
+        md["log"] = ET.tostring(trackmate_metadata["Log"], encoding="utf-8").decode()
+    if "Settings" in trackmate_metadata:
+        md["settings"] = ET.tostring(trackmate_metadata["Settings"], encoding="utf-8").decode()
+    if "GUIState" in trackmate_metadata:
+        md["gui_state"] = ET.tostring(trackmate_metadata["GUIState"], encoding="utf-8").decode()
+    if "DisplaySettings" in trackmate_metadata:
+        md["display_settings"] = ET.tostring(
+            trackmate_metadata["DisplaySettings"], encoding="utf-8"
+        ).decode()
 
     return GeffMetadata(
         axes=[
@@ -948,6 +955,10 @@ def from_trackmate_xml_to_geff(
             filtered out in TrackMate, False otherwise. False by default.
         overwrite (bool, optional): Whether to overwrite the GEFF file if it already exists.
         zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
+
+    Raises:
+        UserWarning: If the XML file does not contain specific metadata tags or if there are issues
+            with the TrackMate metadata.
     """
     xml_path = Path(xml_path)
     geff_path = Path(geff_path).with_suffix(".geff")
