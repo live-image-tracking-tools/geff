@@ -81,7 +81,12 @@ def test_convert_trackmate_xml(tmp_path: Path, other_arg: str | None) -> None:
     cmd_args = ["convert-trackmate-xml", in_data, geff_output]
     if other_arg is not None:
         cmd_args.append(other_arg)
-    result = CliRunner().invoke(app, cmd_args)
+
+    with pytest.warns() as warning_list:
+        result = CliRunner().invoke(app, cmd_args)
+    warning_messages = [str(warning.message) for warning in warning_list]
+    assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
+    assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
     assert result.exit_code == 0, (
         f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
     )

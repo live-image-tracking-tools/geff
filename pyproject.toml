@@ -166,7 +166,7 @@ source = ["src/geff"]
 omit = ["*/__init__.py"]
 
 [tool.typos.default]
-extend-ignore-identifiers-re = ["(?i)ome", "ser"]
+extend-ignore-identifiers-re = ["(?i)ome", "ser", "propert"]
 
 [project.scripts]
 geff = "geff._cli:app"

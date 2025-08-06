@@ -119,10 +119,10 @@ This is a geff metadata zattrs file that matches the above example structure.
         "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
         // axes are optional
         "axes": [
-            {"name": "t", "type": "time", "unit": "seconds", "min": 0, "max": 125},
-            {"name": "z", "type": "space", "unit": "micrometers", "min": 1523.36, "max": 4398.1},
-            {"name": "y", "type": "space", "unit": "micrometers", "min": 81.667, "max": 1877.7},
-            {"name": "x", "type": "space", "unit": "micrometers", "min": 764.42, "max": 2152.3}
+            {"name": "t", "type": "time", "unit": "second", "min": 0, "max": 125},
+            {"name": "z", "type": "space", "unit": "micrometer", "min": 1523.36, "max": 4398.1},
+            {"name": "y", "type": "space", "unit": "micrometer", "min": 81.667, "max": 1877.7},
+            {"name": "x", "type": "space", "unit": "micrometer", "min": 764.42, "max": 2152.3}
         ],
         // predefined node attributes for storing detections as spheres or ellipsoids
         "sphere": "radius", // optional
@@ -159,6 +159,16 @@ This is a geff metadata zattrs file that matches the above example structure.
         "extra": {
             // ...
         }
+    }
+}
+```
+
+Minimal geff metadata must have `version` and `directed` fields under a `geff` field.
+```jsonc
+{
+    "geff": {
+        "version": "0.0.0",
+        "directed": false
     }
 }
 ```
