@@ -126,8 +126,6 @@ filterwarnings = [
     # if needed, add global ignores here, for example:
     # "ignore:Some message:SomeCategory",
     "ignore:.*skipping conversion test:ImportWarning:networkx",
-    # Ignore warnings from TrackMate XML to GEFF conversion about unused properties being removed from metadata
-    "ignore:The following.* removed from the metadata because.* not present in the data.*:UserWarning",
 ]
 
 
