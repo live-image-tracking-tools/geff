@@ -54,7 +54,7 @@ def write_arrays(
     """
     geff_store = remove_tilde(geff_store)
 
-    write_id_arrays(geff_store, node_ids, edge_ids)
+    write_id_arrays(geff_store, node_ids, edge_ids, zarr_format=zarr_format)
     if node_props is not None:
         write_props_arrays(
             geff_store, "nodes", node_props, node_props_unsquish, zarr_format=zarr_format
