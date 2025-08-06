@@ -130,7 +130,7 @@ def test_convert_attributes():
         "feat_neg": "-10",
         "feat_string": "nope",
     }
-    tm_xml._convert_attributes(converted_attrs, attrs_md, "node")
+    tm_xml._convert_attributes(converted_attrs, attrs_md, "node", 1)
     expected_attr = {
         "feat_float": 30.0,
         "feat_int": 20,
@@ -142,7 +142,7 @@ def test_convert_attributes():
     # Special attributes
     attrs_md = {}
     converted_attrs = {"ID": "42", "name": "ID42", "ROI_N_POINTS": "10"}
-    tm_xml._convert_attributes(converted_attrs, attrs_md, "node")
+    tm_xml._convert_attributes(converted_attrs, attrs_md, "node", 1)
     expected_attr = {"ID": 42, "name": "ID42", "ROI_N_POINTS": 10}
     assert converted_attrs == expected_attr
 
@@ -152,7 +152,7 @@ def test_convert_attributes():
     }
     converted_attrs = {"feat_int": "not_an_int"}
     with pytest.raises(ValueError, match="Invalid integer value for feat_int: not_an_int"):
-        tm_xml._convert_attributes(converted_attrs, attrs_md, "node")
+        tm_xml._convert_attributes(converted_attrs, attrs_md, "node", 1)
 
     # Missing attribute in metadata
     attrs_md = {
@@ -163,7 +163,7 @@ def test_convert_attributes():
     with pytest.warns(
         UserWarning, match="Node attribute feat_int not found in the attributes metadata."
     ):
-        tm_xml._convert_attributes(converted_attrs, attrs_md, "node")
+        tm_xml._convert_attributes(converted_attrs, attrs_md, "node", 1)
 
 
 def test_convert_ROI_coordinates():
@@ -590,7 +590,7 @@ def test_get_specific_tags():
         "GUIState",  # simple element with attrib
         "TrackFilterCollection",  # nested elements with attribs
     ]
-    obtained = tm_xml._get_specific_tags(xml_path, tag_names)
+    obtained = tm_xml._get_specific_tags(xml_path, tag_names, 1)
 
     track_filter_collection = ET.Element("TrackFilterCollection")
     ET.SubElement(
@@ -631,7 +631,7 @@ def test_get_specific_tags():
         UserWarning,
         match=r"Missing tag\(s\): \['MissingTag', 'AnotherMissingTag'\]",
     ):
-        tm_xml._get_specific_tags(xml_path, tag_names)
+        tm_xml._get_specific_tags(xml_path, tag_names, 1)
 
 
 def test_extract_image_path():

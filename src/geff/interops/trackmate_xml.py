@@ -100,13 +100,13 @@ def _get_units(
     if "spatialunits" not in units:
         warnings.warn(
             "No space unit found in the XML file. Setting to 'pixel'.",
-            stacklevel=2,
+            stacklevel=4,
         )
         units["spatialunits"] = "pixel"  # TrackMate default value.
     if "timeunits" not in units:
         warnings.warn(
             "No time unit found in the XML file. Setting to 'frame'.",
-            stacklevel=2,
+            stacklevel=4,
         )
         units["timeunits"] = "frame"  # TrackMate default value.
     element.clear()  # We won't need it anymore so we free up some memory.
@@ -154,6 +154,7 @@ def _convert_attributes(
     attrs: dict[str, Any],
     attrs_metadata: dict[str, dict[str, str]],
     attr_type: str,
+    stack_level: int,
 ) -> None:
     """
     Convert the values of the attributes from string to the correct data type.
@@ -166,6 +167,8 @@ def _convert_attributes(
         attrs_metadata (dict[str, dict[str, str]]): The attributes metadata containing
         information on the expected data types for each attribute.
         attr_type (str): The type of the attribute to convert (node, edge, or lineage).
+        stack_level (int): The stack level for warnings, used to indicate where
+            the warning originated.
 
     Raises:
         ValueError: If an attribute value cannot be converted to the expected type.
@@ -194,7 +197,7 @@ def _convert_attributes(
         else:
             warnings.warn(
                 f"{attr_type.capitalize()} attribute {key} not found in the attributes metadata.",
-                stacklevel=2,
+                stacklevel=stack_level,
             )
 
 
@@ -261,7 +264,7 @@ def _add_all_nodes(
             # on these attributes type as defined in the attributes
             # metadata (attribute `isint`).
             attrs = deepcopy(element.attrib)
-            _convert_attributes(attrs, attrs_md, "node")
+            _convert_attributes(attrs, attrs_md, "node", 5)
 
             # The ROI coordinates are not stored in a tag attribute but in
             # the tag text. So we need to extract then format them.
@@ -282,7 +285,7 @@ def _add_all_nodes(
                 warnings.warn(
                     f"No key 'ID' in the attributes of current element "
                     f"'{element.tag}'. Not adding this node to the graph.",
-                    stacklevel=2,
+                    stacklevel=4,
                 )
             finally:
                 element.clear()
@@ -320,7 +323,7 @@ def _add_edge(
         UserWarning: If an edge cannot be added due to missing required attributes.
     """
     attrs = deepcopy(element.attrib)
-    _convert_attributes(attrs, attrs_md, "edge")
+    _convert_attributes(attrs, attrs_md, "edge", 6)
     try:
         entry_node_id = int(attrs["SPOT_SOURCE_ID"])
         exit_node_id = int(attrs["SPOT_TARGET_ID"])
@@ -328,7 +331,7 @@ def _add_edge(
         warnings.warn(
             f"No key 'SPOT_SOURCE_ID' or 'SPOT_TARGET_ID' in the attributes of "
             f"current element '{element.tag}'. Not adding this edge to the graph.",
-            stacklevel=2,
+            stacklevel=5,
         )
     else:
         graph.add_edge(entry_node_id, exit_node_id)
@@ -386,7 +389,7 @@ def _build_tracks(
         # Saving the current track information.
         if element.tag == "Track" and event == "start":
             attrs: dict[str, Any] = deepcopy(element.attrib)
-            _convert_attributes(attrs, attrs_md, "lineage")
+            _convert_attributes(attrs, attrs_md, "lineage", 5)
             tracks_attrs.append(attrs)
             try:
                 current_track_id = attrs["TRACK_ID"]
@@ -432,7 +435,7 @@ def _get_filtered_tracks_ID(
         warnings.warn(
             f"No key 'TRACK_ID' in the attributes of current element "
             f"'{element.tag}'. Ignoring this track.",
-            stacklevel=2,
+            stacklevel=4,
         )
 
     while (event, element) != ("end", ancestor):
@@ -445,7 +448,7 @@ def _get_filtered_tracks_ID(
                 warnings.warn(
                     f"No key 'TRACK_ID' in the attributes of current element "
                     f"'{element.tag}'. Ignoring this track.",
-                    stacklevel=2,
+                    stacklevel=4,
                 )
 
     return filtered_tracks_ID
@@ -558,6 +561,7 @@ def _get_trackmate_version(
 def _get_specific_tags(
     xml_path: Path,
     tag_names: list[str],
+    stack_level: int,
 ) -> dict[str, ET.Element]:
     """
     Extract specific tags from an XML file and return them in a dictionary.
@@ -570,6 +574,8 @@ def _get_specific_tags(
     Args:
     xml_path (Path): The file path of the XML file to be parsed.
     tag_names (list[str]): A list of tag names to search for in the XML file.
+    stack_level (int): The stack level for warnings, used to indicate where
+        the warning originated.
 
     Returns:
         dict[str, ET.Element]: A dictionary where each key is a tag name from
@@ -597,7 +603,7 @@ def _get_specific_tags(
             warnings.warn(
                 f"Missing tag(s): {tag_names}. The associated metadata "
                 "will not be included in the GEFF file.",
-                stacklevel=2,
+                stacklevel=stack_level,
             )
 
     return dict_tags
@@ -622,7 +628,7 @@ def _extract_image_path(settings_md: ET.Element | None) -> str | None:
                 "No 'Settings' tag found in the XML file. "
                 "The GEFF file will not point to a related image."
             ),
-            stacklevel=2,
+            stacklevel=3,
         )
         return None
     image_data = settings_md.find("ImageData")
@@ -632,7 +638,7 @@ def _extract_image_path(settings_md: ET.Element | None) -> str | None:
                 "No 'ImageData' tag found in the XML file. "
                 "The GEFF file will not point to a related image."
             ),
-            stacklevel=2,
+            stacklevel=3,
         )
         return None
 
@@ -641,20 +647,20 @@ def _extract_image_path(settings_md: ET.Element | None) -> str | None:
     if not filename and not folder:
         warnings.warn(
             "No image path found in the XML file. The GEFF file will not point to a related image.",
-            stacklevel=2,
+            stacklevel=3,
         )
         return None
     elif not filename:
         warnings.warn(
             "No image name found in the XML file. The GEFF file will only point to a folder.",
-            stacklevel=2,
+            stacklevel=3,
         )
         return str(Path(folder))
     elif not folder:
         warnings.warn(
             "No image folder found in the XML file. "
             "The GEFF file will only point to an image name.",
-            stacklevel=2,
+            stacklevel=3,
         )
         return str(Path(filename))
     else:
@@ -677,7 +683,7 @@ def _get_feature_name(feat: ET.Element, key: str, feat_type: str) -> str:
         warnings.warn(
             f"Missing field 'name' in 'FeatureDeclarations' {feat_type} tag. "
             "Using the feature identifier as name.",
-            stacklevel=3,
+            stacklevel=5,
         )
         name = key
     return name
@@ -801,7 +807,7 @@ def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, 
         "TrackFeatures": lineage_props_metadata,
     }
 
-    tags_data = _get_specific_tags(xml_path, ["FeatureDeclarations"])
+    tags_data = _get_specific_tags(xml_path, ["FeatureDeclarations"], 4)
     xml_md = tags_data["FeatureDeclarations"]
     for feat_type in xml_md:
         if feat_type.tag in mapping_feat_type:
@@ -904,7 +910,7 @@ def _check_component_props_consistency(
         warnings.warn(
             f"The following {component_type} propert{plural1} removed from the metadata "
             f"because {plural2} not present in the data: {', '.join(removed_props)}.",
-            stacklevel=2,
+            stacklevel=4,
         )
 
 
@@ -973,7 +979,7 @@ def from_trackmate_xml_to_geff(
     # Metadata
     props_metadata = _extract_props_metadata(xml_path, units)
     _ensure_data_metadata_consistency(graph=graph, metadata=props_metadata)
-    tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"])
+    tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"], 3)
     img_path = _extract_image_path(tm_md.get("Settings", None))
     metadata = _build_geff_metadata(
         xml_path=xml_path,
