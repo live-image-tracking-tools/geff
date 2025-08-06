@@ -1,4 +1,6 @@
-# Graph Exchange File Format (geff)
+![](docs/images/GEFF_HorizontalLogo_RGB.png)
+
+# Graph Exchange File Format 
 
 <!--intro-start-->
 
