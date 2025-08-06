@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Literal
 
 import numpy as np
-import zarr
 import pytest
+import zarr
 
 from geff.metadata_schema import GeffMetadata
 from geff.write_arrays import write_arrays
