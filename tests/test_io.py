@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, get_args
 
 import networkx as nx
 import numpy as np
@@ -27,15 +27,15 @@ extra_edge_props = [
 
 def is_expected_type(graph, backend: SupportedBackend):
     match backend:
-        case SupportedBackend.NETWORKX:
+        case "networkx":
             return isinstance(graph, nx.Graph | nx.DiGraph)
-        case SupportedBackend.RUSTWORKX:
+        case "rustworkx":
             return isinstance(graph, rx.PyGraph | rx.PyDiGraph)
-        case SupportedBackend.SPATIAL_GRAPH:
+        case "spatial-graph":
             return isinstance(graph, sg.SpatialGraph | sg.SpatialDiGraph)
         case _:
             raise TypeError(
-                f"No `is_expected_type` code path has been defined for backend '{backend.value}'."
+                f"No `is_expected_type` code path has been defined for backend '{backend}'."
             )
 
 
@@ -114,7 +114,7 @@ def sg_get_node_spatial_props(
 @pytest.mark.parametrize("directed", [True, False])
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
-@pytest.mark.parametrize("backend", [*SupportedBackend])
+@pytest.mark.parametrize("backend", get_args(SupportedBackend))
 def test_read(
     node_id_dtype,
     node_axis_dtypes,

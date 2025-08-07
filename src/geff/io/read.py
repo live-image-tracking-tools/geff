@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
 from geff.geff_reader import read_to_memory
 from geff.networkx.io import construct_nx
 
-from .supported_backends import SupportedBackend
-
 R = TypeVar("R", covariant=True)
 
 if TYPE_CHECKING:
@@ -19,6 +17,8 @@ if TYPE_CHECKING:
 
     from geff.metadata_schema import GeffMetadata
     from geff.typing import PropDictNpArray
+
+SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
 # !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
 
@@ -82,19 +82,19 @@ class ConstructFunc(Protocol[R]):
 
 @overload
 def get_construct_func(
-    backend: Literal[SupportedBackend.NETWORKX],
+    backend: Literal["networkx"],
 ) -> ConstructFunc[nx.Graph | nx.DiGraph]: ...
 
 
 @overload
 def get_construct_func(
-    backend: Literal[SupportedBackend.RUSTWORKX],
+    backend: Literal["rustworkx"],
 ) -> ConstructFunc[rx.PyGraph | rx.PyDiGraph]: ...
 
 
 @overload
 def get_construct_func(
-    backend: Literal[SupportedBackend.SPATIAL_GRAPH],
+    backend: Literal["spatial-graph"],
 ) -> ConstructFunc[sg.SpatialGraph | sg.SpatialDiGraph]: ...
 
 
@@ -109,16 +109,16 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
         ConstructFunc: A function that construct a graph from GEFF data.
     """
     match backend:
-        case SupportedBackend.NETWORKX:
+        case "networkx":
             return construct_nx
-        case SupportedBackend.RUSTWORKX:
+        case "rustworkx":
             if construct_rx is None:
                 raise ImportError(
                     "rustworkx is not installed. To read a GEFF to the rustworkx backend please "
                     "use `pip install 'geff[rx]'`"
                 )
             return construct_rx
-        case SupportedBackend.SPATIAL_GRAPH:
+        case "spatial-graph":
             if construct_sg is None:
                 raise ImportError(
                     "spatial-graph is not installed. To read a GEFF to the spatial-graph backend "
@@ -136,7 +136,7 @@ def read(
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-    backend: Literal[SupportedBackend.NETWORKX] = SupportedBackend.NETWORKX,
+    backend: Literal["networkx"] = "networkx",
 ) -> tuple[nx.Graph | nx.DiGraph, GeffMetadata]: ...
 
 
@@ -146,7 +146,7 @@ def read(
     validate: bool,
     node_props: list[str] | None,
     edge_props: list[str] | None,
-    backend: Literal[SupportedBackend.RUSTWORKX],
+    backend: Literal["rustworkx"],
 ) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]: ...
 
 
@@ -156,7 +156,7 @@ def read(
     validate: bool,
     node_props: list[str] | None,
     edge_props: list[str] | None,
-    backend: Literal[SupportedBackend.SPATIAL_GRAPH],
+    backend: Literal["spatial-graph"],
     *,
     position_attr: str = "position",
 ) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]: ...
@@ -167,12 +167,7 @@ def read(
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-    # using Literal because mypy can't seem to narrow the enum type when chaining functions
-    backend: Literal[
-        SupportedBackend.NETWORKX,
-        SupportedBackend.RUSTWORKX,
-        SupportedBackend.SPATIAL_GRAPH,
-    ] = SupportedBackend.NETWORKX,
+    backend: SupportedBackend = "networkx",
     **backend_kwargs: Any,
 ) -> tuple[Any, GeffMetadata]:
     """
@@ -188,7 +183,8 @@ def read(
             if None all properties will be loaded, defaults to None.
         edge_props (list of str, optional): The names of the edge properties to load,
             if None all properties will be loaded, defaults to None.
-        backend (SupportedBackend): Flag for the chosen backend, default is "networkx".
+        backend ({"networkx", "rustworkx", "spatial-graph"}): Flag for the chosen backend, default
+            is "networkx".
         backend_kwargs (Any): Additional kwargs that may be accepted by
             the backend when reading the data.
 

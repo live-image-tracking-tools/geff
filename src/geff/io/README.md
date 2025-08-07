@@ -4,7 +4,7 @@
 
 Follow these steps to add read support for a new graph backend.
 
-1. Add your backend to the [`SupportedBackend`](supported_backends.py#L4) enum class.
+1. Add your backend to the [`SupportedBackend`](read.py#L21) `Literal` type at the start of the read.py file.
 
 2. Write a function that constructs your graph object from a set of NumPy arrays containing the GEFF data. Your construct function must follow the [`ConstructFunc`](read.py#L21) protocol.
 
