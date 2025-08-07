@@ -123,7 +123,7 @@ def test_read(
     include_t,
     include_z,
     backend,
-):
+) -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype,
         node_axis_dtypes,

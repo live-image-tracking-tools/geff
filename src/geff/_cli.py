@@ -17,7 +17,7 @@ def validate(
     input_path: str = typer.Argument(
         ..., help="Path to the GEFF folder, e.g. data.zarr/tracks.geff"
     ),
-):
+) -> None:
     """Validate a GEFF file."""
     utils.validate(input_path)
     print(f"{input_path} is valid")
@@ -28,7 +28,7 @@ def info(
     input_path: str = typer.Argument(
         ..., help="Path to the GEFF folder, e.g. data.zarr/tracks.geff"
     ),
-):
+) -> None:
     """Display information about a GEFF file."""
     metadata = GeffMetadata.read(input_path)
     print(metadata.model_dump_json(indent=2))
@@ -77,7 +77,8 @@ def convert_ctc(
         ),
     ] = False,
     overwrite: Annotated[
-        bool, typer.Option(help="Whether to overwrite the GEFF file if it already exists.")
+        bool,
+        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
 ) -> None:
     """
@@ -110,7 +111,8 @@ def convert_ctc(
 @app.command()
 def convert_trackmate_xml(
     xml_path: Annotated[
-        Path, typer.Argument(help="The path to the TrackMate XML file", show_default=False)
+        Path,
+        typer.Argument(help="The path to the TrackMate XML file", show_default=False),
     ],
     geff_path: Annotated[
         Path,
@@ -129,9 +131,10 @@ def convert_trackmate_xml(
         typer.Option(help="True to discard the tracks filtered out in TrackMate, False otherwise."),
     ] = False,
     overwrite: Annotated[
-        bool, typer.Option(help="Whether to overwrite the GEFF file if it already exists.")
+        bool,
+        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
-    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,  # type: ignore
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
     # because of Typer not supporting Literal types
 ) -> None:
     """

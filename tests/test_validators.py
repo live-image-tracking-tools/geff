@@ -10,7 +10,7 @@ from geff.validators.validators import (
 )
 
 
-def test_no_self_edges():
+def test_no_self_edges() -> None:
     """
     Test that no node has an edge to itself.
     """
@@ -20,7 +20,7 @@ def test_no_self_edges():
     assert len(problematic_nodes) == 0, "There should be no problematic nodes with self-edges."
 
 
-def test_detects_self_edges():
+def test_detects_self_edges() -> None:
     """
     Test that validator detects nodes with self-edges.
     """
@@ -33,7 +33,7 @@ def test_detects_self_edges():
     )
 
 
-def test_all_edges_valid():
+def test_all_edges_valid() -> None:
     """
     Test that all edges reference existing node IDs.
     """
@@ -44,7 +44,7 @@ def test_all_edges_valid():
     assert len(invalid_edges) == 0, "There should be no invalid edges."
 
 
-def test_detects_invalid_edges():
+def test_detects_invalid_edges() -> None:
     """
     Test that invalid edges (edges with missing node IDs) are detected.
     """
@@ -56,7 +56,7 @@ def test_detects_invalid_edges():
     assert len(invalid_edges) == 1, "There should be exactly one invalid edge."
 
 
-def test_no_repeated_edges():
+def test_no_repeated_edges() -> None:
     """
     Test that validator passes when all edges are unique.
     """
@@ -66,7 +66,7 @@ def test_no_repeated_edges():
     assert len(repeated_edges) == 0, "No edges should be reported as repeated."
 
 
-def test_detects_repeated_edges():
+def test_detects_repeated_edges() -> None:
     """
     Test that validator detects repeated edges.
     """
@@ -156,7 +156,7 @@ def test_detects_repeated_edges():
         ),
     ],
 )
-def test_validate_tracklets(node_ids, edge_ids, tracklet_ids, expected_valid, description):
+def test_validate_tracklets(node_ids, edge_ids, tracklet_ids, expected_valid, description) -> None:
     is_valid, errors = validate_tracklets(node_ids, edge_ids, tracklet_ids)
     assert is_valid == expected_valid, f"{description} failed: {errors}"
 
@@ -245,7 +245,7 @@ def test_validate_tracklets(node_ids, edge_ids, tracklet_ids, expected_valid, de
         ),
     ],
 )
-def test_validate_lineages(node_ids, edge_ids, lineage_ids, expected_valid, description):
+def test_validate_lineages(node_ids, edge_ids, lineage_ids, expected_valid, description) -> None:
     """
     Tests the validate_lineages function for various connectivity scenarios.
     """
