@@ -2,19 +2,23 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
 import numpy as np
 import zarr
 
+from . import _path
+
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from zarr.storage import StoreLike
 
 from urllib.parse import urlparse
 
-from .metadata_schema import GeffMetadata
+from .metadata_schema import GeffMetadata, PropMetadata
 
 
 def is_remote_url(path: str) -> bool:
@@ -52,126 +56,175 @@ def remove_tilde(store: StoreLike) -> StoreLike:
     return store
 
 
-def validate_props_metadata(props_metadata_dict, component_group, component_type):
+def _validate_props_metadata(
+    props_metadata_dict: Mapping[str, PropMetadata],
+    component_props: zarr.Group,
+    component_type: str,
+) -> None:
     """Validate that properties described in metadata are compatible with the data in zarr arrays.
 
     Args:
         props_metadata_dict (dict): Dictionary of property metadata with identifier keys
             and PropMetadata values
-        component_group: Zarr group containing the component data (nodes or edges)
+        component_props (zarr.Group): Zarr group containing the component properties (nodes
+            or edges)
         component_type (str): Component type for error messages ("Node" or "Edge")
 
     Raises:
         AssertionError: If properties in metadata don't match zarr arrays
     """
-    id_dtype_map = {
-        prop.identifier: np.dtype(prop.dtype).type for prop in props_metadata_dict.values()
-    }
-    for prop_id, prop_dtype in id_dtype_map.items():
+    for prop in props_metadata_dict.values():
+        prop_id = prop.identifier
         # Properties described in metadata should be present in zarr arrays
-        assert prop_id in component_group["props"].keys(), (
-            f"{component_type} property {prop_id} described in metadata is not present "
-            f"in props arrays"
-        )
+        if not isinstance(props_group := component_props.get(prop_id), zarr.Group):
+            raise ValueError(
+                f"{component_type} property {prop_id} described in metadata is not present "
+                f"in props arrays"
+            )
+
         # dtype in metadata should match dtype in zarr arrays
-        array_dtype = component_group["props"][prop_id]["values"].dtype
-        assert array_dtype == prop_dtype, (
-            f"{component_type} property {prop_id} with dtype {array_dtype} does not match "
-            f"metadata dtype {prop_dtype}"
-        )
+        values_array = expect_array(props_group, _path.VALUES, component_type)
+        array_dtype = values_array.dtype
+        prop_dtype = np.dtype(prop.dtype).type
+        if array_dtype != prop_dtype:
+            raise ValueError(
+                f"{component_type} property {prop_id} with dtype {array_dtype} does not match "
+                f"metadata dtype {prop_dtype}"
+            )
 
 
-def validate(store: StoreLike):
-    """Check that the structure of the zarr conforms to geff specification
+def validate(store: StoreLike) -> None:
+    """Ensure that the structure of the zarr conforms to geff specification
 
     Args:
         store (str | Path | zarr store): Check the geff zarr, either str/Path/store
 
     Raises:
-        AssertionError: If geff specs are violated
-        ValueError: If store is not a valid zarr store or path doesn't exist
+        ValueError: If geff specs are violated
+        FileNotFoundError: If store is not a valid zarr store or path doesn't exist
     """
 
     # Check if path exists for string/Path inputs
     if isinstance(store, str | Path):
         store_path = Path(store)
         if not is_remote_url(str(store_path)) and not store_path.exists():
-            raise ValueError(f"Path does not exist: {store}")
+            raise FileNotFoundError(f"Path does not exist: {store}")
 
     # Open the zarr group from the store
     try:
-        graph = zarr.open_group(store, mode="r")
+        graph_group = zarr.open_group(store, mode="r")
     except Exception as e:
-        raise ValueError("store must be a zarr StoreLike") from e
+        raise ValueError(f"store must be a zarr StoreLike: {e}") from e
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
     metadata = GeffMetadata.read(store)
 
-    assert "nodes" in graph, "graph group must contain a nodes group"
-    nodes = graph["nodes"]
-
-    # ids and props are required and should be same length
-    assert "ids" in nodes.array_keys(), "nodes group must contain an ids array"
-    assert "props" in nodes.group_keys(), "nodes group must contain a props group"
-
-    # Property array length should match id length
-    id_len = nodes["ids"].shape[0]
-    for prop in nodes["props"].keys():
-        prop_group = nodes["props"][prop]
-        assert "values" in prop_group.array_keys(), (
-            f"node property group {prop} must have values group"
-        )
-        prop_len = prop_group["values"].shape[0]
-        assert prop_len == id_len, (
-            f"Node property {prop} values has length {prop_len}, which does not match "
-            f"id length {id_len}"
-        )
-        if "missing" in prop_group.array_keys():
-            missing_len = prop_group["missing"].shape[0]
-            assert missing_len == id_len, (
-                f"Node property {prop} missing mask has length {missing_len}, which "
-                f"does not match id length {id_len}"
-            )
-    # Node properties metadata validation
-    if metadata.node_props_metadata is not None:
-        validate_props_metadata(metadata.node_props_metadata, nodes, "Node")
+    nodes_group = expect_group(graph_group, _path.NODES)
+    _validate_nodes_group(nodes_group, metadata)
 
     # TODO: Do we want to prevent missing values on spatialtemporal properties
+    if _path.EDGES in graph_group.keys():
+        edges_group = expect_group(graph_group, _path.EDGES)
+        _validate_edges_group(edges_group, metadata)
 
-    if "edges" in graph.group_keys():
-        edges = graph["edges"]
 
-        # Edges only require ids which contain nodes for each edge
-        assert "ids" in edges, "edge group must contain ids array"
-        id_shape = edges["ids"].shape
-        assert id_shape[-1] == 2, (
-            f"edges ids must have a last dimension of size 2, received shape {id_shape}"
+# -----------------------------------------------------------------------------#
+# helpers
+# -----------------------------------------------------------------------------#
+
+
+def expect_array(parent: zarr.Group, key: str, parent_name: str) -> zarr.Array:
+    """Return an array in the parent group with the given key, or raise ValueError."""
+    arr = parent.get(key)
+    if not isinstance(arr, zarr.Array):
+        raise ValueError(f"{parent_name!r} group must contain an {key!r} array")
+    return arr
+
+
+def expect_group(parent: zarr.Group, key: str, parent_name: str = "graph") -> zarr.Group:
+    """Return a group in the parent group with the given key, or raise ValueError."""
+    grp = parent.get(key)
+    if not isinstance(grp, zarr.Group):
+        raise ValueError(f"{parent_name!r} group must contain a group named {key!r}")
+    return grp
+
+
+# -----------------------------------------------------------------------------#
+# node / edge / props validators
+# -----------------------------------------------------------------------------#
+
+
+def _validate_props_group(
+    props_group: zarr.Group,
+    expected_len: int,
+    parent_key: str,
+) -> None:
+    """Validate every property subgroup under `props_group`."""
+    for prop_name in props_group.keys():
+        prop_group = props_group[prop_name]
+        if not isinstance(prop_group, zarr.Group):
+            raise ValueError(
+                f"{_path.PROPS!r} group '{prop_name}' under {parent_key!r} "
+                f"must be a zarr group. Got {type(prop_group)}"
+            )
+
+        arrays = set(prop_group.array_keys())
+        if _path.VALUES not in arrays:
+            raise ValueError(
+                f"{parent_key} property group {prop_name!r} must have a {_path.VALUES!r} array"
+            )
+
+        val_len = cast("zarr.Array", prop_group[_path.VALUES]).shape[0]
+        if val_len != expected_len:
+            raise ValueError(
+                f"{parent_key} property {prop_name!r} {_path.VALUES} has length {val_len}, "
+                f"which does not match id length {expected_len}"
+            )
+
+        if _path.MISSING in arrays:
+            miss_len = cast("zarr.Array", prop_group[_path.MISSING]).shape[0]
+            if miss_len != expected_len:
+                raise ValueError(
+                    f"{parent_key} property {prop_name!r} {_path.MISSING} mask has length "
+                    f"{miss_len}, which does not match id length {expected_len}"
+                )
+
+
+def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> None:
+    """Validate the structure of a nodes group in a GEFF zarr store."""
+    node_ids = expect_array(nodes_group, _path.IDS, _path.NODES)
+    id_len = node_ids.shape[0]
+    node_props = expect_group(nodes_group, _path.PROPS, _path.NODES)
+    _validate_props_group(node_props, id_len, "Node")
+
+    # Node properties metadata validation
+    if metadata.node_props_metadata is not None:
+        _validate_props_metadata(metadata.node_props_metadata, node_props, "Node")
+
+
+def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> None:
+    """Validate the structure of an edges group in a GEFF zarr store."""
+    # Edges only require ids which contain nodes for each edge
+    edges_ids = expect_array(edges_group, _path.IDS, _path.EDGES)
+    if edges_ids.shape[-1] != 2:
+        raise ValueError(
+            f"edges ids must have a last dimension of size 2, received shape {edges_ids.shape}"
         )
 
-        # Edge property array length should match edge id length
-        edge_id_len = edges["ids"].shape[0]
-        if "props" in edges:
-            for prop in edges["props"].keys():
-                prop_group = edges["props"][prop]
-                assert "values" in prop_group.array_keys(), (
-                    f"Edge property group {prop} must have values group"
-                )
-                prop_len = prop_group["values"].shape[0]
-                assert prop_len == edge_id_len, (
-                    f"Edge property {prop} values has length {prop_len}, which does not "
-                    f"match id length {edge_id_len}"
-                )
-                if "missing" in prop_group.array_keys():
-                    missing_len = prop_group["missing"].shape[0]
-                    assert missing_len == edge_id_len, (
-                        f"Edge property {prop} missing mask has length {missing_len}, "
-                        f"which does not match id length {edge_id_len}"
-                    )
-
-        # Edge properties metadata validation
-        if metadata.edge_props_metadata is not None:
-            validate_props_metadata(metadata.edge_props_metadata, edges, "Edge")
+    # Edge property array length should match edge id length
+    edge_id_len = edges_ids.shape[0]
+    edge_props = edges_group.get(_path.PROPS)
+    if edge_props is None:
+        return
+    if not isinstance(edge_props, zarr.Group):
+        raise ValueError(
+            f"{_path.EDGES!r} group must contain a {_path.PROPS!r} group. Got {type(edge_props)}"
+        )
+    _validate_props_group(edge_props, edge_id_len, "Edge")
+    # Edge properties metadata validation
+    if metadata.edge_props_metadata is not None:
+        _validate_props_metadata(metadata.edge_props_metadata, edge_props, "Edge")
 
 
 def nx_is_equal(g1: nx.Graph, g2: nx.Graph) -> bool:
@@ -194,6 +247,7 @@ def nx_is_equal(g1: nx.Graph, g2: nx.Graph) -> bool:
     nodes_default = len(nodes_attr) * [0]
     nm = iso.categorical_node_match(nodes_attr, nodes_default)
 
+    same_nodes = same_edges = False
     if not g1.nodes.data() and not g2.nodes.data():
         same_nodes = True
     elif len(g1.nodes.data()) != len(g2.nodes.data()):

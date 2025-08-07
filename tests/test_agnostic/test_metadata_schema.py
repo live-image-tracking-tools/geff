@@ -1,4 +1,3 @@
-import json
 import re
 import warnings
 from pathlib import Path
@@ -16,13 +15,14 @@ from geff.metadata_schema import (
     GeffMetadata,
     GeffSchema,
     PropMetadata,
+    formatted_schema_json,
     validate_key_identifier_equality,
 )
 from geff.testing.data import create_simple_2d_geff
 
 
 class TestMetadataModel:
-    def test_version_pattern(self):
+    def test_version_pattern(self) -> None:
         # Valid versions
         valid_versions = [
             "1.0",
@@ -44,7 +44,7 @@ class TestMetadataModel:
         for version in invalid_versions:
             assert not re.fullmatch(VERSION_PATTERN, version)
 
-    def test_valid_init(self):
+    def test_valid_init(self) -> None:
         # Minimal required fields
         model = GeffMetadata(geff_version="0.0.1", directed=True)
         assert model.geff_version == "0.0.1"
@@ -67,7 +67,7 @@ class TestMetadataModel:
                 {"type": "image", "path": "raw/"},
             ],
         )
-        assert len(model.axes) == 1
+        assert model.axes and len(model.axes) == 1
 
         # Multiple axes
         model = GeffMetadata(
@@ -78,16 +78,16 @@ class TestMetadataModel:
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
             ],
         )
-        assert len(model.axes) == 2
+        assert model.axes and len(model.axes) == 2
 
-    def test_duplicate_axes_names(self):
+    def test_duplicate_axes_names(self) -> None:
         # duplicate names not allowed
         with pytest.raises(ValueError, match=r"Duplicate axes names found in"):
             GeffMetadata(
                 geff_version="0.0.1", directed=True, axes=[{"name": "test"}, {"name": "test"}]
             )
 
-    def test_related_objects(self):
+    def test_related_objects(self) -> None:
         # Valid related objects
         model = GeffMetadata(
             geff_version="0.0.1",
@@ -119,11 +119,11 @@ class TestMetadataModel:
                 related_objects=[{"type": "image", "path": "raw/", "label_prop": "seg_id"}],
             )
 
-    def test_invalid_version(self):
+    def test_invalid_version(self) -> None:
         with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
             GeffMetadata(geff_version="aljkdf", directed=True)
 
-    def test_props_metadata(self):
+    def test_props_metadata(self) -> None:
         # Valid props metadata
         node_props = {
             "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
@@ -169,7 +169,7 @@ class TestMetadataModel:
                 },
             )
 
-    def test_extra_attrs(self):
+    def test_extra_attrs(self) -> None:
         # Should not fail
         GeffMetadata(
             geff_version="0.0.1",
@@ -178,10 +178,10 @@ class TestMetadataModel:
                 {"name": "test"},
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
             ],
-            extra=True,
+            extra={"foo": "bar", "bar": {"baz": "qux"}},
         )
 
-    def test_read_write(self, tmp_path):
+    def test_read_write(self, tmp_path: Path) -> None:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
@@ -189,7 +189,7 @@ class TestMetadataModel:
                 {"name": "test"},
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
             ],
-            extra=True,
+            extra={"foo": "bar", "bar": {"baz": "qux"}},
         )
         zpath = tmp_path / "test.zarr"
         meta.write(zpath)
@@ -201,7 +201,7 @@ class TestMetadataModel:
         compare = GeffMetadata.read(zpath)
         assert compare == meta
 
-    def test_meta_write_raises_type_error_upon_group(self):
+    def test_meta_write_raises_type_error_upon_group(self) -> None:
         # Create a GeffMetadata instance
         meta = GeffMetadata(
             geff_version="0.0.1",
@@ -227,7 +227,7 @@ class TestMetadataModel:
         ):
             meta.read(group)
 
-    def test_model_mutation(self):
+    def test_model_mutation(self) -> None:
         """Test that invalid model mutations raise errors."""
         meta = GeffMetadata(
             geff_version="0.0.1",
@@ -243,7 +243,7 @@ class TestMetadataModel:
         with pytest.raises(pydantic.ValidationError):
             meta.geff_version = "abcde"
 
-    def test_read_write_ignored_metadata(self, tmp_path):
+    def test_read_write_ignored_metadata(self, tmp_path: Path) -> None:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
@@ -259,7 +259,7 @@ class TestMetadataModel:
         with pytest.raises(AttributeError, match="object has no attribute 'foo'"):
             compare.foo  # noqa: B018
 
-    def test_display_hints(self):
+    def test_display_hints(self) -> None:
         meta = {
             "geff_version": "0.0.1",
             "directed": True,
@@ -310,23 +310,23 @@ class TestMetadataModel:
 
 
 class TestAxis:
-    def test_valid(self):
+    def test_valid(self) -> None:
         # minimal fields
         Axis(name="property")
 
         # All fields
         Axis(name="property", type="space", unit="micrometer", min=0, max=10)
 
-    def test_no_name(self):
+    def test_no_name(self) -> None:
         # name is the only required field
         with pytest.raises(pydantic.ValidationError):
             Axis(type="space")
 
-    def test_bad_type(self):
+    def test_bad_type(self) -> None:
         with pytest.warns(UserWarning, match=r"Type .* not in valid types"):
             Axis(name="test", type="other")
 
-    def test_invalid_units(self):
+    def test_invalid_units(self) -> None:
         # Spatial
         with pytest.warns(UserWarning, match=r"Spatial unit .* not in valid"):
             Axis(name="test", type="space", unit="bad unit")
@@ -338,7 +338,7 @@ class TestAxis:
         # Don't check units if we don't specify type
         Axis(name="test", unit="not checked")
 
-    def test_min_max(self):
+    def test_min_max(self) -> None:
         # Min no max
         with pytest.raises(ValueError, match=r"Min and max must both be None or neither"):
             Axis(name="test", min=0)
@@ -353,7 +353,7 @@ class TestAxis:
 
 
 class TestPropMetadata:
-    def test_valid(self):
+    def test_valid(self) -> None:
         # Minimal valid metadata
         PropMetadata(identifier="prop_1", name="property", dtype="int32")
 
@@ -367,16 +367,16 @@ class TestPropMetadata:
             description="A property with all fields set.",
         )
 
-    def test_invalid_identifier(self):
+    def test_invalid_identifier(self) -> None:
         # identifier must be a string
         with pytest.raises(pydantic.ValidationError):
             PropMetadata(identifier=123, name="property", dtype="int16")
 
         # identifier must be a non-empty string
-        with pytest.raises(ValueError, match="Property identifier cannot be an empty string."):
+        with pytest.raises(ValueError, match="String should have at least 1 character"):
             PropMetadata(identifier="", dtype="int16")
 
-    def test_invalid_dtype(self):
+    def test_invalid_dtype(self) -> None:
         # dtype must be a string
         with pytest.raises(pydantic.ValidationError):
             PropMetadata(identifier="prop", dtype=123)
@@ -384,7 +384,7 @@ class TestPropMetadata:
             PropMetadata(identifier="prop", dtype=None)
 
         # dtype must be a non-empty string
-        with pytest.raises(ValueError, match="Property dtype cannot be an empty string."):
+        with pytest.raises(ValueError, match="String should have at least 1 character"):
             PropMetadata(identifier="prop", dtype="")
 
         # dtype must be in allowed data types
@@ -393,7 +393,7 @@ class TestPropMetadata:
         ):
             PropMetadata(identifier="prop", dtype="nope")
 
-    def test_invalid_encoding(self):
+    def test_invalid_encoding(self) -> None:
         # encoding must be a string
         with pytest.raises(pydantic.ValidationError):
             PropMetadata(identifier="prop", dtype="int16", encoding=123)
@@ -403,7 +403,7 @@ class TestPropMetadata:
             PropMetadata(identifier="prop", dtype="float", encoding="invalid_encoding")
 
 
-def test_validate_key_identifier_equality():
+def test_validate_key_identifier_equality() -> None:
     # Matching key / identifier
     props_md = {
         "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
@@ -437,7 +437,7 @@ def test_validate_key_identifier_equality():
 class TestAffineTransformation:
     """Comprehensive tests for Affine transformation functionality with metadata."""
 
-    def test_affine_integration_with_metadata(self):
+    def test_affine_integration_with_metadata(self) -> None:
         """Test integration of Affine with GeffMetadata."""
         # Create a simple affine transformation
         affine = Affine.from_matrix_offset([[1.5, 0.0], [0.0, 1.5]], [10.0, 20.0])
@@ -461,7 +461,7 @@ class TestAffineTransformation:
         )
         np.testing.assert_array_almost_equal(metadata.affine.offset, [10.0, 20.0])
 
-    def test_unmatched_ndim(self):
+    def test_unmatched_ndim(self) -> None:
         """Test that an error is raised if the affine matrix and axes have different dimensions."""
         with pytest.raises(
             ValueError, match="Affine transformation matrix must have 3 dimensions, got 2"
@@ -478,7 +478,7 @@ class TestAffineTransformation:
                 affine=np.eye(3),
             )
 
-    def test_affine_serialization_with_metadata(self, tmp_path):
+    def test_affine_serialization_with_metadata(self, tmp_path: Path) -> None:
         """Test that Affine transformations can be serialized and deserialized with metadata."""
         # Create metadata with affine transformation
         affine = Affine.from_matrix_offset(
@@ -555,7 +555,7 @@ def test_schema_file_updated(pytestconfig: pytest.Config) -> None:
             )
         current_schema_text = ""
 
-    new_schema_text = json.dumps(GeffSchema.model_json_schema(), indent=2)
+    new_schema_text = formatted_schema_json()
     if current_schema_text != new_schema_text:
         if pytestconfig.getoption("--update-schema"):
             schema_path.write_text(new_schema_text)
