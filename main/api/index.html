@@ -974,7 +974,7 @@ if None all properties will be loaded, defaults to None.</p>
     <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1132,12 +1132,12 @@ Defaults to 2.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
 
-        <p>Check that the structure of the zarr conforms to geff specification</p>
+        <p>Ensure that the structure of the zarr conforms to geff specification</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1182,7 +1182,7 @@ Defaults to 2.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#AssertionError">AssertionError</a></code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1192,7 +1192,7 @@ Defaults to 2.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError">FileNotFoundError</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1332,7 +1332,7 @@ Defaults to 2.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1589,7 +1589,7 @@ Defaults to None.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_axis_type</span><span class="p">(</span><span class="n">axis_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_axis_type</span><span class="p">(</span><span class="n">axis_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">AxisType</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1639,7 +1639,7 @@ Defaults to None.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>bool</code></td>            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+                  <code><a class="autorefs autorefs-external" title="typing.TypeGuard" href="https://docs.python.org/3/library/typing.html#typing.TypeGuard">TypeGuard</a>[<span title="geff.valid_values.AxisType">AxisType</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1668,7 +1668,7 @@ Defaults to None.</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_AXIS_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;space&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;channel&#39;</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_AXIS_TYPES</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">AxisType</span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1685,7 +1685,9 @@ Defaults to None.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_space_unit</span><span class="p">(</span><span class="n">unit_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_space_unit</span><span class="p">(</span>
+    <span class="n">unit_name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">SpaceUnits</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1735,7 +1737,7 @@ Defaults to None.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>bool</code></td>            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+                  <code><a class="autorefs autorefs-external" title="typing.TypeGuard" href="https://docs.python.org/3/library/typing.html#typing.TypeGuard">TypeGuard</a>[<span title="geff.valid_values.SpaceUnits">SpaceUnits</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1745,7 +1747,7 @@ Defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
 <td></td>            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+                  <code><a class="autorefs autorefs-external" title="typing.TypeGuard" href="https://docs.python.org/3/library/typing.html#typing.TypeGuard">TypeGuard</a>[<span title="geff.valid_values.SpaceUnits">SpaceUnits</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1774,35 +1776,9 @@ Defaults to None.</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_SPACE_UNITS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="kc">None</span><span class="p">,</span>
-    <span class="s2">&quot;angstrom&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;attometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;centimeter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;decimeter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;exameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;femtometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;foot&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;gigameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hectometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;inch&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;kilometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;megameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;meter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;micrometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;mile&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;millimeter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;nanometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;parsec&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;petameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;picometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;terameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yard&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yoctometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yottameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zeptometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zettameter&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_SPACE_UNITS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SpaceUnits</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span>
+    <span class="n">SpaceUnits</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1819,7 +1795,7 @@ Defaults to None.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_time_unit</span><span class="p">(</span><span class="n">unit_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_time_unit</span><span class="p">(</span><span class="n">unit_name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeGuard</span><span class="p">[</span><span class="n">TimeUnits</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1869,7 +1845,7 @@ Defaults to None.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>bool</code></td>            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+                  <code><a class="autorefs autorefs-external" title="typing.TypeGuard" href="https://docs.python.org/3/library/typing.html#typing.TypeGuard">TypeGuard</a>[<span title="geff.valid_values.TimeUnits">TimeUnits</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1879,7 +1855,7 @@ Defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
 <td></td>            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+                  <code><a class="autorefs autorefs-external" title="typing.TypeGuard" href="https://docs.python.org/3/library/typing.html#typing.TypeGuard">TypeGuard</a>[<span title="geff.valid_values.TimeUnits">TimeUnits</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1908,32 +1884,9 @@ Defaults to None.</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_TIME_UNITS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="kc">None</span><span class="p">,</span>
-    <span class="s2">&quot;attosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;centisecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;day&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;decisecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;exasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;femtosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;gigasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hectosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hour&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;kilosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;megasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;microsecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;millisecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;minute&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;nanosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;petasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;picosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;second&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;terasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yoctosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yottasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zeptosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zettasecond&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_TIME_UNITS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">TimeUnits</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span>
+    <span class="n">TimeUnits</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -1963,7 +1916,7 @@ Defaults to None.</p>
     <span class="n">node_props_unsquish</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props_unsquish</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
