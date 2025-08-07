@@ -2157,7 +2157,7 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
 
 
 
-
+        <p><span class="badge badge-light restriction min-length-restriction" id="geff_node_props_metadata_anyOf_i0_additionalProperties_identifier_minLength">Must be at least <code>1</code> characters long</span></p>
 
 
             </div>
@@ -2226,7 +2226,7 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
 
 
 
-
+        <p><span class="badge badge-light restriction min-length-restriction" id="geff_node_props_metadata_anyOf_i0_additionalProperties_dtype_minLength">Must be at least <code>1</code> characters long</span></p>
 
 
             </div>
@@ -5434,6 +5434,53 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
 
 
 
+<div class="accordion" id="accordiongeff_extra_additionalProperties">
+    <div class="card">
+        <div class="card-header" id="headinggeff_extra_additionalProperties">
+            <h2 class="mb-0">
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_extra_additionalProperties"
+                        aria-expanded="" aria-controls="geff_extra_additionalProperties" onclick="setAnchor('#geff_extra_additionalProperties')"><em><span class="property-name">Additional Properties</span></em></button>
+            </h2>
+        </div>
+
+        <div id="geff_extra_additionalProperties"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_extra_additionalProperties"
+             data-parent="#accordiongeff_extra_additionalProperties">
+            <div class="card-body pl-5"><p class="additional-properties">Additional Properties of any type are allowed.</p>
+
+    <div class="breadcrumbs">root
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_extra" onclick="anchorLink('geff_extra')">extra</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_extra_additionalProperties" onclick="anchorLink('geff_extra_additionalProperties')">additionalProperties</a></div><span class="badge badge-dark value-type">Type: object</span><br/>
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -5463,7 +5510,7 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_AXIS_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;space&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;channel&#39;</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_AXIS_TYPES</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AxisType</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">AxisType</span><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -5485,35 +5532,9 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_SPACE_UNITS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="kc">None</span><span class="p">,</span>
-    <span class="s2">&quot;angstrom&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;attometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;centimeter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;decimeter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;exameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;femtometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;foot&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;gigameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hectometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;inch&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;kilometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;megameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;meter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;micrometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;mile&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;millimeter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;nanometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;parsec&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;petameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;picometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;terameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yard&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yoctometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yottameter&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zeptometer&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zettameter&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_SPACE_UNITS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SpaceUnits</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span>
+    <span class="n">SpaceUnits</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -5535,32 +5556,9 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_TIME_UNITS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="kc">None</span><span class="p">,</span>
-    <span class="s2">&quot;attosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;centisecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;day&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;decisecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;exasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;femtosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;gigasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hectosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hour&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;kilosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;megasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;microsecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;millisecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;minute&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;nanosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;petasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;picosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;second&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;terasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yoctosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;yottasecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zeptosecond&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;zettasecond&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">VALID_TIME_UNITS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">TimeUnits</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span>
+    <span class="n">TimeUnits</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
