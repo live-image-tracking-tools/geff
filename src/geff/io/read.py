@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from importlib.util import find_spec
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
 
 from geff.geff_reader import read_to_memory
@@ -19,25 +18,6 @@ if TYPE_CHECKING:
     from geff.typing import PropDictNpArray
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
-
-# !!! Add new overloads for `read` and `get_construct_func` when a new backend is added !!!
-
-# import construct funcs only if relevant modules are installed
-rx_spec = find_spec("rustworkx")
-if rx_spec is not None:
-    # ruff complains about redefining imports without this pattern
-    import geff.rustworkx.io as rx_io
-
-    construct_rx: ConstructFunc | None = rx_io.construct_rx
-else:
-    construct_rx = None
-sg_spec = find_spec("spatial_graph")
-if sg_spec is not None:
-    import geff.spatial_graph.io as sg_io
-
-    construct_sg: ConstructFunc | None = sg_io.construct_sg
-else:
-    construct_sg = None
 
 
 class ConstructFunc(Protocol[R]):
@@ -112,18 +92,12 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
         case "networkx":
             return construct_nx
         case "rustworkx":
-            if construct_rx is None:
-                raise ImportError(
-                    "rustworkx is not installed. To read a GEFF to the rustworkx backend please "
-                    "use `pip install 'geff[rx]'`"
-                )
+            from geff.rustworkx.io import construct_rx
+
             return construct_rx
         case "spatial-graph":
-            if construct_sg is None:
-                raise ImportError(
-                    "spatial-graph is not installed. To read a GEFF to the spatial-graph backend "
-                    "please use `pip install 'geff[spatial-graph]'`"
-                )
+            from geff.spatial_graph.io import construct_sg
+
             return construct_sg
         # Add cases for new backends, remember to add overloads
         case _:
