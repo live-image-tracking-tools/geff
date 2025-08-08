@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
+import numpy as np
 
 from geff.geff_reader import read_to_memory
 from geff.io_utils import (
@@ -14,6 +15,8 @@ from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
@@ -22,6 +25,128 @@ if TYPE_CHECKING:
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class NxBackend:
+    @property
+    def type(self) -> tuple[type[nx.Graph | nx.DiGraph], ...]:
+        """The networkx graph type. Useful for isinstance checks."""
+        return nx.Graph, nx.DiGraph
+
+    @staticmethod
+    def construct(
+        metadata: GeffMetadata,
+        node_ids: NDArray[Any],
+        edge_ids: NDArray[Any],
+        node_props: dict[str, PropDictNpArray],
+        edge_props: dict[str, PropDictNpArray],
+    ) -> nx.Graph | nx.DiGraph:
+        """
+        Construct a `networkx` graph instance from GEFF data.
+
+        Args:
+            metadata (GeffMetadata): The metadata of the graph.
+            node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
+                edge_ids.
+            edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
+                as node_ids.
+            node_props (dict[str, PropDictNpArray]): A dictionary
+                from node property names to (values, missing) arrays, which should have same
+                length as node_ids. Spatial graph does not support missing attributes, so the
+                missing arrays should be None or all False. If present, the missing arrays are
+                ignored with warning
+            edge_props (dict[str, PropDictNpArray]): A dictionary
+                from edge property names to (values, missing) arrays, which should have same
+                length as edge_ids. Spatial graph does not support missing attributes, so the
+                missing arrays should be None or all False. If present, the missing array is ignored
+                with warning.
+
+        Returns:
+            (nx.Graph | nx.DiGraph): A `networkx` graph object.
+        """
+        graph = nx.DiGraph() if metadata.directed else nx.Graph()
+
+        graph.add_nodes_from(node_ids.tolist())
+        for name, prop_dict in node_props.items():
+            _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
+
+        graph.add_edges_from(edge_ids.tolist())
+        for name, prop_dict in edge_props.items():
+            _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
+
+        return graph
+
+    @staticmethod
+    def get_node_ids(graph: nx.Graph | nx.DiGraph) -> Sequence[Any]:
+        """
+        Get the node ids of the graph.
+
+        Args:
+            graph (nx.Graph | nx.DiGraph): The graph object.
+
+        Returns:
+            node_ids (Sequence[Any]): The node ids.
+        """
+        return list(graph.nodes)
+
+    @staticmethod
+    def get_edge_ids(graph: nx.Graph | nx.DiGraph) -> Sequence[tuple[Any, Any]]:
+        """
+        Get the edges of the graph.
+
+        Args:
+            graph (nx.Graph | nx.DiGraph): The graph object.
+
+        Returns:
+            edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
+        """
+        return list(graph.edges)
+
+    @staticmethod
+    def get_node_prop(
+        graph: nx.Graph | nx.DiGraph,
+        name: str,
+        nodes: Sequence[Any],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        """
+        Get a property of the nodes as a numpy array.
+
+        Args:
+            graph (nx.Graph | nx.DiGraph): The graph object.
+            name (str): The name of the node property.
+            nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
+                array.
+            metadata (GeffMetadata): The GEFF metadata.
+
+        Returns:
+            numpy.ndarray: The values of the selected property as a numpy array.
+        """
+        prop = [graph.nodes[node][name] for node in nodes]
+        return np.array(prop)
+
+    @staticmethod
+    def get_edge_prop(
+        graph: nx.Graph | nx.DiGraph,
+        name: str,
+        edges: Sequence[tuple[Any, Any]],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        """
+        Get a property of the edges as a numpy array.
+
+        Args:
+            graph (nx.Graph | nx.DiGraph): The graph object.
+            name (str): The name of the edge property.
+            edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
+                determines the order of the property array.
+            metadata (GeffMetadata): The GEFF metadata.
+
+        Returns:
+            numpy.ndarray: The values of the selected property as a numpy array.
+        """
+        prop = [graph.edges[edge][name] for edge in edges]
+        return np.array(prop)
 
 
 def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
@@ -150,45 +275,6 @@ def _set_property_values(
                 graph.edges[source, target][name] = val.tolist()
 
 
-def construct_nx(
-    metadata: GeffMetadata,
-    node_ids: NDArray[Any],
-    edge_ids: NDArray[Any],
-    node_props: dict[str, PropDictNpArray],
-    edge_props: dict[str, PropDictNpArray],
-) -> nx.Graph | nx.DiGraph:
-    """
-    Construct a `networkx` graph instance from a dictionary representation of the GEFF data.
-
-    Args:
-        metadata (GeffMetadata): The metadata of the graph.
-        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
-            edge_ids.
-        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
-            as node_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids.
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids.
-
-    Returns:
-        (nx.Graph | nx.DiGraph): A `networkx` graph object.
-    """
-    graph = nx.DiGraph() if metadata.directed else nx.Graph()
-
-    graph.add_nodes_from(node_ids.tolist())
-    for name, prop_dict in node_props.items():
-        _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
-
-    graph.add_edges_from(edge_ids.tolist())
-    for name, prop_dict in edge_props.items():
-        _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
-
-    return graph
-
-
 def read_nx(
     store: StoreLike,
     validate: bool = True,
@@ -213,6 +299,6 @@ def read_nx(
         A networkx graph containing the graph that was stored in the geff file format
     """
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct_nx(**in_memory_geff)
+    graph = NxBackend.construct(**in_memory_geff)
 
     return graph, in_memory_geff["metadata"]
