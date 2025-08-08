@@ -118,7 +118,7 @@ def read_sg(
     position_attr: str = "position",
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-) -> tuple[sg.SpatialGraph, GeffMetadata]:
+) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]:
     """Read a geff file into a SpatialGraph.
 
     Because SpatialGraph does not support missing/ragged node/edge attributes,

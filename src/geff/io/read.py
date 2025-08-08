@@ -101,7 +101,7 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
             return construct_sg
         # Add cases for new backends, remember to add overloads
         case _:
-            raise ValueError(f"Unsupported backend chosen: '{backend.value}'")
+            raise ValueError(f"Unsupported backend chosen: '{backend}'")
 
 
 @overload
