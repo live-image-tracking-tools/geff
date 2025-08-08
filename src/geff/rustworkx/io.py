@@ -24,9 +24,10 @@ from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
+    from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.typing import InMemoryGeff
+    from geff.typing import PropDictNpArray
 
 
 def get_roi_rx(
@@ -157,31 +158,47 @@ def write_rx(
     metadata.write(store)
 
 
-def construct_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:
+def construct_rx(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+) -> rx.PyDiGraph | rx.PyGraph:
     """
     Convert a InMemoryGeff to a rustworkx graph.
     The graph will have a `to_rx_id_map` attribute that maps geff node ids
     to rustworkx node indices.
 
     Args:
-        graph_dict: The InMemoryGeff to convert to a rustworkx graph.
+        metadata (GeffMetadata): The metadata of the graph.
+        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+            edge_ids.
+        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+            as node_ids.
+        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from node property names to (values, missing) arrays, which should have same
+            length as node_ids.
+        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+            from edge property names to (values, missing) arrays, which should have same
+            length as edge_ids.
 
     Returns:
         rx.PyGraph: A rustworkx graph.
     """
-    metadata = graph_dict["metadata"]
+    metadata = metadata
 
     graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()
     graph.attrs = metadata.model_dump()
 
     # Add nodes with populated properties
-    node_ids = graph_dict["node_ids"].tolist()
-    node_props: list[dict[str, Any]] = [{} for _ in node_ids]
+    node_ids = node_ids.tolist()
+    props_per_node: list[dict[str, Any]] = [{} for _ in node_ids]
 
     # Populate node properties first
     indices = np.arange(len(node_ids))
 
-    for name, prop_dict in graph_dict["node_props"].items():
+    for name, prop_dict in node_props.items():
         values = prop_dict["values"]
         if "missing" in prop_dict:
             current_indices = indices[~prop_dict["missing"]]
@@ -193,23 +210,23 @@ def construct_rx(graph_dict: InMemoryGeff) -> rx.PyDiGraph | rx.PyGraph:
         current_indices = current_indices.tolist()
 
         for idx, val in zip(current_indices, values, strict=True):
-            node_props[idx][name] = val
+            props_per_node[idx][name] = val
 
     # Add nodes with their properties
-    rx_node_ids = graph.add_nodes_from(node_props)
+    rx_node_ids = graph.add_nodes_from(props_per_node)
 
     # Create mapping from geff node id to rustworkx node index
     to_rx_id_map = dict(zip(node_ids, rx_node_ids, strict=False))
 
     # Add edges if they exist
-    if len(graph_dict["edge_ids"]) > 0:
+    if len(edge_ids) > 0:
         # converting to local rx ids
-        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(graph_dict["edge_ids"])
+        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(edge_ids)
         # Prepare edge data with properties
         edges_data: list[dict[str, Any]] = [{} for _ in edge_ids]
         indices = np.arange(len(edge_ids))
 
-        for name, prop_dict in graph_dict["edge_props"].items():
+        for name, prop_dict in edge_props.items():
             values = prop_dict["values"]
             if "missing" in prop_dict:
                 current_indices = indices[~prop_dict["missing"]]
@@ -257,6 +274,6 @@ def read_rx(
         A tuple containing the rustworkx graph and the metadata.
     """
     graph_dict = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct_rx(graph_dict)
+    graph = construct_rx(**graph_dict)
 
     return graph, graph_dict["metadata"]

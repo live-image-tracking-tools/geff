@@ -15,6 +15,8 @@ import numpy as np
 from zarr.storage import StoreLike
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
@@ -116,7 +118,7 @@ def read_sg(
     position_attr: str = "position",
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-) -> tuple[sg.SpatialGraph, GeffMetadata]:
+) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]:
     """Read a geff file into a SpatialGraph.
 
     Because SpatialGraph does not support missing/ragged node/edge attributes,
@@ -168,7 +170,7 @@ def construct_sg(
     node_props: dict[str, PropDictNpArray],
     edge_props: dict[str, PropDictNpArray],
     position_attr: str = "position",
-) -> sg.SpatialGraph:
+) -> sg.SpatialGraph | sg.SpatialDiGraph:
     """Construct a spatial graph graph instance from a dictionary representation of the GEFF data
 
     Args:
@@ -240,7 +242,9 @@ def construct_sg(
     node_attr_dtypes[position_attr] = get_dtype_str(position)
 
     # create graph
-    create_graph = getattr(sg, "create_graph", sg.SpatialGraph)
+    create_graph: Callable[..., sg.SpatialGraph | sg.SpatialDiGraph] = getattr(
+        sg, "create_graph", sg.SpatialGraph
+    )
     graph = create_graph(
         ndims=ndims,
         node_dtype=node_dtype,
