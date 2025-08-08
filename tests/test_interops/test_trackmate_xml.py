@@ -15,7 +15,7 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 
-def test_preliminary_checks(tmp_path):
+def test_preliminary_checks(tmp_path: Path) -> None:
     xml_path = Path("path/to/xml")
     geff_path = Path("path/to/geff")
 
@@ -31,7 +31,7 @@ def test_preliminary_checks(tmp_path):
         tm_xml._preliminary_checks(tmp_path, tmp_path, False)
 
 
-def test_get_units():
+def test_get_units() -> None:
     space_warning = "No space unit found in the XML file. Setting to 'pixel'."
     time_warning = "No time unit found in the XML file. Setting to 'frame'."
 
@@ -74,7 +74,7 @@ def test_get_units():
     assert time_warning in str(warning_list[1].message)
 
 
-def test_get_attributes_metadata():
+def test_get_attributes_metadata() -> None:
     # Several attributes with Feature tags
     xml_data = """
         <FeatureDeclarations>
@@ -116,7 +116,7 @@ def test_get_attributes_metadata():
     assert obtained_attrs == expected_attrs
 
 
-def test_convert_attributes():
+def test_convert_attributes() -> None:
     # Normal conversion with various data types
     attrs_md = {
         "feat_float": {"name": "feat_float", "isint": "false", "random": "info1"},
@@ -166,7 +166,7 @@ def test_convert_attributes():
         tm_xml._convert_attributes(converted_attrs, attrs_md, "node", 1)
 
 
-def test_convert_ROI_coordinates():
+def test_convert_ROI_coordinates() -> None:
     # 2D points
     el_obtained = ET.Element("Spot")
     el_obtained.attrib["ROI_N_POINTS"] = "3"
@@ -212,7 +212,7 @@ def test_convert_ROI_coordinates():
     assert attr_obtained == attr_expected
 
 
-def test_add_all_nodes():
+def test_add_all_nodes() -> None:
     # Several attributes
     xml_data = """
         <data>
@@ -287,7 +287,7 @@ def test_add_all_nodes():
         tm_xml._add_all_nodes(it, element, {}, nx.DiGraph())
 
 
-def test_add_edge():
+def test_add_edge() -> None:
     # Normal case with several attributes
     xml_data = """<data SPOT_SOURCE_ID="1" SPOT_TARGET_ID="2" x="20.5" y="25" />"""
     it = ET.iterparse(io.BytesIO(xml_data.encode("utf-8")), events=["start", "end"])
@@ -364,7 +364,7 @@ def test_add_edge():
         tm_xml._add_edge(element, attrs_md, obtained, 1)
 
 
-def test_build_tracks():
+def test_build_tracks() -> None:
     # Normal case with several attributes
     xml_data = """
         <data>
@@ -493,7 +493,7 @@ def test_build_tracks():
         tm_xml._build_tracks(it, element, attrs_md, nx.DiGraph())
 
 
-def test_get_filtered_tracks_ID():
+def test_get_filtered_tracks_ID() -> None:
     # Normal case with TRACK_ID attributes
     xml_data = """
         <data>
@@ -542,7 +542,7 @@ def test_get_filtered_tracks_ID():
         tm_xml._get_filtered_tracks_ID(it, element)
 
 
-def test_get_trackmate_version(tmp_path):
+def test_get_trackmate_version(tmp_path: Path) -> None:
     # Normal case with version attribute
     xml_path = Path("tests/data/FakeTracks.xml")
     obtained = tm_xml._get_trackmate_version(xml_path)
@@ -582,7 +582,7 @@ def test_get_trackmate_version(tmp_path):
     assert obtained == "unknown"
 
 
-def test_get_specific_tags():
+def test_get_specific_tags() -> None:
     # Normal case with several tags
     xml_path = Path("tests/data/FakeTracks.xml")
     tag_names = [
@@ -634,7 +634,7 @@ def test_get_specific_tags():
         tm_xml._get_specific_tags(xml_path, tag_names, 1)
 
 
-def test_extract_image_path():
+def test_extract_image_path() -> None:
     # Normal case with both filename and folder
     settings_element = ET.Element("Settings")
     ET.SubElement(
@@ -702,7 +702,7 @@ def test_extract_image_path():
     assert obtained is None
 
 
-def test_get_feature_name():
+def test_get_feature_name() -> None:
     # Normal case
     feature_element = ET.Element("Feature", attrib={"feature": "QUALITY", "name": "Quality"})
     obtained = tm_xml._get_feature_name(feature_element, "QUALITY", "node")
@@ -727,7 +727,7 @@ def test_get_feature_name():
         assert obtained == "QUALITY"
 
 
-def test_get_feature_dtype():
+def test_get_feature_dtype() -> None:
     # Normal case, is int
     feat_element = ET.Element("Feature", attrib={"feature": "QUALITY", "isint": "true"})
     obtained = tm_xml._get_feature_dtype(feat_element, "node")
@@ -755,7 +755,7 @@ def test_get_feature_dtype():
         tm_xml._get_feature_dtype(feat_element, "edge")
 
 
-def test_get_feature_unit():
+def test_get_feature_unit() -> None:
     units = {"spatialunits": "micrometer", "timeunits": "second"}
 
     # NONE dimension
@@ -835,7 +835,7 @@ def test_get_feature_unit():
         tm_xml._get_feature_unit(feature_element, "SpotFeatures", units)
 
 
-def test_process_feature_metadata():
+def test_process_feature_metadata() -> None:
     units = {"spatialunits": "pixel", "timeunits": "frame"}
 
     # Normal case
@@ -905,7 +905,7 @@ def test_process_feature_metadata():
         tm_xml._process_feature_metadata(feature_element, obtained, "SpotFeatures", units)
 
 
-def test_from_trackmate_xml_to_geff(tmp_path):
+def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     # No arguments, should use default values
     geff_output = tmp_path / "test.geff"
     with pytest.warns() as warning_list:

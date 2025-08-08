@@ -34,7 +34,7 @@ class TestWriteArrays:
         assert geff_path.exists()
 
         # Verify node and edge IDs were written correctly
-        root = zarr.open(str(geff_path))
+        root = zarr.open_group(str(geff_path))
         assert "nodes/ids" in root
         assert "edges/ids" in root
 
