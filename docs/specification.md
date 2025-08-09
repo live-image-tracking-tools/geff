@@ -14,13 +14,24 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 
 !!! note
 
-    The axes dictionary is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
+    The axes dictionary is modeled after the [OME-Zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data.
 
     ::: geff.valid_values.VALID_AXIS_TYPES  
 
     ::: geff.valid_values.VALID_SPACE_UNITS    
 
     ::: geff.valid_values.VALID_TIME_UNITS  
+
+### Other units
+
+Other unit names parseable by [pint](https://pint.readthedocs.io/en/stable/) unit may also be used.
+
+A warning will be issued if the unit is not enumerated in the OME-Zarr specification.
+
+An error will be raised if the unit is in neither the OME-Zarr specification nor the [default pint unit registry](https://github.com/hgrecco/pint/blob/master/pint/default_en.txt).
+An error will also be raised if the unit is not appropriate for the axis type.
+* For axes of type `"space"`, the unit must be either in `geff.valid_values.VALID_SPACE_UNITS` or in the pint `"[length]"` unit container.
+* For axes of type `"time"`, the unit must either be in `geff.valid_values.VALID_TIME_UNITS` or in the pint `"[time]"` unit container.
 
 ### Affine transformations
 The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.

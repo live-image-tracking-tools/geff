@@ -3,9 +3,11 @@ import warnings
 from pathlib import Path
 
 import numpy as np
+import pint
 import pydantic
 import pytest
 import zarr
+from pint.errors import UndefinedUnitError
 
 import geff
 from geff.affine import Affine
@@ -328,15 +330,40 @@ class TestAxis:
 
     def test_invalid_units(self) -> None:
         # Spatial
+        with pytest.raises(
+            UndefinedUnitError, match=r"'bad_unit' is not defined in the unit registry"
+        ):
+            Axis(name="test", type="space", unit="bad_unit")
+
+        with pytest.raises(pydantic.ValidationError, match=r"second is not a valid space unit."):
+            Axis(name="test", type="space", unit="second")
+
         with pytest.warns(UserWarning, match=r"Spatial unit .* not in valid"):
-            Axis(name="test", type="space", unit="bad unit")
+            Axis(name="test", type="space", unit="micrometers")
 
         # Temporal
+        with pytest.raises(
+            UndefinedUnitError, match=r"'bad_unit' is not defined in the unit registry"
+        ):
+            Axis(name="test", type="time", unit="bad_unit")
+
+        with pytest.raises(pydantic.ValidationError, match=r"micrometer is not a valid time unit."):
+            Axis(name="test", type="time", unit="micrometer")
+
         with pytest.warns(UserWarning, match=r"Temporal unit .* not in valid"):
-            Axis(name="test", type="time", unit="bad unit")
+            Axis(name="test", type="time", unit="seconds")
 
         # Don't check units if we don't specify type
         Axis(name="test", unit="not checked")
+
+    def test_ome_units(self) -> None:
+        ureg = pint.UnitRegistry()
+        for unit_name in geff.valid_values.VALID_SPACE_UNITS:
+            if not ureg(unit_name).check("[length]"):
+                raise Exception(f"OME unit {unit_name} not a length unit in pint")
+        for unit_name in geff.valid_values.VALID_TIME_UNITS:
+            if not ureg(unit_name).check("[time]"):
+                raise Exception(f"OME unit {unit_name} not a time unit in pint")
 
     def test_min_max(self) -> None:
         # Min no max

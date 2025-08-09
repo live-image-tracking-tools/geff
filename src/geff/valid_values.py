@@ -6,6 +6,7 @@ from typing import Any, Literal, TypeAlias, TypeGuard, get_args
 
 import numpy as np
 import numpy.typing as npt
+import pint
 
 # -----------------------------------------------------------------------------
 # Unit validation
@@ -79,6 +80,8 @@ VALID_SPACE_UNITS: tuple[SpaceUnits, ...] = get_args(SpaceUnits)
 VALID_TIME_UNITS: tuple[TimeUnits, ...] = get_args(TimeUnits)
 VALID_AXIS_TYPES: tuple[AxisType, ...] = get_args(AxisType)
 
+ureg = pint.UnitRegistry()
+
 
 def validate_axis_type(axis_type: Any) -> TypeGuard[AxisType]:
     """Validate axis type against standard list
@@ -93,7 +96,11 @@ def validate_axis_type(axis_type: Any) -> TypeGuard[AxisType]:
 
 
 def validate_space_unit(unit_name: Any) -> TypeGuard[SpaceUnits]:
-    """Checks space unit against ome-zarr supported units
+    """Checks space unit against supported units
+
+    Units are checked against the units for "space" axes enumerated in the
+    OME-NGFF specification and in the pint default unit registry in the
+    [length] units container.
 
     Args:
         unit_name (str): Unit name to check
@@ -102,11 +109,15 @@ def validate_space_unit(unit_name: Any) -> TypeGuard[SpaceUnits]:
         bool: True if a space unit is a KNOWN valid unit.
         False if the unit is not known. The unit may be valid.
     """
-    return unit_name in VALID_SPACE_UNITS
+    return unit_name in VALID_SPACE_UNITS or ureg(unit_name).check("[length]")
 
 
 def validate_time_unit(unit_name: Any) -> TypeGuard[TimeUnits]:
-    """Check time unit against ome-zarr supported units
+    """Check time unit against supported units
+
+    Units are checked again the units for "time" axes enumerated in the
+    OME-NGFF specification and in the pint default unit registry in the
+    [time] units container.
 
     Args:
         unit_name (str): Unit name to check
@@ -115,7 +126,7 @@ def validate_time_unit(unit_name: Any) -> TypeGuard[TimeUnits]:
         bool: True if a time unit is a KNOWN valid unit.
         False if the unit is not known. The unit may be valid.
     """
-    return unit_name in VALID_TIME_UNITS
+    return unit_name in VALID_TIME_UNITS or ureg(unit_name).check("[time]")
 
 
 # -----------------------------------------------------------------------------
