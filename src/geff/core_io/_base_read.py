@@ -6,8 +6,8 @@ import numpy as np
 import zarr
 
 from geff import _path
-from geff.core_io import utils
-from geff.metadata.schema import GeffMetadata
+from geff.core_io import _utils
+from geff.metadata._schema import GeffMetadata
 from geff.validate.structure import validate_structure
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.typing import InMemoryGeff, PropDictNpArray, PropDictZArray
+    from geff._typing import InMemoryGeff, PropDictNpArray, PropDictZArray
 
 
 class GeffReader:
@@ -58,7 +58,7 @@ class GeffReader:
                 geff file before loading into memory. If set to False and there are
                 format issues, will likely fail with a cryptic error. Defaults to True.
         """
-        source = utils.remove_tilde(source)
+        source = _utils.remove_tilde(source)
 
         if validate:
             validate_structure(source)
@@ -70,7 +70,7 @@ class GeffReader:
         self.edge_props: dict[str, PropDictZArray] = {}
 
         # get node properties names
-        nodes_group = utils.expect_group(self.group, _path.NODES)
+        nodes_group = _utils.expect_group(self.group, _path.NODES)
         if _path.PROPS in nodes_group.keys():
             node_props_group = zarr.open_group(self.group.store, path=_path.NODE_PROPS, mode="r")
             self.node_prop_names: list[str] = [*node_props_group.group_keys()]
@@ -78,7 +78,7 @@ class GeffReader:
             self.node_prop_names = []
 
         # get edge property names
-        edges_group = utils.expect_group(self.group, _path.EDGES)
+        edges_group = _utils.expect_group(self.group, _path.EDGES)
         if _path.PROPS in edges_group.keys():
             edge_props_group = zarr.open_group(self.group.store, path=_path.EDGE_PROPS, mode="r")
             self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
@@ -104,10 +104,10 @@ class GeffReader:
             prop_group = zarr.open_group(
                 self.group.store, path=f"{_path.NODE_PROPS}/{name}", mode="r"
             )
-            values = utils.expect_array(prop_group, _path.VALUES, "node")
+            values = _utils.expect_array(prop_group, _path.VALUES, "node")
             prop_dict: PropDictZArray = {"values": values}
             if _path.MISSING in prop_group.keys():
-                missing = utils.expect_array(prop_group, _path.MISSING, "node")
+                missing = _utils.expect_array(prop_group, _path.MISSING, "node")
                 prop_dict[_path.MISSING] = missing
             self.node_props[name] = prop_dict
 
@@ -130,10 +130,10 @@ class GeffReader:
             prop_group = zarr.open_group(
                 self.group.store, path=f"{_path.EDGE_PROPS}/{name}", mode="r"
             )
-            values = utils.expect_array(prop_group, _path.VALUES, "edge")
+            values = _utils.expect_array(prop_group, _path.VALUES, "edge")
             prop_dict: PropDictZArray = {"values": values}
             if _path.MISSING in prop_group.keys():
-                missing = utils.expect_array(prop_group, _path.MISSING, "edge")
+                missing = _utils.expect_array(prop_group, _path.MISSING, "edge")
                 prop_dict[_path.MISSING] = missing
             self.edge_props[name] = prop_dict
 

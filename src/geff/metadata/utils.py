@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeVar
 from pydantic import validate_call
 
 import geff
-from geff.metadata.schema import GeffMetadata, PropMetadata
+from geff.metadata._schema import GeffMetadata, PropMetadata
 
 if TYPE_CHECKING:
     T = TypeVar("T")

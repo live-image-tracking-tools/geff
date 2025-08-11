@@ -1,6 +1,6 @@
 import pytest
 
-from geff.metadata.schema import GeffMetadata, PropMetadata
+from geff.metadata._schema import GeffMetadata, PropMetadata
 from geff.metadata.utils import create_or_update_props_metadata
 
 

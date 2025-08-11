@@ -20,13 +20,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.typing import PropDictNpArray
+    from geff._typing import PropDictNpArray
 
 import geff
 from geff.core_io import write_arrays
 from geff.core_io._base_read import read_to_memory
-from geff.core_io.utils import remove_tilde
-from geff.metadata.schema import GeffMetadata, _axes_from_lists
+from geff.core_io._utils import remove_tilde
+from geff.metadata._schema import GeffMetadata, _axes_from_lists
 
 
 def write_sg(

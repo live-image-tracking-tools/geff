@@ -9,14 +9,14 @@ import zarr
 
 import geff
 from geff.metadata._affine import Affine
-from geff.metadata.schema import (
+from geff.metadata._schema import (
     VERSION_PATTERN,
     Axis,
     GeffMetadata,
     GeffSchema,
     PropMetadata,
-    formatted_schema_json,
-    validate_key_identifier_equality,
+    _formatted_schema_json,
+    _validate_key_identifier_equality,
 )
 from geff.testing.data import create_simple_2d_geff
 
@@ -403,18 +403,18 @@ class TestPropMetadata:
             PropMetadata(identifier="prop", dtype="float", encoding="invalid_encoding")
 
 
-def test_validate_key_identifier_equality() -> None:
+def test__validate_key_identifier_equality() -> None:
     # Matching key / identifier
     props_md = {
         "prop1": PropMetadata(identifier="prop1", name="Property 1", dtype="int32"),
         "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
         "prop3": PropMetadata(identifier="prop3", name="Property 3", dtype="str"),
     }
-    validate_key_identifier_equality(props_md, "node")
+    _validate_key_identifier_equality(props_md, "node")
 
     # Empty metadata
     props_md = {}
-    validate_key_identifier_equality(props_md, "edge")
+    _validate_key_identifier_equality(props_md, "edge")
 
     # Non matching key / identifier
     props_md = {
@@ -423,7 +423,7 @@ def test_validate_key_identifier_equality() -> None:
         "prop3": PropMetadata(identifier="prop4", name="Property 3", dtype="str"),
     }
     with pytest.raises(ValueError, match=r".* property key .* does not match "):
-        validate_key_identifier_equality(props_md, "node")
+        _validate_key_identifier_equality(props_md, "node")
 
     # Incorrect component type
     props_md = {
@@ -431,7 +431,7 @@ def test_validate_key_identifier_equality() -> None:
         "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
     }
     with pytest.raises(pydantic.ValidationError):
-        validate_key_identifier_equality(props_md, "nodeeeee")
+        _validate_key_identifier_equality(props_md, "nodeeeee")
 
 
 class TestAffineTransformation:
@@ -555,7 +555,7 @@ def test_schema_file_updated(pytestconfig: pytest.Config) -> None:
             )
         current_schema_text = ""
 
-    new_schema_text = formatted_schema_json()
+    new_schema_text = _formatted_schema_json()
     if current_schema_text != new_schema_text:
         if pytestconfig.getoption("--update-schema"):
             schema_path.write_text(new_schema_text)

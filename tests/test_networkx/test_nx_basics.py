@@ -4,7 +4,7 @@ import pytest
 import zarr
 
 import geff
-from geff.metadata.schema import GeffMetadata, _axes_from_lists
+from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]

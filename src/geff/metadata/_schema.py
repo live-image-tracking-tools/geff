@@ -35,6 +35,19 @@ VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
 
 class Axis(BaseModel):
+    """TODO docstring
+
+    Args:
+        BaseModel (_type_): _description_
+
+    Raises:
+        ValueError: _description_
+        ValueError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     name: str
     type: str | None = None
     unit: str | None = None
@@ -216,7 +229,7 @@ class PropMetadata(BaseModel):
 
 
 @validate_call
-def validate_key_identifier_equality(
+def _validate_key_identifier_equality(
     props_metadata: dict[str, PropMetadata],
     c_type: Literal["node", "edge", "tracklet", "lineage"],
 ) -> None:
@@ -241,6 +254,8 @@ def validate_key_identifier_equality(
 
 
 class RelatedObject(BaseModel):
+    """TODO docstring"""
+
     type: str = Field(
         ...,
         description=(
@@ -458,9 +473,9 @@ class GeffMetadata(BaseModel):
 
         # Property metadata validation
         if self.node_props_metadata is not None:
-            validate_key_identifier_equality(self.node_props_metadata, "node")
+            _validate_key_identifier_equality(self.node_props_metadata, "node")
         if self.edge_props_metadata is not None:
-            validate_key_identifier_equality(self.edge_props_metadata, "edge")
+            _validate_key_identifier_equality(self.edge_props_metadata, "edge")
 
         return self
 
@@ -510,7 +525,7 @@ class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
 
 
-def formatted_schema_json() -> str:
+def _formatted_schema_json() -> str:
     """Get the formatted JSON schema for the GeffMetadata model."""
     schema = GeffSchema.model_json_schema()
 

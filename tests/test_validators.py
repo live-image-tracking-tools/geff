@@ -2,12 +2,11 @@ import numpy as np
 import pytest
 
 from geff.validate.graph import (
-    validate_lineages,
     validate_no_repeated_edges,
     validate_no_self_edges,
     validate_nodes_for_edges,
-    validate_tracklets,
 )
+from geff.validate.tracks import validate_lineages, validate_tracklets
 
 
 def test_no_self_edges() -> None:

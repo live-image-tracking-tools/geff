@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import zarr
     from numpy.typing import NDArray
 
-    from .metadata.schema import GeffMetadata
+    from .metadata._schema import GeffMetadata
 
 # From python 3.11 TypeDicts can also inherit from Generic
 # While python 3.10 is support two PropDicts for NDArray and zarr.Array are defined

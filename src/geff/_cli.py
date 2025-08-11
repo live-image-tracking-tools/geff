@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Annotated, cast
 import typer
 
 from . import validate_structure
-from .metadata.schema import GeffMetadata
+from .metadata._schema import GeffMetadata
 
 if TYPE_CHECKING:
     from typing import Literal

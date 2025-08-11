@@ -8,7 +8,7 @@ import pytest
 
 import geff.convert._trackmate_xml as tm_xml
 from geff import validate_structure
-from geff.testing.utils import nx_is_equal
+from geff.testing._utils import nx_is_equal
 
 try:
     from lxml import etree as ET

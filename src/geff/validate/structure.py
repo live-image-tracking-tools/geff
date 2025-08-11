@@ -7,7 +7,7 @@ import numpy as np
 import zarr
 
 from geff import _path
-from geff.core_io.utils import expect_array, expect_group, is_remote_url
+from geff.core_io._utils import expect_array, expect_group, is_remote_url
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
 
-from geff.metadata.schema import GeffMetadata, PropMetadata
+from geff.metadata._schema import GeffMetadata, PropMetadata
 
 
 def validate_structure(store: StoreLike) -> None:

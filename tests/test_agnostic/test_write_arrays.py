@@ -6,7 +6,7 @@ import pytest
 import zarr
 
 from geff.core_io import write_arrays
-from geff.metadata.schema import GeffMetadata
+from geff.metadata._schema import GeffMetadata
 
 
 class TestWriteArrays:

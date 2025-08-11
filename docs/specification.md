@@ -16,11 +16,11 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
 
     The axes dictionary is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
 
-    ::: geff.valid_values.VALID_AXIS_TYPES  
+    <!-- ::: geff.valid_values.VALID_AXIS_TYPES   -->
 
-    ::: geff.valid_values.VALID_SPACE_UNITS    
+    <!-- ::: geff.valid_values.VALID_SPACE_UNITS     -->
 
-    ::: geff.valid_values.VALID_TIME_UNITS  
+    <!-- ::: geff.valid_values.VALID_TIME_UNITS   -->
 
 ### Affine transformations
 The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
