@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
-from geff.validators.segmentation_validators import (
+from geff.validate.segmentation import (
     axes_match_seg_dims,
     graph_is_in_seg_bounds,
     has_seg_ids_at_coords,

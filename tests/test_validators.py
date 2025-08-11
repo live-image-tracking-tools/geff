@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.validators.validators import (
+from geff.validate.graph import (
     validate_lineages,
     validate_no_repeated_edges,
     validate_no_self_edges,
