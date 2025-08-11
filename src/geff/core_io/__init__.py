@@ -1,3 +1,4 @@
 from ._base_read import GeffReader, read_to_memory
+from ._base_write import write_arrays, write_dicts
 
-__all__ = ["GeffReader", "read_to_memory"]
+__all__ = ["GeffReader", "read_to_memory", "write_arrays", "write_dicts"]

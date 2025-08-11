@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.write_dicts import dict_props_to_arr
+from geff.core_io._base_write import dict_props_to_arr
 
 
 @pytest.fixture

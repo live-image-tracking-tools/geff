@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import zarr
 
+from geff.core_io import write_arrays
 from geff.metadata_schema import GeffMetadata
-from geff.write_arrays import write_arrays
 
 
 class TestWriteArrays:

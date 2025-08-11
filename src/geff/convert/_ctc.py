@@ -18,8 +18,8 @@ import zarr
 from zarr.storage import StoreLike
 
 import geff
+from geff.core_io import write_arrays
 from geff.metadata_schema import Axis, GeffMetadata
-from geff.write_arrays import write_arrays
 
 
 def ctc_tiffs_to_zarr(
