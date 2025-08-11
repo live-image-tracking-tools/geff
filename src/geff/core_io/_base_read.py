@@ -5,8 +5,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import zarr
 
-from geff import _path, utils
+from geff import _path
+from geff.core_io import utils
 from geff.metadata.schema import GeffMetadata
+from geff.validate.structure import validate_structure
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -59,7 +61,7 @@ class GeffReader:
         source = utils.remove_tilde(source)
 
         if validate:
-            utils.validate(source)
+            validate_structure(source)
         self.group = zarr.open_group(source, mode="r")
         self.metadata = GeffMetadata.read(source)
         self.nodes = zarr.open_array(source, path=_path.NODE_IDS, mode="r")

@@ -7,7 +7,8 @@ import networkx as nx
 import pytest
 
 import geff.convert._trackmate_xml as tm_xml
-from geff.utils import nx_is_equal, validate
+from geff import validate_structure
+from geff.testing.utils import nx_is_equal
 
 try:
     from lxml import etree as ET
@@ -913,7 +914,7 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     warning_messages = [str(warning.message) for warning in warning_list]
     assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
     assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
-    validate(geff_output)
+    validate_structure(geff_output)
 
     # Discard filtered spots and tracks
     with pytest.warns() as warning_list:
@@ -927,7 +928,7 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     warning_messages = [str(warning.message) for warning in warning_list]
     assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
     assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
-    validate(geff_output)
+    validate_structure(geff_output)
 
     # Geff file already exists
     with pytest.raises(FileExistsError):

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Annotated, cast
 
 import typer
 
-from . import utils
+from . import validate_structure
 from .metadata.schema import GeffMetadata
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ def validate(
     ),
 ) -> None:
     """Validate a GEFF file."""
-    utils.validate(input_path)
+    validate_structure(input_path)
     print(f"{input_path} is valid")
 
 

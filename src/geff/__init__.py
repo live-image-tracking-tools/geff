@@ -8,7 +8,7 @@ except PackageNotFoundError:  # pragma: no cover
 
 from .graph_libs._networkx import read_nx, write_nx
 from .metadata.schema import GeffMetadata
-from .utils import validate
+from .validate.structure import validate_structure
 
 if TYPE_CHECKING:
     from geff.graph_libs._rustworkx import read_rx, write_rx
@@ -20,7 +20,7 @@ __all__ = [
     "read_nx",
     "read_rx",
     "read_sg",
-    "validate",
+    "validate_structure",
     "write_nx",
     "write_rx",
     "write_sg",

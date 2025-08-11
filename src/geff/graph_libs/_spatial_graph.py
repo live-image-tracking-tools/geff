@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 import geff
 from geff.core_io import write_arrays
 from geff.core_io._base_read import read_to_memory
+from geff.core_io.utils import remove_tilde
 from geff.metadata.schema import GeffMetadata, _axes_from_lists
-from geff.utils import remove_tilde
 
 
 def write_sg(

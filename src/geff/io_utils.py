@@ -11,7 +11,7 @@ from pydantic import validate_call
 from zarr.storage import StoreLike
 
 import geff
-from geff import utils
+from geff.core_io import utils
 from geff.metadata.schema import GeffMetadata, PropMetadata
 
 if TYPE_CHECKING:

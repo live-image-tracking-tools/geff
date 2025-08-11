@@ -7,8 +7,8 @@ import numpy as np
 import zarr
 
 from geff import _path
+from geff.core_io.utils import remove_tilde
 from geff.metadata._valid_values import validate_data_type
-from geff.utils import remove_tilde
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
