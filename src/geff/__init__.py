@@ -12,7 +12,7 @@ from .utils import validate
 
 if TYPE_CHECKING:
     from geff.graph_libs._rustworkx import read_rx, write_rx
-    from geff.spatial_graph.io import read_sg, write_sg
+    from geff.graph_libs._spatial_graph import read_sg, write_sg
 
 
 __all__ = [
@@ -33,8 +33,8 @@ def __getattr__(name: str) -> Any:
 
         return getattr(_rustworkx, name)
     if name in ("read_sg", "write_sg"):
-        from geff.spatial_graph import io
+        from geff.graph_libs import _spatial_graph
 
-        return getattr(io, name)
+        return getattr(_spatial_graph, name)
 
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")

@@ -96,7 +96,7 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
 
             return construct_rx
         case "spatial-graph":
-            from geff.spatial_graph.io import construct_sg
+            from geff.graph_libs._spatial_graph import construct_sg
 
             return construct_sg
         # Add cases for new backends, remember to add overloads
