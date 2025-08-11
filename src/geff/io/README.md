@@ -4,16 +4,16 @@
 
 Follow these steps to add read support for a new graph backend.
 
-1. Add your backend to the [`SupportedBackend`](supported_backends.py#L4) enum class.
+1. Add your backend to the [`SupportedBackend`](read.py#L20) `Literal` type at the start of the read.py file.
 
-2. Write a function that constructs your graph object from a set of NumPy arrays containing the GEFF data. Your construct function must follow the [`ConstructFunc`](read.py#L21) protocol.
+2. Write a function that constructs your graph object from a set of NumPy arrays containing the GEFF data. Your construct function must follow the [`ConstructFunc`](read.py#L23) protocol.
 
 > [!TIP]
 > A python `Protocol` is a way to do structural type hinting, in our case it means a static type checker, such as `mypy`, will enforce anything typed as a `ConstructFunc` to have a matching function signature, i.e. it must have the arguments `metadata`, `node_ids`, `edge_ids`, `node_props` and `edge_props`; additional `args` and `kwargs` are allowed and the return type can be anything.
 
-3. Add a case to the function [`get_construct_func`](read.py#L65) so that when your backend flag, which you added to `SupportedBackend`, is chosen, the new construct function you defined will be returned.
+3. Add a case to the function [`get_construct_func`](read.py#L81) so that when your backend flag, which you added to `SupportedBackend`, is chosen, the new construct function you defined will be returned.
 
-4. i. Add new overloads for the `get_construct_func` and [`read`](read.py#L107) functions, check the `networkx` overloads to see how it should be done. 
+4. i. Add new overloads for the `get_construct_func` and [`read`](read.py#L139) functions, check the `networkx` overloads to see how it should be done. 
     
     ii. In the `read` implementation you will also need to add your backend to the `Literal` type for the `backend` argument.
 
