@@ -23,8 +23,8 @@ else:
     except ImportError:  # pragma: no cover
         import xml.etree.ElementTree as ET
 
+from geff.graph_libs._networkx import write_nx
 from geff.metadata_schema import Axis, DisplayHint, GeffMetadata, RelatedObject
-from geff.networkx.io import write_nx
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
 # used in ctc_to_geff. Need to wait for CTC PR.

@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import zarr
 
-from geff.networkx.io import read_nx
+from geff import read_nx
 
 
 def create_mock_data(
