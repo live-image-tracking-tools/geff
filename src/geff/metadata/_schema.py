@@ -35,18 +35,7 @@ VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
 
 class Axis(BaseModel):
-    """TODO docstring
-
-    Args:
-        BaseModel (_type_): _description_
-
-    Raises:
-        ValueError: _description_
-        ValueError: _description_
-
-    Returns:
-        _type_: _description_
-    """
+    """TODO docstring"""
 
     name: str
     type: str | None = None

@@ -20,8 +20,7 @@ if TYPE_CHECKING:
 
 
 class GeffReader:
-    """
-    File reader class that allows subset reading to an intermediate dict representation.
+    """File reader class that allows subset reading to an intermediate dict representation.
 
     The subsets can be a subset of node and edge properties, and a subset of nodes and
     edges.
@@ -42,8 +41,8 @@ class GeffReader:
         ... in_memory_geff = file_reader.build()
         ... in_memory_geff
 
-        >>> # Now in_memory_geff will only be a subset with nodes "t" < 5
-        ... in_memory_geff = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
+        >>> in_memory_geff = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
+        ... # Now in_memory_geff will only be a subset with nodes "t" < 5
         ... in_memory_geff
     """
 
@@ -95,7 +94,7 @@ class GeffReader:
 
         Args:
             names (iterable of str, optional): The names of the node properties to load. If
-            None all node properties will be loaded.
+                None all node properties will be loaded.
         """
         if names is None:
             names = self.node_prop_names
@@ -121,7 +120,7 @@ class GeffReader:
 
         Args:
             names (iterable of str, optional): The names of the edge properties to load. If
-            None all node properties will be loaded.
+                None all node properties will be loaded.
         """
         if names is None:
             names = self.edge_prop_names
@@ -149,11 +148,11 @@ class GeffReader:
 
         Args:
             node_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
-            of a subset of nodes, where `node_mask` is equal to True. It must be a 1D
-            array of length number of nodes.
+                of a subset of nodes, where `node_mask` is equal to True. It must be a 1D
+                array of length number of nodes.
             edge_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
-            of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
-            array of length number of edges.
+                of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
+                array of length number of edges.
         Returns:
             InMemoryGeff: A dictionary of in memory numpy arrays representing the graph.
         """
