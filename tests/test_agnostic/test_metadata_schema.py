@@ -8,8 +8,8 @@ import pytest
 import zarr
 
 import geff
-from geff.affine import Affine
-from geff.metadata_schema import (
+from geff.metadata._affine import Affine
+from geff.metadata.schema import (
     VERSION_PATTERN,
     Axis,
     GeffMetadata,

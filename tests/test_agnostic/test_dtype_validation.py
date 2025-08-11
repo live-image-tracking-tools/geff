@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 from geff.core_io import write_arrays
-from geff.metadata_schema import GeffMetadata
-from geff.valid_values import validate_data_type
+from geff.metadata._valid_values import validate_data_type
+from geff.metadata.schema import GeffMetadata
 
 
 # -----------------------------------------------------------------------------

@@ -13,8 +13,8 @@ from zarr.storage import StoreLike
 
 import geff
 
-from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
-from .valid_values import (
+from ._affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
+from ._valid_values import (
     ALLOWED_DTYPES,
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
@@ -74,7 +74,7 @@ class Axis(BaseModel):
         return self
 
 
-def axes_from_lists(
+def _axes_from_lists(
     axis_names: Sequence[str] | None = None,
     axis_units: Sequence[str | None] | None = None,
     axis_types: Sequence[str | None] | None = None,

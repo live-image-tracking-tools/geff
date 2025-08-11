@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.metadata_schema import GeffMetadata
+    from geff.metadata.schema import GeffMetadata
     from geff.typing import PropDictNpArray
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]

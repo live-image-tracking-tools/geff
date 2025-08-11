@@ -6,7 +6,7 @@ import numpy as np
 import zarr
 
 from geff import _path, utils
-from geff.metadata_schema import GeffMetadata
+from geff.metadata.schema import GeffMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

@@ -12,7 +12,7 @@ from zarr.storage import StoreLike
 
 import geff
 from geff import utils
-from geff.metadata_schema import GeffMetadata, PropMetadata
+from geff.metadata.schema import GeffMetadata, PropMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping

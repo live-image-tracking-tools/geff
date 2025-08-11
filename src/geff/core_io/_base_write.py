@@ -7,15 +7,15 @@ import numpy as np
 import zarr
 
 from geff import _path
+from geff.metadata._valid_values import validate_data_type
 from geff.utils import remove_tilde
-from geff.valid_values import validate_data_type
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
     from zarr.storage import StoreLike
 
-    from geff.metadata_schema import GeffMetadata
+    from geff.metadata.schema import GeffMetadata
 
 
 def write_dicts(

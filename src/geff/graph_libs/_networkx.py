@@ -11,7 +11,7 @@ from geff.io_utils import (
     create_or_update_metadata,
     get_graph_existing_metadata,
 )
-from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.metadata.schema import GeffMetadata, _axes_from_lists
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -99,7 +99,7 @@ def write_nx(
     else:
         roi_min, roi_max = None, None
 
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names,
         axis_units=axis_units,
         axis_types=axis_types,

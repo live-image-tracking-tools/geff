@@ -7,7 +7,7 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "uninstalled"
 
 from .graph_libs._networkx import read_nx, write_nx
-from .metadata_schema import GeffMetadata
+from .metadata.schema import GeffMetadata
 from .utils import validate
 
 if TYPE_CHECKING:

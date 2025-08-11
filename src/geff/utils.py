@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 from urllib.parse import urlparse
 
-from .metadata_schema import GeffMetadata, PropMetadata
+from .metadata.schema import GeffMetadata, PropMetadata
 
 
 def is_remote_url(path: str) -> bool:
