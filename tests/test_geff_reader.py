@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.geff_reader import GeffReader
+from geff.core_io import GeffReader
 from geff.graph_libs._networkx import construct_nx
 from geff.testing.data import create_memory_mock_geff
 

@@ -5,9 +5,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import zarr
 
+from geff import _path, utils
 from geff.metadata_schema import GeffMetadata
-
-from . import _path, utils
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

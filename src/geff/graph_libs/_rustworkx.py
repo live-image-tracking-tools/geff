@@ -14,7 +14,7 @@ except ImportError as e:
     ) from e
 
 
-from geff.geff_reader import read_to_memory
+from geff.core_io._base_read import read_to_memory
 from geff.io_utils import (
     calculate_roi_from_nodes,
     create_or_update_metadata,

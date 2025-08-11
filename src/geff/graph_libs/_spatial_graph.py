@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from geff.typing import PropDictNpArray
 
 import geff
-from geff.geff_reader import read_to_memory
+from geff.core_io._base_read import read_to_memory
 from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.utils import remove_tilde
 from geff.write_arrays import write_arrays

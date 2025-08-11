@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
 
-from geff.geff_reader import read_to_memory
+from geff.core_io._base_read import read_to_memory
 from geff.graph_libs._networkx import construct_nx
 
 R = TypeVar("R", covariant=True)
