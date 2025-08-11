@@ -58,18 +58,26 @@ class Axis(BaseModel):
             )
 
         if self.unit:
-            if self.type == "space" and not validate_space_unit(self.unit):
-                warnings.warn(
-                    f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
-                    "Reader applications may not know what to do with this information.",
-                    stacklevel=2,
-                )
-            elif self.type == "time" and not validate_time_unit(self.unit):
-                warnings.warn(
-                    f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
-                    "Reader applications may not know what to do with this information.",
-                    stacklevel=2,
-                )
+            if self.type == "space":
+                if validate_space_unit(self.unit):
+                    (self.unit in VALID_SPACE_UNITS) or warnings.warn(
+                        f"""Spatial unit {self.unit} not in valid OME-Zarr
+                        units {VALID_SPACE_UNITS}. Reader applications may not
+                        know what to do with this information.""",
+                        stacklevel=2,
+                    )
+                else:
+                    raise ValueError(f"{self.unit} is not a valid space unit")
+            elif self.type == "time":
+                if validate_time_unit(self.unit):
+                    (self.unit in VALID_TIME_UNITS) or warnings.warn(
+                        f"""Temporal unit {self.unit} not in valid OME-Zarr
+                        units {VALID_TIME_UNITS}. Reader applications may not
+                        know what to do with this information.""",
+                        stacklevel=2,
+                    )
+                else:
+                    raise ValueError(f"{self.unit} is not a valid time unit")
 
         return self
 
