@@ -11,7 +11,7 @@ from .metadata_schema import GeffMetadata
 from .utils import validate
 
 if TYPE_CHECKING:
-    from geff.rustworkx.io import read_rx, write_rx
+    from geff.graph_libs._rustworkx import read_rx, write_rx
     from geff.spatial_graph.io import read_sg, write_sg
 
 
@@ -29,11 +29,11 @@ __all__ = [
 
 def __getattr__(name: str) -> Any:
     if name in ("read_rx", "write_rx"):
-        from geff.rustworkx import io
+        from geff.graph_libs import _rustworkx
 
-        return getattr(io, name)
+        return getattr(_rustworkx, name)
     if name in ("read_sg", "write_sg"):
-        from geff.spatial_graph import io  # type: ignore[no-redef]
+        from geff.spatial_graph import io
 
         return getattr(io, name)
 

@@ -92,7 +92,7 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
         case "networkx":
             return construct_nx
         case "rustworkx":
-            from geff.rustworkx.io import construct_rx
+            from geff.graph_libs._rustworkx import construct_rx
 
             return construct_rx
         case "spatial-graph":
