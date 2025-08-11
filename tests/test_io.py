@@ -6,7 +6,7 @@ import pytest
 from numpy.typing import NDArray
 
 from geff import GeffMetadata
-from geff.io import SupportedBackend, read
+from geff.graph_libs._api_wrapper import SupportedBackend, read
 from geff.testing.data import create_memory_mock_geff
 
 rx = pytest.importorskip("rustworkx")

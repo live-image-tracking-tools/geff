@@ -6,7 +6,7 @@ from pathlib import Path
 import networkx as nx
 import pytest
 
-import geff.interops.trackmate_xml as tm_xml
+import geff.convert.trackmate_xml as tm_xml
 from geff.utils import nx_is_equal, validate
 
 try:
