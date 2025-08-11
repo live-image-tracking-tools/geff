@@ -5,25 +5,16 @@ ci:
   autofix_prs: false
 
 repos:
-  - repo: local
-    hooks:
-      - id: update-json
-        name: Update geff-schema.json
-        entry: pixi run -e dev update-json
-        language: python
-        types: [python]
-        pass_filenames: false
-        stages: [manual]
   - repo: https://github.com/crate-ci/typos
-    rev: v1.34.0
+    rev: v1
     hooks:
       - id: typos
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.4
+    rev: v0.12.7
     hooks:
       - id: ruff-check
-        args: [--fix]
+        args: [--fix, --unsafe-fixes]
       - id: ruff-format
 
   - repo: https://github.com/abravalheri/validate-pyproject
@@ -32,10 +23,25 @@ repos:
       - id: validate-pyproject
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.0
+    rev: v1.17.1
     hooks:
       - id: mypy
         files: "^src/"
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
+          # - types-networkx
+          - pydantic
+          - typer
+          - numpy
+          - zarr
+
+  - repo: local
+    hooks:
+      - id: pyright
+        stages: [manual]
+        name: pyright (local)
+        entry: uv run pyright
+        language: system
+        types: [python]
+        files: "^src/"

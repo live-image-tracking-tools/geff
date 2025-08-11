@@ -2,24 +2,34 @@ from __future__ import annotations
 
 import json
 import warnings
-from collections.abc import Sequence  # noqa: TC003
-from importlib.metadata import version
-from pathlib import Path
-from typing import Any, Literal
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 import zarr
-from pydantic import BaseModel, Field, model_validator
+from annotated_types import MinLen
+from pydantic import BaseModel, Field, field_validator, model_validator, validate_call
 from pydantic.config import ConfigDict
+from zarr.storage import StoreLike
+
+import geff
 
 from .affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
-from .units import (
+from .valid_values import (
+    ALLOWED_DTYPES,
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
+    VALID_STR_ENCODINGS,
     VALID_TIME_UNITS,
     validate_axis_type,
+    validate_data_type,
     validate_space_unit,
+    validate_str_encoding,
     validate_time_unit,
 )
+
+if TYPE_CHECKING:
+    from zarr.storage import StoreLike
+
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
 
@@ -33,32 +43,33 @@ class Axis(BaseModel):
 
     @model_validator(mode="after")
     def _validate_model(self) -> Axis:
-        if (self.min is None) != (self.max is None):  # type: ignore
+        if (self.min is None) != (self.max is None):
             raise ValueError(
                 f"Min and max must both be None or neither: got min {self.min} and max {self.max}"
             )
-        if self.min is not None and self.min > self.max:  # type: ignore
+        if self.min is not None and self.max is not None and self.min > self.max:
             raise ValueError(f"Min {self.min} is greater than max {self.max}")
 
-        if self.type is not None and not validate_axis_type(self.type):  # type: ignore
+        if self.type is not None and not validate_axis_type(self.type):
             warnings.warn(
                 f"Type {self.type} not in valid types {VALID_AXIS_TYPES}. "
                 "Reader applications may not know what to do with this information.",
                 stacklevel=2,
             )
 
-        if self.type == "space" and not validate_space_unit(self.unit):  # type: ignore
-            warnings.warn(
-                f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
-        elif self.type == "time" and not validate_time_unit(self.unit):  # type: ignore
-            warnings.warn(
-                f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
+        if self.unit:
+            if self.type == "space" and not validate_space_unit(self.unit):
+                warnings.warn(
+                    f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
+                    "Reader applications may not know what to do with this information.",
+                    stacklevel=2,
+                )
+            elif self.type == "time" and not validate_time_unit(self.unit):
+                warnings.warn(
+                    f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
+                    "Reader applications may not know what to do with this information.",
+                    stacklevel=2,
+                )
 
         return self
 
@@ -124,15 +135,109 @@ class DisplayHint(BaseModel):
     """Metadata indicating how spatiotemporal axes are displayed by a viewer"""
 
     display_horizontal: str = Field(
-        ..., description="Which spatial axis to use for horizontal display"
+        ...,
+        description="Which spatial axis to use for horizontal display",
     )
-    display_vertical: str = Field(..., description="Which spatial axis to use for vertical display")
+    display_vertical: str = Field(
+        ...,
+        description="Which spatial axis to use for vertical display",
+    )
     display_depth: str | None = Field(
-        None, description="Optional, which spatial axis to use for depth display"
+        default=None,
+        description="Optional, which spatial axis to use for depth display",
     )
     display_time: str | None = Field(
-        None, description="Optional, which temporal axis to use for time"
+        None,
+        description="Optional, which temporal axis to use for time",
     )
+
+
+class PropMetadata(BaseModel):
+    """Metadata describing a property in the geff graph."""
+
+    identifier: Annotated[str, MinLen(1)] = Field(
+        ...,
+        description=(
+            "Identifier of the property. Must be unique within its own component "
+            "subgroup (nodes or edges). Must be a non-empty string."
+        ),
+    )
+    dtype: Annotated[str, MinLen(1)] = Field(
+        ...,
+        description=(
+            "Data type of the property. Must be a non-empty string. "
+            "Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. "
+            "Examples of invalid values: 'integer', 'np.int16', 'number', 'string'."
+        ),
+    )
+    encoding: str | None = Field(
+        default=None,
+        description=(
+            "Optional encoding when the property is stored as a string. For example, "
+            "but not limited to, 'utf-8' or 'ascii'."
+        ),
+    )
+    unit: str | None = Field(
+        default=None,
+        description=("Optional unit of the property."),
+    )
+    name: str | None = Field(
+        default=None,
+        description=("Optional human friendly name of the property"),
+    )
+    description: str | None = Field(
+        default=None,
+        description=("Optional description of the property."),
+    )
+
+    @field_validator("dtype", mode="after")
+    @classmethod
+    def _validate_dtype(cls, value: str) -> str:
+        try:
+            validate_data_type(value)
+        except TypeError:
+            warnings.warn(
+                f"Data type {value} cannot be matched to a valid data type {ALLOWED_DTYPES}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+        return value
+
+    @field_validator("encoding", mode="after")
+    @classmethod
+    def _validate_encoding(cls, value: str | None) -> str | None:
+        if value is not None and not validate_str_encoding(value):
+            warnings.warn(
+                f"Encoding {value} not in valid encodings {VALID_STR_ENCODINGS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+        return value
+
+
+@validate_call
+def validate_key_identifier_equality(
+    props_metadata: dict[str, PropMetadata],
+    c_type: Literal["node", "edge", "tracklet", "lineage"],
+) -> None:
+    """Check that the keys in the property metadata dictionary match the identifiers
+    in the PropMetadata objects.
+
+    Args:
+        props_metadata (dict[str, PropMetadata]): The property metadata dictionary
+            where keys are property identifiers and values are PropMetadata objects.
+        c_type (Literal["node", "edge", "tracklet", "lineage"]): The type of component
+            to which the property belongs.
+
+    Raises:
+        ValueError: If the key does not match the identifier.
+    """
+    for key, prop_md in props_metadata.items():
+        if key != prop_md.identifier:
+            raise ValueError(
+                f"{c_type.capitalize()} property key '{key}' does not match "
+                f"identifier {prop_md.identifier}"
+            )
 
 
 class RelatedObject(BaseModel):
@@ -154,7 +259,7 @@ class RelatedObject(BaseModel):
         ),
     )
     label_prop: str | None = Field(
-        None,
+        default=None,
         description=(
             "Property name for label objects. This is the node property that will be used "
             "to identify the labels in the related object. "
@@ -178,6 +283,9 @@ class RelatedObject(BaseModel):
         return self
 
 
+GEFF_VERSION = ".".join(geff.__version__.split(".")[:2])
+
+
 class GeffMetadata(BaseModel):
     """
     Geff metadata schema to validate the attributes json file in a geff zarr
@@ -190,7 +298,7 @@ class GeffMetadata(BaseModel):
     )
 
     geff_version: str = Field(
-        ...,
+        default=GEFF_VERSION,
         pattern=VERSION_PATTERN,
         description=(
             "Geff version string following semantic versioning (MAJOR.MINOR.PATCH), "
@@ -200,16 +308,69 @@ class GeffMetadata(BaseModel):
     )
 
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
-    axes: Sequence[Axis] | None = Field(
-        None,
+    axes: list[Axis] | None = Field(
+        default=None,
         description="Optional list of Axis objects defining the axes of each node in the graph.\n"
         "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
         "Each axis can additionally optionally define a `unit` key, which should match the valid"
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
+
+    node_props_metadata: dict[str, PropMetadata] | None = Field(
+        default=None,
+        description=(
+            "Metadata for node properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+    edge_props_metadata: dict[str, PropMetadata] | None = Field(
+        default=None,
+        description=(
+            "Metadata for edge properties. The keys are the property identifiers, "
+            "and the values are PropMetadata objects describing the properties."
+        ),
+    )
+
+    sphere: str | None = Field(
+        default=None,
+        title="Node property: Detections as spheres",
+        description=(
+            """
+            Name of the optional `sphere` property.
+
+            A sphere is defined by
+            - a center point, already given by the `space` type properties
+            - a radius scalar, stored in this property
+            """
+        ),
+    )
+    ellipsoid: str | None = Field(
+        default=None,
+        title="Node property: Detections as ellipsoids",
+        description=(
+            """
+            Name of the `ellipsoid` property.
+
+            An ellipsoid is assumed to be in the same coordinate system as the `space` type
+            properties.
+
+            It is defined by
+            - a center point :math:`c`, already given by the `space` type properties
+            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this
+              property as a `2x2`/`3x3` array.
+
+            To plot the ellipsoid:
+            - Compute the eigendecomposition of the covariance matrix
+            :math:`\\Sigma = Q \\Lambda Q^{\\top}`
+            - Sample points :math:`z` on the unit sphere
+            - Transform the points to the ellipsoid by
+            :math:`x = c + Q \\Lambda^{(1/2)} z`.
+            """
+        ),
+    )
     track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
-        None,
+        default=None,
         description=(
             "Node properties denoting tracklet and/or lineage IDs.\n"
             "A tracklet is defined as a simple path of connected nodes "
@@ -221,8 +382,8 @@ class GeffMetadata(BaseModel):
             "The dictionary can store one or both of 'tracklet' or 'lineage' keys."
         ),
     )
-    related_objects: Sequence[RelatedObject] | None = Field(
-        None,
+    related_objects: list[RelatedObject] | None = Field(
+        default=None,
         description=(
             "A list of dictionaries of related objects such as labels or images. "
             "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
@@ -236,25 +397,19 @@ class GeffMetadata(BaseModel):
         ),
     )
     affine: Affine | None = Field(
-        None,
+        default=None,
         description="Affine transformation matrix to transform the graph coordinates to the "
         "physical coordinates. The matrix must have the same number of dimensions as the number of "
         "axes in the graph.",
     )
     display_hints: DisplayHint | None = Field(
-        None, description="Metadata indicating how spatiotemporal axes are displayed by a viewer"
+        default=None,
+        description="Metadata indicating how spatiotemporal axes are displayed by a viewer",
     )
-    extra: Any = Field(
+    extra: dict[str, Any] = Field(
         default_factory=dict,
         description="Extra metadata that is not part of the schema",
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_model_before(cls, values: dict) -> dict:
-        if values.get("geff_version") is None:
-            values["geff_version"] = version("geff")
-        return values
 
     @model_validator(mode="after")
     def _validate_model_after(self) -> GeffMetadata:
@@ -300,32 +455,44 @@ class GeffMetadata(BaseModel):
                     f"Display hint display_depth name {self.display_hints.display_depth} "
                     f"not found in axes {ax_names}"
                 )
+
+        # Property metadata validation
+        if self.node_props_metadata is not None:
+            validate_key_identifier_equality(self.node_props_metadata, "node")
+        if self.edge_props_metadata is not None:
+            validate_key_identifier_equality(self.edge_props_metadata, "edge")
+
         return self
 
-    def write(self, group: zarr.Group | Path | str):
-        """Helper function to write GeffMetadata into the zarr geff group.
+    def write(self, store: StoreLike) -> None:
+        """Helper function to write GeffMetadata into the group of a zarr geff store.
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
-            group (zarr.Group | Path): The geff group to write the metadata to
+            store (zarr store | Path | str): The geff store to write the metadata to
         """
-        if isinstance(group, Path | str):
-            group = zarr.open(group)
 
+        if isinstance(store, zarr.Group):
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+
+        group = zarr.open_group(store)
         group.attrs["geff"] = self.model_dump(mode="json")
 
     @classmethod
-    def read(cls, group: zarr.Group | Path) -> GeffMetadata:
+    def read(cls, store: StoreLike) -> GeffMetadata:
         """Helper function to read GeffMetadata from a zarr geff group.
 
         Args:
-            group (zarr.Group | Path): The zarr group containing the geff metadata
+            store (zarr store | Path | str): The geff store to read the metadata from
 
         Returns:
             GeffMetadata: The GeffMetadata object
         """
-        if isinstance(group, Path):
-            group = zarr.open(group)
+
+        if isinstance(store, zarr.Group):
+            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+
+        group = zarr.open_group(store)
 
         # Check if geff_version exists in zattrs
         if "geff" not in group.attrs:
@@ -334,20 +501,26 @@ class GeffMetadata(BaseModel):
                 f"zarr group name is not specified (e.g. /dataset.zarr/tracks/ instead of "
                 f"/dataset.zarr/)."
             )
-
-        return cls(**group.attrs["geff"])
+        if not isinstance(geff_dict := group.attrs["geff"], Mapping):
+            raise ValueError(f"Expected geff metadata to be a Mapping. Got {type(geff_dict)}")
+        return cls.model_validate(geff_dict)
 
 
 class GeffSchema(BaseModel):
     geff: GeffMetadata = Field(..., description="geff_metadata")
 
 
-def write_metadata_schema(outpath: Path):
-    """Write the current geff metadata schema to a json file
+def formatted_schema_json() -> str:
+    """Get the formatted JSON schema for the GeffMetadata model."""
+    schema = GeffSchema.model_json_schema()
 
-    Args:
-        outpath (Path): The file to write the schema to
-    """
-    metadata_schema = GeffSchema.model_json_schema()
-    with open(outpath, "w") as f:
-        f.write(json.dumps(metadata_schema, indent=2))
+    # this is a hacky way to ensure that the schema says geff_version is required
+    # while still being able to instantiate GeffMetadata without it.
+    # Once we cleanly version the schema independently, this *might* be a bit cleaner
+    # Note: one could also pass a custom `schema_generator` to `model_json_schema()`
+    # above... but this is simpler for now.
+    geff_meta = schema["$defs"]["GeffMetadata"]
+    geff_meta["properties"]["geff_version"].pop("default")
+    geff_meta["required"].append("geff_version")
+
+    return json.dumps(schema, indent=2)

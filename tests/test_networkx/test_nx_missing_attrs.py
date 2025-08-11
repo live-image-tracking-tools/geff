@@ -44,15 +44,15 @@ def graph_sparse_edge_props():
     return graph
 
 
-def test_sparse_node_props(tmp_path):
+def test_sparse_node_props(tmp_path) -> None:
     zarr_path = Path(tmp_path) / "test.zarr"
     graph, positions = graph_sparse_node_props()
-    geff.write_nx(graph, axis_names=["t", "y", "x"], path=zarr_path)
+    geff.write_nx(graph, axis_names=["t", "y", "x"], store=zarr_path)
     # check that the written thing is valid
     assert Path(zarr_path).exists()
     geff.validate(zarr_path)
 
-    zroot = zarr.open(zarr_path, mode="r")
+    zroot = zarr.open_group(zarr_path, mode="r")
     node_props = zroot["nodes"]["props"]
     t = node_props["t"]["values"][:]
     # TODO: test other dimensions
@@ -70,15 +70,15 @@ def test_sparse_node_props(tmp_path):
         assert read_graph.nodes[node] == data
 
 
-def test_sparse_edge_props(tmp_path):
+def test_sparse_edge_props(tmp_path) -> None:
     zarr_path = Path(tmp_path) / "test.zarr"
     graph = graph_sparse_edge_props()
-    geff.write_nx(graph, axis_names=["t", "y", "x"], path=zarr_path)
+    geff.write_nx(graph, axis_names=["t", "y", "x"], store=zarr_path)
     # check that the written thing is valid
     assert Path(zarr_path).exists()
     geff.validate(zarr_path)
 
-    zroot = zarr.open(zarr_path, mode="r")
+    zroot = zarr.open_group(zarr_path, mode="r")
     edge_props = zroot["edges"]["props"]
     scores = edge_props["score"]["values"][:]
     assert scores[0] == 0.1
@@ -93,15 +93,15 @@ def test_sparse_edge_props(tmp_path):
         assert read_graph.edges[u, v] == data
 
 
-def test_missing_pos_prop(tmp_path):
+def test_missing_pos_prop(tmp_path) -> None:
     zarr_path = Path(tmp_path) / "test1.zarr"
     graph, _ = graph_sparse_node_props()
     # wrong property name
     with pytest.raises(UserWarning, match="Property .* is not present on any graph elements"):
         with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
-            geff.write_nx(graph, axis_names=["t", "y", "z"], path=zarr_path)
+            geff.write_nx(graph, axis_names=["t", "y", "z"], store=zarr_path)
     # missing property
     del graph.nodes[1]["t"]
     print(graph.nodes[1])
     with pytest.raises(ValueError, match=r"Spatiotemporal property 't' not found in : \[1\]"):
-        geff.write_nx(graph, axis_names=["t", "y", "x"], path=zarr_path)
+        geff.write_nx(graph, axis_names=["t", "y", "x"], store=zarr_path)
