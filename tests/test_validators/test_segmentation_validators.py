@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
-from geff.validators.segmentation_validators import (
+from geff.validate.segmentation import (
     axes_match_seg_dims,
     graph_is_in_seg_bounds,
     has_seg_ids_at_coords,
@@ -60,7 +60,7 @@ def valid_segmentation():
     return seg
 
 
-def test_has_valid_seg_id(valid_store_and_attrs, invalid_store_and_attrs):
+def test_has_valid_seg_id(valid_store_and_attrs, invalid_store_and_attrs) -> None:
     store, _ = valid_store_and_attrs  # valid seg id
     assert has_valid_seg_id(store)[0] is True
 
@@ -71,7 +71,7 @@ def test_has_valid_seg_id(valid_store_and_attrs, invalid_store_and_attrs):
     assert has_valid_seg_id(store)[0] is False
 
 
-def test_axes_match_seg_dims(valid_store_and_attrs, valid_segmentation):
+def test_axes_match_seg_dims(valid_store_and_attrs, valid_segmentation) -> None:
     store, _ = valid_store_and_attrs
     assert axes_match_seg_dims(store, valid_segmentation)[0] is True
 
@@ -79,7 +79,7 @@ def test_axes_match_seg_dims(valid_store_and_attrs, valid_segmentation):
     assert axes_match_seg_dims(store, seg_invalid)[0] is False
 
 
-def test_graph_is_in_seg_bounds(valid_store_and_attrs, valid_segmentation):
+def test_graph_is_in_seg_bounds(valid_store_and_attrs, valid_segmentation) -> None:
     store, _ = valid_store_and_attrs
     scale = (1, 1, 100)
     assert graph_is_in_seg_bounds(store, valid_segmentation, scale=scale)[0] is True
@@ -102,8 +102,12 @@ def test_graph_is_in_seg_bounds(valid_store_and_attrs, valid_segmentation):
     ],
 )
 def test_has_seg_ids_at_time_points(
-    valid_store_and_attrs, valid_segmentation, time_points, seg_ids, expected
-):
+    valid_store_and_attrs: tuple,
+    valid_segmentation: np.ndarray,
+    time_points: list[int],
+    seg_ids: list[int],
+    expected: bool,
+) -> None:
     store, _ = valid_store_and_attrs
     assert (
         has_seg_ids_at_time_points(valid_segmentation, time_points, seg_ids, store=store)[0]
@@ -125,7 +129,12 @@ def test_has_seg_ids_at_time_points(
         ([(0, 100, 1.0)], [0, 1], False),  # Mismatched lengths
     ],
 )
-def test_has_seg_ids_at_coords(valid_segmentation, coords, seg_ids, expected):
+def test_has_seg_ids_at_coords(
+    valid_segmentation: np.ndarray,
+    coords: list[tuple[int, int, float]],
+    seg_ids: list[int],
+    expected: bool,
+) -> None:
     scale = (1, 1, 100)
     if len(coords) != len(seg_ids):
         assert has_seg_ids_at_coords(valid_segmentation, coords, seg_ids, scale=scale)[0] is False

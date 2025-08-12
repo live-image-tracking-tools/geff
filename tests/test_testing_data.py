@@ -11,7 +11,7 @@ from geff.testing.data import (
 )
 
 
-def test_create_simple_2d_geff():
+def test_create_simple_2d_geff() -> None:
     """Test the create_simple_2d_geff convenience function"""
 
     # Test with defaults
@@ -42,7 +42,7 @@ def test_create_simple_2d_geff():
     assert "z" not in axis_names
 
 
-def test_create_simple_3d_geff():
+def test_create_simple_3d_geff() -> None:
     """Test the create_simple_3d_geff convenience function"""
 
     # Test with defaults
@@ -73,7 +73,7 @@ def test_create_simple_3d_geff():
     assert "t" in axis_names
 
 
-def test_create_simple_temporal_geff():
+def test_create_simple_temporal_geff() -> None:
     """Test the create_simple_temporal_geff convenience function"""
 
     # Test with defaults
@@ -104,7 +104,7 @@ def test_create_simple_temporal_geff():
     assert "z" not in axis_names  # No spatial dimensions
 
 
-def test_simple_geff_edge_properties():
+def test_simple_geff_edge_properties() -> None:
     """Test that the simple functions create graphs with proper edge properties"""
 
     # Test 2D
@@ -144,7 +144,7 @@ def test_simple_geff_edge_properties():
         assert isinstance(edge_data["color"], int | np.integer)
 
 
-def test_create_memory_mock_geff_with_extra_node_props():
+def test_create_memory_mock_geff_with_extra_node_props() -> None:
     """Test create_memory_mock_geff with extra node properties"""
 
     # Test with mixed auto-generated and custom arrays for node properties
@@ -246,7 +246,7 @@ def test_create_memory_mock_geff_with_extra_node_props():
         assert edge_data["type"] == custom_edge_types[i]
 
 
-def test_create_memory_mock_geff_with_no_extra_node_props():
+def test_create_memory_mock_geff_with_no_extra_node_props() -> None:
     """Test create_memory_mock_geff with no extra node properties"""
 
     store, graph_props = create_memory_mock_geff(
@@ -272,7 +272,7 @@ def test_create_memory_mock_geff_with_no_extra_node_props():
             assert prop not in node_data
 
 
-def test_create_memory_mock_geff_extra_node_props_validation():
+def test_create_memory_mock_geff_extra_node_props_validation() -> None:
     """Test validation of extra_node_props parameter"""
 
     # Test with invalid input types
@@ -412,7 +412,7 @@ def test_create_memory_mock_geff_extra_node_props_validation():
         )
 
 
-def test_create_memory_mock_geff_extra_node_props_different_dtypes():
+def test_create_memory_mock_geff_extra_node_props_different_dtypes() -> None:
     """Test extra node properties with different data types"""
 
     # Test all supported dtypes
@@ -459,7 +459,7 @@ def test_create_memory_mock_geff_extra_node_props_different_dtypes():
             assert isinstance(node_data[prop_name], float | np.floating)
 
 
-def test_create_dummy_graph_props_extra_node_props():
+def test_create_dummy_graph_props_extra_node_props() -> None:
     """Test create_dummy_graph_props with extra node properties"""
 
     extra_node_props = {
@@ -500,7 +500,7 @@ def test_create_dummy_graph_props_extra_node_props():
         assert extra_props["category"][i] == i
 
 
-def test_create_dummy_graph_props_empty_graph():
+def test_create_dummy_graph_props_empty_graph() -> None:
     """Test create_dummy_graph_props with empty graph (0 nodes, 0 edges)"""
 
     extra_node_props = {
@@ -577,7 +577,7 @@ def test_create_dummy_graph_props_empty_graph():
     assert graph_props["axis_types"] == ("time", "space", "space", "space")
 
 
-def test_create_dummy_graph_props_empty_graph_no_extra_props():
+def test_create_dummy_graph_props_empty_graph_no_extra_props() -> None:
     """Test create_dummy_graph_props with empty graph and no extra properties"""
 
     graph_props = create_dummy_graph_props(
@@ -625,7 +625,7 @@ def test_create_dummy_graph_props_empty_graph_no_extra_props():
     assert graph_props["axis_types"] == ("time", "space", "space", "space")
 
 
-def test_create_dummy_graph_props_empty_graph_partial_dimensions():
+def test_create_dummy_graph_props_empty_graph_partial_dimensions() -> None:
     """Test create_dummy_graph_props with empty graph and partial dimensions"""
 
     graph_props = create_dummy_graph_props(

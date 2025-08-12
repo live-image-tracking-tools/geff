@@ -3,7 +3,7 @@ import pytest
 try:
     import tifffile
 
-    from geff.interops import ctc_tiffs_to_zarr, from_ctc_to_geff
+    from geff.convert import ctc_tiffs_to_zarr, from_ctc_to_geff
 except ImportError:
     pytest.skip("geff[ctc] not installed", allow_module_level=True)
 
@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import zarr
 
-from geff.networkx.io import read_nx
+from geff import read_nx
 
 
 def create_mock_data(
@@ -95,7 +95,7 @@ def test_ctc_to_geff(
 
     expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
 
-    segm = zarr.open(segm_path, mode="r")[...]
+    segm = zarr.open_array(segm_path, mode="r")[...]
 
     assert segm.shape[0] == expected_segm.shape[0]
 
@@ -114,7 +114,7 @@ def test_ctc_image_to_zarr(tmp_path: Path, ctzyx: bool) -> None:
     ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=ctzyx)
 
     expected_arr = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
-    copied_arr = zarr.open(zarr_path, mode="r")
+    copied_arr = zarr.open_array(zarr_path, mode="r")
 
     if ctzyx:
         assert copied_arr.ndim == 5

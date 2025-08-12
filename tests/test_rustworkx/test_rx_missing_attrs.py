@@ -46,7 +46,7 @@ def create_rx_graph_sparse_edge_props():
     return graph, node_indices
 
 
-def test_sparse_node_props_rx(tmp_path):
+def test_sparse_node_props_rx(tmp_path) -> None:
     """Test rustworkx graphs with sparse node properties."""
     zarr_path = Path(tmp_path) / "test.zarr"
     graph, node_indices, positions = create_rx_graph_sparse_node_props()
@@ -58,10 +58,10 @@ def test_sparse_node_props_rx(tmp_path):
 
     # Check that the written file is valid
     assert Path(zarr_path).exists()
-    geff.validate(zarr_path)
+    geff.validate_structure(zarr_path)
 
     # Check the written data
-    zroot = zarr.open(zarr_path, mode="r")
+    zroot = zarr.open_group(zarr_path, mode="r")
     node_props = zroot["nodes"]["props"]
 
     # Check time values
@@ -85,7 +85,7 @@ def test_sparse_node_props_rx(tmp_path):
     assert read_graph.num_edges() == graph.num_edges()
 
 
-def test_sparse_edge_props_rx(tmp_path):
+def test_sparse_edge_props_rx(tmp_path) -> None:
     """Test rustworkx graphs with sparse edge properties."""
     zarr_path = Path(tmp_path) / "test.zarr"
     graph, node_indices = create_rx_graph_sparse_edge_props()
@@ -97,10 +97,10 @@ def test_sparse_edge_props_rx(tmp_path):
 
     # Check that the written file is valid
     assert Path(zarr_path).exists()
-    geff.validate(zarr_path)
+    geff.validate_structure(zarr_path)
 
     # Check the written data
-    zroot = zarr.open(zarr_path, mode="r")
+    zroot = zarr.open_group(zarr_path, mode="r")
     edge_props = zroot["edges"]["props"]
 
     # Check edge scores
@@ -119,7 +119,7 @@ def test_sparse_edge_props_rx(tmp_path):
     assert read_graph.num_edges() == graph.num_edges()
 
 
-def test_missing_pos_prop_rx(tmp_path):
+def test_missing_pos_prop_rx(tmp_path) -> None:
     """Test rustworkx graphs with missing positional properties."""
     zarr_path = Path(tmp_path) / "test1.zarr"
     graph, node_indices, positions = create_rx_graph_sparse_node_props()

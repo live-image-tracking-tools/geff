@@ -2,10 +2,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, cast
 
 import typer
-import zarr
 
-from . import utils
-from .metadata_schema import GeffMetadata
+from . import validate_structure
+from .metadata._schema import GeffMetadata
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -18,9 +17,9 @@ def validate(
     input_path: str = typer.Argument(
         ..., help="Path to the GEFF folder, e.g. data.zarr/tracks.geff"
     ),
-):
+) -> None:
     """Validate a GEFF file."""
-    utils.validate(input_path)
+    validate_structure(input_path)
     print(f"{input_path} is valid")
 
 
@@ -29,9 +28,9 @@ def info(
     input_path: str = typer.Argument(
         ..., help="Path to the GEFF folder, e.g. data.zarr/tracks.geff"
     ),
-):
+) -> None:
     """Display information about a GEFF file."""
-    metadata = GeffMetadata.read(zarr.open(input_path, mode="r"))
+    metadata = GeffMetadata.read(input_path)
     print(metadata.model_dump_json(indent=2))
 
 
@@ -78,13 +77,14 @@ def convert_ctc(
         ),
     ] = False,
     overwrite: Annotated[
-        bool, typer.Option(help="Whether to overwrite the GEFF file if it already exists.")
+        bool,
+        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
 ) -> None:
     """
     Convert a CTC data directory to a GEFF file.
     """
-    from geff.interops import from_ctc_to_geff, ctc_tiffs_to_zarr  # noqa: I001 import at call time to avoid optional dependency issues
+    from geff.convert import from_ctc_to_geff, ctc_tiffs_to_zarr  # noqa: I001 import at call time to avoid optional dependency issues
 
     if (input_image_dir is not None and output_image_path is None) or (
         input_image_dir is None and output_image_path is not None
@@ -111,7 +111,8 @@ def convert_ctc(
 @app.command()
 def convert_trackmate_xml(
     xml_path: Annotated[
-        Path, typer.Argument(help="The path to the TrackMate XML file", show_default=False)
+        Path,
+        typer.Argument(help="The path to the TrackMate XML file", show_default=False),
     ],
     geff_path: Annotated[
         Path,
@@ -130,15 +131,16 @@ def convert_trackmate_xml(
         typer.Option(help="True to discard the tracks filtered out in TrackMate, False otherwise."),
     ] = False,
     overwrite: Annotated[
-        bool, typer.Option(help="Whether to overwrite the GEFF file if it already exists.")
+        bool,
+        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
-    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,  # type: ignore
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
     # because of Typer not supporting Literal types
 ) -> None:
     """
     Convert a TrackMate XML file to a GEFF file.
     """
-    from geff.interops import from_trackmate_xml_to_geff
+    from geff.convert import from_trackmate_xml_to_geff
 
     from_trackmate_xml_to_geff(
         xml_path=xml_path,

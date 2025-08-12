@@ -3,7 +3,7 @@ import pytest
 import zarr
 
 import geff
-from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.testing.data import create_memory_mock_geff
 
 rx = pytest.importorskip("rustworkx")
@@ -75,7 +75,7 @@ def test_read_write_consistency(
     directed,
     include_t,
     include_z,
-):
+) -> None:
     """Test rustworkx read/write consistency using create_memory_mock_geff like networkx tests."""
     store, graph_props = create_memory_mock_geff(
         node_id_dtype,
@@ -117,7 +117,7 @@ def test_read_write_consistency(
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_no_spatial_rx(
     tmp_path, node_id_dtype, node_axis_dtypes, extra_edge_props, directed
-):
+) -> None:
     """Test rustworkx graphs with no spatial properties."""
     graph = rx.PyDiGraph() if directed else rx.PyGraph()
 
@@ -164,7 +164,7 @@ def test_read_write_no_spatial_rx(
 @pytest.mark.parametrize("directed", [True, False])
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
-def test_read_write_consistency_rx(tmp_path, directed, include_t, include_z):
+def test_read_write_consistency_rx(tmp_path, directed, include_t, include_z) -> None:
     """Test that rustworkx graphs can be written and read back consistently."""
 
     graph, node_indices = create_rustworkx_graph(directed, include_t, include_z)
@@ -199,7 +199,7 @@ def test_read_write_consistency_rx(tmp_path, directed, include_t, include_z):
     assert len(metadata.axes) == len(axis_names)
 
 
-def test_write_empty_graph_rx(tmp_path):
+def test_write_empty_graph_rx(tmp_path) -> None:
     """Test writing an empty rustworkx graph."""
     graph = rx.PyDiGraph()
     path = tmp_path / "empty.zarr"
@@ -213,13 +213,13 @@ def test_write_empty_graph_rx(tmp_path):
     assert read_graph.num_edges() == 0
 
 
-def test_write_rx_with_metadata(tmp_path):
+def test_write_rx_with_metadata(tmp_path) -> None:
     """Test write_rx with explicit metadata parameter."""
 
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
     # Create metadata object
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -243,12 +243,12 @@ def test_write_rx_with_metadata(tmp_path):
     assert read_metadata.axes[1].unit == "micrometer"
 
 
-def test_write_rx_metadata_extra_properties(tmp_path):
+def test_write_rx_metadata_extra_properties(tmp_path) -> None:
     """Test writing rustworkx graph with extra metadata properties."""
 
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -268,13 +268,13 @@ def test_write_rx_metadata_extra_properties(tmp_path):
     assert read_metadata.extra["bar"]["baz"] == "qux"
 
 
-def test_write_rx_metadata_override_precedence(tmp_path):
+def test_write_rx_metadata_override_precedence(tmp_path) -> None:
     """Test that explicit axis parameters override metadata for rustworkx."""
 
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=True, include_z=True)
 
     # Create metadata with one set of axes
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -305,7 +305,7 @@ def test_write_rx_metadata_override_precedence(tmp_path):
     assert axis_types == ["time", "space", "space", "space"]
 
 
-def test_write_rx_different_store_types(tmp_path):
+def test_write_rx_different_store_types(tmp_path) -> None:
     """Test write_rx with different store types: path, string, and zarr.store."""
 
     # Create a simple test graph

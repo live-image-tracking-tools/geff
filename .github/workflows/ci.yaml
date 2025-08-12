@@ -12,6 +12,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test-typing:
+    name: Type checking
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Run type checks
+        run: uv run pyright
+
   test:
     name: ${{ matrix.platform }} ${{ matrix.python-version }} ${{ matrix.group }} ${{ matrix.resolution }}
     runs-on: ${{ matrix.platform }}
@@ -32,7 +43,7 @@ jobs:
             resolution: lowest-direct # (already tested by third-party group)
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v6
@@ -77,14 +88,14 @@ jobs:
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
   benchmark:
-    name: Benchmark
+    name: Run Benchmarks
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
-      - name: Run benchmarks
-        uses: CodSpeedHQ/action@v3
+        with:
+          python-version: "3.13"
+      - uses: CodSpeedHQ/action@v3
         with:
           run: uv run --group bench --no-dev pytest --codspeed -v tests/test_bench.py
 
@@ -93,7 +104,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: hynek/build-and-inspect-python-package@v2
@@ -108,7 +119,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Packages
           path: dist
