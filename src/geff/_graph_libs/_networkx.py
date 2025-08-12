@@ -135,12 +135,11 @@ def _set_property_values(
         nodes (bool, optional): If True, extract and set node properties.  If False,
             extract and set edge properties. Defaults to True.
     """
-    sparse = "missing" in prop_dict
     for idx in range(len(ids)):
         _id = ids[idx]
         val = prop_dict["values"][idx]
         # If property is sparse and missing for this node, skip setting property
-        ignore = prop_dict["missing"][idx] if sparse else False
+        ignore = prop_dict["missing"][idx] if prop_dict["missing"] is not None else False
         if not ignore:
             # Get either individual item or list instead of setting with np.array
             if nodes:

@@ -161,16 +161,19 @@ class GeffReader:
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray] = {}
         for name, props in self.node_props.items():
-            node_props[name] = {
-                _path.VALUES: np.array(
-                    props[_path.VALUES][node_mask.tolist() if node_mask is not None else ...]
-                )
-            }
             if _path.MISSING in props:
-                node_props[name][_path.MISSING] = np.array(
+                missing = np.array(
                     props[_path.MISSING][node_mask.tolist() if node_mask is not None else ...],
                     dtype=bool,
                 )
+            else:
+                missing = None
+            node_props[name] = {
+                "values": np.array(
+                    props[_path.VALUES][node_mask.tolist() if node_mask is not None else ...]
+                ),
+                "missing": missing,
+            }
 
         # remove edges if any of it's nodes has been masked
         edges = np.array(self.edges[:])
@@ -184,16 +187,19 @@ class GeffReader:
 
         edge_props: dict[str, PropDictNpArray] = {}
         for name, props in self.edge_props.items():
-            edge_props[name] = {
-                _path.VALUES: np.array(
-                    props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...]
-                )
-            }
             if _path.MISSING in props:
-                edge_props[name][_path.MISSING] = np.array(
-                    props["missing"][edge_mask.tolist() if edge_mask is not None else ...],
+                missing = np.array(
+                    props[_path.MISSING][edge_mask.tolist() if edge_mask is not None else ...],
                     dtype=bool,
                 )
+            else:
+                missing = None
+            edge_props[name] = {
+                "values": np.array(
+                    props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...]
+                ),
+                "missing": missing,
+            }
 
         return {
             "metadata": self.metadata,
