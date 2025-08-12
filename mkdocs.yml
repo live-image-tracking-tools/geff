@@ -8,6 +8,7 @@ nav:
   - index.md
   - what-is-geff.md
   - specification.md
+  - tracking.md
   - command-line-tools.md
 
 theme:
