@@ -58,7 +58,7 @@ def test_sparse_node_props_rx(tmp_path) -> None:
 
     # Check that the written file is valid
     assert Path(zarr_path).exists()
-    geff.validate(zarr_path)
+    geff.validate_structure(zarr_path)
 
     # Check the written data
     zroot = zarr.open_group(zarr_path, mode="r")
@@ -97,7 +97,7 @@ def test_sparse_edge_props_rx(tmp_path) -> None:
 
     # Check that the written file is valid
     assert Path(zarr_path).exists()
-    geff.validate(zarr_path)
+    geff.validate_structure(zarr_path)
 
     # Check the written data
     zroot = zarr.open_group(zarr_path, mode="r")

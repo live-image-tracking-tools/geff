@@ -4,7 +4,7 @@ import pytest
 import zarr
 
 import geff
-from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
@@ -121,7 +121,7 @@ def test_write_nx_with_metadata(tmp_path) -> None:
     graph.add_edge(1, 2, weight=0.5)
 
     # Create metadata object
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -149,14 +149,12 @@ def test_write_nx_with_metadata(tmp_path) -> None:
 
 
 def test_write_nx_metadata_extra_properties(tmp_path) -> None:
-    from geff.metadata_schema import GeffMetadata, axes_from_lists
-
     graph = nx.Graph()
     graph.add_node(1, x=1.0, y=2.0)
     graph.add_node(2, x=3.0, y=4.0)
     graph.add_edge(1, 2, weight=0.5)
 
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -177,14 +175,12 @@ def test_write_nx_metadata_extra_properties(tmp_path) -> None:
 
 def test_write_nx_metadata_override_precedence(tmp_path) -> None:
     """Test that explicit axis parameters override metadata"""
-    from geff.metadata_schema import GeffMetadata, axes_from_lists
-
     graph = nx.Graph()
     graph.add_node(1, x=1.0, y=2.0, z=3.0)
     graph.add_node(2, x=4.0, y=5.0, z=6.0)
 
     # Create metadata with one set of axes
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],

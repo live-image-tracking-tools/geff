@@ -3,7 +3,7 @@ import pytest
 try:
     import tifffile
 
-    from geff.interops import ctc_tiffs_to_zarr, from_ctc_to_geff
+    from geff.convert import ctc_tiffs_to_zarr, from_ctc_to_geff
 except ImportError:
     pytest.skip("geff[ctc] not installed", allow_module_level=True)
 
@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import zarr
 
-from geff.networkx.io import read_nx
+from geff import read_nx
 
 
 def create_mock_data(

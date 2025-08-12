@@ -5,9 +5,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import zarr
 
-from geff.metadata_schema import GeffMetadata
-
-from . import _path, utils
+from geff import _path
+from geff.core_io import _utils
+from geff.metadata._schema import GeffMetadata
+from geff.validate.structure import validate_structure
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -15,35 +16,36 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.typing import InMemoryGeff, PropDictNpArray, PropDictZArray
+    from geff._typing import InMemoryGeff, PropDictNpArray, PropDictZArray
 
 
 class GeffReader:
-    """
-    File reader class that allows subset reading to an intermediate dict representation.
+    """File reader class that allows subset reading to an intermediate dict representation.
 
     The subsets can be a subset of node and edge properties, and a subset of nodes and
     edges.
 
     Example:
-        >>> from pathlib import Path
-        ... from geff.file_reader import FileReader
+    ```
+    >>> from pathlib import Path
+    ... from geff.file_reader import FileReader
 
-        >>> path = Path("example/path")
-        ... file_reader = FileReader(path)
-        ... file_reader.read_node_prop("seg_id")
-        ... # in_memory_geff will only have the node property "seg_id"
-        ... in_memory_geff = file_reader.build()
-        ... in_memory_geff
+    >>> path = Path("example/path")
+    ... file_reader = FileReader(path)
+    ... file_reader.read_node_prop("seg_id")
+    ... # in_memory_geff will only have the node property "seg_id"
+    ... in_memory_geff = file_reader.build()
+    ... in_memory_geff
 
-        >>> file_reader.read_node_prop("t")
-        ... # Now graph dict will have two node properties: "seg_id" and "t"
-        ... in_memory_geff = file_reader.build()
-        ... in_memory_geff
+    >>> file_reader.read_node_prop("t")
+    ... # Now graph dict will have two node properties: "seg_id" and "t"
+    ... in_memory_geff = file_reader.build()
+    ... in_memory_geff
 
-        >>> # Now in_memory_geff will only be a subset with nodes "t" < 5
-        ... in_memory_geff = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
-        ... in_memory_geff
+    >>> in_memory_geff = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
+    ... # Now in_memory_geff will only be a subset with nodes "t" < 5
+    ... in_memory_geff
+    ```
     """
 
     def __init__(self, source: StoreLike, validate: bool = True) -> None:
@@ -57,10 +59,10 @@ class GeffReader:
                 geff file before loading into memory. If set to False and there are
                 format issues, will likely fail with a cryptic error. Defaults to True.
         """
-        source = utils.remove_tilde(source)
+        source = _utils.remove_tilde(source)
 
         if validate:
-            utils.validate(source)
+            validate_structure(source)
         self.group = zarr.open_group(source, mode="r")
         self.metadata = GeffMetadata.read(source)
         self.nodes = zarr.open_array(source, path=_path.NODE_IDS, mode="r")
@@ -69,7 +71,7 @@ class GeffReader:
         self.edge_props: dict[str, PropDictZArray] = {}
 
         # get node properties names
-        nodes_group = utils.expect_group(self.group, _path.NODES)
+        nodes_group = _utils.expect_group(self.group, _path.NODES)
         if _path.PROPS in nodes_group.keys():
             node_props_group = zarr.open_group(self.group.store, path=_path.NODE_PROPS, mode="r")
             self.node_prop_names: list[str] = [*node_props_group.group_keys()]
@@ -77,7 +79,7 @@ class GeffReader:
             self.node_prop_names = []
 
         # get edge property names
-        edges_group = utils.expect_group(self.group, _path.EDGES)
+        edges_group = _utils.expect_group(self.group, _path.EDGES)
         if _path.PROPS in edges_group.keys():
             edge_props_group = zarr.open_group(self.group.store, path=_path.EDGE_PROPS, mode="r")
             self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
@@ -94,7 +96,7 @@ class GeffReader:
 
         Args:
             names (iterable of str, optional): The names of the node properties to load. If
-            None all node properties will be loaded.
+                None all node properties will be loaded.
         """
         if names is None:
             names = self.node_prop_names
@@ -103,10 +105,10 @@ class GeffReader:
             prop_group = zarr.open_group(
                 self.group.store, path=f"{_path.NODE_PROPS}/{name}", mode="r"
             )
-            values = utils.expect_array(prop_group, _path.VALUES, "node")
+            values = _utils.expect_array(prop_group, _path.VALUES, "node")
             prop_dict: PropDictZArray = {"values": values}
             if _path.MISSING in prop_group.keys():
-                missing = utils.expect_array(prop_group, _path.MISSING, "node")
+                missing = _utils.expect_array(prop_group, _path.MISSING, "node")
                 prop_dict[_path.MISSING] = missing
             self.node_props[name] = prop_dict
 
@@ -120,7 +122,7 @@ class GeffReader:
 
         Args:
             names (iterable of str, optional): The names of the edge properties to load. If
-            None all node properties will be loaded.
+                None all node properties will be loaded.
         """
         if names is None:
             names = self.edge_prop_names
@@ -129,10 +131,10 @@ class GeffReader:
             prop_group = zarr.open_group(
                 self.group.store, path=f"{_path.EDGE_PROPS}/{name}", mode="r"
             )
-            values = utils.expect_array(prop_group, _path.VALUES, "edge")
+            values = _utils.expect_array(prop_group, _path.VALUES, "edge")
             prop_dict: PropDictZArray = {"values": values}
             if _path.MISSING in prop_group.keys():
-                missing = utils.expect_array(prop_group, _path.MISSING, "edge")
+                missing = _utils.expect_array(prop_group, _path.MISSING, "edge")
                 prop_dict[_path.MISSING] = missing
             self.edge_props[name] = prop_dict
 
@@ -148,11 +150,11 @@ class GeffReader:
 
         Args:
             node_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
-            of a subset of nodes, where `node_mask` is equal to True. It must be a 1D
-            array of length number of nodes.
+                of a subset of nodes, where `node_mask` is equal to True. It must be a 1D
+                array of length number of nodes.
             edge_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
-            of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
-            array of length number of edges.
+                of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
+                array of length number of edges.
         Returns:
             InMemoryGeff: A dictionary of in memory numpy arrays representing the graph.
         """
