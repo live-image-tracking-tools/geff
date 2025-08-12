@@ -266,7 +266,7 @@ def test_check_equiv_geff():
     # Warn if one has missing but other doesn't
     bad_mem = copy.deepcopy(in_mem)
     bad_mem["edge_props"]["score"]["missing"] = np.zeros(
-        bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool
+        bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool_
     )
     bad_store = _write_new_store(bad_mem)
     with pytest.raises(UserWarning, match=".* contains missing but the other does not"):
