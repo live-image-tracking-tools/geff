@@ -8,13 +8,13 @@ import pytest
 import zarr
 
 import geff
+from geff.metadata import PropMetadata
 from geff.metadata._affine import Affine
 from geff.metadata._schema import (
     VERSION_PATTERN,
     Axis,
     GeffMetadata,
     GeffSchema,
-    PropMetadata,
     _formatted_schema_json,
     _validate_key_identifier_equality,
 )
