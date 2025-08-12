@@ -22,6 +22,7 @@
       "type": "object"
     },
     "Axis": {
+      "description": "TODO docstring",
       "properties": {
         "name": {
           "title": "Name",
@@ -369,6 +370,7 @@
       "type": "object"
     },
     "RelatedObject": {
+      "description": "TODO docstring",
       "properties": {
         "type": {
           "description": "Type of the related object. 'labels' for label objects, 'image' for image objects. Other types are also allowed, but may not be recognized by reader applications. ",
