@@ -10,7 +10,6 @@ nav:
   - specification.md
   - tracking.md
   - command-line-tools.md
-  - api.md
 
 theme:
   name: "material"
@@ -63,3 +62,5 @@ plugins:
           # summary: true
           line_length: 60
 - include-markdown
+- api-autonav:
+    modules: ['src/geff']

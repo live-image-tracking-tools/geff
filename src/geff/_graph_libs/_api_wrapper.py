@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
 
-from geff.geff_reader import read_to_memory
-from geff.networkx.io import construct_nx
+from geff._graph_libs._networkx import construct_nx
+from geff.core_io._base_read import read_to_memory
 
 R = TypeVar("R", covariant=True)
 
@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.metadata_schema import GeffMetadata
-    from geff.typing import PropDictNpArray
+    from geff._typing import PropDictNpArray
+    from geff.metadata._schema import GeffMetadata
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
@@ -92,11 +92,11 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
         case "networkx":
             return construct_nx
         case "rustworkx":
-            from geff.rustworkx.io import construct_rx
+            from geff._graph_libs._rustworkx import construct_rx
 
             return construct_rx
         case "spatial-graph":
-            from geff.spatial_graph.io import construct_sg
+            from geff._graph_libs._spatial_graph import construct_sg
 
             return construct_sg
         # Add cases for new backends, remember to add overloads

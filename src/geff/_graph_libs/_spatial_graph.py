@@ -20,13 +20,13 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.typing import PropDictNpArray
+    from geff._typing import PropDictNpArray
 
 import geff
-from geff.geff_reader import read_to_memory
-from geff.metadata_schema import GeffMetadata, axes_from_lists
-from geff.utils import remove_tilde
-from geff.write_arrays import write_arrays
+from geff.core_io import write_arrays
+from geff.core_io._base_read import read_to_memory
+from geff.core_io._utils import remove_tilde
+from geff.metadata._schema import GeffMetadata, _axes_from_lists
 
 
 def write_sg(
@@ -86,7 +86,7 @@ def write_sg(
 
     # create metadata
     roi_min, roi_max = graph.roi
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
     )
     metadata = GeffMetadata(

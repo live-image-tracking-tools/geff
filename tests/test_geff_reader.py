@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from geff.geff_reader import GeffReader
-from geff.networkx.io import construct_nx
+from geff import GeffReader
+from geff._graph_libs._networkx import construct_nx
 from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
