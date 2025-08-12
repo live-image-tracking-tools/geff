@@ -64,18 +64,6 @@ def test_read_write_consistency(
     # assert graph.graph["axis_names"] == graph_props["axis_names"]
     # assert graph.graph["axis_units"] == graph_props["axis_units"]
 
-    # Write again
-    out_zarr = tmp_path / "write-out.zarr/tracks"
-    geff.write_nx(
-        graph,
-        out_zarr,
-        axis_names=list(graph_props["axis_names"]),
-        axis_units=list(graph_props["axis_units"]),
-    )
-
-    # Check consistency with source fixture
-    # check_equiv_geff(path, out_zarr)
-
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
 @pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
