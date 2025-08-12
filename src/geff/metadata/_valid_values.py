@@ -129,7 +129,7 @@ def validate_time_unit(unit_name: Any) -> TypeGuard[TimeUnits]:
 #   https://github.com/zarr-developers/zarr-java/blob/e758d5465d4ff8bb0ccaf2e632c8096b02a9d51c/src/main/java/dev/zarr/zarrjava/v3/DataType.java#L41
 #   https://numpy.org/doc/stable/reference/arrays.dtypes.html
 
-ALLOWED_DTYPES: set[npt.DTypeLike] = {
+ALLOWED_NUMPY_DTYPES: set[npt.DTypeLike] = {
     np.bool_,
     np.int8,
     np.int16,
@@ -144,15 +144,20 @@ ALLOWED_DTYPES: set[npt.DTypeLike] = {
     np.bytes_,
     np.str_,
 }
+VAR_LEN_DTYPE = "varlength"
 
 
-def validate_data_type(data_type: Any) -> TypeGuard[npt.DTypeLike]:
-    """Return *True* when *data_type* is allowed for Java-Zarr.
+def validate_data_type(data_type: Any) -> bool:
+    """Return *True* when *data_type* is allowed in the GEFF schema
 
     The function is intentionally *permissive* in what it accepts - any object
     that can be interpreted as a NumPy dtype (including a dtype object itself
     or a string like ``"int16"``) is valid input.  Internally we normalise the
     value to the canonical dtype and compare it against a allow-list.
+
+    A data type of "varlength" indicates that the property is a variable length property.
+
+    Float 16 is excluded for compatibility with java zarr.
 
     Examples
     --------
@@ -163,4 +168,9 @@ def validate_data_type(data_type: Any) -> TypeGuard[npt.DTypeLike]:
     >>> validate_data_type(_np.float16)
     False
     """
-    return np.dtype(data_type).type in ALLOWED_DTYPES
+    if data_type == VAR_LEN_DTYPE:
+        return True
+    try:
+        return np.dtype(data_type).type in ALLOWED_NUMPY_DTYPES
+    except TypeError:
+        return False

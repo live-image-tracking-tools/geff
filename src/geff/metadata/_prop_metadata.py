@@ -7,7 +7,7 @@ from annotated_types import MinLen
 from pydantic import BaseModel, Field, field_validator
 
 from ._valid_values import (
-    ALLOWED_DTYPES,
+    ALLOWED_NUMPY_DTYPES,
     validate_data_type,
 )
 
@@ -46,12 +46,11 @@ class PropMetadata(BaseModel):
     @field_validator("dtype", mode="after")
     @classmethod
     def _validate_dtype(cls, value: str) -> str:
-        try:
-            validate_data_type(value)
-        except TypeError:
+        if not validate_data_type(value):
+            # TODO: error?
             warnings.warn(
-                f"Data type {value} cannot be matched to a valid data type {ALLOWED_DTYPES}. "
-                "Reader applications may not know what to do with this information.",
+                f"Data type {value} cannot be matched to a valid data type {ALLOWED_NUMPY_DTYPES}"
+                "or `varlength`. Reader applications may not know what to do with this dtype.",
                 stacklevel=2,
             )
         return value
