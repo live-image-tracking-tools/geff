@@ -26,24 +26,26 @@ class GeffReader:
     edges.
 
     Example:
-        >>> from pathlib import Path
-        ... from geff.file_reader import FileReader
+    ```
+    >>> from pathlib import Path
+    ... from geff.file_reader import FileReader
 
-        >>> path = Path("example/path")
-        ... file_reader = FileReader(path)
-        ... file_reader.read_node_prop("seg_id")
-        ... # in_memory_geff will only have the node property "seg_id"
-        ... in_memory_geff = file_reader.build()
-        ... in_memory_geff
+    >>> path = Path("example/path")
+    ... file_reader = FileReader(path)
+    ... file_reader.read_node_prop("seg_id")
+    ... # in_memory_geff will only have the node property "seg_id"
+    ... in_memory_geff = file_reader.build()
+    ... in_memory_geff
 
-        >>> file_reader.read_node_prop("t")
-        ... # Now graph dict will have two node properties: "seg_id" and "t"
-        ... in_memory_geff = file_reader.build()
-        ... in_memory_geff
+    >>> file_reader.read_node_prop("t")
+    ... # Now graph dict will have two node properties: "seg_id" and "t"
+    ... in_memory_geff = file_reader.build()
+    ... in_memory_geff
 
-        >>> in_memory_geff = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
-        ... # Now in_memory_geff will only be a subset with nodes "t" < 5
-        ... in_memory_geff
+    >>> in_memory_geff = file_reader.build(file_reader.node_props["t"]["values"][:] < 5)
+    ... # Now in_memory_geff will only be a subset with nodes "t" < 5
+    ... in_memory_geff
+    ```
     """
 
     def __init__(self, source: StoreLike, validate: bool = True) -> None:
