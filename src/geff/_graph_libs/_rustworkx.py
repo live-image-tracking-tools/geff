@@ -200,7 +200,7 @@ def construct_rx(
 
     for name, prop_dict in node_props.items():
         values = prop_dict["values"]
-        if "missing" in prop_dict:
+        if prop_dict["missing"] is not None:
             current_indices = indices[~prop_dict["missing"]]
             values = values[current_indices]
         else:
@@ -228,7 +228,7 @@ def construct_rx(
 
         for name, prop_dict in edge_props.items():
             values = prop_dict["values"]
-            if "missing" in prop_dict:
+            if prop_dict["missing"] is not None:
                 current_indices = indices[~prop_dict["missing"]]
                 values = values[current_indices]
             else:
