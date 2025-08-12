@@ -100,12 +100,14 @@ def write_sg(
         geff_store=store,
         node_ids=graph.nodes,
         node_props={
-            name: (getattr(graph.node_attrs, name), None) for name in graph.node_attr_dtypes.keys()
+            name: {"values": getattr(graph.node_attrs, name), "missing": None}
+            for name in graph.node_attr_dtypes.keys()
         },
         node_props_unsquish={graph.position_attr: axis_names},
         edge_ids=graph.edges,
         edge_props={
-            name: (getattr(graph.edge_attrs, name), None) for name in graph.edge_attr_dtypes.keys()
+            name: {"values": getattr(graph.edge_attrs, name), "missing": None}
+            for name in graph.edge_attr_dtypes.keys()
         },
         metadata=metadata,
         zarr_format=zarr_format,
@@ -217,7 +219,7 @@ def construct_sg(
         name: get_dtype_str(node_props[name]["values"]) for name in node_props.keys()
     }
     for name in node_props.keys():
-        if "missing" in node_props[name]:
+        if node_props[name]["missing"] is not None:
             warnings.warn(
                 f"Potential missing values for attr {name} are being ignored", stacklevel=2
             )
@@ -225,7 +227,7 @@ def construct_sg(
         name: get_dtype_str(edge_props[name]["values"]) for name in edge_props.keys()
     }
     for name in edge_props.keys():
-        if "missing" in edge_props[name]:
+        if edge_props[name]["missing"] is not None:
             warnings.warn(
                 f"Potential missing values for attr {name} are being ignored", stacklevel=2
             )

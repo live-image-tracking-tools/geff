@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from zarr.storage import StoreLike
 
+    from geff._typing import PropDictNpArray
     from geff.metadata._schema import GeffMetadata
 
 
@@ -79,7 +80,7 @@ def write_dicts(
     node_props_dict = dict_props_to_arr(node_data, node_prop_names)
     if axis_names is not None:
         for axis in axis_names:
-            missing_arr = node_props_dict[axis][1]
+            missing_arr = node_props_dict[axis]["missing"]
             if missing_arr is not None:
                 raise ValueError(
                     f"Spatiotemporal property '{axis}' not found in : "
@@ -132,7 +133,7 @@ def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_na
 def dict_props_to_arr(
     data: Sequence[tuple[Any, dict[str, Any]]],
     prop_names: Sequence[str],
-) -> dict[str, tuple[np.ndarray, np.ndarray | None]]:
+) -> dict[str, PropDictNpArray]:
     """Convert dict-like properties to values and missing array representation.
 
     Note: The order of the sequence of data should be the same as that used to write
@@ -144,10 +145,10 @@ def dict_props_to_arr(
         prop_names (str): The properties to include in the dictionary of property arrays.
 
     Returns:
-        dict[tuple[np.ndarray, np.ndarray | None]]: A dictionary from property names
+        dict[PropDictNpArray]: A dictionary from property names
             to a tuple of (value, missing) arrays, where the missing array can be None.
     """
-    props_dict = {}
+    props_dict: dict[str, PropDictNpArray] = {}
     for name in prop_names:
         values = []
         missing = []
@@ -167,16 +168,16 @@ def dict_props_to_arr(
                 missing_any = True
         values_arr = np.asarray(values)
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
-        props_dict[name] = (values_arr, missing_arr)
+        props_dict[name] = {"missing": missing_arr, "values": values_arr}
     return props_dict
 
 
 def write_arrays(
     geff_store: StoreLike,
     node_ids: np.ndarray,
-    node_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
+    node_props: dict[str, PropDictNpArray] | None,
     edge_ids: np.ndarray,
-    edge_props: dict[str, tuple[np.ndarray, np.ndarray | None]] | None,
+    edge_props: dict[str, PropDictNpArray] | None,
     metadata: GeffMetadata,
     node_props_unsquish: dict[str, list[str]] | None = None,
     edge_props_unsquish: dict[str, list[str]] | None = None,
@@ -192,12 +193,12 @@ def write_arrays(
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
         node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
             edge_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+        node_props (dict[str, PropDictNpArray] | None): A dictionary
             from node property names to (values, missing) arrays, which should have same
             length as node_ids.
         edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
             as node_ids.
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+        edge_props (dict[str, PropDictNpArray] | None): A dictionary
             from edge property names to (values, missing) arrays, which should have same
             length as edge_ids.
         metadata (GeffMetadata): The metadata of the graph.
@@ -272,7 +273,7 @@ def write_id_arrays(
 def write_props_arrays(
     geff_store: StoreLike,
     group: Literal["nodes", "edges"],
-    props: dict[str, tuple[np.ndarray, np.ndarray | None]],
+    props: dict[str, PropDictNpArray],
     props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
@@ -284,7 +285,7 @@ def write_props_arrays(
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
         group (Literal["nodes", "edges"]): "nodes" or "edges"
-        props (dict[str, tuple[np.ndarray, np.ndarray | None]]): a dictionary from
+        props (dict[str, PropDictNpArray]): a dictionary from
             attr name to (attr_values, attr_missing) arrays.
         props_unsquish (dict[str, list[str]] | None): a dictionary indicication
             how to "unsquish" a property into individual scalars (e.g.:
@@ -304,14 +305,20 @@ def write_props_arrays(
 
     if props_unsquish is not None:
         for name, replace_names in props_unsquish.items():
-            array, missing = props[name]
-            assert len(array.shape) == 2, "Can only unsquish 2D arrays."
-            replace_arrays = {
-                replace_name: (array[:, i], None if not missing else missing[:, i])
-                for i, replace_name in enumerate(replace_names)
-            }
+            values = props[name]["values"]
+            missing = props[name]["missing"]
+            assert len(values.shape) == 2, "Can only unsquish 2D arrays."
+
+            replace_arrays: dict[str, PropDictNpArray]
+            for i, replace_name in enumerate(replace_names):
+                replace_arrays = {
+                    replace_name: {
+                        "values": values[:, i],
+                        "missing": None if missing is None else missing[i],
+                    }
+                }
+                props.update(replace_arrays)
             del props[name]
-            props.update(replace_arrays)
 
     if zarr.__version__.startswith("3"):
         geff_root = zarr.open_group(
@@ -320,10 +327,11 @@ def write_props_arrays(
     else:
         geff_root = zarr.open_group(geff_store, mode="a")
     props_group = geff_root.require_group(f"{group}/{_path.PROPS}")
-    for prop, arrays in props.items():
+    for prop, prop_dict in props.items():
         # data-type validation - ensure this property can round-trip through
         # Java Zarr readers before any data get written to disk.
-        values, missing = arrays
+        values = prop_dict["values"]
+        missing = prop_dict["missing"]
         if not validate_data_type(values.dtype):
             warnings.warn(
                 f"Data type {values.dtype} for property '{prop}' is not supported "

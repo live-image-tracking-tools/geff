@@ -176,7 +176,10 @@ def from_ctc_to_geff(
     write_arrays(
         geff_store=geff_path,
         node_ids=node_ids,
-        node_props={name: (np.asarray(values), None) for name, values in node_props.items()},
+        node_props={
+            name: {"values": np.asarray(values), "missing": None}
+            for name, values in node_props.items()
+        },
         edge_ids=np.asarray(edges, dtype=node_ids.dtype),
         edge_props={},
         metadata=GeffMetadata(

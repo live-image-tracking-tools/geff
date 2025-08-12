@@ -26,7 +26,8 @@ def data():
 def test_dict_prop_to_arr(data, data_type, expected) -> None:
     props_dict = dict_props_to_arr(data, [data_type])
     print(props_dict)
-    values, missing = props_dict[data_type]
+    values = props_dict[data_type]["values"]
+    missing = props_dict[data_type]["missing"]
     ex_values, ex_missing = expected
     ex_values = np.array(ex_values)
     ex_missing = np.array(ex_missing, dtype=bool) if ex_missing is not None else None
