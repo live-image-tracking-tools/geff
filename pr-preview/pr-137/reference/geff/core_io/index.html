@@ -1189,11 +1189,9 @@ if None all properties will be loaded, defaults to None.</p>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_arrays</span><span class="p">(</span>
     <span class="n">geff_store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">node_ids</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">node_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
-    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">node_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PropDictNpArray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_ids</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]]</span>
-    <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PropDictNpArray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span><span class="p">,</span>
     <span class="n">node_props_unsquish</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props_unsquish</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1258,7 +1256,7 @@ edge_ids.</p>
                 <code>node_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="numpy.ndarray">ndarray</span>, <span title="numpy.ndarray">ndarray</span> | None]] | None</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff._typing.PropDictNpArray">PropDictNpArray</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1293,7 +1291,7 @@ as node_ids.</p>
                 <code>edge_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="numpy.ndarray">ndarray</span>, <span title="numpy.ndarray">ndarray</span> | None]] | None</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff._typing.PropDictNpArray">PropDictNpArray</span>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
