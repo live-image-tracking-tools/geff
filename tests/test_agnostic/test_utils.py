@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import copy
 import re
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 import zarr
+import zarr.storage
 
-from geff.utils import validate
+from geff.geff_reader import read_to_memory
+from geff.testing.data import create_simple_2d_geff
+from geff.utils import check_equiv_geff, open_storelike, validate
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -205,7 +209,7 @@ def test_validate(tmp_path: Path) -> None:
     z.attrs["geff"] = geff_attrs
 
     # Everything passes
-    validate(zpath) 
+    validate(zpath)
 
 
 def test_open_storelike(tmp_path):
@@ -217,7 +221,7 @@ def test_open_storelike(tmp_path):
 
     # Open from a store
     store = zarr.storage.MemoryStore()
-    zarr.open_group(store, path='group')
+    zarr.open_group(store, path="group")
     group = open_storelike(store)
     assert isinstance(group, zarr.Group)
 
@@ -228,3 +232,19 @@ def test_open_storelike(tmp_path):
     # Not a store
     with pytest.raises(ValueError, match="store must be a zarr StoreLike"):
         open_storelike(group)
+
+
+def test_check_equiv_geff(tmp_path):
+    store, attrs = create_simple_2d_geff()
+
+    # Check that two exactly same geffs pass
+    check_equiv_geff(store, store)
+
+    # Create in memory version to mess with
+    in_mem = read_to_memory(store)
+    # bad_store = zarr.storage.MemoryStore()
+
+    # Id shape mismatch
+    bad_mem = copy.copy(in_mem)
+    bad_mem["node_ids"] = np.ones(5, dtype=in_mem["node_ids"].dtype)
+    # write_arrays(bad_store, **in_mem)
