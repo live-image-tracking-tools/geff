@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import encodings
-import pkgutil
 from typing import Any, Literal, TypeAlias, TypeGuard, get_args
 
 import numpy as np
@@ -166,45 +164,3 @@ def validate_data_type(data_type: Any) -> TypeGuard[npt.DTypeLike]:
     False
     """
     return np.dtype(data_type).type in ALLOWED_DTYPES
-
-
-# -----------------------------------------------------------------------------
-# String encoding validation
-# -----------------------------------------------------------------------------
-# There is no easy way to get a proper list of all valid string encodings in
-# Python standard library.
-# Encodings and their main aliases are listed in the Python documentation:
-# https://docs.python.org/3.13/library/codecs.html#standard-encodings
-#
-# The current validation does not allow aliases, only the standard encodings.
-# For example, "utf-8" is allowed, but "utf8" is not.
-
-exceptions = ["aliases"]
-VALID_STR_ENCODINGS = list(
-    {name for _, name, _ in pkgutil.iter_modules(encodings.__path__) if name not in exceptions}
-)
-
-
-def validate_str_encoding(encoding: str) -> bool:
-    """Validate string encoding against standard list of encodings available in Python.
-
-    Args:
-        encoding (str): Encoding to check.
-
-    Returns:
-        bool: True if the normalized version of encoding is in valid encodings, False otherwise.
-
-    Notes:
-        This function uses the `encodings.normalize_encoding` function to ensure that the encoding
-        is in a consistent format before checking against the valid encodings.
-        For example, it will normalize "utf-8" to "utf_8" and check against the valid encodings.
-        However, spellings like "utf8" or "latin1" will not be recognized as valid encodings.
-
-    References:
-        Python documentation on standard encodings:
-        https://docs.python.org/3.13/library/codecs.html#standard-encodings
-
-        Python documentation on `encodings.normalize_encoding`:
-        https://docs.python.org/3.13/library/codecs.html#encodings.normalize_encoding
-    """
-    return encodings.normalize_encoding(encoding) in VALID_STR_ENCODINGS

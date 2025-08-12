@@ -309,19 +309,6 @@
           "title": "Dtype",
           "type": "string"
         },
-        "encoding": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional encoding when the property is stored as a string. For example, but not limited to, 'utf-8' or 'ascii'.",
-          "title": "Encoding"
-        },
         "unit": {
           "anyOf": [
             {

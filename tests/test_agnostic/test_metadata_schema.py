@@ -361,7 +361,6 @@ class TestPropMetadata:
         PropMetadata(
             identifier="prop_2",
             dtype="float64",
-            encoding="utf-8",
             unit="micrometer",
             name="property 2",
             description="A property with all fields set.",
@@ -392,15 +391,6 @@ class TestPropMetadata:
             UserWarning, match=r"Data type .* cannot be matched to a valid data type"
         ):
             PropMetadata(identifier="prop", dtype="nope")
-
-    def test_invalid_encoding(self) -> None:
-        # encoding must be a string
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier="prop", dtype="int16", encoding=123)
-
-        # encoding must be a valid string encoding
-        with pytest.warns(UserWarning, match=r"Encoding .* not in valid encodings"):
-            PropMetadata(identifier="prop", dtype="float", encoding="invalid_encoding")
 
 
 def test__validate_key_identifier_equality() -> None:

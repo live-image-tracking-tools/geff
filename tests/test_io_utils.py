@@ -31,12 +31,12 @@ class TestCreateOrUpdatePropsMetadata:
         )
         props_md = [
             PropMetadata(identifier="prop1", dtype="float64"),
-            PropMetadata(identifier="prop2", dtype="str", encoding="utf-8"),
+            PropMetadata(identifier="prop2", dtype="str"),
         ]
         result = create_or_update_props_metadata(metadata, props_md, "edge")
         assert result.edge_props_metadata == {
             "prop1": PropMetadata(identifier="prop1", dtype="float64"),
-            "prop2": PropMetadata(identifier="prop2", dtype="str", encoding="utf-8"),
+            "prop2": PropMetadata(identifier="prop2", dtype="str"),
         }
 
     def test_update_existing_node_props_metadata(self):
@@ -64,7 +64,7 @@ class TestCreateOrUpdatePropsMetadata:
             edge_props_metadata=existing_props,
         )
         props_md = [
-            PropMetadata(identifier="new_edge_prop", dtype="str", encoding="ascii"),
+            PropMetadata(identifier="new_edge_prop", dtype="str"),
         ]
         result = create_or_update_props_metadata(metadata, props_md, "edge")
         assert len(result.edge_props_metadata) == 2
@@ -79,12 +79,11 @@ class TestCreateOrUpdatePropsMetadata:
             node_props_metadata=existing_props,
         )
         props_md = [
-            PropMetadata(identifier="prop1", dtype="float64", encoding="utf-8"),
+            PropMetadata(identifier="prop1", dtype="float64"),
         ]
         result = create_or_update_props_metadata(metadata, props_md, "node")
         assert len(result.node_props_metadata) == 1
         assert result.node_props_metadata["prop1"].dtype == "float64"
-        assert result.node_props_metadata["prop1"].encoding == "utf-8"
 
     def test_empty_props_md_list(self):
         """Test handling of empty props metadata list."""
@@ -106,7 +105,7 @@ class TestCreateOrUpdatePropsMetadata:
         )
         props_md = [
             PropMetadata(identifier="newprop1", dtype="float64"),
-            PropMetadata(identifier="newprop2", dtype="str", encoding="utf-8"),
+            PropMetadata(identifier="newprop2", dtype="str"),
             PropMetadata(identifier="newprop3", dtype="bool"),
         ]
         result = create_or_update_props_metadata(metadata, props_md, "edge")
@@ -118,7 +117,6 @@ class TestCreateOrUpdatePropsMetadata:
         assert result.edge_props_metadata["newprop"].dtype == "int"
         assert result.edge_props_metadata["newprop1"].dtype == "float64"
         assert result.edge_props_metadata["newprop2"].dtype == "str"
-        assert result.edge_props_metadata["newprop2"].encoding == "utf-8"
         assert result.edge_props_metadata["newprop3"].dtype == "bool"
 
     def test_invalid_c_type_raises_error(self):
