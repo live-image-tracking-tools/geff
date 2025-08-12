@@ -119,7 +119,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Packages
           path: dist
