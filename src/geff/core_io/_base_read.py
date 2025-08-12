@@ -189,7 +189,7 @@ class GeffReader:
         for name, props in self.edge_props.items():
             if _path.MISSING in props:
                 missing = np.array(
-                    props["missing"][edge_mask.tolist() if edge_mask is not None else ...],
+                    props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...],
                     dtype=bool,
                 )
             else:
