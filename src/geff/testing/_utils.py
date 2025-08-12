@@ -2,7 +2,6 @@ import warnings
 
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
-import numpy as np
 from zarr.storage import StoreLike
 
 from geff import _path
@@ -92,8 +91,8 @@ def check_equiv_geff(store_a: StoreLike, store_b: StoreLike) -> None:
         gb = expect_group(open_storelike(store_b), graph_group)
 
         # Check ids
-        ids_a = np.asarray(ga[_path.IDS])
-        ids_b = np.asarray(gb[_path.IDS])
+        ids_a = expect_array(ga, _path.IDS)
+        ids_b = expect_array(gb, _path.IDS)
         if (a_shape := ids_a.shape) != (b_shape := ids_b.shape):
             raise ValueError(f"{graph_group} ids shape: a {a_shape} does not match b {b_shape}")
 
