@@ -97,53 +97,38 @@ def check_equiv_geff(store_a: StoreLike, store_b: StoreLike) -> None:
         if (a_shape := ids_a.shape) != (b_shape := ids_b.shape):
             raise ValueError(f"{graph_group} ids shape: a {a_shape} does not match b {b_shape}")
 
-        a_dtype, b_dtype = ids_a.dtype, ids_b.dtype
-        if (a_dtype := ids_a.dtype) != (b_dtype := ids_b.dtype):
-            raise ValueError(f"{graph_group} ids dtype: a {a_dtype} does not match b {b_dtype}")
+        # Check that properties in each geff are the same
+        a_props = set(expect_group(ga, _path.PROPS))
+        b_props = set(expect_group(gb, _path.PROPS))
+        if a_props != b_props:
+            raise ValueError(
+                f"{graph_group} properties: a ({a_props}) does not match b ({b_props})"
+            )
 
-        if (_path.PROPS in ga) != (_path.PROPS in gb):
-            raise ValueError(f"One {graph_group} has properties while the other doesn't")
-        else:
-            # Check that properties in each geff are the same
-            a_props = set(expect_group(ga, _path.PROPS))
-            b_props = set(expect_group(gb, _path.PROPS))
-            if a_props != b_props:
+        # Check shape and dtype of each prop
+        for prop in a_props:
+            if "missing" in expect_group(ga, f"{_path.PROPS}/{prop}"):
+                if "missing" not in expect_group(gb, f"{_path.PROPS}/{prop}"):
+                    warnings.warn(
+                        f"a {graph_group}/{_path.PROPS}/{prop} contains missing "
+                        "but b does not. This may be correct but should be verified.",
+                        stacklevel=2,
+                    )
+
+                # Note: don't need to check missing shape because validation forces it to be
+                # the same shape as values
+
+                # Note: don't need to check missing dtype because validation forces it to be bool
+
+            a_values = expect_array(ga, f"{_path.PROPS}/{prop}/{_path.VALUES}")
+            b_values = expect_array(gb, f"{_path.PROPS}/{prop}/{_path.VALUES}")
+            if (a_shape := a_values.shape) != (b_shape := b_values.shape):
                 raise ValueError(
-                    f"{graph_group} properties: a ({a_props}) does not match b ({b_props})"
+                    f"{graph_group}/{_path.PROPS}/{prop}/{_path.VALUES} shape: "
+                    f"a {a_shape} does not match b {b_shape}"
                 )
-
-            # Check shape and dtype of each prop
-            for prop in a_props:
-                if "missing" in expect_group(ga, f"{_path.PROPS}/{prop}"):
-                    if "missing" not in expect_group(gb, f"{_path.PROPS}/{prop}"):
-                        warnings.warn(
-                            f"a {graph_group}/{_path.PROPS}/{prop} contains missing "
-                            "but b does not. This may be correct but should be verified.",
-                            stacklevel=2,
-                        )
-                    else:
-                        a_missing = expect_array(ga, f"{_path.PROPS}/{prop}/{_path.MISSING}")
-                        b_missing = expect_array(gb, f"{_path.PROPS}/{prop}/{_path.MISSING}")
-                        if (a_shape := a_missing.shape) != (b_shape := b_missing.shape):
-                            raise ValueError(
-                                f"{graph_group}/{_path.PROPS}/{prop}/{_path.MISSING} shape: "
-                                f"a {a_shape} does not match b {b_shape}"
-                            )
-                        if (a_dtype := a_missing.dtype) != (b_dtype := b_missing.dtype):
-                            raise ValueError(
-                                f"{graph_group}/{_path.PROPS}/{prop}/{_path.MISSING} dtype: "
-                                f"a {a_dtype} does not match b {b_dtype}"
-                            )
-
-                a_values = expect_array(ga, f"{_path.PROPS}/{prop}/{_path.VALUES}")
-                b_values = expect_array(gb, f"{_path.PROPS}/{prop}/{_path.VALUES}")
-                if (a_shape := a_values.shape) != (b_shape := b_values.shape):
-                    raise ValueError(
-                        f"{graph_group}/{_path.PROPS}/{prop}/{_path.VALUES} shape: "
-                        f"a {a_shape} does not match b {b_shape}"
-                    )
-                if (a_dtype := a_values.dtype) != (b_dtype := b_values.dtype):
-                    raise ValueError(
-                        f"{graph_group}/{_path.PROPS}/{prop}/{_path.VALUES} dtype: "
-                        f"a {a_dtype} does not match b {b_dtype}"
-                    )
+            if (a_dtype := a_values.dtype) != (b_dtype := b_values.dtype):
+                raise ValueError(
+                    f"{graph_group}/{_path.PROPS}/{prop}/{_path.VALUES} dtype: "
+                    f"a {a_dtype} does not match b {b_dtype}"
+                )
