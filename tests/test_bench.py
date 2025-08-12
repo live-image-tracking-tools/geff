@@ -20,7 +20,6 @@ import networkx as nx
 import numpy as np
 
 import geff
-from geff.utils import validate
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
@@ -105,7 +104,7 @@ def test_bench_write(
 @pytest.mark.parametrize("nodes", [500])
 def test_bench_validate(benchmark: BenchmarkFixture, nodes: int) -> None:
     graph_path = graph_file_path(nodes)
-    benchmark(validate, store=graph_path)
+    benchmark(geff.validate_structure, store=graph_path)
 
 
 @pytest.mark.parametrize("nodes", [500])

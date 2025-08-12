@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.affine import Affine
+from geff.metadata._affine import Affine
 
 
 class TestAffineValidation:

@@ -50,7 +50,7 @@ def test_sparse_node_props(tmp_path) -> None:
     geff.write_nx(graph, axis_names=["t", "y", "x"], store=zarr_path)
     # check that the written thing is valid
     assert Path(zarr_path).exists()
-    geff.validate(zarr_path)
+    geff.validate_structure(zarr_path)
 
     zroot = zarr.open_group(zarr_path, mode="r")
     node_props = zroot["nodes"]["props"]
@@ -76,7 +76,7 @@ def test_sparse_edge_props(tmp_path) -> None:
     geff.write_nx(graph, axis_names=["t", "y", "x"], store=zarr_path)
     # check that the written thing is valid
     assert Path(zarr_path).exists()
-    geff.validate(zarr_path)
+    geff.validate_structure(zarr_path)
 
     zroot = zarr.open_group(zarr_path, mode="r")
     edge_props = zroot["edges"]["props"]

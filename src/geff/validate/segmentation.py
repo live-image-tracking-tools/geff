@@ -102,15 +102,15 @@ def graph_is_in_seg_bounds(
         store (DirectoryStore, MemoryStore): A geff zarr store or a path to one.
         segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
         scale (tuple[float] | list[float] | None = None): optional scaling tuple, with the
-          same length as the number of dimensions in the segmentation data.
+            same length as the number of dimensions in the segmentation data.
 
     Returns:
         tuple (bool, list[str])
         True if all checks passed
         False if the store does not provide metadata, if the provided scale tuple does not
-           have the same length as the number of dimensions in the segmentation, if the
-           number of dimensions in the metadata does not match that of the segmentation,
-           or if the (scaled) graph data is not within the segmentation bounds.
+            have the same length as the number of dimensions in the segmentation, if the
+            number of dimensions in the metadata does not match that of the segmentation,
+            or if the (scaled) graph data is not within the segmentation bounds.
         A list of length 0 or 1 with the encountered error, if any.
     """
 
@@ -168,8 +168,8 @@ def has_seg_ids_at_time_points(
         time_points (Sequence[int]): Sequence of time points to check.
         seg_ids (Sequence[int]): Sequence of seg_ids to check.
         store (DirectoryStore, MemoryStore, | None = None): Optional geff Zarr store or a
-          path to one. If provided, it will attempt to read the axis order from the
-          metadata. Otherwise, it is assumed that the dimension order is t(z)yx.
+            path to one. If provided, it will attempt to read the axis order from the
+            metadata. Otherwise, it is assumed that the dimension order is t(z)yx.
 
     Returns:
         tuple (bool, list[str])

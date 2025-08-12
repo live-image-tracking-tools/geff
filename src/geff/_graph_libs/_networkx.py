@@ -4,20 +4,20 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
 
-from geff.geff_reader import read_to_memory
-from geff.io_utils import (
-    calculate_roi_from_nodes,
+from geff.core_io import write_dicts
+from geff.core_io._base_read import read_to_memory
+from geff.core_io._utils import calculate_roi_from_nodes
+from geff.metadata._schema import GeffMetadata, _axes_from_lists
+from geff.metadata.utils import (
     create_or_update_metadata,
     get_graph_existing_metadata,
 )
-from geff.metadata_schema import GeffMetadata, axes_from_lists
-from geff.write_dicts import write_dicts
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff.typing import PropDictNpArray
+    from geff._typing import PropDictNpArray
 
 import logging
 
@@ -99,7 +99,7 @@ def write_nx(
     else:
         roi_min, roi_max = None, None
 
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names,
         axis_units=axis_units,
         axis_types=axis_types,
