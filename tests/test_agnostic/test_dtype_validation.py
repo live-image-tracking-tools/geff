@@ -1,4 +1,4 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -6,6 +6,9 @@ import pytest
 from geff.core_io import write_arrays
 from geff.metadata._schema import GeffMetadata
 from geff.metadata._valid_values import validate_data_type
+
+if TYPE_CHECKING:
+    from geff._typing import PropDictNpArray
 
 
 # -----------------------------------------------------------------------------
@@ -75,7 +78,7 @@ def test_write_arrays_rejects_disallowed_property_dtype(tmp_path) -> None:
 
     # property with disallowed dtype (float16)
     bad_prop_values = np.array([0.1, 0.2, 0.3], dtype=np.float16)
-    node_props = {"score": (bad_prop_values, None)}
+    node_props: dict[str, PropDictNpArray] = {"score": {"values": bad_prop_values, "missing": None}}
 
     with pytest.warns(UserWarning):
         write_arrays(

@@ -100,12 +100,14 @@ def write_sg(
         geff_store=store,
         node_ids=graph.nodes,
         node_props={
-            name: (getattr(graph.node_attrs, name), None) for name in graph.node_attr_dtypes.keys()
+            name: {"values": getattr(graph.node_attrs, name), "missing": None}
+            for name in graph.node_attr_dtypes.keys()
         },
         node_props_unsquish={graph.position_attr: axis_names},
         edge_ids=graph.edges,
         edge_props={
-            name: (getattr(graph.edge_attrs, name), None) for name in graph.edge_attr_dtypes.keys()
+            name: {"values": getattr(graph.edge_attrs, name), "missing": None}
+            for name in graph.edge_attr_dtypes.keys()
         },
         metadata=metadata,
         zarr_format=zarr_format,
