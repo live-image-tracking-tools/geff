@@ -205,4 +205,26 @@ def test_validate(tmp_path: Path) -> None:
     z.attrs["geff"] = geff_attrs
 
     # Everything passes
-    validate(zpath)
+    validate(zpath) 
+
+
+def test_open_storelike(tmp_path):
+    # Open from a path
+    valid_zarr = f"{tmp_path}/test.zarr"
+    _ = zarr.open(valid_zarr)
+    group = open_storelike(valid_zarr)
+    assert isinstance(group, zarr.Group)
+
+    # Open from a store
+    store = zarr.storage.MemoryStore()
+    zarr.open_group(store, path='group')
+    group = open_storelike(store)
+    assert isinstance(group, zarr.Group)
+
+    # Bad path
+    with pytest.raises(FileNotFoundError, match="Path does not exist"):
+        open_storelike(f"{tmp_path}/bad.zarr")
+
+    # Not a store
+    with pytest.raises(ValueError, match="store must be a zarr StoreLike"):
+        open_storelike(group)

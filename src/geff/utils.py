@@ -105,17 +105,7 @@ def validate(store: StoreLike) -> None:
         FileNotFoundError: If store is not a valid zarr store or path doesn't exist
     """
 
-    # Check if path exists for string/Path inputs
-    if isinstance(store, str | Path):
-        store_path = Path(store)
-        if not is_remote_url(str(store_path)) and not store_path.exists():
-            raise FileNotFoundError(f"Path does not exist: {store}")
-
-    # Open the zarr group from the store
-    try:
-        graph_group = zarr.open_group(store, mode="r")
-    except Exception as e:
-        raise ValueError(f"store must be a zarr StoreLike: {e}") from e
+    graph_group = open_storelike(store)
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError
@@ -128,6 +118,34 @@ def validate(store: StoreLike) -> None:
     if _path.EDGES in graph_group.keys():
         edges_group = expect_group(graph_group, _path.EDGES)
         _validate_edges_group(edges_group, metadata)
+
+
+def open_storelike(store: StoreLike) -> zarr.Group:
+    """Opens a StoreLike input as a zarr group 
+
+    Args:
+        store (str | Path | zarr store): str/Path/store for a geff zarr
+
+    Raises:
+        FileNotFoundError: Path does not exist
+        ValueError: store must be a zarr StoreLike
+
+    Returns:
+        zarr.Group: Opened zarr group
+    """
+    # Check if path exists for string/Path inputs
+    if isinstance(store, str | Path):
+        store_path = Path(store)
+        if not is_remote_url(str(store_path)) and not store_path.exists():
+            raise FileNotFoundError(f"Path does not exist: {store}")
+
+    # Open the zarr group from the store
+    try:
+        graph_group = zarr.open_group(store, mode="r")
+    except Exception as e:
+        raise ValueError(f"store must be a zarr StoreLike: {e}") from e
+    
+    return graph_group
 
 
 # -----------------------------------------------------------------------------#
