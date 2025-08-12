@@ -257,23 +257,23 @@ def test_check_equiv_geff():
         check_equiv_geff(store, bad_store)
 
     # Missing props
-    bad_mem = copy.copy(in_mem)
+    bad_mem = copy.deepcopy(in_mem)
     bad_mem["node_props"] = {}
     bad_store = _write_new_store(bad_mem)
     with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
         check_equiv_geff(store, bad_store)
 
     # Warn if one has missing but other doesn't
-    bad_mem = copy.copy(in_mem)
+    bad_mem = copy.deepcopy(in_mem)
     bad_mem["edge_props"]["score"]["missing"] = np.zeros(
         bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool
     )
     bad_store = _write_new_store(bad_mem)
-    with pytest.raises(UserWarning, match=".* contains missing but b does not"):
+    with pytest.raises(UserWarning, match=".* contains missing but the other does not"):
         check_equiv_geff(bad_store, store)
 
     # Values shape mismatch
-    bad_mem = copy.copy(in_mem)
+    bad_mem = copy.deepcopy(in_mem)
     # Add extra dimension to an edge prop
     bad_mem["edge_props"]["score"]["values"] = bad_mem["edge_props"]["score"]["values"][
         ..., np.newaxis
@@ -283,7 +283,7 @@ def test_check_equiv_geff():
         check_equiv_geff(store, bad_store)
 
     # Values dtype mismatch
-    bad_mem = copy.copy(in_mem)
+    bad_mem = copy.deepcopy(in_mem)
     # Change dtype
     bad_mem["edge_props"]["score"]["values"] = (
         bad_mem["edge_props"]["score"]["values"].astype("int").squeeze()

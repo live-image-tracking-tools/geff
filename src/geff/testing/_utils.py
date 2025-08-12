@@ -106,13 +106,14 @@ def check_equiv_geff(store_a: StoreLike, store_b: StoreLike) -> None:
 
         # Check shape and dtype of each prop
         for prop in a_props:
-            if "missing" in expect_group(ga, f"{_path.PROPS}/{prop}"):
-                if "missing" not in expect_group(gb, f"{_path.PROPS}/{prop}"):
-                    warnings.warn(
-                        f"a {graph_group}/{_path.PROPS}/{prop} contains missing "
-                        "but b does not. This may be correct but should be verified.",
-                        stacklevel=2,
-                    )
+            a_missing = "missing" in expect_group(ga, f"{_path.PROPS}/{prop}")
+            b_missing = "missing" in expect_group(gb, f"{_path.PROPS}/{prop}")
+            if a_missing != b_missing:
+                warnings.warn(
+                    f"one {graph_group}/{_path.PROPS}/{prop} contains missing "
+                    "but the other does not. This may be correct but should be verified.",
+                    stacklevel=2,
+                )
 
                 # Note: don't need to check missing shape because validation forces it to be
                 # the same shape as values
