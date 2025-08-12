@@ -169,10 +169,10 @@ class GeffReader:
             else:
                 missing = None
             node_props[name] = {
-                _path.VALUES: np.array(
+                "values": np.array(
                     props[_path.VALUES][node_mask.tolist() if node_mask is not None else ...]
                 ),
-                _path.MISSING: missing,
+                "missing": missing,
             }
 
         # remove edges if any of it's nodes has been masked
@@ -195,10 +195,10 @@ class GeffReader:
             else:
                 missing = None
             edge_props[name] = {
-                _path.VALUES: np.array(
+                "values": np.array(
                     props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...]
                 ),
-                _path.MISSING: missing,
+                "missing": missing,
             }
 
         return {
