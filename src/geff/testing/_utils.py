@@ -73,7 +73,7 @@ def check_equiv_geff(store_a: StoreLike, store_b: StoreLike) -> None:
     the output of an implementation.
 
     This tests focuses on maintaining shape and dtype consistency. It does not
-    assert element wise equality. path_a is assumed to be the "correct" geff.
+    assert element wise equality. store_a is assumed to be the "correct" geff.
 
     Missing arrays are not required to be present in both a and b because we allow
     missing arrays where all values are present. We raise a warning if we see this.
