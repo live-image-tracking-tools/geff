@@ -3,27 +3,24 @@ from __future__ import annotations
 import json
 import warnings
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Annotated, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
-from annotated_types import MinLen
-from pydantic import BaseModel, Field, field_validator, model_validator, validate_call
+from pydantic import BaseModel, Field, model_validator, validate_call
 from pydantic.config import ConfigDict
 from zarr.storage import StoreLike
 
 import geff
 
-from ._affine import Affine  # noqa: TC001 # Needed at runtime for Pydantic validation
+# The next two imports are needed at runtime for Pydantic validation
+from ._affine import Affine  # noqa: TC001
+from ._prop_metadata import PropMetadata  # noqa: TC001
 from ._valid_values import (
-    ALLOWED_DTYPES,
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
-    VALID_STR_ENCODINGS,
     VALID_TIME_UNITS,
     validate_axis_type,
-    validate_data_type,
     validate_space_unit,
-    validate_str_encoding,
     validate_time_unit,
 )
 
@@ -152,69 +149,6 @@ class DisplayHint(BaseModel):
         None,
         description="Optional, which temporal axis to use for time",
     )
-
-
-class PropMetadata(BaseModel):
-    """Metadata describing a property in the geff graph."""
-
-    identifier: Annotated[str, MinLen(1)] = Field(
-        ...,
-        description=(
-            "Identifier of the property. Must be unique within its own component "
-            "subgroup (nodes or edges). Must be a non-empty string."
-        ),
-    )
-    dtype: Annotated[str, MinLen(1)] = Field(
-        ...,
-        description=(
-            "Data type of the property. Must be a non-empty string. "
-            "Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. "
-            "Examples of invalid values: 'integer', 'np.int16', 'number', 'string'."
-        ),
-    )
-    encoding: str | None = Field(
-        default=None,
-        description=(
-            "Optional encoding when the property is stored as a string. For example, "
-            "but not limited to, 'utf-8' or 'ascii'."
-        ),
-    )
-    unit: str | None = Field(
-        default=None,
-        description=("Optional unit of the property."),
-    )
-    name: str | None = Field(
-        default=None,
-        description=("Optional human friendly name of the property"),
-    )
-    description: str | None = Field(
-        default=None,
-        description=("Optional description of the property."),
-    )
-
-    @field_validator("dtype", mode="after")
-    @classmethod
-    def _validate_dtype(cls, value: str) -> str:
-        try:
-            validate_data_type(value)
-        except TypeError:
-            warnings.warn(
-                f"Data type {value} cannot be matched to a valid data type {ALLOWED_DTYPES}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
-        return value
-
-    @field_validator("encoding", mode="after")
-    @classmethod
-    def _validate_encoding(cls, value: str | None) -> str | None:
-        if value is not None and not validate_str_encoding(value):
-            warnings.warn(
-                f"Encoding {value} not in valid encodings {VALID_STR_ENCODINGS}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
-        return value
 
 
 @validate_call

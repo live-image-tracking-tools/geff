@@ -304,23 +304,10 @@
           "type": "string"
         },
         "dtype": {
-          "description": "Data type of the property. Must be a non-empty string. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
+          "description": "Data type of the property. Must be a non-empty string that can beparsed into a numpy dtype, or the special value 'varlength' to indicatea variable length property. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
           "minLength": 1,
           "title": "Dtype",
           "type": "string"
-        },
-        "encoding": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional encoding when the property is stored as a string. For example, but not limited to, 'utf-8' or 'ascii'.",
-          "title": "Encoding"
         },
         "unit": {
           "anyOf": [
