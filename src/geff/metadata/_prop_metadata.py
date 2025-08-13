@@ -25,8 +25,8 @@ class PropMetadata(BaseModel):
     dtype: Annotated[str, MinLen(1)] = Field(
         ...,
         description=(
-            "Data type of the property. Must be a non-empty string that can be"
-            "parsed into a numpy dtype, or the special value 'varlength' to indicate"
+            "Data type of the property. Must be a non-empty string that can be "
+            "parsed into a numpy dtype, or the special value 'varlength' to indicate "
             "a variable length property. "
             "Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. "
             "Examples of invalid values: 'integer', 'np.int16', 'number', 'string'."
