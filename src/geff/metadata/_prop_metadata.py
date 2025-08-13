@@ -3,8 +3,9 @@ from __future__ import annotations
 import warnings
 from typing import Annotated
 
+import numpy as np
 from annotated_types import MinLen
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ._valid_values import (
     ALLOWED_NUMPY_DTYPES,
@@ -61,3 +62,9 @@ class PropMetadata(BaseModel):
                 stacklevel=2,
             )
         return value
+
+    @model_validator(mode="after")
+    def _no_varlength_strings(self) -> PropMetadata:
+        if self.varlength and np.dtype(self.dtype) == np.str_:
+            raise ValueError("Cannot have a variable length property with type str")
+        return self

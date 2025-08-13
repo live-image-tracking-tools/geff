@@ -392,6 +392,12 @@ class TestPropMetadata:
         ):
             PropMetadata(identifier="prop", dtype="nope")
 
+        # variable length string metadata
+        with pytest.raises(
+            ValueError, match="Cannot have a variable length property with type str"
+        ):
+            PropMetadata(identifier="test", dtype="str", varlength=True)
+
 
 def test__validate_key_identifier_equality() -> None:
     # Matching key / identifier
