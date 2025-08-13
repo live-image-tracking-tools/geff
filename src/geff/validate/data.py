@@ -21,15 +21,15 @@ if TYPE_CHECKING:
     from .dict_representation import GraphDict
 
 
-def validate_zarr_data(graph_dict: InMemoryGeff) -> None:
+def validate_zarr_data(memory_geff: InMemoryGeff) -> None:
     """Runs checks on loaded data based on information present in the metadata
 
     Args:
-        graph_dict (GraphDict): A graphdict object which contains metadata and
+        memory_geff (InMemoryGeff): An InMemoryGeff object which contains metadata and
             dictionaries of node/edge property arrays
     """
-    node_ids = graph_dict["nodes"]
-    edge_ids = graph_dict["edges"]
+    node_ids = memory_geff["node_ids"]
+    edge_ids = memory_geff["edge_ids"]
 
     valid, invalid_edges = validate_nodes_for_edges(node_ids, edge_ids)
     if not valid:

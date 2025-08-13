@@ -8,9 +8,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
-def validate_nodes_for_edges(
-    node_ids: ArrayLike, edge_ids: ArrayLike
-) -> tuple[bool, list[tuple[int, int]]]:
+def validate_nodes_for_edges(node_ids: ArrayLike, edge_ids: ArrayLike) -> tuple[bool, np.ndarray]:
     """
     Validates that all edges in `edge_ids` reference node IDs present in `node_ids`.
 
@@ -24,9 +22,9 @@ def validate_nodes_for_edges(
             (source, target).
 
     Returns:
-        tuple[bool, list[tuple[int, int]]]:
+        tuple[bool, np.ndarray]:
             - all_edges_valid (bool): True if all edges reference valid node IDs.
-            - invalid_edges (list of tuple[int, int]): List of (source, target) pairs for
+            - invalid_edges (np.ndarray): Array of (source, target) pairs for
               invalid edges.
     """
 
@@ -39,7 +37,7 @@ def validate_nodes_for_edges(
     mask = valid_src & valid_tgt
 
     # Find invalid edges
-    invalid_edges = [tuple(edge) for edge in edge_ids[~mask]]
+    invalid_edges = np.asarray([tuple(edge) for edge in edge_ids[~mask]])
     all_edges_valid = not invalid_edges
     return all_edges_valid, invalid_edges
 

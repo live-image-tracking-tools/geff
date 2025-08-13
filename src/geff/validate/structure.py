@@ -173,7 +173,7 @@ def validate_axes_structure(graph: zarr.Group, meta: GeffMetadata) -> None:
         meta (GeffMetadata): Metadata from geff
     """
     if meta.axes is not None:
-        node_prop_group = graph["nodes/props"]
+        node_prop_group = expect_group(graph, "nodes/props")
         for ax in meta.axes:
             # Array must be present without missing values
             assert f"{ax.name}/values" in node_prop_group, f"Axis {ax.name} data is missing"
@@ -181,5 +181,5 @@ def validate_axes_structure(graph: zarr.Group, meta: GeffMetadata) -> None:
                 f"Axis {ax.name} has missing values which are not allowed"
             )
             # Only 1d data allowed, already checked length of first axis
-            ndim = len(node_prop_group[f"{ax.name}/values"].shape)
+            ndim = len(expect_array(node_prop_group, f"{ax.name}/values").shape)
             assert ndim == 1, f"Axis property {ax.name} has {ndim} dimensions, must be 1D"
