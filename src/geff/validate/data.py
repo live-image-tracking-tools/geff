@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
 from pydantic import BaseModel
 
 from geff.validate.graph import (
@@ -10,6 +9,7 @@ from geff.validate.graph import (
     validate_no_self_edges,
     validate_nodes_for_edges,
 )
+from geff.validate.shapes import validate_ellipsoid, validate_sphere
 from geff.validate.tracks import (
     validate_lineages,
     validate_tracklets,
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 def validate_zarr_data(memory_geff: InMemoryGeff) -> None:
-    """Runs checks on loaded data based on information present in the metadata
+    """Checks whether the graph meets spec requirements
 
     Args:
         memory_geff (InMemoryGeff): An InMemoryGeff object which contains metadata and
@@ -59,19 +59,12 @@ def validate_optional_data(config: ValidationConfig, memory_geff: InMemoryGeff) 
     """
     meta = memory_geff["metadata"]
     if config.sphere and meta.sphere is not None:
-        if np.any(memory_geff["node_props"][meta.sphere]["values"] < 0):
-            raise ValueError("Sphere radius values must be non-negative.")
+        radius = memory_geff["node_props"][meta.sphere]["values"]
+        validate_sphere(radius)
 
     if config.ellipsoid and meta.ellipsoid is not None:
         covariance = memory_geff["node_props"][meta.ellipsoid]["values"]
-        if not isinstance(covariance, np.ndarray):
-            raise TypeError("Ellipsoid covariance must be a numpy array")
-        if covariance.ndim != 3 or covariance.shape[1] != covariance.shape[2]:
-            raise ValueError("Ellipsoid covariance must be square matrices")
-        if not np.allclose(covariance, covariance.transpose((0, 2, 1))):
-            raise ValueError("Ellipsoid covariance matrices must be symmetric")
-        if not np.all(np.linalg.eigvals(covariance) > 0):
-            raise ValueError("Ellipsoid covariance matrices must be positive-definite")
+        validate_ellipsoid(covariance)
 
     if meta.track_node_props is not None:
         if config.lineage and "tracklet" in meta.track_node_props:
