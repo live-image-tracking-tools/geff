@@ -22,7 +22,7 @@
       "type": "object"
     },
     "Axis": {
-      "description": "TODO docstring",
+      "description": "The spatiotemporal axes representing the position of a node in space.\n\nThe axes list is modeled after the OME-zarr specifications. If the same names are \nused in the axes metadata of the related image or segmentation data, \napplications can use this information to align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. Any downstream properties that are \nan array of values with one value per (spatial) axis will be in the order of the axis \nlist (filtering to only the spatial axes by the type field if needed). ",
       "properties": {
         "name": {
           "title": "Name",

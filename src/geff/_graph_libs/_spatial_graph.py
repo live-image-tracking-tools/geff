@@ -26,7 +26,8 @@ import geff
 from geff.core_io import write_arrays
 from geff.core_io._base_read import read_to_memory
 from geff.core_io._utils import remove_tilde
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
+from geff.metadata import GeffMetadata
+from geff.metadata.utils import axes_from_lists
 
 
 def write_sg(
@@ -86,7 +87,7 @@ def write_sg(
 
     # create metadata
     roi_min, roi_max = graph.roi
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
     )
     metadata = GeffMetadata(

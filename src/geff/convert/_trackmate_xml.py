@@ -24,7 +24,7 @@ else:
         import xml.etree.ElementTree as ET
 
 from geff._graph_libs._networkx import write_nx
-from geff.metadata._schema import Axis, DisplayHint, GeffMetadata, RelatedObject
+from geff.metadata import Axis, DisplayHint, GeffMetadata, RelatedObject
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
 # used in ctc_to_geff. Need to wait for CTC PR.

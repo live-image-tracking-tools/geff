@@ -4,7 +4,8 @@ import pytest
 import zarr
 
 import geff
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
+from geff.metadata import GeffMetadata
+from geff.metadata.utils import axes_from_lists
 from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
@@ -121,7 +122,7 @@ def test_write_nx_with_metadata(tmp_path) -> None:
     graph.add_edge(1, 2, weight=0.5)
 
     # Create metadata object
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -154,7 +155,7 @@ def test_write_nx_metadata_extra_properties(tmp_path) -> None:
     graph.add_node(2, x=3.0, y=4.0)
     graph.add_edge(1, 2, weight=0.5)
 
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -180,7 +181,7 @@ def test_write_nx_metadata_override_precedence(tmp_path) -> None:
     graph.add_node(2, x=4.0, y=5.0, z=6.0)
 
     # Create metadata with one set of axes
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
