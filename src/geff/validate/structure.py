@@ -112,11 +112,17 @@ def _validate_props_group(
             )
 
         if _path.MISSING in arrays:
-            miss_len = cast("zarr.Array", prop_group[_path.MISSING]).shape[0]
+            missing_arr = cast("zarr.Array", prop_group[_path.MISSING])
+            miss_len = missing_arr.shape[0]
             if miss_len != expected_len:
                 raise ValueError(
                     f"{parent_key} property {prop_name!r} {_path.MISSING} mask has length "
                     f"{miss_len}, which does not match id length {expected_len}"
+                )
+
+            if not np.issubdtype(missing_arr.dtype, np.bool_):
+                raise ValueError(
+                    f"{parent_key} property {prop_name!r} {_path.MISSING} must be boolean"
                 )
 
 

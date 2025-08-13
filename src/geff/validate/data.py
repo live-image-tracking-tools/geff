@@ -18,8 +18,6 @@ from geff.validate.tracks import (
 if TYPE_CHECKING:
     from geff._typing import InMemoryGeff
 
-    from .dict_representation import GraphDict
-
 
 def validate_zarr_data(memory_geff: InMemoryGeff) -> None:
     """Runs checks on loaded data based on information present in the metadata
@@ -51,21 +49,21 @@ class ValidationConfig(BaseModel):
     tracklet: bool = False
 
 
-def validate_optional_data(config: ValidationConfig, graph_dict: GraphDict) -> None:
+def validate_optional_data(config: ValidationConfig, memory_geff: InMemoryGeff) -> None:
     """Run data validation on optional data types based on the input
 
     Args:
         config (ValidationConfig): Configuration for which validation to run
-        graph_dict (GraphDict): A graphdict object which contains metadata and
+        memory_geff (InMemoryGeff): A graphdict object which contains metadata and
             dictionaries of node/edge property arrays
     """
-    meta = graph_dict["metadata"]
+    meta = memory_geff["metadata"]
     if config.sphere and meta.sphere is not None:
-        if np.any(graph_dict["node_props"][meta.sphere]["values"] < 0):
+        if np.any(memory_geff["node_props"][meta.sphere]["values"] < 0):
             raise ValueError("Sphere radius values must be non-negative.")
 
     if config.ellipsoid and meta.ellipsoid is not None:
-        covariance = graph_dict["node_props"][meta.ellipsoid]["values"]
+        covariance = memory_geff["node_props"][meta.ellipsoid]["values"]
         if not isinstance(covariance, np.ndarray):
             raise TypeError("Ellipsoid covariance must be a numpy array")
         if covariance.ndim != 3 or covariance.shape[1] != covariance.shape[2]:
@@ -77,19 +75,19 @@ def validate_optional_data(config: ValidationConfig, graph_dict: GraphDict) -> N
 
     if meta.track_node_props is not None:
         if config.lineage and "tracklet" in meta.track_node_props:
-            node_ids = graph_dict["nodes"]
-            edge_ids = graph_dict["edges"]
+            node_ids = memory_geff["node_ids"]
+            edge_ids = memory_geff["edge_ids"]
             tracklet_key = meta.track_node_props["tracklet"]
-            tracklet_ids = graph_dict["node_props"][tracklet_key]
+            tracklet_ids = memory_geff["node_props"][tracklet_key]["values"]
             valid, errors = validate_tracklets(node_ids, edge_ids, tracklet_ids)
             if not valid:
                 raise ValueError("Found invalid tracklets:\n", "\n".join(errors))
 
         if config.lineage and "lineage" in meta.track_node_props:
-            node_ids = graph_dict["nodes"]
-            edge_ids = graph_dict["edges"]
+            node_ids = memory_geff["node_ids"]
+            edge_ids = memory_geff["edge_ids"]
             lineage_key = meta.track_node_props["lineage"]
-            lineage_ids = graph_dict["node_props"][lineage_key]
+            lineage_ids = memory_geff["node_props"][lineage_key]["values"]
             valid, errors = validate_lineages(node_ids, edge_ids, lineage_ids)
             if not valid:
                 raise ValueError("Found invalid lineages:\n", "\n".join(errors))

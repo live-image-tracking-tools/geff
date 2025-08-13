@@ -257,6 +257,6 @@ def read_to_memory(
         validate_zarr_data(in_memory_geff)
 
     if validate_opt_data is not None:
-        validate_optional_data(config=validate_opt_data, graph_dict=in_memory_geff)
+        validate_optional_data(config=validate_opt_data, memory_geff=in_memory_geff)
 
     return in_memory_geff
