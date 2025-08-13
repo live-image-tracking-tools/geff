@@ -341,6 +341,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#axes-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      Axes list
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#geff.metadata._valid_values.VALID_AXIS_TYPES" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_AXIS_TYPES
@@ -362,6 +371,15 @@
   <a href="#geff.metadata._valid_values.VALID_TIME_UNITS" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_TIME_UNITS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      Property metadata
     </span>
   </a>
   
@@ -1068,6 +1086,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#axes-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      Axes list
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#geff.metadata._valid_values.VALID_AXIS_TYPES" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_AXIS_TYPES
@@ -1089,6 +1116,15 @@
   <a href="#geff.metadata._valid_values.VALID_TIME_UNITS" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-attribute"></code>&nbsp;VALID_TIME_UNITS
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      Property metadata
     </span>
   </a>
   
@@ -1217,6 +1253,7 @@
 <h2 id="zarr-specification">Zarr specification</h2>
 <p>Currently, <code>geff</code> supports zarr specifications <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html">2</a> and <a href="https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html">3</a>. However, <code>geff</code> will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.</p>
 <h2 id="geff-metadata">Geff metadata</h2>
+<p>This is an auto-generated description of the schema for GEFF metadata. Further description of specific sections of interest are below.</p>
 <div id="geff-schema"><head>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Overpass:300,400,600,800">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -2754,230 +2791,12 @@ Each object's <code>name</code> must be an existing attribute on the nodes. The 
             />
         </svg>
     <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_dtype" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_dtype')">dtype</a></div><h4>Dtype</h4><span class="badge badge-dark value-type">Type: string</span><br/>
-<span class="description"><p>Data type of the property. Must be a non-empty string. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.</p>
+<span class="description"><p>Data type of the property. Must be a non-empty string that can beparsed into a numpy dtype, or the special value 'varlength' to indicatea variable length property. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.</p>
 </span>
 
 
 
         <p><span class="badge badge-light restriction min-length-restriction" id="geff_node_props_metadata_anyOf_i0_additionalProperties_dtype_minLength">Must be at least <code>1</code> characters long</span></p>
-
-
-            </div>
-        </div>
-    </div>
-</div>
-<div class="accordion" id="accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_encoding">
-    <div class="card">
-        <div class="card-header" id="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_encoding">
-            <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding"
-                        aria-expanded="" aria-controls="geff_node_props_metadata_anyOf_i0_additionalProperties_encoding" onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding')"><span class="property-name">encoding</span></button>
-            </h2>
-        </div>
-
-        <div id="geff_node_props_metadata_anyOf_i0_additionalProperties_encoding"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_encoding"
-             data-parent="#accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_encoding">
-            <div class="card-body pl-5">
-
-    <div class="breadcrumbs">root
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff" onclick="anchorLink('geff')">geff</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding')">encoding</a></div><h4>Encoding</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<span class="description"><p>Optional encoding when the property is stored as a string. For example, but not limited to, 'utf-8' or 'ascii'.</p>
-</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf"><h2 class="handle">
-  <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_anyOf" role="tablist"><li class="nav-item">
-            <a class="nav-link active anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i0" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i0')"
-            >Option 1</a>
-        </li><li class="nav-item">
-            <a class="nav-link anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i1" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i1')"
-            >Option 2</a>
-        </li></ul>
-<div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i0" role="tabpanel">
-
-
-    <div class="breadcrumbs">root
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff" onclick="anchorLink('geff')">geff</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding')">encoding</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
-
-
-
-
-
-
-
-        </div><div class="tab-pane fade card-body "
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i1" role="tabpanel">
-
-
-    <div class="breadcrumbs">root
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff" onclick="anchorLink('geff')">geff</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding')">encoding</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_encoding_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
-
-
-
-
-
-
-
-        </div></div></div>
-
-
-
-
 
 
             </div>
@@ -6026,8 +5845,7 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
 
     </body></div>
 
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<h3 id="axes-list">Axes list</h3>
 <p>The axes list is modeled after the <a href="https://ngff.openmicroscopy.org/0.5/index.html#axes-md">OME-zarr</a> specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. </p>
 <p>The order of the axes in the list is meaningful. For one, any downstream properties that are an array of values with one value per (spatial) axis will be in the order of the axis list (filtering to only the spatial axes by the <code>type</code> field if needed). Secondly, if associated image or segmentation data does not have axes metadata, the order of the spatiotemporal axes is a good default guess for aligning the graph and the image data, although there is no way to denote the channel dimension in the graph spec. If you are writing out a geff with an associated segmentation and/or image dataset, we highly recommend providing the axis names for your segmentation/image using the OME-zarr spec, including channel dimensions if needed.</p>
 
@@ -6100,7 +5918,12 @@ where p<em>out</em>homo = [p<em>out; 1] and p</em>in = p<em>in</em>homo[:-1]</p>
 
     </div>
 
-</div></div>
+</div><h3 id="property-metadata">Property metadata</h3>
+<p>The metadata for each node/edge property is (optionally) stored in the <code>node_props_metadata</code> and <code>edge_props_metadata</code> entries.
+Each property must have a string identifier (the group name for the property) and a dtype. The dtype can be any string
+that can be coerced into a numpy dtype, or the special <code>varlength</code> dtype indicating this is a variable length property (coming soon).
+String properties should have dtype <code>str</code>, not <code>varlength</code>, even though they are stored using the same variable
+length mechanism.</p>
 <h3 id="affine-transformations">Affine transformations</h3>
 <p>The optional <code>affine</code> field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value <strong>matrix</strong> is stored as a <code>(N + 1) × (N + 1)</code> homogeneous matrix following the <code>scipy.ndimage.affine_transform</code> convention, where <strong>N</strong> equals the number of spatio-temporal axes declared in <code>axes</code>.</p>
 <h3 id="extra-attributes">Extra attributes</h3>
