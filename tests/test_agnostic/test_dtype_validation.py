@@ -23,6 +23,7 @@ if TYPE_CHECKING:
         np.float32,
         np.dtype("float64"),
         np.bool_,
+        "str",
     ],
 )
 def test_validate_data_type_allowed(dtype_in: Any) -> None:
@@ -32,7 +33,7 @@ def test_validate_data_type_allowed(dtype_in: Any) -> None:
 
 @pytest.mark.parametrize(
     "dtype_in",
-    ["float16", np.float16, "complex64", np.dtype("complex128"), ">f2"],
+    ["float16", np.float16, "complex64", np.dtype("complex128"), ">f2", "varlength"],
 )
 def test_validate_data_type_disallowed(dtype_in) -> None:
     """All disallowed dtypes should return *False*."""
