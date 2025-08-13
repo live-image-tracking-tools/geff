@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import zarr
 
 from geff import _path
-from geff.core_io._utils import expect_array, expect_group, is_remote_url
+from geff.core_io._utils import expect_array, expect_group, open_storelike
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
 
-from geff.metadata._schema import GeffMetadata, PropMetadata
+from geff.metadata import GeffMetadata, PropMetadata
 
 
 def validate_structure(store: StoreLike) -> None:
@@ -29,17 +28,7 @@ def validate_structure(store: StoreLike) -> None:
         FileNotFoundError: If store is not a valid zarr store or path doesn't exist
     """
 
-    # Check if path exists for string/Path inputs
-    if isinstance(store, str | Path):
-        store_path = Path(store)
-        if not is_remote_url(str(store_path)) and not store_path.exists():
-            raise FileNotFoundError(f"Path does not exist: {store}")
-
-    # Open the zarr group from the store
-    try:
-        graph_group = zarr.open_group(store, mode="r")
-    except Exception as e:
-        raise ValueError(f"store must be a zarr StoreLike: {e}") from e
+    graph_group = open_storelike(store)
 
     # graph attrs validation
     # Raises pydantic.ValidationError or ValueError

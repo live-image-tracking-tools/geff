@@ -1,3 +1,4 @@
-from ._schema import Axis, DisplayHint, GeffMetadata, PropMetadata, RelatedObject
+from ._prop_metadata import PropMetadata
+from ._schema import Axis, DisplayHint, GeffMetadata, RelatedObject
 
 __all__ = ["Axis", "DisplayHint", "GeffMetadata", "PropMetadata", "RelatedObject"]

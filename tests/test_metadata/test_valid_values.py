@@ -32,3 +32,14 @@ def test_validate_data_type_allowed(dtype_in: Any) -> None:
 def test_validate_data_type_disallowed(dtype_in) -> None:
     """All disallowed dtypes should return *False*."""
     assert validate_data_type(dtype_in) is False
+
+
+def test_validate_data_type():
+    assert validate_data_type("varlength")
+    assert validate_data_type("int")
+    assert validate_data_type(np.uint16)
+    assert validate_data_type(int)
+    assert validate_data_type(str)
+
+    assert not validate_data_type("abc")
+    assert not validate_data_type(np.float16)
