@@ -22,7 +22,7 @@
       "type": "object"
     },
     "Axis": {
-      "description": "The spatiotemporal axes representing the position of a node in space.\n\nThe axes list is modeled after the OME-zarr specifications. If the same names are \nused in the axes metadata of the related image or segmentation data, \napplications can use this information to align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. Any downstream properties that are \nan array of values with one value per (spatial) axis will be in the order of the axis \nlist (filtering to only the spatial axes by the type field if needed). ",
+      "description": "The spatiotemporal axes representing the position of a node in space.\n\nThe axes list is modeled after the OME-zarr specifications. If the same names are\nused in the axes metadata of the related image or segmentation data,\napplications can use this information to align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. Any downstream properties that are\nan array of values with one value per (spatial) axis will be in the order of the axis\nlist (filtering to only the spatial axes by the type field if needed).",
       "properties": {
         "name": {
           "title": "Name",
@@ -161,36 +161,22 @@
           "title": "Axes"
         },
         "node_props_metadata": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/PropMetadata"
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
-          "title": "Node Props Metadata"
+          "additionalProperties": {
+            "$ref": "#/$defs/PropMetadata"
+          },
+          "default": {},
+          "description": "Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each node property.",
+          "title": "Node Props Metadata",
+          "type": "object"
         },
         "edge_props_metadata": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/PropMetadata"
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
-          "title": "Edge Props Metadata"
+          "additionalProperties": {
+            "$ref": "#/$defs/PropMetadata"
+          },
+          "default": {},
+          "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each edge property.",
+          "title": "Edge Props Metadata",
+          "type": "object"
         },
         "sphere": {
           "anyOf": [

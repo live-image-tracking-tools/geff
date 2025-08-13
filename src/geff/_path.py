@@ -3,22 +3,25 @@ from __future__ import annotations
 from typing import Final
 
 NODES: Final = "nodes"
-"""Path at which we expect to find the Nodes group in a GEFF group."""
+"""Path at which we expect to find the nodes group in a GEFF group."""
 
 EDGES: Final = "edges"
-"""Path at which we expect to find the Edges group in a GEFF group."""
+"""Path at which we expect to find the edges group in a GEFF group."""
 
 IDS: Final = "ids"
-"""Path at which we expect to find the IDs array in a Nodes or Edges group."""
+"""Path at which we expect to find the IDs array in a nodes or edges group."""
 
 PROPS: Final = "props"
-"""Path at which we expect to find the Props group in a Nodes or Edges group."""
+"""Path at which we expect to find the props group in a nodes or edges group."""
 
 VALUES: Final = "values"
-"""Path at which we expect to find the Values array in a Nodes or Edges group."""
+"""Path at which we expect to find the values array in a props group."""
 
 MISSING: Final = "missing"
-"""Path at which we expect to find the Missing array in a Nodes or Edges group."""
+"""Path at which we expect to find the missing array in a props group."""
+
+DATA: Final = "data"
+"""Path at which we expect to find the data array in a var length props group."""
 
 NODE_IDS: Final = f"{NODES}/{IDS}"
 """Shortcut for the path to the node IDs in a GEFF."""
