@@ -1,12 +1,21 @@
-import numpy as np
-import zarr
+from pathlib import Path
+from typing import Literal
 
-from geff.metadata_schema import GeffMetadata
-from geff.write_arrays import write_arrays
+import numpy as np
+import pytest
+import zarr
+import zarr.storage
+
+from geff.core_io import write_arrays
+from geff.core_io._base_read import read_to_memory
+from geff.metadata._schema import GeffMetadata
+from geff.testing.data import create_simple_3d_geff
+from geff.validate.structure import validate_structure
 
 
 class TestWriteArrays:
-    def test_write_arrays_basic(self, tmp_path):
+    @pytest.mark.parametrize("zarr_format", [2, 3])
+    def test_write_arrays_basic(self, tmp_path: Path, zarr_format: Literal[2, 3]) -> None:
         """Test basic functionality of write_arrays with minimal data."""
         # Create test data
         geff_path = tmp_path / "test.geff"
@@ -22,13 +31,14 @@ class TestWriteArrays:
             edge_ids=edge_ids,
             edge_props=None,
             metadata=metadata,
+            zarr_format=zarr_format,
         )
 
         # Verify the zarr group was created
         assert geff_path.exists()
 
         # Verify node and edge IDs were written correctly
-        root = zarr.open(str(geff_path))
+        root = zarr.open_group(str(geff_path))
         assert "nodes/ids" in root
         assert "edges/ids" in root
 
@@ -47,3 +57,13 @@ class TestWriteArrays:
 
     # TODO: test properties helper. It's covered by networkx tests now, so I'm okay merging,
     # but we should do it when we have time.
+
+    def test_write_in_mem_geff(self):
+        store, attrs = create_simple_3d_geff()
+        in_mem_geff = read_to_memory(store)
+
+        # Test writing
+        new_store = zarr.storage.MemoryStore()
+        write_arrays(new_store, **in_mem_geff)
+
+        validate_structure(new_store)

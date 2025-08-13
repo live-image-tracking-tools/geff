@@ -4,7 +4,7 @@ import pytest
 import zarr
 
 import geff
-from geff.metadata_schema import GeffMetadata, axes_from_lists
+from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.testing.data import create_memory_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
@@ -27,13 +27,14 @@ extra_edge_props = [
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
 def test_read_write_consistency(
+    tmp_path,
     node_id_dtype,
     node_axis_dtypes,
     extra_edge_props,
     directed,
     include_t,
     include_z,
-):
+) -> None:
     store, graph_props = create_memory_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
@@ -45,6 +46,7 @@ def test_read_write_consistency(
 
     graph, _ = geff.read_nx(store)
 
+    # Check that in memory representation is consistent with what we expected to have from fixture
     assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
     assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
     for idx, node in enumerate(graph_props["nodes"]):
@@ -69,7 +71,7 @@ def test_read_write_consistency(
 @pytest.mark.parametrize("directed", [True, False])
 def test_read_write_no_spatial(
     tmp_path, node_id_dtype, node_axis_dtypes, extra_edge_props, directed
-):
+) -> None:
     graph = nx.DiGraph() if directed else nx.Graph()
 
     nodes = np.array([10, 2, 127, 4, 5], dtype=node_id_dtype)
@@ -107,12 +109,12 @@ def test_read_write_no_spatial(
         assert graph.edges[edge.tolist()]["color"] == compare.edges[edge.tolist()]["color"]
 
 
-def test_write_empty_graph(tmp_path):
+def test_write_empty_graph(tmp_path) -> None:
     graph = nx.DiGraph()
     geff.write_nx(graph, axis_names=["t", "y", "x"], store=tmp_path / "empty.zarr")
 
 
-def test_write_nx_with_metadata(tmp_path):
+def test_write_nx_with_metadata(tmp_path) -> None:
     """Test write_nx with explicit metadata parameter"""
 
     graph = nx.Graph()
@@ -121,7 +123,7 @@ def test_write_nx_with_metadata(tmp_path):
     graph.add_edge(1, 2, weight=0.5)
 
     # Create metadata object
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -148,15 +150,13 @@ def test_write_nx_with_metadata(tmp_path):
     assert read_metadata.axes[1].min == 2.0 and read_metadata.axes[1].max == 4.0
 
 
-def test_write_nx_metadata_extra_properties(tmp_path):
-    from geff.metadata_schema import GeffMetadata, axes_from_lists
-
+def test_write_nx_metadata_extra_properties(tmp_path) -> None:
     graph = nx.Graph()
     graph.add_node(1, x=1.0, y=2.0)
     graph.add_node(2, x=3.0, y=4.0)
     graph.add_edge(1, 2, weight=0.5)
 
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -175,16 +175,14 @@ def test_write_nx_metadata_extra_properties(tmp_path):
     assert compare.extra["bar"]["baz"] == "qux"
 
 
-def test_write_nx_metadata_override_precedence(tmp_path):
+def test_write_nx_metadata_override_precedence(tmp_path) -> None:
     """Test that explicit axis parameters override metadata"""
-    from geff.metadata_schema import GeffMetadata, axes_from_lists
-
     graph = nx.Graph()
     graph.add_node(1, x=1.0, y=2.0, z=3.0)
     graph.add_node(2, x=4.0, y=5.0, z=6.0)
 
     # Create metadata with one set of axes
-    axes = axes_from_lists(
+    axes = _axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -215,7 +213,7 @@ def test_write_nx_metadata_override_precedence(tmp_path):
     assert axis_types == ["space", "space", "space"]
 
 
-def test_write_nx_different_store_types(tmp_path):
+def test_write_nx_different_store_types(tmp_path) -> None:
     """Test write_nx with different store types: path, string, and zarr.store"""
 
     # Create a simple test graph

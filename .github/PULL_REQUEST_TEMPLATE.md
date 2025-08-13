@@ -11,7 +11,12 @@ What types of changes does your code introduce? Delete those that do not apply.
 
 Which topics does your change affect? Delete those that do not apply.
 - Specification
-- `networkx` implementation
+- Implementations (`geff._graph_libs`)
+- Convert
+- Core io
+- Metadata
+- Testing
+- Validate
 
 # Checklist
 Put an x in the boxes that apply. You can also fill these out after creating the PR. If you're unsure about any of them, don't hesitate to ask. We're here to help! This is simply a reminder of what we are going to look for before merging your code.
@@ -23,7 +28,7 @@ Put an x in the boxes that apply. You can also fill these out after creating the
 
 ## If you changed the specification
 - [ ] I have checked that any validation functions and tests reflect the changes.
-- [ ] I have updated the GeffMetadata and the json schema using `pixi run update-json` if necessary.
+- [ ] I have updated the GeffMetadata and the json schema using `pytest --update-schema` if necessary.
 - [ ] I have updated docs/specification.md to reflect the change.
 - [ ] I have updated implementations to reflect the change. (This can happen in separate PRs on a feature branch, but must be complete before merging into main.)
 

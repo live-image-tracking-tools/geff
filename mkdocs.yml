@@ -1,16 +1,19 @@
 site_name: geff
 
 site_url: https://live-image-tracking-tools.github.io/geff/
+repo_url: https://github.com/live-image-tracking-tools/geff
+repo_name: live-image-tracking-tools/geff
 
 nav:
   - index.md
   - what-is-geff.md
   - specification.md
+  - tracking.md
   - command-line-tools.md
-  - api.md
 
 theme:
   name: "material"
+  # logo: images/GEFF_Icon_RGB.png # TODO: currently this doesn't render well -- too small
   # palette:
   #   scheme: slate
   #   primary: purple
@@ -33,6 +36,7 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - mkdocs-typer
 
 plugins:
 - search
@@ -58,3 +62,5 @@ plugins:
           # summary: true
           line_length: 60
 - include-markdown
+- api-autonav:
+    modules: ['src/geff']

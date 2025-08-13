@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.write_dicts import dict_props_to_arr
+from geff.core_io._base_write import dict_props_to_arr
 
 
 @pytest.fixture
@@ -23,10 +23,11 @@ def data():
         ("str_arr", ([["test", "string"], ["test", "string"], ["test", "string"]], [1, 0, 1])),
     ],
 )
-def test_dict_prop_to_arr(data, data_type, expected):
+def test_dict_prop_to_arr(data, data_type, expected) -> None:
     props_dict = dict_props_to_arr(data, [data_type])
     print(props_dict)
-    values, missing = props_dict[data_type]
+    values = props_dict[data_type]["values"]
+    missing = props_dict[data_type]["missing"]
     ex_values, ex_missing = expected
     ex_values = np.array(ex_values)
     ex_missing = np.array(ex_missing, dtype=bool) if ex_missing is not None else None

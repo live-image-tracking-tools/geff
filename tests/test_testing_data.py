@@ -11,7 +11,7 @@ from geff.testing.data import (
 )
 
 
-def test_create_simple_2d_geff():
+def test_create_simple_2d_geff() -> None:
     """Test the create_simple_2d_geff convenience function"""
 
     # Test with defaults
@@ -42,7 +42,7 @@ def test_create_simple_2d_geff():
     assert "z" not in axis_names
 
 
-def test_create_simple_3d_geff():
+def test_create_simple_3d_geff() -> None:
     """Test the create_simple_3d_geff convenience function"""
 
     # Test with defaults
@@ -73,7 +73,7 @@ def test_create_simple_3d_geff():
     assert "t" in axis_names
 
 
-def test_create_simple_temporal_geff():
+def test_create_simple_temporal_geff() -> None:
     """Test the create_simple_temporal_geff convenience function"""
 
     # Test with defaults
@@ -104,7 +104,7 @@ def test_create_simple_temporal_geff():
     assert "z" not in axis_names  # No spatial dimensions
 
 
-def test_simple_geff_edge_properties():
+def test_simple_geff_edge_properties() -> None:
     """Test that the simple functions create graphs with proper edge properties"""
 
     # Test 2D
@@ -144,27 +144,42 @@ def test_simple_geff_edge_properties():
         assert isinstance(edge_data["color"], int | np.integer)
 
 
-def test_create_memory_mock_geff_with_extra_node_props():
+def test_create_memory_mock_geff_with_extra_node_props() -> None:
     """Test create_memory_mock_geff with extra node properties"""
 
-    # Test with various extra node properties
+    # Test with mixed auto-generated and custom arrays for node properties
+    custom_node_labels = np.array(["A", "B", "C", "D", "E"])
+    custom_node_scores = np.array([0.1, 0.5, 0.8, 0.3, 0.9])
+
     extra_node_props = {
-        "label": "str",
-        "confidence": "float64",
-        "category": "int8",
-        "priority": "uint16",
-        "status": "str",
-        "weight": "float32",
+        "label": custom_node_labels,  # Custom array
+        "confidence": "float64",  # Auto-generate
+        "category": "int8",  # Auto-generate
+        "priority": "uint16",  # Auto-generate
+        "status": "str",  # Auto-generate
+        "weight": "float32",  # Auto-generate
+        "score": custom_node_scores,  # Custom array
+    }
+
+    # Test with mixed auto-generated and custom arrays for edge properties
+    custom_edge_weights = np.array([0.1, 0.2, 0.3, 0.4])
+    custom_edge_types = np.array(["type_A", "type_B", "type_C", "type_D"])
+
+    extra_edge_props = {
+        "weight": custom_edge_weights,  # Custom array
+        "score": "float64",  # Auto-generate
+        "color": "int",  # Auto-generate
+        "type": custom_edge_types,  # Custom array
     }
 
     store, _ = create_memory_mock_geff(
         node_id_dtype="int",
         node_axis_dtypes={"position": "float64", "time": "float64"},
-        extra_edge_props={"score": "float64", "color": "int"},
         directed=False,
         num_nodes=5,
         num_edges=4,
         extra_node_props=extra_node_props,
+        extra_edge_props=extra_edge_props,
     )
 
     # Verify the graph was created correctly
@@ -180,6 +195,7 @@ def test_create_memory_mock_geff_with_extra_node_props():
         assert "priority" in node_data
         assert "status" in node_data
         assert "weight" in node_data
+        assert "score" in node_data
 
         # Check data types
         assert isinstance(node_data["label"], str)
@@ -188,17 +204,49 @@ def test_create_memory_mock_geff_with_extra_node_props():
         assert isinstance(node_data["priority"], int | np.integer)
         assert isinstance(node_data["status"], str)
         assert isinstance(node_data["weight"], float | np.floating)
+        assert isinstance(node_data["score"], float | np.floating)
 
-    # Check that the properties match the expected patterns
+    # Check that auto-generated properties match the expected patterns
     for i, node in enumerate(sorted(graph.nodes)):
         node_data = graph.nodes[node]
-        assert node_data["label"] == f"label_{i}"
         assert node_data["status"] == f"status_{i}"
         assert node_data["category"] == i
         assert node_data["priority"] == i
 
+    # Check that custom node properties match the provided arrays
+    for i, node in enumerate(sorted(graph.nodes)):
+        node_data = graph.nodes[node]
+        assert node_data["label"] == custom_node_labels[i]
+        assert node_data["score"] == custom_node_scores[i]
 
-def test_create_memory_mock_geff_with_no_extra_node_props():
+    # Check that extra edge properties are present
+    for edge in graph.edges:
+        edge_data = graph.edges[edge]
+        assert "weight" in edge_data
+        assert "score" in edge_data
+        assert "color" in edge_data
+        assert "type" in edge_data
+
+        # Check data types
+        assert isinstance(edge_data["weight"], float | np.floating)
+        assert isinstance(edge_data["score"], float | np.floating)
+        assert isinstance(edge_data["color"], int | np.integer)
+        assert isinstance(edge_data["type"], str)
+
+    # Check that auto-generated edge properties match the expected patterns
+    for i, edge in enumerate(sorted(graph.edges)):
+        edge_data = graph.edges[edge]
+        assert edge_data["score"] == pytest.approx(0.1 + i * 0.9 / 3)  # linspace(0.1, 1.0, 4)
+        assert edge_data["color"] == i
+
+    # Check that custom edge properties match the provided arrays
+    for i, edge in enumerate(sorted(graph.edges)):
+        edge_data = graph.edges[edge]
+        assert edge_data["weight"] == custom_edge_weights[i]
+        assert edge_data["type"] == custom_edge_types[i]
+
+
+def test_create_memory_mock_geff_with_no_extra_node_props() -> None:
     """Test create_memory_mock_geff with no extra node properties"""
 
     store, graph_props = create_memory_mock_geff(
@@ -224,7 +272,7 @@ def test_create_memory_mock_geff_with_no_extra_node_props():
             assert prop not in node_data
 
 
-def test_create_memory_mock_geff_extra_node_props_validation():
+def test_create_memory_mock_geff_extra_node_props_validation() -> None:
     """Test validation of extra_node_props parameter"""
 
     # Test with invalid input types
@@ -264,8 +312,107 @@ def test_create_memory_mock_geff_extra_node_props_validation():
             extra_node_props={"label": "invalid_dtype"},  # Invalid dtype
         )
 
+    # Test array length validation for node properties
+    custom_node_labels = np.array(["A", "B", "C"])  # Only 3 elements, but 5 nodes
 
-def test_create_memory_mock_geff_extra_node_props_different_dtypes():
+    with pytest.raises(
+        ValueError,
+        match="extra_node_props\\[label\\] array length 3 does not match num_nodes 5",
+    ):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            extra_edge_props={"score": "float64", "color": "int"},
+            directed=False,
+            num_nodes=5,
+            num_edges=4,
+            extra_node_props={"label": custom_node_labels},
+        )
+
+    # Test array length validation for edge properties
+    custom_edge_weights = np.array([0.1, 0.2])  # Only 2 elements, but 4 edges
+
+    with pytest.raises(
+        ValueError,
+        match="extra_edge_props\\[weight\\] array length 2 does not match number of edges 4",
+    ):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=False,
+            num_nodes=5,
+            num_edges=4,
+            extra_edge_props={"weight": custom_edge_weights},
+        )
+
+    # Test mixed case - one correct, one wrong
+    custom_node_labels = np.array(["A", "B", "C", "D", "E"])  # Correct length
+    custom_node_scores = np.array([0.1, 0.2])  # Wrong length
+
+    with pytest.raises(
+        ValueError, match="extra_node_props\\[score\\] array length 2 does not match num_nodes 5"
+    ):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=False,
+            num_nodes=5,
+            num_edges=4,
+            extra_node_props={"label": custom_node_labels, "score": custom_node_scores},
+        )
+
+    # Test invalid type for node properties (non-string, non-array)
+    with pytest.raises(
+        ValueError, match="extra_node_props\\[label\\] must be a string dtype or numpy array"
+    ):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            extra_edge_props={"score": "float64", "color": "int"},
+            directed=False,
+            extra_node_props={"label": 123},  # Invalid type
+        )
+
+    # Test invalid type for edge properties (non-string, non-array)
+    with pytest.raises(
+        ValueError, match="extra_edge_props\\[weight\\] must be a string dtype or numpy array"
+    ):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=False,
+            extra_edge_props={"weight": [1, 2, 3, 4]},  # Invalid type
+        )
+
+    # Test extra_edge_props is not a dict
+    with pytest.raises(ValueError, match="extra_edge_props must be a dict"):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=False,
+            extra_edge_props="not_a_dict",  # Should be a dict
+        )
+
+    # Test extra_edge_props property name is not a string
+    with pytest.raises(ValueError, match="extra_edge_props keys must be strings"):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=False,
+            extra_edge_props={123: "str"},  # Key should be string
+        )
+
+    # Test extra_edge_props property dtype is not a valid dtype
+    with pytest.raises(ValueError, match="dtype 'invalid_dtype' not supported"):
+        create_memory_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=False,
+            extra_edge_props={"weight": "invalid_dtype"},  # Invalid dtype
+        )
+
+
+def test_create_memory_mock_geff_extra_node_props_different_dtypes() -> None:
     """Test extra node properties with different data types"""
 
     # Test all supported dtypes
@@ -283,7 +430,7 @@ def test_create_memory_mock_geff_extra_node_props_different_dtypes():
     store, graph_props = create_memory_mock_geff(
         node_id_dtype="int",
         node_axis_dtypes={"position": "float64", "time": "float64"},
-        extra_edge_props={"score": "float64", "color": "int"},
+        extra_edge_props={"score": "float64", "color": "int", "type": "str"},
         directed=False,
         num_nodes=3,
         num_edges=2,
@@ -312,7 +459,7 @@ def test_create_memory_mock_geff_extra_node_props_different_dtypes():
             assert isinstance(node_data[prop_name], float | np.floating)
 
 
-def test_create_dummy_graph_props_extra_node_props():
+def test_create_dummy_graph_props_extra_node_props() -> None:
     """Test create_dummy_graph_props with extra node properties"""
 
     extra_node_props = {
@@ -353,7 +500,7 @@ def test_create_dummy_graph_props_extra_node_props():
         assert extra_props["category"][i] == i
 
 
-def test_create_dummy_graph_props_empty_graph():
+def test_create_dummy_graph_props_empty_graph() -> None:
     """Test create_dummy_graph_props with empty graph (0 nodes, 0 edges)"""
 
     extra_node_props = {
@@ -430,7 +577,7 @@ def test_create_dummy_graph_props_empty_graph():
     assert graph_props["axis_types"] == ("time", "space", "space", "space")
 
 
-def test_create_dummy_graph_props_empty_graph_no_extra_props():
+def test_create_dummy_graph_props_empty_graph_no_extra_props() -> None:
     """Test create_dummy_graph_props with empty graph and no extra properties"""
 
     graph_props = create_dummy_graph_props(
@@ -478,7 +625,7 @@ def test_create_dummy_graph_props_empty_graph_no_extra_props():
     assert graph_props["axis_types"] == ("time", "space", "space", "space")
 
 
-def test_create_dummy_graph_props_empty_graph_partial_dimensions():
+def test_create_dummy_graph_props_empty_graph_partial_dimensions() -> None:
     """Test create_dummy_graph_props with empty graph and partial dimensions"""
 
     graph_props = create_dummy_graph_props(

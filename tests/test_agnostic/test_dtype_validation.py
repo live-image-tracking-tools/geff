@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING, Any
+
 import numpy as np
 import pytest
 
-from geff.metadata_schema import GeffMetadata
-from geff.units import validate_data_type
-from geff.write_arrays import write_arrays
+from geff.core_io import write_arrays
+from geff.metadata._schema import GeffMetadata
+from geff.metadata._valid_values import validate_data_type
+
+if TYPE_CHECKING:
+    from geff._typing import PropDictNpArray
 
 
 # -----------------------------------------------------------------------------
@@ -20,7 +25,7 @@ from geff.write_arrays import write_arrays
         np.bool_,
     ],
 )
-def test_validate_data_type_allowed(dtype_in):
+def test_validate_data_type_allowed(dtype_in: Any) -> None:
     """All allowed dtypes should return *True*."""
     assert validate_data_type(dtype_in) is True
 
@@ -29,7 +34,7 @@ def test_validate_data_type_allowed(dtype_in):
     "dtype_in",
     ["float16", np.float16, "complex64", np.dtype("complex128"), ">f2"],
 )
-def test_validate_data_type_disallowed(dtype_in):
+def test_validate_data_type_disallowed(dtype_in) -> None:
     """All disallowed dtypes should return *False*."""
     assert validate_data_type(dtype_in) is False
 
@@ -44,7 +49,7 @@ def _tmp_metadata():
     return GeffMetadata(geff_version="0.0.1", directed=True)
 
 
-def test_write_arrays_rejects_disallowed_id_dtype(tmp_path):
+def test_write_arrays_rejects_disallowed_id_dtype(tmp_path) -> None:
     """write_arrays must fail fast for node/edge ids with unsupported dtype."""
     geff_path = tmp_path / "invalid_ids.geff"
 
@@ -63,7 +68,7 @@ def test_write_arrays_rejects_disallowed_id_dtype(tmp_path):
         )
 
 
-def test_write_arrays_rejects_disallowed_property_dtype(tmp_path):
+def test_write_arrays_rejects_disallowed_property_dtype(tmp_path) -> None:
     """write_arrays must fail fast if any property array has an unsupported dtype."""
     geff_path = tmp_path / "invalid_prop.geff"
 
@@ -73,7 +78,7 @@ def test_write_arrays_rejects_disallowed_property_dtype(tmp_path):
 
     # property with disallowed dtype (float16)
     bad_prop_values = np.array([0.1, 0.2, 0.3], dtype=np.float16)
-    node_props = {"score": (bad_prop_values, None)}
+    node_props: dict[str, PropDictNpArray] = {"score": {"values": bad_prop_values, "missing": None}}
 
     with pytest.warns(UserWarning):
         write_arrays(

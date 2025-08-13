@@ -9,18 +9,28 @@ The graph exchange file format is `zarr` based. A graph is stored in a zarr grou
 Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html). However, `geff` will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.
 
 ## Geff metadata
+This is an auto-generated description of the schema for GEFF metadata. Further description of specific sections of interest are below.
 
 <!-- GEFF-SCHEMA -->
 
-!!! note
+### Axes list
 
-    The axes dictionary is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
+The axes list is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
 
-    ::: geff.units.VALID_AXIS_TYPES  
+The order of the axes in the list is meaningful. For one, any downstream properties that are an array of values with one value per (spatial) axis will be in the order of the axis list (filtering to only the spatial axes by the `type` field if needed). Secondly, if associated image or segmentation data does not have axes metadata, the order of the spatiotemporal axes is a good default guess for aligning the graph and the image data, although there is no way to denote the channel dimension in the graph spec. If you are writing out a geff with an associated segmentation and/or image dataset, we highly recommend providing the axis names for your segmentation/image using the OME-zarr spec, including channel dimensions if needed.
 
-    ::: geff.units.VALID_SPACE_UNITS    
+::: geff.metadata._valid_values.VALID_AXIS_TYPES
 
-    ::: geff.units.VALID_TIME_UNITS  
+::: geff.metadata._valid_values.VALID_SPACE_UNITS
+
+::: geff.metadata._valid_values.VALID_TIME_UNITS
+
+### Property metadata
+The metadata for each node/edge property is (optionally) stored in the `node_props_metadata` and `edge_props_metadata` entries.
+Each property must have a string identifier (the group name for the property) and a dtype. The dtype can be any string
+that can be coerced into a numpy dtype, or the special `varlength` dtype indicating this is a variable length property (coming soon).
+String properties should have dtype `str`, not `varlength`, even though they are stored using the same variable
+length mechanism.
 
 ### Affine transformations
 The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
@@ -111,52 +121,64 @@ Here is a schematic of the expected file structure.
     /raw 
 ```
 This is a geff metadata zattrs file that matches the above example structure.
-```json
-# /path/to.zarr/tracking_graph/.zattrs
+```jsonc
+// /path/to.zarr/tracking_graph/.zattrs
 {   
     "geff": {
         "directed": true,
         "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
-        "axes": [ # optional
-            {'name': 't', 'type': "time", 'unit': "seconds", 'min': 0, 'max': 125},
-            {'name': 'z', 'type': "space", 'unit': "micrometers", 'min': 1523.36, 'max': 4398.1},
-            {'name': 'y', 'type': "space", 'unit': "micrometers", 'min': 81.667, 'max': 1877.7},
-            {'name': 'x', 'type': "space", 'unit': "micrometers", 'min': 764.42, 'max': 2152.3},
+        // axes are optional
+        "axes": [
+            {"name": "t", "type": "time", "unit": "second", "min": 0, "max": 125},
+            {"name": "z", "type": "space", "unit": "micrometer", "min": 1523.36, "max": 4398.1},
+            {"name": "y", "type": "space", "unit": "micrometer", "min": 81.667, "max": 1877.7},
+            {"name": "x", "type": "space", "unit": "micrometer", "min": 764.42, "max": 2152.3}
         ],
-        # predefined node attributes for storing detections as spheres or ellipsoids
-        "sphere": "radius", # optional
-        "ellipsoid": "covariance3d", # optional
+        // predefined node attributes for storing detections as spheres or ellipsoids
+        "sphere": "radius", // optional
+        "ellipsoid": "covariance3d", // optional
         "display_hints": {
             "display_horizontal": "x",
             "display_vertical": "y",
             "display_depth": "z",
-            "display_time": "t",
+            "display_time": "t"
         },
-        # node attributes corresponding to tracklet and/or lineage IDs
+        // node attributes corresponding to tracklet and/or lineage IDs
         "track_node_props": {
             "lineage": "ultrack_lineage_id",
             "tracklet": "ultrack_id"
         },
-        "related_objects": {
+        "related_objects": [
             {
-                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id",
+                "type":"labels", "path":"../segmentation/", "label_prop": "seg_id"
             },
             {
-                "type":"image", "path":"../raw/",
-            },
-        },
-        # optional coordinate transformation is defined as homogeneous coordinates
-        # It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
+                "type":"image", "path":"../raw/"
+            }
+        ],
+        // optional coordinate transformation is defined as homogeneous coordinates
+        // It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
         "affine": [
             [1, 0, 0, 0, 0],
             [0, 1, 0, 0, 0],
             [0, 0, 1, 0, 0],
             [0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1],
-        # custom other things must be placed **inside** the extra attribute
+            [0, 0, 0, 0, 1]
+        ],
+        // custom other things must be placed **inside** the extra attribute
         "extra": {
-            ...
+            // ...
         }
+    }
+}
+```
+
+Minimal geff metadata must have `version` and `directed` fields under a `geff` field.
+```jsonc
+{
+    "geff": {
+        "version": "0.0.0",
+        "directed": false
     }
 }
 ```

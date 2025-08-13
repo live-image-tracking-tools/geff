@@ -1,11 +1,18 @@
 {
   "$defs": {
     "Affine": {
-      "description": "Affine transformation class following scipy conventions.\n\nInternally stores transformations as homogeneous coordinate matrices (N+1, N+1).\nThe transformation matrix follows scipy.ndimage.affine_transform convention\nwhere the matrix maps output coordinates to input coordinates (inverse/pull transformation).\n\nFor a point p_out in output space, the corresponding input point p_in is computed as:\np_in_homo = matrix @ p_out_homo\nwhere p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]\n\nAttributes:\n    matrix: Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)",
+      "description": "Affine transformation matrix following scipy conventions.\n\nInternally stores transformations as homogeneous coordinate matrices (N+1, N+1).\nThe transformation matrix follows scipy.ndimage.affine_transform convention\nwhere the matrix maps output coordinates to input coordinates (inverse/pull transformation).\n\nFor a point p_out in output space, the corresponding input point p_in is computed as:\np_in_homo = matrix @ p_out_homo\nwhere p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]\n\nAttributes:\n    matrix (np.ndarray) : square, homogeneous transformation matrix (ndim+1, ndim+1)",
       "properties": {
         "matrix": {
-          "description": "Homogeneous transformation matrix as list of lists (ndim+1, ndim+1)",
-          "title": "Matrix"
+          "description": "Homogeneous transformation matrix (ndim+1, ndim+1)",
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Matrix",
+          "type": "array"
         }
       },
       "required": [
@@ -15,6 +22,7 @@
       "type": "object"
     },
     "Axis": {
+      "description": "TODO docstring",
       "properties": {
         "name": {
           "title": "Name",
@@ -152,6 +160,38 @@
           "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
           "title": "Axes"
         },
+        "node_props_metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/PropMetadata"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
+          "title": "Node Props Metadata"
+        },
+        "edge_props_metadata": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/PropMetadata"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
+          "title": "Edge Props Metadata"
+        },
         "sphere": {
           "anyOf": [
             {
@@ -241,18 +281,83 @@
           "description": "Metadata indicating how spatiotemporal axes are displayed by a viewer"
         },
         "extra": {
+          "additionalProperties": true,
           "description": "Extra metadata that is not part of the schema",
-          "title": "Extra"
+          "title": "Extra",
+          "type": "object"
         }
       },
       "required": [
-        "geff_version",
-        "directed"
+        "directed",
+        "geff_version"
       ],
       "title": "geff_metadata",
       "type": "object"
     },
+    "PropMetadata": {
+      "description": "Metadata describing a property in the geff graph.",
+      "properties": {
+        "identifier": {
+          "description": "Identifier of the property. Must be unique within its own component subgroup (nodes or edges). Must be a non-empty string.",
+          "minLength": 1,
+          "title": "Identifier",
+          "type": "string"
+        },
+        "dtype": {
+          "description": "Data type of the property. Must be a non-empty string that can be parsed into a numpy dtype, or the special value 'varlength' to indicate a variable length property. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
+          "minLength": 1,
+          "title": "Dtype",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional unit of the property.",
+          "title": "Unit"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional human friendly name of the property",
+          "title": "Name"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional description of the property.",
+          "title": "Description"
+        }
+      },
+      "required": [
+        "identifier",
+        "dtype"
+      ],
+      "title": "PropMetadata",
+      "type": "object"
+    },
     "RelatedObject": {
+      "description": "TODO docstring",
       "properties": {
         "type": {
           "description": "Type of the related object. 'labels' for label objects, 'image' for image objects. Other types are also allowed, but may not be recognized by reader applications. ",
