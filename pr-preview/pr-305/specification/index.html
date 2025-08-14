@@ -1532,7 +1532,7 @@ applications can use this information to align graph node locations with image d
 
 <p>The order of the axes in the list is meaningful. Any downstream properties that are<br />
 an array of values with one value per (spatial) axis will be in the order of the axis<br />
-list (filtering to only the spatial axes by the type field if needed). </p>
+list (filtering to only the spatial axes by the type field if needed).</p>
 
         </div>
         <div>
@@ -2565,73 +2565,27 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a></div><h4>Node Props Metadata</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<span class="description"><p>Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.</p>
-</span><div class="any-of-value" id="geff_node_props_metadata_anyOf"><h2 class="handle">
-  <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_anyOf" role="tablist"><li class="nav-item">
-            <a class="nav-link active anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0')"
-            >Option 1</a>
-        </li><li class="nav-item">
-            <a class="nav-link anyOf-option"
-               id="geff_node_props_metadata_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i1" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i1')"
-            >Option 2</a>
-        </li></ul>
-<div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_geff_node_props_metadata_anyOf_i0" role="tabpanel">
-
-
-    <div class="breadcrumbs">root
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff" onclick="anchorLink('geff')">geff</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: object</span><br/>
+    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a></div><h4>Node Props Metadata</h4><span class="badge badge-dark value-type">Type: object</span> <span class="badge badge-success default-value">Default: {}</span><br/>
+<span class="description"><p>Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each node property.</p>
+</span>
 
 
 
 
 
 
-
-<div class="accordion" id="accordiongeff_node_props_metadata_anyOf_i0_additionalProperties">
+<div class="accordion" id="accordiongeff_node_props_metadata_additionalProperties">
     <div class="card">
-        <div class="card-header" id="headinggeff_node_props_metadata_anyOf_i0_additionalProperties">
+        <div class="card-header" id="headinggeff_node_props_metadata_additionalProperties">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_anyOf_i0_additionalProperties"
-                        aria-expanded="" aria-controls="geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties')"><em><span class="property-name">Additional Properties</span></em></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_additionalProperties"
+                        aria-expanded="" aria-controls="geff_node_props_metadata_additionalProperties" onclick="setAnchor('#geff_node_props_metadata_additionalProperties')"><em><span class="property-name">Additional Properties</span></em></button>
             </h2>
         </div>
 
-        <div id="geff_node_props_metadata_anyOf_i0_additionalProperties"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_anyOf_i0_additionalProperties"
-             data-parent="#accordiongeff_node_props_metadata_anyOf_i0_additionalProperties">
+        <div id="geff_node_props_metadata_additionalProperties"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_additionalProperties"
+             data-parent="#accordiongeff_node_props_metadata_additionalProperties">
             <div class="card-body pl-5"><p class="additional-properties">Each additional property must conform to the following schema</p>
 
     <div class="breadcrumbs">root
@@ -2655,21 +2609,7 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a></div><h4>PropMetadata</h4><span class="badge badge-dark value-type">Type: object</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a></div><h4>PropMetadata</h4><span class="badge badge-dark value-type">Type: object</span><br/>
 <span class="description"><p>Metadata describing a property in the geff graph.</p>
 </span>
 
@@ -2680,18 +2620,18 @@ list (filtering to only the spatial axes by the type field if needed). </p>
 
 
 
-<div class="accordion" id="accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_identifier">
+<div class="accordion" id="accordiongeff_node_props_metadata_additionalProperties_identifier">
     <div class="card">
-        <div class="card-header" id="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_identifier">
+        <div class="card-header" id="headinggeff_node_props_metadata_additionalProperties_identifier">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_anyOf_i0_additionalProperties_identifier"
-                        aria-expanded="" aria-controls="geff_node_props_metadata_anyOf_i0_additionalProperties_identifier" onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_identifier')"><span class="property-name">identifier</span> <span class="badge badge-warning required-property">Required</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_additionalProperties_identifier"
+                        aria-expanded="" aria-controls="geff_node_props_metadata_additionalProperties_identifier" onclick="setAnchor('#geff_node_props_metadata_additionalProperties_identifier')"><span class="property-name">identifier</span> <span class="badge badge-warning required-property">Required</span></button>
             </h2>
         </div>
 
-        <div id="geff_node_props_metadata_anyOf_i0_additionalProperties_identifier"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_identifier"
-             data-parent="#accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_identifier">
+        <div id="geff_node_props_metadata_additionalProperties_identifier"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_additionalProperties_identifier"
+             data-parent="#accordiongeff_node_props_metadata_additionalProperties_identifier">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -2715,52 +2655,38 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_identifier" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_identifier')">identifier</a></div><h4>Identifier</h4><span class="badge badge-dark value-type">Type: string</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_identifier" onclick="anchorLink('geff_node_props_metadata_additionalProperties_identifier')">identifier</a></div><h4>Identifier</h4><span class="badge badge-dark value-type">Type: string</span><br/>
 <span class="description"><p>Identifier of the property. Must be unique within its own component subgroup (nodes or edges). Must be a non-empty string.</p>
 </span>
 
 
 
-        <p><span class="badge badge-light restriction min-length-restriction" id="geff_node_props_metadata_anyOf_i0_additionalProperties_identifier_minLength">Must be at least <code>1</code> characters long</span></p>
+        <p><span class="badge badge-light restriction min-length-restriction" id="geff_node_props_metadata_additionalProperties_identifier_minLength">Must be at least <code>1</code> characters long</span></p>
 
 
             </div>
         </div>
     </div>
 </div>
-<div class="accordion" id="accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_dtype">
+<div class="accordion" id="accordiongeff_node_props_metadata_additionalProperties_dtype">
     <div class="card">
-        <div class="card-header" id="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_dtype">
+        <div class="card-header" id="headinggeff_node_props_metadata_additionalProperties_dtype">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_anyOf_i0_additionalProperties_dtype"
-                        aria-expanded="" aria-controls="geff_node_props_metadata_anyOf_i0_additionalProperties_dtype" onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_dtype')"><span class="property-name">dtype</span> <span class="badge badge-warning required-property">Required</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_additionalProperties_dtype"
+                        aria-expanded="" aria-controls="geff_node_props_metadata_additionalProperties_dtype" onclick="setAnchor('#geff_node_props_metadata_additionalProperties_dtype')"><span class="property-name">dtype</span> <span class="badge badge-warning required-property">Required</span></button>
             </h2>
         </div>
 
-        <div id="geff_node_props_metadata_anyOf_i0_additionalProperties_dtype"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_dtype"
-             data-parent="#accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_dtype">
+        <div id="geff_node_props_metadata_additionalProperties_dtype"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_additionalProperties_dtype"
+             data-parent="#accordiongeff_node_props_metadata_additionalProperties_dtype">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -2784,52 +2710,38 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_dtype" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_dtype')">dtype</a></div><h4>Dtype</h4><span class="badge badge-dark value-type">Type: string</span><br/>
-<span class="description"><p>Data type of the property. Must be a non-empty string that can be parsed into a numpy dtype, or the special value 'varlength' to indicate a variable length property. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.</p>
+    <a href="#geff_node_props_metadata_additionalProperties_dtype" onclick="anchorLink('geff_node_props_metadata_additionalProperties_dtype')">dtype</a></div><h4>Dtype</h4><span class="badge badge-dark value-type">Type: string</span><br/>
+<span class="description"><p>Data type of the property. Must be a non-empty string that can be parsed into a numpy dtype.Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.</p>
 </span>
 
 
 
-        <p><span class="badge badge-light restriction min-length-restriction" id="geff_node_props_metadata_anyOf_i0_additionalProperties_dtype_minLength">Must be at least <code>1</code> characters long</span></p>
+        <p><span class="badge badge-light restriction min-length-restriction" id="geff_node_props_metadata_additionalProperties_dtype_minLength">Must be at least <code>1</code> characters long</span></p>
 
 
             </div>
         </div>
     </div>
 </div>
-<div class="accordion" id="accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_unit">
+<div class="accordion" id="accordiongeff_node_props_metadata_additionalProperties_varlength">
     <div class="card">
-        <div class="card-header" id="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_unit">
+        <div class="card-header" id="headinggeff_node_props_metadata_additionalProperties_varlength">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit"
-                        aria-expanded="" aria-controls="geff_node_props_metadata_anyOf_i0_additionalProperties_unit" onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_unit')"><span class="property-name">unit</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_additionalProperties_varlength"
+                        aria-expanded="" aria-controls="geff_node_props_metadata_additionalProperties_varlength" onclick="setAnchor('#geff_node_props_metadata_additionalProperties_varlength')"><span class="property-name">varlength</span></button>
             </h2>
         </div>
 
-        <div id="geff_node_props_metadata_anyOf_i0_additionalProperties_unit"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_unit"
-             data-parent="#accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_unit">
+        <div id="geff_node_props_metadata_additionalProperties_varlength"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_additionalProperties_varlength"
+             data-parent="#accordiongeff_node_props_metadata_additionalProperties_varlength">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -2853,44 +2765,85 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
+    <a href="#geff_node_props_metadata_additionalProperties_varlength" onclick="anchorLink('geff_node_props_metadata_additionalProperties_varlength')">varlength</a></div><h4>Varlength</h4><span class="badge badge-dark value-type">Type: boolean</span> <span class="badge badge-success default-value">Default: false</span><br/>
+<span class="description"><p>True if the property contains variable length arrays. Variable length arrays cannot be of dtype string (e.g. you cannot have a property where each node has a string array)</p>
+</span>
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="accordion" id="accordiongeff_node_props_metadata_additionalProperties_unit">
+    <div class="card">
+        <div class="card-header" id="headinggeff_node_props_metadata_additionalProperties_unit">
+            <h2 class="mb-0">
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_additionalProperties_unit"
+                        aria-expanded="" aria-controls="geff_node_props_metadata_additionalProperties_unit" onclick="setAnchor('#geff_node_props_metadata_additionalProperties_unit')"><span class="property-name">unit</span></button>
+            </h2>
+        </div>
+
+        <div id="geff_node_props_metadata_additionalProperties_unit"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_additionalProperties_unit"
+             data-parent="#accordiongeff_node_props_metadata_additionalProperties_unit">
+            <div class="card-body pl-5">
+
+    <div class="breadcrumbs">root
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
+    <a href="#geff" onclick="anchorLink('geff')">geff</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit')">unit</a></div><h4>Unit</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
+        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                fill-rule="evenodd"
+                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+            />
+        </svg>
+    <a href="#geff_node_props_metadata_additionalProperties_unit" onclick="anchorLink('geff_node_props_metadata_additionalProperties_unit')">unit</a></div><h4>Unit</h4> <span class="badge badge-success default-value">Default: null</span><br/>
 <span class="description"><p>Optional unit of the property.</p>
-</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf"><h2 class="handle">
+</span><div class="any-of-value" id="geff_node_props_metadata_additionalProperties_unit_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_additionalProperties_unit_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i0" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i0')"
+               id="geff_node_props_metadata_additionalProperties_unit_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_additionalProperties_unit_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_node_props_metadata_additionalProperties_unit_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i1" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i1')"
+               id="geff_node_props_metadata_additionalProperties_unit_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_additionalProperties_unit_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_node_props_metadata_additionalProperties_unit_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_node_props_metadata_additionalProperties_unit_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -2914,42 +2867,28 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
+    <a href="#geff_node_props_metadata_additionalProperties_unit" onclick="anchorLink('geff_node_props_metadata_additionalProperties_unit')">unit</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
+    <a href="#geff_node_props_metadata_additionalProperties_unit_anyOf" onclick="anchorLink('geff_node_props_metadata_additionalProperties_unit_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit')">unit</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_unit_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_additionalProperties_unit_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
 
 
 
@@ -2958,7 +2897,7 @@ list (filtering to only the spatial axes by the type field if needed). </p>
 
 
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_node_props_metadata_additionalProperties_unit_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -2982,42 +2921,28 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
+    <a href="#geff_node_props_metadata_additionalProperties_unit" onclick="anchorLink('geff_node_props_metadata_additionalProperties_unit')">unit</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
+    <a href="#geff_node_props_metadata_additionalProperties_unit_anyOf" onclick="anchorLink('geff_node_props_metadata_additionalProperties_unit_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit')">unit</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_unit_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_unit_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_additionalProperties_unit_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -3036,18 +2961,18 @@ list (filtering to only the spatial axes by the type field if needed). </p>
         </div>
     </div>
 </div>
-<div class="accordion" id="accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_name">
+<div class="accordion" id="accordiongeff_node_props_metadata_additionalProperties_name">
     <div class="card">
-        <div class="card-header" id="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_name">
+        <div class="card-header" id="headinggeff_node_props_metadata_additionalProperties_name">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_anyOf_i0_additionalProperties_name"
-                        aria-expanded="" aria-controls="geff_node_props_metadata_anyOf_i0_additionalProperties_name" onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_name')"><span class="property-name">name</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_additionalProperties_name"
+                        aria-expanded="" aria-controls="geff_node_props_metadata_additionalProperties_name" onclick="setAnchor('#geff_node_props_metadata_additionalProperties_name')"><span class="property-name">name</span></button>
             </h2>
         </div>
 
-        <div id="geff_node_props_metadata_anyOf_i0_additionalProperties_name"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_name"
-             data-parent="#accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_name">
+        <div id="geff_node_props_metadata_additionalProperties_name"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_additionalProperties_name"
+             data-parent="#accordiongeff_node_props_metadata_additionalProperties_name">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -3071,44 +2996,30 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name')">name</a></div><h4>Name</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_name" onclick="anchorLink('geff_node_props_metadata_additionalProperties_name')">name</a></div><h4>Name</h4> <span class="badge badge-success default-value">Default: null</span><br/>
 <span class="description"><p>Optional human friendly name of the property</p>
-</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf"><h2 class="handle">
+</span><div class="any-of-value" id="geff_node_props_metadata_additionalProperties_name_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_additionalProperties_name_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i0" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i0')"
+               id="geff_node_props_metadata_additionalProperties_name_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_additionalProperties_name_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_node_props_metadata_additionalProperties_name_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i1" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i1')"
+               id="geff_node_props_metadata_additionalProperties_name_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_additionalProperties_name_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_node_props_metadata_additionalProperties_name_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_node_props_metadata_additionalProperties_name_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -3132,42 +3043,28 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
+    <a href="#geff_node_props_metadata_additionalProperties_name" onclick="anchorLink('geff_node_props_metadata_additionalProperties_name')">name</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
+    <a href="#geff_node_props_metadata_additionalProperties_name_anyOf" onclick="anchorLink('geff_node_props_metadata_additionalProperties_name_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name')">name</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_name_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_additionalProperties_name_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
 
 
 
@@ -3176,7 +3073,7 @@ list (filtering to only the spatial axes by the type field if needed). </p>
 
 
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_node_props_metadata_additionalProperties_name_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -3200,42 +3097,28 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
+    <a href="#geff_node_props_metadata_additionalProperties_name" onclick="anchorLink('geff_node_props_metadata_additionalProperties_name')">name</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
+    <a href="#geff_node_props_metadata_additionalProperties_name_anyOf" onclick="anchorLink('geff_node_props_metadata_additionalProperties_name_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name')">name</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_name_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_name_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_additionalProperties_name_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -3254,18 +3137,18 @@ list (filtering to only the spatial axes by the type field if needed). </p>
         </div>
     </div>
 </div>
-<div class="accordion" id="accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_description">
+<div class="accordion" id="accordiongeff_node_props_metadata_additionalProperties_description">
     <div class="card">
-        <div class="card-header" id="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_description">
+        <div class="card-header" id="headinggeff_node_props_metadata_additionalProperties_description">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_anyOf_i0_additionalProperties_description"
-                        aria-expanded="" aria-controls="geff_node_props_metadata_anyOf_i0_additionalProperties_description" onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_description')"><span class="property-name">description</span></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_node_props_metadata_additionalProperties_description"
+                        aria-expanded="" aria-controls="geff_node_props_metadata_additionalProperties_description" onclick="setAnchor('#geff_node_props_metadata_additionalProperties_description')"><span class="property-name">description</span></button>
             </h2>
         </div>
 
-        <div id="geff_node_props_metadata_anyOf_i0_additionalProperties_description"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_anyOf_i0_additionalProperties_description"
-             data-parent="#accordiongeff_node_props_metadata_anyOf_i0_additionalProperties_description">
+        <div id="geff_node_props_metadata_additionalProperties_description"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_node_props_metadata_additionalProperties_description"
+             data-parent="#accordiongeff_node_props_metadata_additionalProperties_description">
             <div class="card-body pl-5">
 
     <div class="breadcrumbs">root
@@ -3289,44 +3172,30 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description')">description</a></div><h4>Description</h4> <span class="badge badge-success default-value">Default: null</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_description" onclick="anchorLink('geff_node_props_metadata_additionalProperties_description')">description</a></div><h4>Description</h4> <span class="badge badge-success default-value">Default: null</span><br/>
 <span class="description"><p>Optional description of the property.</p>
-</span><div class="any-of-value" id="geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf"><h2 class="handle">
+</span><div class="any-of-value" id="geff_node_props_metadata_additionalProperties_description_anyOf"><h2 class="handle">
   <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_anyOf" role="tablist"><li class="nav-item">
+</h2><ul class="nav nav-tabs" id="tabsgeff_node_props_metadata_additionalProperties_description_anyOf_anyOf" role="tablist"><li class="nav-item">
             <a class="nav-link active anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i0" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i0')"
+               id="geff_node_props_metadata_additionalProperties_description_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_additionalProperties_description_anyOf_i0" role="tab"
+               onclick="setAnchor('#geff_node_props_metadata_additionalProperties_description_anyOf_i0')"
             >Option 1</a>
         </li><li class="nav-item">
             <a class="nav-link anyOf-option"
-               id="geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i1" role="tab"
-               onclick="setAnchor('#geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i1')"
+               id="geff_node_props_metadata_additionalProperties_description_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_node_props_metadata_additionalProperties_description_anyOf_i1" role="tab"
+               onclick="setAnchor('#geff_node_props_metadata_additionalProperties_description_anyOf_i1')"
             >Option 2</a>
         </li></ul>
 <div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i0" role="tabpanel">
+             id="tab-pane_geff_node_props_metadata_additionalProperties_description_anyOf_i0" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -3350,42 +3219,28 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
+    <a href="#geff_node_props_metadata_additionalProperties_description" onclick="anchorLink('geff_node_props_metadata_additionalProperties_description')">description</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
+    <a href="#geff_node_props_metadata_additionalProperties_description_anyOf" onclick="anchorLink('geff_node_props_metadata_additionalProperties_description_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description')">description</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_description_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_additionalProperties_description_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: string</span><br/>
 
 
 
@@ -3394,7 +3249,7 @@ list (filtering to only the spatial axes by the type field if needed). </p>
 
 
         </div><div class="tab-pane fade card-body "
-             id="tab-pane_geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i1" role="tabpanel">
+             id="tab-pane_geff_node_props_metadata_additionalProperties_description_anyOf_i1" role="tabpanel">
 
 
     <div class="breadcrumbs">root
@@ -3418,42 +3273,28 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
+    <a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')">PropMetadata</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0" onclick="anchorLink('geff_node_props_metadata_anyOf_i0')">item 0</a>
+    <a href="#geff_node_props_metadata_additionalProperties_description" onclick="anchorLink('geff_node_props_metadata_additionalProperties_description')">description</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a>
+    <a href="#geff_node_props_metadata_additionalProperties_description_anyOf" onclick="anchorLink('geff_node_props_metadata_additionalProperties_description_anyOf')">anyOf</a>
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
                 fill-rule="evenodd"
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description')">description</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties_description_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
+    <a href="#geff_node_props_metadata_additionalProperties_description_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_additionalProperties_description_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
 
 
 
@@ -3476,53 +3317,6 @@ list (filtering to only the spatial axes by the type field if needed). </p>
         </div>
     </div>
 </div>
-        </div><div class="tab-pane fade card-body "
-             id="tab-pane_geff_node_props_metadata_anyOf_i1" role="tabpanel">
-
-
-    <div class="breadcrumbs">root
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff" onclick="anchorLink('geff')">geff</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata" onclick="anchorLink('geff_node_props_metadata')">node_props_metadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf" onclick="anchorLink('geff_node_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_node_props_metadata_anyOf_i1" onclick="anchorLink('geff_node_props_metadata_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
-
-
-
-
-
-
-
-        </div></div></div>
-
-
-
-
-
-
             </div>
         </div>
     </div>
@@ -3555,73 +3349,27 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_edge_props_metadata" onclick="anchorLink('geff_edge_props_metadata')">edge_props_metadata</a></div><h4>Edge Props Metadata</h4> <span class="badge badge-success default-value">Default: null</span><br/>
-<span class="description"><p>Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.</p>
-</span><div class="any-of-value" id="geff_edge_props_metadata_anyOf"><h2 class="handle">
-  <label>Any of</label>
-</h2><ul class="nav nav-tabs" id="tabsgeff_edge_props_metadata_anyOf_anyOf" role="tablist"><li class="nav-item">
-            <a class="nav-link active anyOf-option"
-               id="geff_edge_props_metadata_anyOf_i0" data-toggle="tab" href="#tab-pane_geff_edge_props_metadata_anyOf_i0" role="tab"
-               onclick="setAnchor('#geff_edge_props_metadata_anyOf_i0')"
-            >Option 1</a>
-        </li><li class="nav-item">
-            <a class="nav-link anyOf-option"
-               id="geff_edge_props_metadata_anyOf_i1" data-toggle="tab" href="#tab-pane_geff_edge_props_metadata_anyOf_i1" role="tab"
-               onclick="setAnchor('#geff_edge_props_metadata_anyOf_i1')"
-            >Option 2</a>
-        </li></ul>
-<div class="tab-content card"><div class="tab-pane fade card-body active show"
-             id="tab-pane_geff_edge_props_metadata_anyOf_i0" role="tabpanel">
-
-
-    <div class="breadcrumbs">root
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff" onclick="anchorLink('geff')">geff</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata" onclick="anchorLink('geff_edge_props_metadata')">edge_props_metadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata_anyOf" onclick="anchorLink('geff_edge_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata_anyOf_i0" onclick="anchorLink('geff_edge_props_metadata_anyOf_i0')">item 0</a></div><span class="badge badge-dark value-type">Type: object</span><br/>
+    <a href="#geff_edge_props_metadata" onclick="anchorLink('geff_edge_props_metadata')">edge_props_metadata</a></div><h4>Edge Props Metadata</h4><span class="badge badge-dark value-type">Type: object</span> <span class="badge badge-success default-value">Default: {}</span><br/>
+<span class="description"><p>Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each edge property.</p>
+</span>
 
 
 
 
 
 
-
-<div class="accordion" id="accordiongeff_edge_props_metadata_anyOf_i0_additionalProperties">
+<div class="accordion" id="accordiongeff_edge_props_metadata_additionalProperties">
     <div class="card">
-        <div class="card-header" id="headinggeff_edge_props_metadata_anyOf_i0_additionalProperties">
+        <div class="card-header" id="headinggeff_edge_props_metadata_additionalProperties">
             <h2 class="mb-0">
-                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_edge_props_metadata_anyOf_i0_additionalProperties"
-                        aria-expanded="" aria-controls="geff_edge_props_metadata_anyOf_i0_additionalProperties" onclick="setAnchor('#geff_edge_props_metadata_anyOf_i0_additionalProperties')"><em><span class="property-name">Additional Properties</span></em></button>
+                <button class="btn btn-link property-name-button" type="button" data-toggle="collapse" data-target="#geff_edge_props_metadata_additionalProperties"
+                        aria-expanded="" aria-controls="geff_edge_props_metadata_additionalProperties" onclick="setAnchor('#geff_edge_props_metadata_additionalProperties')"><em><span class="property-name">Additional Properties</span></em></button>
             </h2>
         </div>
 
-        <div id="geff_edge_props_metadata_anyOf_i0_additionalProperties"
-             class="collapse property-definition-div" aria-labelledby="headinggeff_edge_props_metadata_anyOf_i0_additionalProperties"
-             data-parent="#accordiongeff_edge_props_metadata_anyOf_i0_additionalProperties">
+        <div id="geff_edge_props_metadata_additionalProperties"
+             class="collapse property-definition-div" aria-labelledby="headinggeff_edge_props_metadata_additionalProperties"
+             data-parent="#accordiongeff_edge_props_metadata_additionalProperties">
             <div class="card-body pl-5"><p class="additional-properties">Each additional property must conform to the following schema</p>
 
     <div class="breadcrumbs">root
@@ -3645,74 +3393,13 @@ list (filtering to only the spatial axes by the type field if needed). </p>
                 d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
             />
         </svg>
-    <a href="#geff_edge_props_metadata_anyOf" onclick="anchorLink('geff_edge_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata_anyOf_i0" onclick="anchorLink('geff_edge_props_metadata_anyOf_i0')">item 0</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_edge_props_metadata_anyOf_i0_additionalProperties')">PropMetadata</a></div><h4>PropMetadata</h4><span class="badge badge-dark value-type">Type: object</span><br/>
+    <a href="#geff_edge_props_metadata_additionalProperties" onclick="anchorLink('geff_edge_props_metadata_additionalProperties')">PropMetadata</a></div><h4>PropMetadata</h4><span class="badge badge-dark value-type">Type: object</span><br/>
 <span class="description"><p>Metadata describing a property in the geff graph.</p>
-</span><a href="#geff_node_props_metadata_anyOf_i0_additionalProperties" onclick="anchorLink('geff_node_props_metadata_anyOf_i0_additionalProperties')" class="ref-link">Same definition as PropMetadata</a>
+</span><a href="#geff_node_props_metadata_additionalProperties" onclick="anchorLink('geff_node_props_metadata_additionalProperties')" class="ref-link">Same definition as PropMetadata</a>
             </div>
         </div>
     </div>
 </div>
-        </div><div class="tab-pane fade card-body "
-             id="tab-pane_geff_edge_props_metadata_anyOf_i1" role="tabpanel">
-
-
-    <div class="breadcrumbs">root
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff" onclick="anchorLink('geff')">geff</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata" onclick="anchorLink('geff_edge_props_metadata')">edge_props_metadata</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata_anyOf" onclick="anchorLink('geff_edge_props_metadata_anyOf')">anyOf</a>
-        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-right-short" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-                fill-rule="evenodd"
-                d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
-            />
-        </svg>
-    <a href="#geff_edge_props_metadata_anyOf_i1" onclick="anchorLink('geff_edge_props_metadata_anyOf_i1')">item 1</a></div><span class="badge badge-dark value-type">Type: null</span><br/>
-
-
-
-
-
-
-
-        </div></div></div>
-
-
-
-
-
-
             </div>
         </div>
     </div>
