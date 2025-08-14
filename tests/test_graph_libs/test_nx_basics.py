@@ -28,6 +28,7 @@ extra_edge_props = [
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
 def test_read_write_consistency(
+    tmp_path,
     node_id_dtype,
     node_axis_dtypes,
     extra_edge_props,
@@ -46,6 +47,7 @@ def test_read_write_consistency(
 
     graph, _ = geff.read_nx(store)
 
+    # Check that in memory representation is consistent with what we expected to have from fixture
     assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
     assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
     for idx, node in enumerate(graph_props["nodes"]):

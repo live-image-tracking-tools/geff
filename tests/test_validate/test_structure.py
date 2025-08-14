@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+import copy
 import re
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 import zarr
+import zarr.storage
 
 from geff import validate_structure
+from geff.core_io._base_read import read_to_memory
+from geff.core_io._base_write import write_arrays
+from geff.core_io._utils import open_storelike
+from geff.testing._utils import check_equiv_geff
+from geff.testing.data import create_simple_2d_geff
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -206,3 +213,81 @@ def test_validate_structure(tmp_path: Path) -> None:
 
     # Everything passes
     validate_structure(zpath)
+
+
+def test_open_storelike(tmp_path):
+    # Open from a path
+    valid_zarr = f"{tmp_path}/test.zarr"
+    _ = zarr.open(valid_zarr)
+    group = open_storelike(valid_zarr)
+    assert isinstance(group, zarr.Group)
+
+    # Open from a store
+    store = zarr.storage.MemoryStore()
+    zarr.open_group(store, path="group")
+    group = open_storelike(store)
+    assert isinstance(group, zarr.Group)
+
+    # Bad path
+    with pytest.raises(FileNotFoundError, match="Path does not exist"):
+        open_storelike(f"{tmp_path}/bad.zarr")
+
+    # Not a store
+    with pytest.raises(ValueError, match="store must be a zarr StoreLike"):
+        open_storelike(group)
+
+
+def test_check_equiv_geff():
+    def _write_new_store(in_mem):
+        store = zarr.storage.MemoryStore()
+        write_arrays(store, **in_mem)
+        return store
+
+    store, attrs = create_simple_2d_geff(num_nodes=10, num_edges=15)
+
+    # Check that two exactly same geffs pass
+    check_equiv_geff(store, store)
+
+    # Create in memory version to mess with
+    in_mem = read_to_memory(store)
+
+    # Id shape mismatch
+    bad_store, attrs = create_simple_2d_geff(num_nodes=5)
+    with pytest.raises(ValueError, match=r".* ids shape: .* does not match .*"):
+        check_equiv_geff(store, bad_store)
+
+    # Missing props
+    bad_mem = copy.deepcopy(in_mem)
+    bad_mem["node_props"] = {}
+    bad_store = _write_new_store(bad_mem)
+    with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
+        check_equiv_geff(store, bad_store)
+
+    # Warn if one has missing but other doesn't
+    bad_mem = copy.deepcopy(in_mem)
+    bad_mem["edge_props"]["score"]["missing"] = np.zeros(
+        bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool_
+    )
+    bad_store = _write_new_store(bad_mem)
+    with pytest.raises(UserWarning, match=".* contains missing but the other does not"):
+        check_equiv_geff(bad_store, store)
+
+    # Values shape mismatch
+    bad_mem = copy.deepcopy(in_mem)
+    # Add extra dimension to an edge prop
+    bad_mem["edge_props"]["score"]["values"] = bad_mem["edge_props"]["score"]["values"][
+        ..., np.newaxis
+    ]
+    bad_store = _write_new_store(bad_mem)
+    with pytest.raises(ValueError, match=r".* shape: .* does not match b .*"):
+        check_equiv_geff(store, bad_store)
+
+    # Values dtype mismatch
+    bad_mem = copy.deepcopy(in_mem)
+    # Change dtype
+    bad_mem["edge_props"]["score"]["values"] = (
+        bad_mem["edge_props"]["score"]["values"].astype("int").squeeze()
+    )
+    bad_store = _write_new_store(bad_mem)
+    with pytest.raises(ValueError, match=r".* dtype: .* does not match b .*"):
+        check_equiv_geff(store, bad_store)
