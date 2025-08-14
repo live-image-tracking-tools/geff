@@ -64,7 +64,7 @@ def validate_optional_data(config: ValidationConfig, memory_geff: InMemoryGeff) 
 
     if config.ellipsoid and meta.ellipsoid is not None:
         covariance = memory_geff["node_props"][meta.ellipsoid]["values"]
-        validate_ellipsoid(covariance)
+        validate_ellipsoid(covariance, memory_geff["metadata"].axes)
 
     if meta.track_node_props is not None:
         if config.lineage and "tracklet" in meta.track_node_props:
