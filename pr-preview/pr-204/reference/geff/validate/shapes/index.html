@@ -1072,12 +1072,16 @@
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_ellipsoid</span><span class="p">(</span><span class="n">covariance</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_ellipsoid</span><span class="p">(</span>
+    <span class="n">covariance</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Axis</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Validate that ellipsoid data has a valid covariance matrix</p>
+<p>The first axis of the covariance array corresponds to the number of nodes. The
+remaining axes correspond to the number of spatial axes.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1107,6 +1111,22 @@
                 <em>required</em>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>axes</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-internal" title="            Axis (geff.metadata._schema.Axis)" href="../../metadata/#geff.metadata.Axis">Axis</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of Axis metadata</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -1126,7 +1146,27 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Ellipsoid covariance must be square matrices</p>
+                <p>Must define space axes in order to have ellipsoid data</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ellipsoid covariance matrix must have 1 + number of spatial dimensions</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Spatial dimensions of covariance matrix must be equal</p>
               </div>
             </td>
           </tr>
@@ -1171,7 +1211,7 @@
 
     <div class="doc doc-contents ">
 
-        <p>Validate that sphere data has non zero radii</p>
+        <p>Validate that sphere data has nonzero radii and is 2d</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1221,6 +1261,16 @@
             <td>
               <div class="doc-md-description">
                 <p>Sphere radius values must be non-negative</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sphere radius values must be 2D</p>
               </div>
             </td>
           </tr>
