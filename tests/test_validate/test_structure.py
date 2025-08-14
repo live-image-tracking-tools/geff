@@ -13,8 +13,11 @@ from geff import validate_structure
 from geff.core_io._base_read import read_to_memory
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import open_storelike
+from geff.metadata._schema import GeffMetadata
 from geff.testing._utils import check_equiv_geff
-from geff.testing.data import create_simple_2d_geff
+from geff.testing.data import create_2d_geff_with_invalid_shapes, create_simple_2d_geff
+from geff.validate.data import ValidationConfig, validate_optional_data, validate_zarr_data
+from geff.validate.structure import validate_axes_structure
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -60,6 +63,11 @@ def test_validate_structure(tmp_path: Path) -> None:
     n_node = 10
     z["nodes/ids"] = np.zeros(n_node)
 
+    # Node ids must be int
+    with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
+        validate_structure(zpath)
+    z["nodes/ids"] = np.ones(n_node, dtype="int")
+
     # Nodes must have a props group
     with pytest.raises(ValueError, match="'nodes' group must contain a group named 'props'"):
         validate_structure(zpath)
@@ -84,6 +92,7 @@ def test_validate_structure(tmp_path: Path) -> None:
         validate_structure(zpath)
 
     del z["nodes/props"]["badshape"]
+
     # Property missing shape mismatch
     z["nodes/props/badshape/values"] = np.zeros(shape=(n_node))
     z["nodes/props/badshape/missing"] = np.zeros(shape=(n_node * 2))
@@ -96,6 +105,13 @@ def test_validate_structure(tmp_path: Path) -> None:
     ):
         validate_structure(zpath)
     del z["nodes/props"]["badshape"]
+
+    # Missing array must be boolean
+    z["nodes/props/missing_dtype/values"] = np.zeros(shape=(n_node))
+    z["nodes/props/missing_dtype/missing"] = np.zeros(shape=(n_node))
+    with pytest.raises(ValueError, match=".* property .* missing must be boolean"):
+        validate_structure(zpath)
+    del z["nodes/props"]["missing_dtype"]
 
     # No edge group is okay, if the graph has no edges
     z.create_group("edges")
@@ -256,9 +272,9 @@ def test_check_equiv_geff():
     with pytest.raises(ValueError, match=r".* ids shape: .* does not match .*"):
         check_equiv_geff(store, bad_store)
 
-    # Missing props
+    # Props mismatch
     bad_mem = copy.deepcopy(in_mem)
-    bad_mem["node_props"] = {}
+    bad_mem["node_props"]["new prop"] = bad_mem["node_props"]["t"]
     bad_store = _write_new_store(bad_mem)
     with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
         check_equiv_geff(store, bad_store)
@@ -291,3 +307,56 @@ def test_check_equiv_geff():
     bad_store = _write_new_store(bad_mem)
     with pytest.raises(ValueError, match=r".* dtype: .* does not match b .*"):
         check_equiv_geff(store, bad_store)
+
+
+def test_validate_axes_structure(tmp_path):
+    meta = GeffMetadata(geff_version="0.1.0", directed=True, axes=[{"name": "x"}])
+
+    zpath = tmp_path / "test.zarr"
+    z = zarr.open_group(zpath)
+    z.create_group("nodes/props")
+
+    with pytest.raises(AssertionError, match="Axis x data is missing"):
+        validate_axes_structure(z, meta)
+    z.create_group("nodes/props/x")
+
+    # Values must be 1d
+    z["nodes/props/x/values"] = np.zeros((10, 2))
+    with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
+        validate_axes_structure(z, meta)
+    del z["nodes/props/x/values"]
+
+    # No missing values
+    z["nodes/props/x/values"] = np.zeros((10,))
+    z["nodes/props/x/missing"] = np.zeros((10,))
+    with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
+        validate_axes_structure(z, meta)
+
+
+def test_validate_zarr_data():
+    # We're not currently going to test/raise all of the ValueErrors
+    # because each of the sub functions is tested independently
+
+    store, _ = create_simple_2d_geff()
+    graph_dict = read_to_memory(store, validate=False)
+
+    validate_zarr_data(graph_dict)
+
+
+@pytest.mark.xfail(reason="Bad shapes. TODO separate out into multiple tests")
+def test_optional_data():
+    # config = ValidationConfig(lineage=True)
+    # graph_dict = ...  # TODO need a test graph with lineage data
+    # validate_optional_data(config, graph_dict)
+
+    # config = ValidationConfig(tracklet=True)
+    # graph_dict = ...  # TODO need a test graph with tracklet data
+    # validate_optional_data(config, graph_dict)
+
+    graph_dict = create_2d_geff_with_invalid_shapes()
+
+    config = ValidationConfig(sphere=True)
+    validate_optional_data(config, graph_dict)
+
+    config = ValidationConfig(ellipsoid=True)
+    validate_optional_data(config, graph_dict)

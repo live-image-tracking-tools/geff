@@ -42,6 +42,10 @@ def validate_structure(store: StoreLike) -> None:
         edges_group = expect_group(graph_group, _path.EDGES)
         _validate_edges_group(edges_group, metadata)
 
+    # Metadata based validation
+    if metadata.axes is not None:
+        validate_axes_structure(graph_group, metadata)
+
 
 def _validate_props_metadata(
     props_metadata_dict: Mapping[str, PropMetadata],
@@ -108,17 +112,28 @@ def _validate_props_group(
             )
 
         if _path.MISSING in arrays:
-            miss_len = cast("zarr.Array", prop_group[_path.MISSING]).shape[0]
+            missing_arr = cast("zarr.Array", prop_group[_path.MISSING])
+            miss_len = missing_arr.shape[0]
             if miss_len != expected_len:
                 raise ValueError(
                     f"{parent_key} property {prop_name!r} {_path.MISSING} mask has length "
                     f"{miss_len}, which does not match id length {expected_len}"
                 )
 
+            if not np.issubdtype(missing_arr.dtype, np.bool_):
+                raise ValueError(
+                    f"{parent_key} property {prop_name!r} {_path.MISSING} must be boolean"
+                )
+
 
 def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> None:
     """Validate the structure of a nodes group in a GEFF zarr store."""
     node_ids = expect_array(nodes_group, _path.IDS, _path.NODES)
+
+    # Node ids must be int dtype
+    if not np.issubdtype(node_ids.dtype, np.integer):
+        raise ValueError("Node ids must have an integer dtype")
+
     id_len = node_ids.shape[0]
     node_props = expect_group(nodes_group, _path.PROPS, _path.NODES)
     _validate_props_group(node_props, id_len, "Node")
@@ -150,3 +165,27 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
     # Edge properties metadata validation
     if metadata.edge_props_metadata is not None:
         _validate_props_metadata(metadata.edge_props_metadata, edge_props, "Edge")
+
+
+def validate_axes_structure(graph: zarr.Group, meta: GeffMetadata) -> None:
+    """Verify that any metadata regarding axes is actually present in the data
+
+    - Property exists with name matching Axis name
+    - Data is 1D
+    - Missing values not allowed
+
+    Args:
+        graph (zarr.Group): The zarr group containing the geff metadata
+        meta (GeffMetadata): Metadata from geff
+    """
+    if meta.axes is not None:
+        node_prop_group = expect_group(graph, "nodes/props")
+        for ax in meta.axes:
+            # Array must be present without missing values
+            assert f"{ax.name}/values" in node_prop_group, f"Axis {ax.name} data is missing"
+            assert f"{ax.name}/missing" not in node_prop_group, (
+                f"Axis {ax.name} has missing values which are not allowed"
+            )
+            # Only 1d data allowed, already checked length of first axis
+            ndim = len(expect_array(node_prop_group, f"{ax.name}/values").shape)
+            assert ndim == 1, f"Axis property {ax.name} has {ndim} dimensions, must be 1D"

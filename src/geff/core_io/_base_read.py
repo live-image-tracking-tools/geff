@@ -8,6 +8,7 @@ import zarr
 from geff import _path
 from geff.core_io import _utils
 from geff.metadata._schema import GeffMetadata
+from geff.validate.data import ValidationConfig, validate_optional_data, validate_zarr_data
 from geff.validate.structure import validate_structure
 
 if TYPE_CHECKING:
@@ -217,6 +218,8 @@ def read_to_memory(
     validate: bool = True,
     node_props: Iterable[str] | None = None,
     edge_props: Iterable[str] | None = None,
+    validate_data: bool = False,
+    validate_opt_data: ValidationConfig | None = None,
 ) -> InMemoryGeff:
     """
     Read a GEFF zarr file to into memory as a series of numpy arrays in a dictionary.
@@ -227,9 +230,12 @@ def read_to_memory(
     Args:
         source (str | Path | zarr store): Either a path to the root of the geff zarr
             (where the .attrs contains the geff metadata), or a zarr store object
-        validate (bool, optional): Flag indicating whether to perform validation on the
-            geff file before loading into memory. If set to False and there are
-            format issues, will likely fail with a cryptic error. Defaults to True.
+        validate (bool, optional): Flag indicating whether to perform metadata/structure
+            validation on the geff file before loading into memory. If set to False and
+            there are format issues, will likely fail with a cryptic error. Defaults to True.
+        validate_data (bool, optional): Flag indicating whether to perform validation on the
+            underlying data of the geff, e.g. edges. Defaults to False.
+        validate_opt_data (ValidationConfig, optional): Optional configuration for which
         node_props (iterable of str, optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
         edge_props (iterable of str, optional): The names of the edge properties to load,
@@ -246,4 +252,11 @@ def read_to_memory(
     file_reader.read_edge_props(edge_props)
 
     in_memory_geff = file_reader.build()
+
+    if validate_data:
+        validate_zarr_data(in_memory_geff)
+
+    if validate_opt_data is not None:
+        validate_optional_data(config=validate_opt_data, memory_geff=in_memory_geff)
+
     return in_memory_geff
