@@ -12,7 +12,6 @@ from geff.metadata import PropMetadata
 from geff.metadata._affine import Affine
 from geff.metadata._schema import (
     VERSION_PATTERN,
-    Axis,
     GeffMetadata,
     GeffSchema,
     _formatted_schema_json,
@@ -43,6 +42,10 @@ class TestMetadataModel:
         ]
         for version in invalid_versions:
             assert not re.fullmatch(VERSION_PATTERN, version)
+
+    def test_invalid_version(self) -> None:
+        with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
+            GeffMetadata(geff_version="aljkdf", directed=True)
 
     def test_valid_init(self) -> None:
         # Minimal required fields
@@ -118,10 +121,6 @@ class TestMetadataModel:
                 directed=True,
                 related_objects=[{"type": "image", "path": "raw/", "label_prop": "seg_id"}],
             )
-
-    def test_invalid_version(self) -> None:
-        with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
-            GeffMetadata(geff_version="aljkdf", directed=True)
 
     def test_props_metadata(self) -> None:
         # Valid props metadata
@@ -307,96 +306,6 @@ class TestMetadataModel:
                     **meta,
                 }
             )
-
-
-class TestAxis:
-    def test_valid(self) -> None:
-        # minimal fields
-        Axis(name="property")
-
-        # All fields
-        Axis(name="property", type="space", unit="micrometer", min=0, max=10)
-
-    def test_no_name(self) -> None:
-        # name is the only required field
-        with pytest.raises(pydantic.ValidationError):
-            Axis(type="space")
-
-    def test_bad_type(self) -> None:
-        with pytest.warns(UserWarning, match=r"Type .* not in valid types"):
-            Axis(name="test", type="other")
-
-    def test_invalid_units(self) -> None:
-        # Spatial
-        with pytest.warns(UserWarning, match=r"Spatial unit .* not in valid"):
-            Axis(name="test", type="space", unit="bad unit")
-
-        # Temporal
-        with pytest.warns(UserWarning, match=r"Temporal unit .* not in valid"):
-            Axis(name="test", type="time", unit="bad unit")
-
-        # Don't check units if we don't specify type
-        Axis(name="test", unit="not checked")
-
-    def test_min_max(self) -> None:
-        # Min no max
-        with pytest.raises(ValueError, match=r"Min and max must both be None or neither"):
-            Axis(name="test", min=0)
-
-        # Max no min
-        with pytest.raises(ValueError, match=r"Min and max must both be None or neither"):
-            Axis(name="test", max=0)
-
-        # Min > max
-        with pytest.raises(ValueError, match=r"Min .* is greater than max .*"):
-            Axis(name="test", min=0, max=-10)
-
-
-class TestPropMetadata:
-    def test_valid(self) -> None:
-        # Minimal valid metadata
-        PropMetadata(identifier="prop_1", name="property", dtype="int32")
-
-        # All fields
-        PropMetadata(
-            identifier="prop_2",
-            dtype="float64",
-            unit="micrometer",
-            name="property 2",
-            description="A property with all fields set.",
-        )
-
-    def test_invalid_identifier(self) -> None:
-        # identifier must be a string
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier=123, name="property", dtype="int16")
-
-        # identifier must be a non-empty string
-        with pytest.raises(ValueError, match="String should have at least 1 character"):
-            PropMetadata(identifier="", dtype="int16")
-
-    def test_invalid_dtype(self) -> None:
-        # dtype must be a string
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier="prop", dtype=123)
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier="prop", dtype=None)
-
-        # dtype must be a non-empty string
-        with pytest.raises(ValueError, match="String should have at least 1 character"):
-            PropMetadata(identifier="prop", dtype="")
-
-        # dtype must be in allowed data types
-        with pytest.warns(
-            UserWarning, match=r"Data type .* cannot be matched to a valid data type"
-        ):
-            PropMetadata(identifier="prop", dtype="nope")
-
-        # variable length string metadata
-        with pytest.raises(
-            ValueError, match="Cannot have a variable length property with type str"
-        ):
-            PropMetadata(identifier="test", dtype="str", varlength=True)
 
 
 def test__validate_key_identifier_equality() -> None:
