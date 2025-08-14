@@ -149,18 +149,20 @@ class GeffMetadata(BaseModel):
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
     )
 
-    node_props_metadata: dict[str, PropMetadata] | None = Field(
-        default=None,
+    node_props_metadata: dict[str, PropMetadata] = Field(
+        default={},  # TODO: no default value?
         description=(
             "Metadata for node properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
+            "There must be one entry for each node property."
         ),
     )
-    edge_props_metadata: dict[str, PropMetadata] | None = Field(
-        default=None,
+    edge_props_metadata: dict[str, PropMetadata] = Field(
+        default={},
         description=(
             "Metadata for edge properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
+            "There must be one entry for each edge property."
         ),
     )
 
