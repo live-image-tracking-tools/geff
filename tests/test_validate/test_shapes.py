@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from geff.metadata._schema import Axis
-from geff.validate.shapes import validate_ellipsoid
+from geff.validate.shapes import validate_ellipsoid, validate_sphere
 
 
 class Test_validate_ellipsoid:
@@ -54,3 +54,13 @@ class Test_validate_ellipsoid:
             ValueError, match="Ellipsoid covariance matrices must be positive-definite"
         ):
             validate_ellipsoid(arr, self.axes_2d)
+
+
+def test_validate_sphere():
+    # Not 2d
+    with pytest.raises(ValueError, match="Sphere radius values must be 2D"):
+        validate_sphere(np.ones((2, 2, 2)))
+
+    # Not positive
+    with pytest.raises(ValueError, match="Sphere radius values must be non-negative."):
+        validate_sphere(np.full((2, 2), fill_value=-1))

@@ -58,13 +58,17 @@ def validate_ellipsoid(covariance: np.ndarray, axes: list[Axis] | None) -> None:
 
 
 def validate_sphere(radius: np.ndarray) -> None:
-    """Validate that sphere data has non zero radii
+    """Validate that sphere data has nonzero radii and is 2d
 
     Args:
         radius (np.ndarray): Values array of a sphere property
 
     Raises:
         ValueError: Sphere radius values must be non-negative
+        ValueError: Sphere radius values must be 2D
     """
+    if radius.ndim != 2:
+        raise ValueError(f"Sphere radius values must be 2D, got {radius.ndim} dimensions")
+
     if np.any(radius < 0):
         raise ValueError("Sphere radius values must be non-negative.")
