@@ -108,6 +108,11 @@ jobs:
         with:
           fetch-depth: 0
       - uses: hynek/build-and-inspect-python-package@v2
+        with:
+          path: packages/geff-spec
+      - uses: hynek/build-and-inspect-python-package@v2
+        with:
+          path: packages/geff
 
   upload-to-pypi:
     if: success() && startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule'
@@ -123,6 +128,7 @@ jobs:
         with:
           name: Packages
           path: dist
+          merge-multiple: true
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
       - uses: softprops/action-gh-release@v2

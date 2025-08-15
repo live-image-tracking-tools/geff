@@ -13,7 +13,7 @@ cd geff
 
 ```sh
 # <create and activate virtual environment>
-pip install -e . --group dev
+pip install --group dev
 ```
 
 ### Install with uv
@@ -100,6 +100,20 @@ determined automatically based on the tag (using `setuptools-scm`)
 ```sh
 git tag -a v0.1.0 -m v0.1.0
 git push --follow-tags
+```
+
+## Building
+
+To build all packages in the monorepo
+
+```sh
+uv build --all-packages
+```
+
+or to build a specific package, run:
+
+```sh
+uv build packages/<package-name>
 ```
 
 ## Docs
