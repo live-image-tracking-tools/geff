@@ -6,7 +6,7 @@ ci:
 
 repos:
   - repo: https://github.com/crate-ci/typos
-    rev: v1
+    rev: v1.35.4
     hooks:
       - id: typos
 
@@ -26,7 +26,6 @@ repos:
     rev: v1.17.1
     hooks:
       - id: mypy
-        files: "^src/"
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml

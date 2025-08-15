@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { root = "../.." }
+
+[project]
+name = "geff"
+description = "Reference implementation of the Graph Exchange File Format"
+readme = "../../README.md"
+requires-python = ">=3.10"
+license = { text = "MIT License" }
+dynamic = ['version']
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "geff-spec",
+    "typer>=0.14.0",
+    "zarr>=2.18,<4",
+    "pydantic>=2.11",
+    "networkx>=3.2.1",
+    "numpy>=1.24",
+    "numpy>=1.26; python_version >= '3.12'",
+    "numpy>=2.1; python_version >= '3.13'",
+    "numcodecs>=0.13,<0.16",                           # TODO: remove pin once the 16 release is stable
+    "numcodecs>=0.15,<0.16; python_version >= '3.13'", # TODO: remove pin once the 16 release is stable
+]
+
+[project.optional-dependencies]
+spatial-graph = ["spatial-graph>=0.0.4"]
+ctc = [
+    "dask>=2024.10",
+    "imagecodecs>=2025.3.30",
+    "scikit-image>=0.23.2",
+    "scikit-image>=0.25; python_version >= '3.13'",
+    "tifffile>=2024.10",
+]
+rx = ["rustworkx>=0.16.0"]
+
+[project.urls]
+repository = "https://github.com/live-image-tracking-tools/geff"
+homepage = "https://github.com/live-image-tracking-tools/geff"
+
+[project.scripts]
+geff = "geff._cli:app"
+
+[tool.uv.sources]
+geff-spec = { workspace = true }
+
+
+[tool.uv]
+package = true

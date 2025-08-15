@@ -5,45 +5,12 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 
 [project]
-name = "geff"
-description = "Reference implementation of the Graph Exchange File Format"
-readme = "README.md"
+name = "geff-repo"
+version = "0.1.0"
+description = "Monorepo for geff-spec and geff reference implementation."
 requires-python = ">=3.10"
 license = { text = "MIT License" }
-dynamic = ['version']
-dependencies = [
-    "typer>=0.14.0",
-    "zarr>=2.18,<4",
-    "pydantic>=2.11",
-    "networkx>=3.2.1",
-    "numpy>=1.24",
-    "numpy>=1.26; python_version >= '3.12'",
-    "numpy>=2.1; python_version >= '3.13'",
-    "numcodecs>=0.13,<0.16",                           # TODO: remove pin once the 16 release is stable
-    "numcodecs>=0.15,<0.16; python_version >= '3.13'", # TODO: remove pin once the 16 release is stable
-]
-
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: MIT License",
-    "Natural Language :: English",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-]
-
-[project.optional-dependencies]
-spatial-graph = ["spatial-graph>=0.0.4"]
-ctc = [
-    "dask>=2024.10",
-    "imagecodecs>=2025.3.30",
-    "scikit-image>=0.23.2",
-    "scikit-image>=0.25; python_version >= '3.13'",
-    "tifffile>=2024.10",
-]
-rx = ["rustworkx>=0.16.0"]
+dependencies = ["geff"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -79,10 +46,16 @@ bench = [
     "geff[rx, spatial-graph]",
 ]
 
+[tool.uv]
+package = false
 
-[project.urls]
-repository = "https://github.com/live-image-tracking-tools/geff"
-homepage = "https://github.com/live-image-tracking-tools/geff"
+[tool.uv.sources]
+geff = { workspace = true }
+geff-spec = { workspace = true }
+
+# define this root as a workspace
+[tool.uv.workspace]
+members = ["packages/*"]
 
 # https://docs.astral.sh/ruff/rules/
 [tool.ruff]
@@ -117,13 +90,12 @@ ignore = [
 
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*.py" = ["D", "ANN"]
-"scripts/*.py" = ["D"]
+"**/tests/*.py" = ["D", "ANN"]
 
 # https://docs.pytest.org/en/6.2.x/customize.html
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests"]
+testpaths = ["packages"]
 pythonpath = ["tests"]
 filterwarnings = [
     "error",
@@ -131,7 +103,7 @@ filterwarnings = [
     # if needed, add global ignores here, for example:
     # "ignore:Some message:SomeCategory",
     "ignore:.*skipping conversion test:ImportWarning:networkx",
-    "ignore:In the future `np.bool` will be defined as the corresponding NumPy scalar."
+    "ignore:In the future `np.bool` will be defined as the corresponding NumPy scalar.",
 ]
 
 
@@ -169,8 +141,3 @@ omit = ["*/__init__.py"]
 [tool.typos.default]
 extend-ignore-identifiers-re = ["(?i)ome", "ser", "propert"]
 
-[project.scripts]
-geff = "geff._cli:app"
-
-[tool.uv.sources]
-geff = { workspace = true }
