@@ -15,6 +15,8 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
+TEST_DATA = Path(__file__).parent.parent / "data"
+
 
 def test_preliminary_checks(tmp_path: Path) -> None:
     xml_path = Path("path/to/xml")
@@ -545,7 +547,7 @@ def test_get_filtered_tracks_ID() -> None:
 
 def test_get_trackmate_version(tmp_path: Path) -> None:
     # Normal case with version attribute
-    xml_path = Path("tests/data/FakeTracks.xml")
+    xml_path = TEST_DATA / "FakeTracks.xml"
     obtained = tm_xml._get_trackmate_version(xml_path)
     assert obtained == "8.0.0-SNAPSHOT-f411154ed1a4b9de350bbfe91c230cf3ae7639a3"
 
@@ -585,7 +587,7 @@ def test_get_trackmate_version(tmp_path: Path) -> None:
 
 def test_get_specific_tags() -> None:
     # Normal case with several tags
-    xml_path = Path("tests/data/FakeTracks.xml")
+    xml_path = TEST_DATA / "FakeTracks.xml"
     tag_names = [
         "FeaturePenalties",  # empty element
         "GUIState",  # simple element with attrib
@@ -910,7 +912,7 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     # No arguments, should use default values
     geff_output = tmp_path / "test.geff"
     with pytest.warns() as warning_list:
-        tm_xml.from_trackmate_xml_to_geff("tests/data/FakeTracks.xml", geff_output)
+        tm_xml.from_trackmate_xml_to_geff(TEST_DATA / "FakeTracks.xml", geff_output)
     warning_messages = [str(warning.message) for warning in warning_list]
     assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
     assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
@@ -919,7 +921,7 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     # Discard filtered spots and tracks
     with pytest.warns() as warning_list:
         tm_xml.from_trackmate_xml_to_geff(
-            "tests/data/FakeTracks.xml",
+            TEST_DATA / "FakeTracks.xml",
             geff_output,
             discard_filtered_spots=True,
             discard_filtered_tracks=True,
@@ -932,7 +934,4 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
 
     # Geff file already exists
     with pytest.raises(FileExistsError):
-        tm_xml.from_trackmate_xml_to_geff(
-            "tests/data/FakeTracks.xml",
-            geff_output,
-        )
+        tm_xml.from_trackmate_xml_to_geff(TEST_DATA / "FakeTracks.xml", geff_output)

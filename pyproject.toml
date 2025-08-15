@@ -1,17 +1,3 @@
-[build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools_scm]
-
-[project]
-name = "geff-repo"
-version = "0.1.0"
-description = "Monorepo for geff-spec and geff reference implementation."
-requires-python = ">=3.10"
-license = { text = "MIT License" }
-dependencies = ["geff"]
-
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
 test-third-party = [
@@ -62,6 +48,7 @@ members = ["packages/*"]
 line-length = 100
 target-version = "py310"
 fix = true
+src = ["packages/**/src"]
 
 [tool.ruff.lint]
 pydocstyle = { convention = "google" }
@@ -109,7 +96,7 @@ filterwarnings = [
 
 # https://mypy.readthedocs.io/en/stable/config_file.html
 [tool.mypy]
-files = "src/**/"
+files = "packages/**/src/**/"
 strict = true
 disallow_any_generics = false
 disallow_subclassing_any = false
@@ -140,4 +127,3 @@ omit = ["*/__init__.py"]
 
 [tool.typos.default]
 extend-ignore-identifiers-re = ["(?i)ome", "ser", "propert"]
-

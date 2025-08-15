@@ -9,13 +9,11 @@ raw-options = { root = "../.." }
 [project]
 name = "geff"
 description = "Reference implementation of the Graph Exchange File Format"
-readme = "../../README.md"
 requires-python = ">=3.10"
-license = { text = "MIT License" }
+license = "MIT"
 dynamic = ['version']
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",

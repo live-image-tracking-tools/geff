@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
@@ -11,10 +11,8 @@ from geff._cli import app
 from geff.testing.data import create_simple_temporal_geff
 from tests.test_convert.test_ctc import create_mock_data
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
 runner = CliRunner()
+TEST_DATA = Path(__file__).parent / "data"
 
 
 @pytest.fixture
@@ -76,7 +74,7 @@ def test_convert_ctc(tmp_path: Path, is_gt: bool, tczyx: bool) -> None:
 )
 def test_convert_trackmate_xml(tmp_path: Path, other_arg: str | None) -> None:
     geff_output = str(tmp_path / "test.geff")
-    in_data = "tests/data/FakeTracks.xml"
+    in_data = str(TEST_DATA / "FakeTracks.xml")
 
     cmd_args = ["convert-trackmate-xml", in_data, geff_output]
     if other_arg is not None:

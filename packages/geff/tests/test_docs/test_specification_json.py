@@ -7,8 +7,8 @@ import pytest
 
 from geff.metadata._schema import GeffSchema
 
-ROOT_PATH = Path(__file__).parent.parent.parent
-SPECIFICATION_MD_PATH = ROOT_PATH / "docs" / "specification.md"
+DOCS = Path(__file__).parent.parent.parent.parent.parent / "docs"
+SPECIFICATION_MD_PATH = DOCS / "specification.md"
 
 # Matches fenced JSONC code blocks in markdown files
 JSONC_MD_RE = re.compile(r"```jsonc\s+(.*?)```", re.DOTALL)
