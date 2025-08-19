@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Any, Protocol, TypeVar
 
 from numpy.typing import NDArray
 
@@ -9,14 +9,14 @@ from geff.typing import PropDictNpArray
 T = TypeVar("T")
 
 
-class Backend(Protocol, Generic[T]):
+class Backend(Protocol[T]):
     """
     A protocol that acts as a namespace for functions that allow for backend interoperability.
     """
 
     @property
-    def type(self) -> type[T]:
-        """Returns the expected backend type."""
+    def GRAPH_TYPES(self) -> tuple[type[T], ...]:
+        """The expected backend types."""
         ...
 
     @staticmethod
@@ -30,13 +30,13 @@ class Backend(Protocol, Generic[T]):
         **kwargs: Any,
     ) -> T:
         """
-        A function that constructs a backend graph object from the GEFF data.
+        Construct a backend graph object from GEFF data.
 
         Args:
             metadata (GeffMetadata): The metadata of the graph.
-            node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+            node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
                 edge_ids.
-            edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+            edge_ids (NDArray[Any]): An array containing the edge ids. Must have same dtype
                 as node_ids.
             node_props (dict[str, PropDictNpArray]): A dictionary
                 from node property names to (values, missing) arrays, which should have same
@@ -119,3 +119,7 @@ class Backend(Protocol, Generic[T]):
             numpy.ndarray: The values of the selected property as a numpy array.
         """
         ...
+
+    # TODO: add
+    # - get_roi
+    # - write
