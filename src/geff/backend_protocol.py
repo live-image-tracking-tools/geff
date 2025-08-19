@@ -19,8 +19,8 @@ class Backend(Protocol[T]):
         """The expected backend types."""
         ...
 
-    @staticmethod
     def construct(
+        self,
         metadata: GeffMetadata,
         node_ids: NDArray[Any],
         edge_ids: NDArray[Any],
@@ -56,8 +56,7 @@ class Backend(Protocol[T]):
         """
         ...
 
-    @staticmethod
-    def get_node_ids(graph: T) -> Sequence[Any]:
+    def get_node_ids(self, graph: T) -> Sequence[Any]:
         """
         Get the node ids of the graph.
 
@@ -69,8 +68,7 @@ class Backend(Protocol[T]):
         """
         ...
 
-    @staticmethod
-    def get_edge_ids(graph: T) -> Sequence[tuple[Any, Any]]:
+    def get_edge_ids(self, graph: T) -> Sequence[tuple[Any, Any]]:
         """
         Get the edges of the graph.
 
@@ -82,9 +80,8 @@ class Backend(Protocol[T]):
         """
         ...
 
-    @staticmethod
     def get_node_prop(
-        graph: T, name: str, nodes: Sequence[Any], metadata: GeffMetadata
+        self, graph: T, name: str, nodes: Sequence[Any], metadata: GeffMetadata
     ) -> NDArray[Any]:
         """
         Get a property of the nodes as a numpy array.
@@ -101,9 +98,12 @@ class Backend(Protocol[T]):
         """
         ...
 
-    @staticmethod
     def get_edge_prop(
-        graph: T, name: str, edges: Sequence[tuple[Any, Any]], metadata: GeffMetadata
+        self,
+        graph: T,
+        name: str,
+        edges: Sequence[tuple[Any, Any]],
+        metadata: GeffMetadata,
     ) -> NDArray[Any]:
         """
         Get a property of the edges as a numpy array.
