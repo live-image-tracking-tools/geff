@@ -26,3 +26,7 @@ docs-build:
 release version:
     git tag -a {{version}} -m {{version}}
     git push upstream --follow-tags
+
+# update schema
+update-schema:
+    uv run pytest tests/test_agnostic/test_metadata_schema.py::test_schema_file_updated --update-schema

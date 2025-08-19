@@ -6,10 +6,10 @@ import pytest
 from typer.testing import CliRunner
 
 import geff
+from geff import GeffMetadata
 from geff._cli import app
-from geff.metadata_schema import GeffMetadata
 from geff.testing.data import create_simple_temporal_geff
-from tests.test_interops.test_ctc import create_mock_data
+from tests.test_convert.test_ctc import create_mock_data
 
 if TYPE_CHECKING:
     from pathlib import Path

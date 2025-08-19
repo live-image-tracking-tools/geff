@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, Annotated, cast
 
 import typer
 
-from . import utils
-from .metadata_schema import GeffMetadata
+from . import validate_structure
+from .metadata._schema import GeffMetadata
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -19,7 +19,7 @@ def validate(
     ),
 ) -> None:
     """Validate a GEFF file."""
-    utils.validate(input_path)
+    validate_structure(input_path)
     print(f"{input_path} is valid")
 
 
@@ -84,7 +84,7 @@ def convert_ctc(
     """
     Convert a CTC data directory to a GEFF file.
     """
-    from geff.interops import from_ctc_to_geff, ctc_tiffs_to_zarr  # noqa: I001 import at call time to avoid optional dependency issues
+    from geff.convert import from_ctc_to_geff, ctc_tiffs_to_zarr  # noqa: I001 import at call time to avoid optional dependency issues
 
     if (input_image_dir is not None and output_image_path is None) or (
         input_image_dir is None and output_image_path is not None
@@ -140,7 +140,7 @@ def convert_trackmate_xml(
     """
     Convert a TrackMate XML file to a GEFF file.
     """
-    from geff.interops import from_trackmate_xml_to_geff
+    from geff.convert import from_trackmate_xml_to_geff
 
     from_trackmate_xml_to_geff(
         xml_path=xml_path,
