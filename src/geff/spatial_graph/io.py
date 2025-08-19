@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 try:
     import spatial_graph as sg
@@ -15,7 +15,7 @@ import numpy as np
 from zarr.storage import StoreLike
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
@@ -27,6 +27,8 @@ from geff.geff_reader import read_to_memory
 from geff.metadata_schema import GeffMetadata, axes_from_lists
 from geff.utils import remove_tilde
 from geff.write_arrays import write_arrays
+
+GRAPH_TYPES = (sg.SpatialGraph, sg.SpatialDiGraph)
 
 
 def write_sg(
@@ -87,7 +89,11 @@ def write_sg(
     # create metadata
     roi_min, roi_max = graph.roi
     axes = axes_from_lists(
-        axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
+        axis_names,
+        axis_units=axis_units,
+        axis_types=axis_types,
+        roi_min=roi_min,
+        roi_max=roi_max,
     )
     metadata = GeffMetadata(
         geff_version=geff.__version__,
@@ -158,12 +164,12 @@ def read_sg(
     """
 
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct_sg(**in_memory_geff, position_attr=position_attr)
+    graph = construct(**in_memory_geff, position_attr=position_attr)
 
     return graph, in_memory_geff["metadata"]
 
 
-def construct_sg(
+def construct(
     metadata: GeffMetadata,
     node_ids: NDArray[Any],
     edge_ids: NDArray[Any],
@@ -219,7 +225,8 @@ def construct_sg(
     for name in node_props.keys():
         if "missing" in node_props[name]:
             warnings.warn(
-                f"Potential missing values for attr {name} are being ignored", stacklevel=2
+                f"Potential missing values for attr {name} are being ignored",
+                stacklevel=2,
             )
     edge_attr_dtypes = {
         name: get_dtype_str(edge_props[name]["values"]) for name in edge_props.keys()
@@ -227,7 +234,8 @@ def construct_sg(
     for name in edge_props.keys():
         if "missing" in edge_props[name]:
             warnings.warn(
-                f"Potential missing values for attr {name} are being ignored", stacklevel=2
+                f"Potential missing values for attr {name} are being ignored",
+                stacklevel=2,
             )
 
     node_attrs = {name: node_props[name]["values"] for name in node_props.keys()}
@@ -258,3 +266,102 @@ def construct_sg(
     graph.add_edges(edge_ids, **edge_attrs)
 
     return graph
+
+
+def get_node_ids(graph: sg.SpatialGraph | sg.SpatialDiGraph) -> Sequence[Any]:
+    """
+    Get the node ids of the graph.
+
+    Args:
+        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
+
+    Returns:
+        node_ids (Sequence[Any]): The node ids.
+    """
+    return list(graph.nodes)
+
+
+def get_edge_ids(
+    graph: sg.SpatialGraph | sg.SpatialDiGraph,
+) -> Sequence[tuple[Any, Any]]:
+    """
+    Get the edges of the graph.
+
+    Args:
+        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
+
+    Returns:
+        edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
+    """
+    return [tuple(edge.tolist()) for edge in graph.edges]
+
+
+def get_node_prop(
+    graph: sg.SpatialGraph | sg.SpatialDiGraph,
+    name: str,
+    nodes: Sequence[Any],
+    metadata: GeffMetadata,
+) -> NDArray[Any]:
+    """
+    Get a property of the nodes as a numpy array.
+
+    Args:
+        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
+        name (str): The name of the node property.
+        nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
+            array.
+        metadata (GeffMetadata): The GEFF metadata.
+
+    Returns:
+        numpy.ndarray: The values of the selected property as a numpy array.
+    """
+    axes = metadata.axes
+    if axes is None:
+        raise ValueError("No axes found for spatial props")
+    axes_names = [ax.name for ax in axes]
+    if name in axes_names:
+        return _get_node_spatial_props(graph, name, nodes, axes_names)
+    else:
+        # TODO: is this the best way to access node attributes? Have to cast
+        graph.node_attrs[nodes]
+        return cast("NDArray[Any]", getattr(graph.node_attrs[nodes], name))
+
+
+# This is not the most elegant solution but the idea is:
+#   spatial graph takes the spatial properties defined in axes and combines them into a single attr
+#   so to compare with the results we need to index each position separately
+def _get_node_spatial_props(
+    graph: sg.SpatialGraph | sg.SpatialDiGraph,
+    name: str,
+    nodes: Sequence[Any],
+    axes_names: list[str],
+) -> NDArray[Any]:
+    if name not in axes_names:
+        raise ValueError(f"Node property '{name}' not found in axes names {axes_names}")
+    idx = axes_names.index(name)
+    position = getattr(graph.node_attrs[nodes], graph.position_attr)
+    position = cast("NDArray[Any]", position)  # cast because getattr call
+    return position[:, idx]
+
+
+def get_edge_prop(
+    graph: sg.SpatialGraph | sg.SpatialDiGraph,
+    name: str,
+    edges: Sequence[tuple[Any, Any]],
+    metadata: GeffMetadata,
+) -> NDArray[Any]:
+    """
+    Get a property of the edges as a numpy array.
+
+    Args:
+        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
+        name (str): The name of the edge property.
+        edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
+            determines the order of the property array.
+        metadata (GeffMetadata): The GEFF metadata.
+
+    Returns:
+        numpy.ndarray: The values of the selected property as a numpy array.
+    """
+    # TODO: is this the best way to access edge attributes? Have to cast
+    return cast("NDArray[Any]", getattr(graph.edge_attrs[edges], name))
