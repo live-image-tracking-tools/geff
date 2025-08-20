@@ -35,6 +35,9 @@ def get_backend(
 ) -> Backend[sg.SpatialGraph | sg.SpatialDiGraph]: ...
 
 
+# NOTE: overload get_backend for new backends by typing the return type as Backend[GraphType]
+
+
 def get_backend(backend: SupportedBackend) -> Backend:
     """
     Get a specified backend io module.
@@ -52,6 +55,7 @@ def get_backend(backend: SupportedBackend) -> Backend:
             return nx_backend
         case "rustworkx":
             from geff._graph_libs import _rustworkx as rx_backend
+
             return rx_backend
         case "spatial-graph":
             from geff._graph_libs import _spatial_graph as sg_backend
@@ -75,9 +79,10 @@ def read(
 @overload
 def read(
     store: StoreLike,
-    validate: bool,
-    node_props: list[str] | None,
-    edge_props: list[str] | None,
+    validate: bool = ...,
+    node_props: list[str] | None = ...,
+    edge_props: list[str] | None = ...,
+    *,
     backend: Literal["rustworkx"],
 ) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]: ...
 
@@ -85,13 +90,17 @@ def read(
 @overload
 def read(
     store: StoreLike,
-    validate: bool,
-    node_props: list[str] | None,
-    edge_props: list[str] | None,
-    backend: Literal["spatial-graph"],
+    validate: bool = ...,
+    node_props: list[str] | None = ...,
+    edge_props: list[str] | None = ...,
     *,
+    backend: Literal["spatial-graph"],
     position_attr: str = "position",
 ) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]: ...
+
+
+# NOTE: when overloading read for a new backend, if additional arguments can be accepted, explicitly
+# define them such as in the spatial-graph overload above, where position_attr has been added.
 
 
 def read(
