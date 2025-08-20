@@ -175,7 +175,7 @@ def construct(
     edge_props: dict[str, PropDictNpArray],
     position_attr: str = "position",
 ) -> sg.SpatialGraph | sg.SpatialDiGraph:
-    """Construct a spatial graph graph instance from a dictionary representation of the GEFF data
+    """Construct a `spatial-graph` graph instance from GEFF data.
 
     Args:
         metadata (GeffMetadata): The metadata of the graph.

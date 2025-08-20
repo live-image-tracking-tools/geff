@@ -168,18 +168,14 @@ def construct(
         metadata (GeffMetadata): The metadata of the graph.
         node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
             edge_ids.
-        edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
+        edge_ids (NDArray[Any]): An array containing the edge ids. Must have same dtype
             as node_ids.
         node_props (dict[str, PropDictNpArray]): A dictionary
             from node property names to (values, missing) arrays, which should have same
-            length as node_ids. Spatial graph does not support missing attributes, so the
-            missing arrays should be None or all False. If present, the missing arrays are
-            ignored with warning
+            length as node_ids.
         edge_props (dict[str, PropDictNpArray]): A dictionary
             from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids. Spatial graph does not support missing attributes, so the
-            missing arrays should be None or all False. If present, the missing array is ignored
-            with warning.
+            length as edge_ids.
 
     Returns:
         (nx.Graph | nx.DiGraph): A `networkx` graph object.
