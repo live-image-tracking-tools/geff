@@ -54,168 +54,6 @@ def get_roi_rx(
     )
 
 
-def construct(
-    metadata: GeffMetadata,
-    node_ids: NDArray[Any],
-    edge_ids: NDArray[Any],
-    node_props: dict[str, PropDictNpArray],
-    edge_props: dict[str, PropDictNpArray],
-) -> rx.PyGraph | rx.PyDiGraph:
-    """
-    Construct a `rustworkx` graph instance from GEFF data.
-
-    Args:
-        metadata (GeffMetadata): The metadata of the graph.
-        node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
-            edge_ids.
-        edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
-            as node_ids.
-        node_props (dict[str, PropDictNpArray]): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids. Spatial graph does not support missing attributes, so the
-            missing arrays should be None or all False. If present, the missing arrays are
-            ignored with warning
-        edge_props (dict[str, PropDictNpArray]): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids. Spatial graph does not support missing attributes, so the
-            missing arrays should be None or all False. If present, the missing array is ignored
-            with warning.
-
-    Returns:
-        (rx.PyGraph | rx.PyDiGraph): A `networkx` graph object.
-    """
-    metadata = metadata
-
-    graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()
-    graph.attrs = metadata.model_dump()
-
-    # Add nodes with populated properties
-    node_ids = node_ids.tolist()
-    props_per_node: list[dict[str, Any]] = [{} for _ in node_ids]
-
-    # Populate node properties first
-    indices = np.arange(len(node_ids))
-
-    for name, prop_dict in node_props.items():
-        values = prop_dict["values"]
-        if prop_dict["missing"] is not None:
-            current_indices = indices[~prop_dict["missing"]]
-            values = values[current_indices]
-        else:
-            current_indices = indices
-
-        values = values.tolist()
-        current_indices = current_indices.tolist()
-
-        for idx, val in zip(current_indices, values, strict=True):
-            props_per_node[idx][name] = val
-
-    # Add nodes with their properties
-    rx_node_ids = graph.add_nodes_from(props_per_node)
-
-    # Create mapping from geff node id to rustworkx node index
-    to_rx_id_map = dict(zip(node_ids, rx_node_ids, strict=False))
-
-    # Add edges if they exist
-    if len(edge_ids) > 0:
-        # converting to local rx ids
-        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(edge_ids)
-        # Prepare edge data with properties
-        edges_data: list[dict[str, Any]] = [{} for _ in edge_ids]
-        indices = np.arange(len(edge_ids))
-
-        for name, prop_dict in edge_props.items():
-            values = prop_dict["values"]
-            if prop_dict["missing"] is not None:
-                current_indices = indices[~prop_dict["missing"]]
-                values = values[current_indices]
-            else:
-                current_indices = indices
-
-            values = values.tolist()
-            current_indices = current_indices.tolist()
-
-            for idx, val in zip(current_indices, values, strict=True):
-                edges_data[idx][name] = val
-
-        # Add edges with their properties
-        graph.add_edges_from([(e[0], e[1], d) for e, d in zip(edge_ids, edges_data, strict=True)])
-
-    graph.attrs["to_rx_id_map"] = to_rx_id_map
-
-    return graph
-
-
-def get_node_ids(graph: rx.PyGraph | rx.PyDiGraph) -> Sequence[Any]:
-    """
-    Get the node ids of the graph.
-
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
-
-    Returns:
-        node_ids (Sequence[Any]): The node ids.
-    """
-    return list(graph.node_indices())
-
-
-def get_edge_ids(graph: rx.PyGraph | rx.PyDiGraph) -> Sequence[tuple[Any, Any]]:
-    """
-    Get the edges of the graph.
-
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
-
-    Returns:
-        edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
-    """
-    return list(graph.edge_list())
-
-
-def get_node_prop(
-    graph: rx.PyGraph | rx.PyDiGraph,
-    name: str,
-    nodes: Sequence[Any],
-    metadata: GeffMetadata,
-) -> NDArray[Any]:
-    """
-    Get a property of the nodes as a numpy array.
-
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
-        name (str): The name of the node property.
-        nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
-            array.
-        metadata (GeffMetadata): The GEFF metadata.
-
-    Returns:
-        numpy.ndarray: The values of the selected property as a numpy array.
-    """
-    return np.array([graph[node][name] for node in nodes])
-
-
-def get_edge_prop(
-    graph: rx.PyGraph | rx.PyDiGraph,
-    name: str,
-    edges: Sequence[tuple[Any, Any]],
-    metadata: GeffMetadata,
-) -> NDArray[Any]:
-    """
-    Get a property of the edges as a numpy array.
-
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
-        name (str): The name of the edge property.
-        edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
-            determines the order of the property array.
-        metadata (GeffMetadata): The GEFF metadata.
-
-    Returns:
-        numpy.ndarray: The values of the selected property as a numpy array.
-    """
-    return np.array([graph.get_edge_data(*edge)[name] for edge in edges])
-
-
 def write_rx(
     graph: rx.PyGraph,
     store: StoreLike,
@@ -324,6 +162,98 @@ def write_rx(
     metadata.write(store)
 
 
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+) -> rx.PyGraph | rx.PyDiGraph:
+    """
+    Construct a `rustworkx` graph instance from GEFF data.
+
+    Args:
+        metadata (GeffMetadata): The metadata of the graph.
+        node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
+            edge_ids.
+        edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
+            as node_ids.
+        node_props (dict[str, PropDictNpArray]): A dictionary
+            from node property names to (values, missing) arrays, which should have same
+            length as node_ids. Spatial graph does not support missing attributes, so the
+            missing arrays should be None or all False. If present, the missing arrays are
+            ignored with warning
+        edge_props (dict[str, PropDictNpArray]): A dictionary
+            from edge property names to (values, missing) arrays, which should have same
+            length as edge_ids. Spatial graph does not support missing attributes, so the
+            missing arrays should be None or all False. If present, the missing array is ignored
+            with warning.
+
+    Returns:
+        (rx.PyGraph | rx.PyDiGraph): A `networkx` graph object.
+    """
+    metadata = metadata
+
+    graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()
+    graph.attrs = metadata.model_dump()
+
+    # Add nodes with populated properties
+    node_ids = node_ids.tolist()
+    props_per_node: list[dict[str, Any]] = [{} for _ in node_ids]
+
+    # Populate node properties first
+    indices = np.arange(len(node_ids))
+
+    for name, prop_dict in node_props.items():
+        values = prop_dict["values"]
+        if prop_dict["missing"] is not None:
+            current_indices = indices[~prop_dict["missing"]]
+            values = values[current_indices]
+        else:
+            current_indices = indices
+
+        values = values.tolist()
+        current_indices = current_indices.tolist()
+
+        for idx, val in zip(current_indices, values, strict=True):
+            props_per_node[idx][name] = val
+
+    # Add nodes with their properties
+    rx_node_ids = graph.add_nodes_from(props_per_node)
+
+    # Create mapping from geff node id to rustworkx node index
+    to_rx_id_map = dict(zip(node_ids, rx_node_ids, strict=False))
+
+    # Add edges if they exist
+    if len(edge_ids) > 0:
+        # converting to local rx ids
+        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(edge_ids)
+        # Prepare edge data with properties
+        edges_data: list[dict[str, Any]] = [{} for _ in edge_ids]
+        indices = np.arange(len(edge_ids))
+
+        for name, prop_dict in edge_props.items():
+            values = prop_dict["values"]
+            if prop_dict["missing"] is not None:
+                current_indices = indices[~prop_dict["missing"]]
+                values = values[current_indices]
+            else:
+                current_indices = indices
+
+            values = values.tolist()
+            current_indices = current_indices.tolist()
+
+            for idx, val in zip(current_indices, values, strict=True):
+                edges_data[idx][name] = val
+
+        # Add edges with their properties
+        graph.add_edges_from([(e[0], e[1], d) for e, d in zip(edge_ids, edges_data, strict=True)])
+
+    graph.attrs["to_rx_id_map"] = to_rx_id_map
+
+    return graph
+
+
 def read_rx(
     store: StoreLike,
     validate: bool = True,
@@ -349,7 +279,77 @@ def read_rx(
     Returns:
         A tuple containing the rustworkx graph and the metadata.
     """
-    graph_dict = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct(**graph_dict)
+    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
+    graph = construct(**in_memory_geff)
 
-    return graph, graph_dict["metadata"]
+    return graph, in_memory_geff["metadata"]
+
+
+def get_node_ids(graph: rx.PyGraph | rx.PyDiGraph) -> Sequence[Any]:
+    """
+    Get the node ids of the graph.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+
+    Returns:
+        node_ids (Sequence[Any]): The node ids.
+    """
+    return list(graph.node_indices())
+
+
+def get_edge_ids(graph: rx.PyGraph | rx.PyDiGraph) -> Sequence[tuple[Any, Any]]:
+    """
+    Get the edges of the graph.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+
+    Returns:
+        edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
+    """
+    return list(graph.edge_list())
+
+
+def get_node_prop(
+    graph: rx.PyGraph | rx.PyDiGraph,
+    name: str,
+    nodes: Sequence[Any],
+    metadata: GeffMetadata,
+) -> NDArray[Any]:
+    """
+    Get a property of the nodes as a numpy array.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+        name (str): The name of the node property.
+        nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
+            array.
+        metadata (GeffMetadata): The GEFF metadata.
+
+    Returns:
+        numpy.ndarray: The values of the selected property as a numpy array.
+    """
+    return np.array([graph[node][name] for node in nodes])
+
+
+def get_edge_prop(
+    graph: rx.PyGraph | rx.PyDiGraph,
+    name: str,
+    edges: Sequence[tuple[Any, Any]],
+    metadata: GeffMetadata,
+) -> NDArray[Any]:
+    """
+    Get a property of the edges as a numpy array.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+        name (str): The name of the edge property.
+        edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
+            determines the order of the property array.
+        metadata (GeffMetadata): The GEFF metadata.
+
+    Returns:
+        numpy.ndarray: The values of the selected property as a numpy array.
+    """
+    return np.array([graph.get_edge_data(*edge)[name] for edge in edges])
