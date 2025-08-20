@@ -12,8 +12,9 @@ if TYPE_CHECKING:
     import spatial_graph as sg
     from zarr.storage import StoreLike
 
-    from geff.backend_protocol import Backend
     from geff.metadata._schema import GeffMetadata
+
+    from ._backend_protocol import Backend
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
