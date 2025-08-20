@@ -7,7 +7,7 @@ from geff._graph_libs._api_wrapper import SupportedBackend, get_backend, read
 from geff.testing.data import create_memory_mock_geff
 
 if TYPE_CHECKING:
-    from geff.backend_protocol import Backend
+    from geff._graph_libs._backend_protocol import Backend
 
 rx = pytest.importorskip("rustworkx")
 sg = pytest.importorskip("spatial_graph")
