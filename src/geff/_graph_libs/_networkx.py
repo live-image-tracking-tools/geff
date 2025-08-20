@@ -29,6 +29,24 @@ logger = logging.getLogger(__name__)
 GRAPH_TYPES = (nx.Graph, nx.DiGraph)
 
 
+def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
+    """Get the roi of a networkx graph.
+
+    Args:
+        graph (nx.Graph): A non-empty networkx graph
+        axis_names (str): All nodes on graph have these property holding their position
+
+    Returns:
+        tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
+            spatial dim, and a tuple with the max values in each spatial dim
+    """
+    return calculate_roi_from_nodes(
+        graph.nodes(data=True),
+        axis_names,
+        lambda node_tuple: node_tuple[1],  # Extract data from (node_id, data) tuple
+    )
+
+
 def construct(
     metadata: GeffMetadata,
     node_ids: NDArray[Any],
@@ -142,24 +160,6 @@ def get_edge_prop(
     """
     prop = [graph.edges[edge][name] for edge in edges]
     return np.array(prop)
-
-
-def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
-    """Get the roi of a networkx graph.
-
-    Args:
-        graph (nx.Graph): A non-empty networkx graph
-        axis_names (str): All nodes on graph have these property holding their position
-
-    Returns:
-        tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
-            spatial dim, and a tuple with the max values in each spatial dim
-    """
-    return calculate_roi_from_nodes(
-        graph.nodes(data=True),
-        axis_names,
-        lambda node_tuple: node_tuple[1],  # Extract data from (node_id, data) tuple
-    )
 
 
 def write_nx(

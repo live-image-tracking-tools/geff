@@ -34,6 +34,26 @@ if TYPE_CHECKING:
 GRAPH_TYPES = (rx.PyGraph, rx.PyDiGraph)
 
 
+def get_roi_rx(
+    graph: rx.PyGraph, axis_names: list[str]
+) -> tuple[tuple[float, ...], tuple[float, ...]]:
+    """Get the roi of a rustworkx graph.
+
+    Args:
+        graph: A non-empty rustworkx graph
+        axis_names: All nodes on graph have these property holding their position
+
+    Returns:
+        tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
+            spatial dim, and a tuple with the max values in each spatial dim
+    """
+    return calculate_roi_from_nodes(
+        graph.nodes(),
+        axis_names,
+        lambda node_data: node_data,  # node_data is already the dict for rustworkx
+    )
+
+
 def construct(
     metadata: GeffMetadata,
     node_ids: NDArray[Any],
@@ -194,26 +214,6 @@ def get_edge_prop(
         numpy.ndarray: The values of the selected property as a numpy array.
     """
     return np.array([graph.get_edge_data(*edge)[name] for edge in edges])
-
-
-def get_roi_rx(
-    graph: rx.PyGraph, axis_names: list[str]
-) -> tuple[tuple[float, ...], tuple[float, ...]]:
-    """Get the roi of a rustworkx graph.
-
-    Args:
-        graph: A non-empty rustworkx graph
-        axis_names: All nodes on graph have these property holding their position
-
-    Returns:
-        tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
-            spatial dim, and a tuple with the max values in each spatial dim
-    """
-    return calculate_roi_from_nodes(
-        graph.nodes(),
-        axis_names,
-        lambda node_data: node_data,  # node_data is already the dict for rustworkx
-    )
 
 
 def write_rx(
