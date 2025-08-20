@@ -13,7 +13,8 @@ Follow these steps to add read support for a new graph backend.
 
 3. Add a case to the `match-case` block in the [`get_backend`](_api_wrapper.py#38) function. You should also add an overload for this function, following the other backends as an example.
 
-> [!NOTE] `Backend` is defined in a way that means you can use the syntax `Backend[GraphType]` so that a static type checker will know, for example, that the `construct` function in the backend will return an object with the type `GraphType`. This is how you should overload the return of `get_backend` for your case.
+> [!NOTE]
+> `Backend` is defined in a way that means you can use the syntax `Backend[GraphType]` so that a static type checker will know, for example, that the `construct` function in the backend will return an object with the type `GraphType`. This is how you should overload the return of `get_backend` for your case.
 
 > [!TIP]
 > Unfortunately mypy will not give an informative error here if you have not created your module correctly. However if you are also using Pylance, which uses Pyright under the hood, it will tell you:
