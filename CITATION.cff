@@ -82,5 +82,15 @@ authors:
     affiliation: Institut Pasteur
     orcid: https://orcid.org/0000-0002-0998-4718
     alias: tinevez
+  - given-names: Ko
+    family-names: Sugawara
+    affiliation: RIKEN Center for Biosystems Dynamics Research
+    orcid: https://orcid.org/0000-0002-1392-9340
+    alias: ksugar
+  - given-names: Tobias
+    family-names: Pietzsch
+    affiliation: 
+    orcid: 
+    alias: tpietzsch
 license: MIT
 repository-code: https://github.com/live-image-tracking-tools/geff
