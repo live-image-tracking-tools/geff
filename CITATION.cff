@@ -92,5 +92,10 @@ authors:
     affiliation: 
     orcid: 
     alias: tpietzsch
+  - given-names: Ilan
+    family-names: Theodoro
+    affiliation: Chan Zuckerberg Biohub San Francisco
+    orcid: https://orcid.org/0000-0003-4019-3380
+    alias: ilan-theodoro
 license: MIT
 repository-code: https://github.com/live-image-tracking-tools/geff
