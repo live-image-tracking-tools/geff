@@ -7,7 +7,7 @@ import pytest
 import zarr
 import zarr.storage
 
-from geff import validate_structure
+from geff import _path, validate_structure
 from geff.core_io._base_read import read_to_memory
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import open_storelike
@@ -53,52 +53,66 @@ class TestValidateStructure:
             validate_structure(z.store)
 
     def test_no_nodes_group(self, z):
-        del z["nodes"]
-        with pytest.raises(ValueError, match="'graph' group must contain a group named 'nodes'"):
+        del z[_path.NODES]
+        with pytest.raises(
+            ValueError, match=f"'graph' group must contain a group named '{_path.NODES}'"
+        ):
             validate_structure(z.store)
 
     def test_no_edges(self, z):
         del z["edges"]
-        with pytest.raises(ValueError, match="'graph' group must contain a group named 'edges'"):
+        with pytest.raises(
+            ValueError, match=f"'graph' group must contain a group named '{_path.EDGES}'"
+        ):
             validate_structure(z.store)
 
 
 class Test_validate_nodes_group:
     def test_no_node_ids(self, z):
-        del z["nodes"]["ids"]
-        with pytest.raises(ValueError, match="'nodes' group must contain an 'ids' array"):
+        del z[_path.NODE_IDS]
+        with pytest.raises(
+            ValueError, match=f"'{_path.NODES}' group must contain an '{_path.IDS}' array"
+        ):
             validate_structure(z.store)
 
     def test_no_node_props_group(self, z):
-        del z["nodes"]["props"]
+        del z[_path.NODE_PROPS]
         # Nodes must have a props group
-        with pytest.raises(ValueError, match="'nodes' group must contain a group named 'props'"):
+        with pytest.raises(
+            ValueError, match=f"'{_path.NODES}' group must contain a group named '{_path.PROPS}'"
+        ):
             validate_structure(z.store)
 
     def test_node_prop_no_values(self, z):
         # Subgroups in props must have values
-        del z["nodes"]["props"]["t"]["values"]
-        with pytest.raises(ValueError, match="Node property group 't' must have a 'values' array"):
+        key = "t"
+        del z[_path.NODE_PROPS][key][_path.VALUES]
+        with pytest.raises(
+            ValueError, match=f"Node property group '{key}' must have a '{_path.VALUES}' array"
+        ):
             validate_structure(z.store)
 
     def test_node_prop_shape_mismatch(self, z):
         # Property shape mismatch
-        z["nodes/props/badshape/values"] = np.zeros(1)
+        key = "badshape"
+        z[f"{_path.NODE_PROPS}/{key}/{_path.VALUES}"] = np.zeros(1)
         with pytest.raises(
             ValueError,
             match=(
-                f"Node property 'badshape' values has length {1}, which does not match id length .*"
+                f"Node property '{key}' values has length {1}, which does not match id length .*"
             ),
         ):
             validate_structure(z.store)
 
     def test_node_prop_missing_mismatch(self, z):
         # Property missing shape mismatch
-        z["nodes/props/t/missing"] = np.zeros(shape=(1))
+        key = "t"
+        z[f"{_path.NODE_PROPS}/{key}/{_path.MISSING}"] = np.zeros(shape=(1))
         with pytest.raises(
             ValueError,
             match=(
-                "Node property 't' missing mask has length 1, which does not match id length .*"
+                f"Node property '{key}' missing mask has length 1, "
+                "which does not match id length .*"
             ),
         ):
             validate_structure(z.store)
@@ -106,12 +120,14 @@ class Test_validate_nodes_group:
 
 class Test_validate_edges_group:
     def test_no_edge_ids(self, z):
-        del z["edges"]["ids"]
-        with pytest.raises(ValueError, match="'edges' group must contain an 'ids' array"):
+        del z[_path.EDGE_IDS]
+        with pytest.raises(
+            ValueError, match=f"'{_path.EDGES}' group must contain an '{_path.IDS}' array"
+        ):
             validate_structure(z.store)
 
     def test_edge_ids_bad_shape(self, z):
-        z["edges/ids"] = np.zeros((3, 3))
+        z[_path.EDGE_IDS] = np.zeros((3, 3))
         with pytest.raises(
             ValueError,
             match="edges ids must have a last dimension of size 2, received shape .*",
@@ -119,19 +135,22 @@ class Test_validate_edges_group:
             validate_structure(z.store)
 
     def test_edge_values_bad_shape(self, z):
-        z["edges/props/score/values"] = np.zeros((1, 2))
+        key = "score"
+        z[f"{_path.EDGE_PROPS}/{key}/{_path.VALUES}"] = np.zeros((1, 2))
         with pytest.raises(
             ValueError,
-            match=("Edge property 'score' values has length 1, which does not match id length .*"),
+            match=(f"Edge property '{key}' values has length 1, which does not match id length .*"),
         ):
             validate_structure(z.store)
 
     def test_edge_missing_bad_shape(self, z):
-        z["edges/props/score/missing"] = np.zeros((1, 2))
+        key = "score"
+        z[f"{_path.EDGE_PROPS}/{key}/{_path.MISSING}"] = np.zeros((1, 2))
         with pytest.raises(
             ValueError,
             match=(
-                "Edge property 'score' missing mask has length 1, which does not match id length .*"
+                f"Edge property '{key}' missing mask has length 1, "
+                "which does not match id length .*"
             ),
         ):
             validate_structure(z.store)
@@ -220,21 +239,21 @@ def test_validate_axes_structure(tmp_path):
 
     zpath = tmp_path / "test.zarr"
     z = zarr.open_group(zpath)
-    z.create_group("nodes/props")
+    z.create_group(_path.NODE_PROPS)
 
     with pytest.raises(AssertionError, match="Axis x data is missing"):
         _validate_axes_structure(z, meta)
-    z.create_group("nodes/props/x")
+    z.create_group(f"{_path.NODE_PROPS}/x")
 
     # Values must be 1d
-    z["nodes/props/x/values"] = np.zeros((10, 2))
+    z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10, 2))
     with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
         _validate_axes_structure(z, meta)
-    del z["nodes/props/x/values"]
+    del z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"]
 
     # No missing values
-    z["nodes/props/x/values"] = np.zeros((10,))
-    z["nodes/props/x/missing"] = np.zeros((10,))
+    z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10,))
+    z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
     with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
         _validate_axes_structure(z, meta)
 
