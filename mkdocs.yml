@@ -10,6 +10,7 @@ nav:
   - specification.md
   - tracking.md
   - command-line-tools.md
+  - convert.md
 
 theme:
   name: "material"
