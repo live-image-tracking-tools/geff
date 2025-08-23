@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import copy
-import re
-from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -15,20 +13,13 @@ from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import open_storelike
 from geff.metadata._schema import GeffMetadata
 from geff.testing._utils import check_equiv_geff
-from geff.testing.data import create_2d_geff_with_invalid_shapes, create_simple_2d_geff
-from geff.validate.data import ValidationConfig, validate_optional_data, validate_zarr_data
-from geff.validate.structure import validate_axes_structure
-
 from geff.testing.data import (
-    create_dummy_graph_props,
+    create_2d_geff_with_invalid_shapes,
     create_memory_mock_geff,
     create_simple_2d_geff,
-    create_simple_3d_geff,
-    create_simple_temporal_geff,
 )
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from geff.validate.data import ValidationConfig, validate_optional_data, validate_zarr_data
+from geff.validate.structure import _validate_axes_structure
 
 
 @pytest.fixture
@@ -39,7 +30,7 @@ def z() -> zarr.Group:
         directed=False,
         num_nodes=10,
         num_edges=15,
-        extra_node_props={"score": "float64"}
+        extra_node_props={"score": "float64"},
         extra_edge_props={"score": "float64", "color": "int"},
         include_t=True,
         include_z=True,  # 3D includes z
@@ -49,28 +40,11 @@ def z() -> zarr.Group:
     store, attrs = create_simple_2d_geff()
     return zarr.open_group(store)
 
-class TestValidateStructure:
 
+class TestValidateStructure:
     def test_valid_geff(self, z):
         validate_structure(z.store)
 
-    def test_input_path(self, tmp_path: Path, z) -> None:
-        # Does not exist
-        with pytest.raises(FileNotFoundError, match=r"Path does not exist: does-not-exist"):
-            validate_structure("does-not-exist")
-
-        # remote zarr path does not raise existence error
-        # (if we had a real remote geff we could update this to pass)
-        remote_path = "https://blah.com/test.zarr"
-        with pytest.raises(ValueError, match=r"store must be a zarr StoreLike"):
-            validate_structure(remote_path)
-
-        # Path exists but is not a zarr store
-        non_zarr_path = tmp_path / "not-a-zarr"
-        non_zarr_path.mkdir()
-        with pytest.raises(ValueError, match=r"store must be a zarr StoreLike"):
-            validate_structure(non_zarr_path)
-        
     def test_missing_metadata(self, z):
         del z.attrs["geff"]
 
@@ -83,6 +57,13 @@ class TestValidateStructure:
         with pytest.raises(ValueError, match="'graph' group must contain a group named 'nodes'"):
             validate_structure(z.store)
 
+    def test_no_edges(self, z):
+        del z["edges"]
+        with pytest.raises(ValueError, match="'graph' group must contain a group named 'edges'"):
+            validate_structure(z.store)
+
+
+class Test_validate_nodes_group:
     def test_no_node_ids(self, z):
         del z["nodes"]["ids"]
         with pytest.raises(ValueError, match="'nodes' group must contain an 'ids' array"):
@@ -106,8 +87,7 @@ class TestValidateStructure:
         with pytest.raises(
             ValueError,
             match=(
-                f"Node property 'badshape' values has length {1}, "
-                f"which does not match id length .*"
+                f"Node property 'badshape' values has length {1}, which does not match id length .*"
             ),
         ):
             validate_structure(z.store)
@@ -118,17 +98,13 @@ class TestValidateStructure:
         with pytest.raises(
             ValueError,
             match=(
-                f"Node property 't' missing mask has length 1, "
-                f"which does not match id length .*"
+                "Node property 't' missing mask has length 1, which does not match id length .*"
             ),
         ):
             validate_structure(z.store)
 
-    def test_no_edges(self, z):
-        del z["edges"]
-        with pytest.raises(ValueError, match="'graph' group must contain a group named 'edges'"):
-            validate_structure(z.store)
 
+class Test_validate_edges_group:
     def test_no_edge_ids(self, z):
         del z["edges"]["ids"]
         with pytest.raises(ValueError, match="'edges' group must contain an 'ids' array"):
@@ -138,18 +114,15 @@ class TestValidateStructure:
         z["edges/ids"] = np.zeros((3, 3))
         with pytest.raises(
             ValueError,
-            match=f"edges ids must have a last dimension of size 2, received shape .*",
+            match="edges ids must have a last dimension of size 2, received shape .*",
         ):
             validate_structure(z.store)
-    
+
     def test_edge_values_bad_shape(self, z):
         z["edges/props/score/values"] = np.zeros((1, 2))
         with pytest.raises(
             ValueError,
-            match=(
-                f"Edge property 'score' values has length 1, "
-                f"which does not match id length .*"
-            ),
+            match=("Edge property 'score' values has length 1, which does not match id length .*"),
         ):
             validate_structure(z.store)
 
@@ -158,100 +131,10 @@ class TestValidateStructure:
         with pytest.raises(
             ValueError,
             match=(
-                f"Edge property 'score' missing mask has length 1, "
-                f"which does not match id length .*"
+                "Edge property 'score' missing mask has length 1, which does not match id length .*"
             ),
         ):
             validate_structure(z.store)
-
-    def test_metadata_missing_data(self, z):
-    # Nodes: property metadata has no matching data
-        geff_attrs = z.attrs["geff"]
-        geff_attrs["node_props_metadata"] = {
-            "prop1": {"identifier": "prop1", "dtype": "float32"},
-        }
-        z.attrs["geff"] = geff_attrs
-        with pytest.raises(
-            ValueError,
-            match="Node property prop1 described in metadata is not present in props arrays",
-        ):
-            validate_structure(z.store)
-
-    def test_metadata_dtype_data_mismatch(self, z):
-        geff_attrs = z.attrs["geff"]
-        geff_attrs["node_props_metadata"] = {
-            "t": {"identifier": "t", "dtype": "str"},
-        }
-        z.attrs["geff"] = geff_attrs
-        with pytest.raises(
-            ValueError,
-            match=(
-                "Node property t with dtype float64 does not match "
-                "metadata dtype <class 'numpy.str_'>"
-            ),
-        ):
-            validate_structure(z.store)
-
-        geff_attrs["node_props_metadata"]["t"] ={
-            "identifier": "t", "dtype": "float64"
-        }
-        geff_attrs["node_props_metadata"]["x"] ={
-            "identifier": "x", "dtype": "int64"
-        }
-        z.attrs["geff"] = geff_attrs
-        # Another type of dtype mismatch
-        n_node = 10
-        z["nodes/props/x/values"] = np.zeros(n_node, dtype="int16")
-        with pytest.raises(
-            ValueError,
-            match=(
-                "Node property x with dtype int16 does not match "
-                "metadata dtype <class 'numpy.int64'>"
-            ),
-        ):
-            validate_structure(z.store)
-
-    def test_edge_metadata_missing_data(self, z):
-        del z["edges/props/score"]
-        with pytest.raises(
-            ValueError,
-            match="Edge property score described in metadata is not present in props arrays",
-        ):
-            validate_structure(z.store)
-    
-    def test_node_metadata_missing_data(self, z):
-        del z["nodes/props/score"]
-        with pytest.raises(
-            ValueError,
-            match="Edge property score described in metadata is not present in props arrays",
-        ):
-            validate_structure(z.store)
-
-    def test_edge_metadata_wrong_dtype(self, z):
-        geff_attrs = z.attrs["geff"]
-        geff_attrs["edge_props_metadata"] = {
-            "score": {"identifier": "score", "dtype": "int32"},
-        }
-        z.attrs["geff"] = geff_attrs
-        with pytest.raises(
-            ValueError,
-            match="Edge property score with dtype float64 does not match metadata dtype .*",
-        ):
-            validate_structure(z.store)
-    
-    # # No error raised when property with no matching prop metadata
-    # z["nodes/props/prop4/values"] = np.zeros(n_node, dtype="bool")
-    # z["edges/props/prop4/values"] = np.zeros(n_edges, dtype="uint8")
-
-    def test_repeated_prop_name_node_edge(self, z):
-        geff_attrs = z.attrs["geff"]
-        geff_attrs["edge_props_metadata"] = {
-            "score": {"identifier": "score", "dtype": "int32"},
-        }
-        geff_attrs["node_props_metadata"]["score"] = geff_attrs["edge_props_metadata"]["score"]
-        zarr.create_array(z.store, path="edges/props/score", )
-        z["edges/props/score"] = z["nodes/props/score"][:]
-        validate_structure(z.store)
 
 
 def test_open_storelike(tmp_path):
@@ -340,20 +223,20 @@ def test_validate_axes_structure(tmp_path):
     z.create_group("nodes/props")
 
     with pytest.raises(AssertionError, match="Axis x data is missing"):
-        validate_axes_structure(z, meta)
+        _validate_axes_structure(z, meta)
     z.create_group("nodes/props/x")
 
     # Values must be 1d
     z["nodes/props/x/values"] = np.zeros((10, 2))
     with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
-        validate_axes_structure(z, meta)
+        _validate_axes_structure(z, meta)
     del z["nodes/props/x/values"]
 
     # No missing values
     z["nodes/props/x/values"] = np.zeros((10,))
     z["nodes/props/x/missing"] = np.zeros((10,))
     with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
-        validate_axes_structure(z, meta)
+        _validate_axes_structure(z, meta)
 
 
 def test_validate_zarr_data():

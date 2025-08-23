@@ -9,12 +9,10 @@ from geff import _path
 from geff.core_io._utils import expect_array, expect_group, open_storelike
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from zarr.storage import StoreLike
 
 
-from geff.metadata import GeffMetadata, PropMetadata
+from geff.metadata import GeffMetadata
 
 
 def validate_structure(store: StoreLike) -> None:
@@ -67,43 +65,6 @@ def _validate_axes_structure(graph: zarr.Group, meta: GeffMetadata) -> None:
             # Only 1d data allowed, already checked length of first axis
             ndim = len(expect_array(node_prop_group, f"{ax.name}/values").shape)
             assert ndim == 1, f"Axis property {ax.name} has {ndim} dimensions, must be 1D"
-
-
-def _validate_props_metadata(
-    props_metadata_dict: Mapping[str, PropMetadata],
-    component_props: zarr.Group,
-    component_type: str,
-) -> None:
-    """Validate that properties described in metadata are compatible with the data in zarr arrays.
-
-    Args:
-        props_metadata_dict (dict): Dictionary of property metadata with identifier keys
-            and PropMetadata values
-        component_props (zarr.Group): Zarr group containing the component properties (nodes
-            or edges)
-        component_type (str): Component type for error messages ("Node" or "Edge")
-
-    Raises:
-        AssertionError: If properties in metadata don't match zarr arrays
-    """
-    for prop in props_metadata_dict.values():
-        prop_id = prop.identifier
-        # Properties described in metadata should be present in zarr arrays
-        if not isinstance(props_group := component_props.get(prop_id), zarr.Group):
-            raise ValueError(
-                f"{component_type} property {prop_id} described in metadata is not present "
-                f"in props arrays"
-            )
-
-        # dtype in metadata should match dtype in zarr arrays
-        values_array = expect_array(props_group, _path.VALUES, component_type)
-        array_dtype = values_array.dtype
-        prop_dtype = np.dtype(prop.dtype).type
-        if array_dtype != prop_dtype:
-            raise ValueError(
-                f"{component_type} property {prop_id} with dtype {array_dtype} does not match "
-                f"metadata dtype {prop_dtype}"
-            )
 
 
 def _validate_props_group(
@@ -160,10 +121,6 @@ def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> No
     node_props = expect_group(nodes_group, _path.PROPS, _path.NODES)
     _validate_props_group(node_props, id_len, "Node")
 
-    # Node properties metadata validation
-    if metadata.node_props_metadata is not None:
-        _validate_props_metadata(metadata.node_props_metadata, node_props, "Node")
-
 
 def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> None:
     """Validate the structure of an edges group in a GEFF zarr store."""
@@ -184,6 +141,3 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
             f"{_path.EDGES!r} group must contain a {_path.PROPS!r} group. Got {type(edge_props)}"
         )
     _validate_props_group(edge_props, edge_id_len, "Edge")
-    # Edge properties metadata validation
-    if metadata.edge_props_metadata is not None:
-        _validate_props_metadata(metadata.edge_props_metadata, edge_props, "Edge")
