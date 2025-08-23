@@ -38,9 +38,8 @@ def validate_structure(store: StoreLike) -> None:
     _validate_nodes_group(nodes_group, metadata)
 
     # TODO: Do we want to prevent missing values on spatialtemporal properties
-    if _path.EDGES in graph_group.keys():
-        edges_group = expect_group(graph_group, _path.EDGES)
-        _validate_edges_group(edges_group, metadata)
+    edges_group = expect_group(graph_group, _path.EDGES)
+    _validate_edges_group(edges_group, metadata)
 
 
 def _validate_props_metadata(
