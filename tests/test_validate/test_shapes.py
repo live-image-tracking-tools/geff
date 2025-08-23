@@ -57,10 +57,10 @@ class Test_validate_ellipsoid:
 
 
 def test_validate_sphere():
-    # Not 2d
-    with pytest.raises(ValueError, match="Sphere radius values must be 2D"):
+    # Not 1d
+    with pytest.raises(ValueError, match="Sphere radius values must be 1D"):
         validate_sphere(np.ones((2, 2, 2)))
 
     # Not positive
     with pytest.raises(ValueError, match="Sphere radius values must be non-negative."):
-        validate_sphere(np.full((2, 2), fill_value=-1))
+        validate_sphere(np.full((2), fill_value=-1))

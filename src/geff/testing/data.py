@@ -66,12 +66,10 @@ import zarr
 import zarr.storage
 
 import geff
-from geff.core_io._base_read import read_to_memory
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    from geff._typing import InMemoryGeff
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
 NodeIdDTypeStr = Literal["int", "int8", "uint8", "int16", "uint16"]
@@ -630,39 +628,3 @@ def create_simple_temporal_geff(
         include_y=False,  # No spatial dimensions
         include_x=False,  # No spatial dimensions
     )
-
-
-def create_2d_geff_with_invalid_shapes(
-    num_nodes: int = 10,
-    num_edges: int = 15,
-    directed: bool = False,
-) -> InMemoryGeff:
-    """
-    Create a 2D GEFF graph with invalid shapes for testing purposes.
-
-    TODO docs.
-    TODO clean up.
-
-    """
-    store, _ = create_memory_mock_geff(
-        node_id_dtype="int",
-        node_axis_dtypes={"position": "float64", "time": "float64"},
-        directed=directed,
-        num_nodes=num_nodes,
-        num_edges=num_edges,
-        extra_node_props={"radius": "int", "covariance2d": "float64"},
-        include_t=True,
-        include_z=False,  # 2D only
-        include_y=True,
-        include_x=True,
-    )
-
-    graph_dict = read_to_memory(store, validate=False)
-
-    # graph_dict["metadata"].sphere = "radius"
-    # graph_dict["node_props"]["radius"]["values"] = np.arange(num_nodes) - 1
-
-    graph_dict["metadata"].ellipsoid = "covariance2d"
-    graph_dict["node_props"]["covariance2d"]["values"] = np.random.rand(num_nodes, 2, 2)
-
-    return graph_dict
