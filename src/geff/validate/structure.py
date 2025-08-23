@@ -37,9 +37,8 @@ def validate_structure(store: StoreLike) -> None:
     nodes_group = expect_group(graph_group, _path.NODES)
     _validate_nodes_group(nodes_group, metadata)
 
-    if _path.EDGES in graph_group.keys():
-        edges_group = expect_group(graph_group, _path.EDGES)
-        _validate_edges_group(edges_group, metadata)
+    edges_group = expect_group(graph_group, _path.EDGES)
+    _validate_edges_group(edges_group, metadata)
 
     # Metadata based validation
     if metadata.axes is not None:
