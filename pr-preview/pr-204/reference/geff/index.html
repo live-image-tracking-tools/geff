@@ -1813,6 +1813,8 @@ None all node properties will be loaded.</p>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;networkx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
+    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nx</span><span class="o">.</span><span class="n">Graph</span> <span class="o">|</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
@@ -1820,6 +1822,8 @@ None all node properties will be loaded.</p>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;rustworkx&quot;</span><span class="p">],</span>
+    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">PyGraph</span> <span class="o">|</span> <span class="n">rx</span><span class="o">.</span><span class="n">PyDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
@@ -1827,6 +1831,8 @@ None all node properties will be loaded.</p>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;spatial-graph&quot;</span><span class="p">],</span>
+    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
@@ -1839,6 +1845,8 @@ None all node properties will be loaded.</p>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">SupportedBackend</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
+    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">backend_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>
@@ -1947,6 +1955,40 @@ is "networkx".</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>validate_data</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Flag indicating whether to perform validation on the
+underlying data of the geff, e.g. edges. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>validate_opt_data</code>
+            </td>
+            <td>
+                  <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional configuration for which
+optional types of data to validate</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>backend_kwargs</code>
             </td>
             <td>
@@ -2006,6 +2048,8 @@ the backend when reading the data.</p>
     <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>
 
@@ -2095,6 +2139,40 @@ if None all properties will be loaded, defaults to None.</p>
                   <code>None</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>validate_data</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Flag indicating whether to perform validation on the
+underlying data of the geff, e.g. edges. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>validate_opt_data</code>
+            </td>
+            <td>
+                  <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional configuration for which
+optional types of data to validate</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -2139,6 +2217,8 @@ if None all properties will be loaded, defaults to None.</p>
     <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">PyGraph</span> <span class="o">|</span> <span class="n">rx</span><span class="o">.</span><span class="n">PyDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>
 
@@ -2229,6 +2309,40 @@ if None all properties will be loaded, defaults to None.</p>
                   <code>None</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>validate_data</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Flag indicating whether to perform validation on the
+underlying data of the geff, e.g. edges. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>validate_opt_data</code>
+            </td>
+            <td>
+                  <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional configuration for which
+optional types of data to validate</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -2274,6 +2388,8 @@ if None all properties will be loaded, defaults to None.</p>
     <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
     <span class="n">sg</span><span class="o">.</span><span class="n">SpatialGraph</span> <span class="o">|</span> <span class="n">sg</span><span class="o">.</span><span class="n">SpatialDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span>
 <span class="p">]</span>
@@ -2286,34 +2402,49 @@ if None all properties will be loaded, defaults to None.</p>
 missing arrays will be ignored, with a warning raised.</p>
 <p>Args:</p>
 <pre><code>store (Path | str | zarr store):
-
     The path to the root of the geff zarr, where the .attrs contains
     the geff  metadata.
-
 validate (bool, optional):
-
     Flag indicating whether to perform validation on the geff file
     before loading into memory. If set to False and there are format
     issues, will likely fail with a cryptic error. Defaults to True.
-
 position_attr (str, optional):
-
     How to call the position attribute in the returned SpatialGraph.
     Defaults to "position".
-
 node_props (list of str, optional):
-
     The names of the node properties to load, if None all properties
     will be loaded, defaults to None.
-
 edge_props (list of str, optional):
-
     The names of the edge properties to load, if None all properties
     will be loaded, defaults to None.
+validate_data (bool, optional): Flag indicating whether to perform validation on the
+    underlying data of the geff, e.g. edges. Defaults to False.
+validate_opt_data (ValidationConfig, optional): Optional configuration for which
+    optional types of data to validate
 </code></pre>
-<p>Returns:</p>
-<pre><code>A tuple containing the spatial_graph graph and the metadata.
-</code></pre>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="spatial_graph.SpatialGraph">SpatialGraph</span> | <span title="spatial_graph.SpatialDiGraph">SpatialDiGraph</span>, <a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A tuple containing the spatial_graph graph and the metadata.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     </div>
