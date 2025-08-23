@@ -14,11 +14,10 @@ from geff.core_io._utils import expect_group, open_storelike
 from geff.metadata._schema import GeffMetadata
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
-    create_2d_geff_with_invalid_shapes,
     create_memory_mock_geff,
     create_simple_2d_geff,
 )
-from geff.validate.data import ValidationConfig, validate_optional_data, validate_zarr_data
+from geff.validate.data import validate_zarr_data
 from geff.validate.structure import (
     _validate_axes_structure,
     _validate_edges_group,
@@ -270,22 +269,3 @@ def test_validate_zarr_data():
     graph_dict = read_to_memory(store, validate=False)
 
     validate_zarr_data(graph_dict)
-
-
-@pytest.mark.xfail(reason="Bad shapes. TODO separate out into multiple tests")
-def test_optional_data():
-    # config = ValidationConfig(lineage=True)
-    # graph_dict = ...  # TODO need a test graph with lineage data
-    # validate_optional_data(config, graph_dict)
-
-    # config = ValidationConfig(tracklet=True)
-    # graph_dict = ...  # TODO need a test graph with tracklet data
-    # validate_optional_data(config, graph_dict)
-
-    graph_dict = create_2d_geff_with_invalid_shapes()
-
-    config = ValidationConfig(sphere=True)
-    validate_optional_data(config, graph_dict)
-
-    config = ValidationConfig(ellipsoid=True)
-    validate_optional_data(config, graph_dict)
