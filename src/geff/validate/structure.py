@@ -37,14 +37,37 @@ def validate_structure(store: StoreLike) -> None:
     nodes_group = expect_group(graph_group, _path.NODES)
     _validate_nodes_group(nodes_group, metadata)
 
-    # TODO: Do we want to prevent missing values on spatialtemporal properties
     if _path.EDGES in graph_group.keys():
         edges_group = expect_group(graph_group, _path.EDGES)
         _validate_edges_group(edges_group, metadata)
 
     # Metadata based validation
     if metadata.axes is not None:
-        validate_axes_structure(graph_group, metadata)
+        _validate_axes_structure(graph_group, metadata)
+
+
+def _validate_axes_structure(graph: zarr.Group, meta: GeffMetadata) -> None:
+    """Verify that any metadata regarding axes is actually present in the data
+
+    - Property exists with name matching Axis name
+    - Data is 1D
+    - Missing values not allowed
+
+    Args:
+        graph (zarr.Group): The zarr group containing the geff metadata
+        meta (GeffMetadata): Metadata from geff
+    """
+    if meta.axes is not None:
+        node_prop_group = expect_group(graph, "nodes/props")
+        for ax in meta.axes:
+            # Array must be present without missing values
+            assert f"{ax.name}/values" in node_prop_group, f"Axis {ax.name} data is missing"
+            assert f"{ax.name}/missing" not in node_prop_group, (
+                f"Axis {ax.name} has missing values which are not allowed"
+            )
+            # Only 1d data allowed, already checked length of first axis
+            ndim = len(expect_array(node_prop_group, f"{ax.name}/values").shape)
+            assert ndim == 1, f"Axis property {ax.name} has {ndim} dimensions, must be 1D"
 
 
 def _validate_props_metadata(
@@ -165,27 +188,3 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
     # Edge properties metadata validation
     if metadata.edge_props_metadata is not None:
         _validate_props_metadata(metadata.edge_props_metadata, edge_props, "Edge")
-
-
-def validate_axes_structure(graph: zarr.Group, meta: GeffMetadata) -> None:
-    """Verify that any metadata regarding axes is actually present in the data
-
-    - Property exists with name matching Axis name
-    - Data is 1D
-    - Missing values not allowed
-
-    Args:
-        graph (zarr.Group): The zarr group containing the geff metadata
-        meta (GeffMetadata): Metadata from geff
-    """
-    if meta.axes is not None:
-        node_prop_group = expect_group(graph, "nodes/props")
-        for ax in meta.axes:
-            # Array must be present without missing values
-            assert f"{ax.name}/values" in node_prop_group, f"Axis {ax.name} data is missing"
-            assert f"{ax.name}/missing" not in node_prop_group, (
-                f"Axis {ax.name} has missing values which are not allowed"
-            )
-            # Only 1d data allowed, already checked length of first axis
-            ndim = len(expect_array(node_prop_group, f"{ax.name}/values").shape)
-            assert ndim == 1, f"Axis property {ax.name} has {ndim} dimensions, must be 1D"
