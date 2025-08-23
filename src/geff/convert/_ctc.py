@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from typing import Literal
 
 try:
     import tifffile
@@ -27,15 +28,20 @@ def ctc_tiffs_to_zarr(
     output_store: StoreLike,
     ctzyx: bool = False,
     overwrite: bool = False,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
     Convert a CTC file to a Zarr file.
 
     Args:
-        ctc_path: The path to the CTC file.
-        output_store: The path to the Zarr file.
-        ctzyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
-        overwrite: Whether to overwrite the Zarr file if it already exists.
+        ctc_path (Path): The path to the CTC file.
+        output_store (StoreLike): The path to the Zarr file.
+        ctzyx (optional, bool): Expand data to make it (T, C, Z, Y, X)
+            otherwise it's (T,) + Frame shape. Defaults to False.
+        overwrite (optional, bool): Whether to overwrite the Zarr file if it already exists.
+            Defaults to False.
+        zarr_format (optional, Literal[2, 3]): The zarr specification to use when writing the zarr.
+            Defaults to 2.
     """
     array = imread(str(ctc_path / "*.tif"))
     if ctzyx:
@@ -43,7 +49,7 @@ def ctc_tiffs_to_zarr(
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
 
-    array.to_zarr(url=output_store, overwrite=overwrite)
+    array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
 
 
 def from_ctc_to_geff(
@@ -52,6 +58,7 @@ def from_ctc_to_geff(
     segmentation_store: StoreLike | None = None,
     tczyx: bool = False,
     overwrite: bool = False,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
     Convert a CTC file to a GEFF file.
@@ -63,6 +70,8 @@ def from_ctc_to_geff(
                             If not provided, it won't be exported.
         tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite: Whether to overwrite the GEFF file if it already exists.
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
+            Defaults to 2.
     """
     ctc_path = Path(ctc_path)
     geff_path = Path(geff_path).with_suffix(".geff")
@@ -121,6 +130,7 @@ def from_ctc_to_geff(
                 chunks=(1, *n_1_padding, *frame.shape),
                 dtype=frame.dtype,
                 mode="w" if overwrite else "w-",
+                zarr_format=zarr_format,
             )
 
         if segm_array is not None:
@@ -187,4 +197,5 @@ def from_ctc_to_geff(
             axes=axis_names,
             directed=True,
         ),
+        zarr_format=zarr_format,
     )
