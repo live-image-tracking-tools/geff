@@ -186,84 +186,80 @@ def test_open_storelike(tmp_path):
         open_storelike(group)
 
 
-def test_check_equiv_geff():
-    def _write_new_store(in_mem):
+class Test_check_equiv_geff:
+    store, attrs = create_simple_2d_geff(num_nodes=10, num_edges=15)
+    in_mem = read_to_memory(store)
+
+    def _write_new_store(self, in_mem):
         store = zarr.storage.MemoryStore()
         write_arrays(store, **in_mem)
         return store
 
-    store, attrs = create_simple_2d_geff(num_nodes=10, num_edges=15)
+    def test_same_geff(self):
+        # Check that two exactly same geffs pass
+        check_equiv_geff(self.store, self.store)
 
-    # Check that two exactly same geffs pass
-    check_equiv_geff(store, store)
+    def test_id_shape_mismatch(self):
+        # Id shape mismatch
+        bad_store, attrs = create_simple_2d_geff(num_nodes=5)
+        with pytest.raises(ValueError, match=r".* ids shape: .* does not match .*"):
+            check_equiv_geff(self.store, bad_store)
 
-    # Create in memory version to mess with
-    in_mem = read_to_memory(store)
+    def test_props_mismatch(self):
+        bad_mem = copy.deepcopy(self.in_mem)
+        bad_mem["node_props"]["new prop"] = bad_mem["node_props"]["t"]
+        bad_store = self._write_new_store(bad_mem)
+        with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
+            check_equiv_geff(self.store, bad_store)
 
-    # Id shape mismatch
-    bad_store, attrs = create_simple_2d_geff(num_nodes=5)
-    with pytest.raises(ValueError, match=r".* ids shape: .* does not match .*"):
-        check_equiv_geff(store, bad_store)
+    def test_only_one_with_missing(self):
+        bad_mem = copy.deepcopy(self.in_mem)
+        bad_mem["edge_props"]["score"]["missing"] = np.zeros(
+            bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool_
+        )
+        bad_store = self._write_new_store(bad_mem)
+        with pytest.raises(UserWarning, match=".* contains missing but the other does not"):
+            check_equiv_geff(bad_store, self.store)
 
-    # Props mismatch
-    bad_mem = copy.deepcopy(in_mem)
-    bad_mem["node_props"]["new prop"] = bad_mem["node_props"]["t"]
-    bad_store = _write_new_store(bad_mem)
-    with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
-        check_equiv_geff(store, bad_store)
+    def test_value_shape_mismatch(self):
+        bad_mem = copy.deepcopy(self.in_mem)
+        # Add extra dimension to an edge prop
+        bad_mem["edge_props"]["score"]["values"] = bad_mem["edge_props"]["score"]["values"][
+            ..., np.newaxis
+        ]
+        bad_store = self._write_new_store(bad_mem)
+        with pytest.raises(ValueError, match=r".* shape: .* does not match b .*"):
+            check_equiv_geff(self.store, bad_store)
 
-    # Warn if one has missing but other doesn't
-    bad_mem = copy.deepcopy(in_mem)
-    bad_mem["edge_props"]["score"]["missing"] = np.zeros(
-        bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool_
-    )
-    bad_store = _write_new_store(bad_mem)
-    with pytest.raises(UserWarning, match=".* contains missing but the other does not"):
-        check_equiv_geff(bad_store, store)
-
-    # Values shape mismatch
-    bad_mem = copy.deepcopy(in_mem)
-    # Add extra dimension to an edge prop
-    bad_mem["edge_props"]["score"]["values"] = bad_mem["edge_props"]["score"]["values"][
-        ..., np.newaxis
-    ]
-    bad_store = _write_new_store(bad_mem)
-    with pytest.raises(ValueError, match=r".* shape: .* does not match b .*"):
-        check_equiv_geff(store, bad_store)
-
-    # Values dtype mismatch
-    bad_mem = copy.deepcopy(in_mem)
-    # Change dtype
-    bad_mem["edge_props"]["score"]["values"] = (
-        bad_mem["edge_props"]["score"]["values"].astype("int").squeeze()
-    )
-    bad_store = _write_new_store(bad_mem)
-    with pytest.raises(ValueError, match=r".* dtype: .* does not match b .*"):
-        check_equiv_geff(store, bad_store)
+    def test_value_dtype_mismatch(self):
+        # Values dtype mismatch
+        bad_mem = copy.deepcopy(self.in_mem)
+        # Change dtype
+        bad_mem["edge_props"]["score"]["values"] = (
+            bad_mem["edge_props"]["score"]["values"].astype("int").squeeze()
+        )
+        bad_store = self._write_new_store(bad_mem)
+        with pytest.raises(ValueError, match=r".* dtype: .* does not match b .*"):
+            check_equiv_geff(self.store, bad_store)
 
 
-def test_validate_axes_structure(tmp_path):
-    meta = GeffMetadata(geff_version="0.1.0", directed=True, axes=[{"name": "x"}])
+class Test_validate_axes_structure:
+    def test_missing_axes_prop(self, z, meta):
+        key = "x"
+        del z[_path.NODE_PROPS][key]
+        with pytest.raises(AssertionError, match=f"Axis {key} data is missing"):
+            _validate_axes_structure(z, meta)
 
-    zpath = tmp_path / "test.zarr"
-    z = zarr.open_group(zpath)
-    z.create_group(_path.NODE_PROPS)
+    def test_must_be_1d(self, z, meta):
+        z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10, 2))
+        with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
+            _validate_axes_structure(z, meta)
 
-    with pytest.raises(AssertionError, match="Axis x data is missing"):
-        _validate_axes_structure(z, meta)
-    z.create_group(f"{_path.NODE_PROPS}/x")
-
-    # Values must be 1d
-    z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10, 2))
-    with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
-        _validate_axes_structure(z, meta)
-    del z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"]
-
-    # No missing values
-    z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10,))
-    z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
-    with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
-        _validate_axes_structure(z, meta)
+    def test_no_missing_values(self, z, meta):
+        z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10,))
+        z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
+        with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
+            _validate_axes_structure(z, meta)
 
 
 def test_validate_zarr_data():
