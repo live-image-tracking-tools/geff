@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
+    from geff.validate.data import ValidationConfig
 
 
 def get_roi_rx(
@@ -253,6 +254,8 @@ def read_rx(
     validate: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
+    validate_data: bool = False,
+    validate_opt_data: ValidationConfig | None = None,
 ) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]:
     """Read a geff file into a rustworkx graph.
     Metadata properties will be stored in the graph.attrs dict
@@ -269,11 +272,17 @@ def read_rx(
             if None all properties will be loaded, defaults to None.
         edge_props: The names of the edge properties to load,
             if None all properties will be loaded, defaults to None.
+        validate_data (bool, optional): Flag indicating whether to perform validation on the
+            underlying data of the geff, e.g. edges. Defaults to False.
+        validate_opt_data (ValidationConfig, optional): Optional configuration for which
+            optional types of data to validate
 
     Returns:
         A tuple containing the rustworkx graph and the metadata.
     """
-    graph_dict = read_to_memory(store, validate, node_props, edge_props)
+    graph_dict = read_to_memory(
+        store, validate, node_props, edge_props, validate_data, validate_opt_data
+    )
     graph = construct_rx(**graph_dict)
 
     return graph, graph_dict["metadata"]
