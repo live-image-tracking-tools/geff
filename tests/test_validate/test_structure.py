@@ -10,7 +10,7 @@ import zarr.storage
 from geff import _path, validate_structure
 from geff.core_io._base_read import read_to_memory
 from geff.core_io._base_write import write_arrays
-from geff.core_io._utils import open_storelike
+from geff.core_io._utils import expect_group, open_storelike
 from geff.metadata._schema import GeffMetadata
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
@@ -19,7 +19,12 @@ from geff.testing.data import (
     create_simple_2d_geff,
 )
 from geff.validate.data import ValidationConfig, validate_optional_data, validate_zarr_data
-from geff.validate.structure import _validate_axes_structure
+from geff.validate.structure import (
+    _validate_axes_structure,
+    _validate_edges_group,
+    _validate_nodes_group,
+    _validate_props_group,
+)
 
 
 @pytest.fixture
@@ -39,6 +44,21 @@ def z() -> zarr.Group:
     )
     store, attrs = create_simple_2d_geff()
     return zarr.open_group(store)
+
+
+@pytest.fixture
+def meta(z) -> GeffMetadata:
+    return GeffMetadata.read(z.store)
+
+
+@pytest.fixture
+def node_group(z) -> zarr.Group:
+    return expect_group(z, _path.NODES)
+
+
+@pytest.fixture
+def edge_group(z) -> zarr.Group:
+    return expect_group(z, _path.EDGES)
 
 
 class TestValidateStructure:
@@ -68,46 +88,72 @@ class TestValidateStructure:
 
 
 class Test_validate_nodes_group:
-    def test_no_node_ids(self, z):
-        del z[_path.NODE_IDS]
+    def test_no_node_ids(self, node_group, meta):
+        del node_group[_path.IDS]
         with pytest.raises(
             ValueError, match=f"'{_path.NODES}' group must contain an '{_path.IDS}' array"
         ):
-            validate_structure(z.store)
+            _validate_nodes_group(node_group, meta)
 
-    def test_no_node_props_group(self, z):
-        del z[_path.NODE_PROPS]
+    def test_no_node_props_group(self, node_group, meta):
+        del node_group[_path.PROPS]
         # Nodes must have a props group
         with pytest.raises(
             ValueError, match=f"'{_path.NODES}' group must contain a group named '{_path.PROPS}'"
         ):
-            validate_structure(z.store)
+            _validate_nodes_group(node_group, meta)
 
-    def test_node_prop_no_values(self, z):
+    # Other cases are caught in tests for _validate_props_group
+
+
+class Test_validate_edges_group:
+    def test_no_edge_ids(self, edge_group, meta):
+        del edge_group[_path.IDS]
+        with pytest.raises(
+            ValueError, match=f"'{_path.EDGES}' group must contain an '{_path.IDS}' array"
+        ):
+            _validate_edges_group(edge_group, meta)
+
+    def test_edge_ids_bad_shape(self, edge_group, meta):
+        edge_group[_path.IDS] = np.zeros((3, 3))
+        with pytest.raises(
+            ValueError,
+            match="edges ids must have a last dimension of size 2, received shape .*",
+        ):
+            _validate_edges_group(edge_group, meta)
+
+    # Other cases are caught in tests for _validate_props_group
+
+
+class Test_validate_props_group:
+    def test_node_prop_no_values(self, node_group):
         # Subgroups in props must have values
         key = "t"
-        del z[_path.NODE_PROPS][key][_path.VALUES]
+        del node_group[_path.PROPS][key][_path.VALUES]
+        id_len = node_group[_path.IDS].shape[0]
         with pytest.raises(
             ValueError, match=f"Node property group '{key}' must have a '{_path.VALUES}' array"
         ):
-            validate_structure(z.store)
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
 
-    def test_node_prop_shape_mismatch(self, z):
+    def test_node_prop_shape_mismatch(self, node_group):
         # Property shape mismatch
         key = "badshape"
-        z[f"{_path.NODE_PROPS}/{key}/{_path.VALUES}"] = np.zeros(1)
+        node_group[f"{_path.PROPS}/{key}/{_path.VALUES}"] = np.zeros(1)
+        id_len = node_group[_path.IDS].shape[0]
         with pytest.raises(
             ValueError,
             match=(
                 f"Node property '{key}' values has length {1}, which does not match id length .*"
             ),
         ):
-            validate_structure(z.store)
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
 
-    def test_node_prop_missing_mismatch(self, z):
+    def test_node_prop_missing_mismatch(self, node_group):
         # Property missing shape mismatch
         key = "t"
-        z[f"{_path.NODE_PROPS}/{key}/{_path.MISSING}"] = np.zeros(shape=(1))
+        node_group[f"{_path.PROPS}/{key}/{_path.MISSING}"] = np.zeros(shape=(1))
+        id_len = node_group[_path.IDS].shape[0]
         with pytest.raises(
             ValueError,
             match=(
@@ -115,45 +161,7 @@ class Test_validate_nodes_group:
                 "which does not match id length .*"
             ),
         ):
-            validate_structure(z.store)
-
-
-class Test_validate_edges_group:
-    def test_no_edge_ids(self, z):
-        del z[_path.EDGE_IDS]
-        with pytest.raises(
-            ValueError, match=f"'{_path.EDGES}' group must contain an '{_path.IDS}' array"
-        ):
-            validate_structure(z.store)
-
-    def test_edge_ids_bad_shape(self, z):
-        z[_path.EDGE_IDS] = np.zeros((3, 3))
-        with pytest.raises(
-            ValueError,
-            match="edges ids must have a last dimension of size 2, received shape .*",
-        ):
-            validate_structure(z.store)
-
-    def test_edge_values_bad_shape(self, z):
-        key = "score"
-        z[f"{_path.EDGE_PROPS}/{key}/{_path.VALUES}"] = np.zeros((1, 2))
-        with pytest.raises(
-            ValueError,
-            match=(f"Edge property '{key}' values has length 1, which does not match id length .*"),
-        ):
-            validate_structure(z.store)
-
-    def test_edge_missing_bad_shape(self, z):
-        key = "score"
-        z[f"{_path.EDGE_PROPS}/{key}/{_path.MISSING}"] = np.zeros((1, 2))
-        with pytest.raises(
-            ValueError,
-            match=(
-                f"Edge property '{key}' missing mask has length 1, "
-                "which does not match id length .*"
-            ),
-        ):
-            validate_structure(z.store)
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
 
 
 def test_open_storelike(tmp_path):
