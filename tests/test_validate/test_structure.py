@@ -41,7 +41,6 @@ def z() -> zarr.Group:
         include_y=True,
         include_x=True,
     )
-    store, attrs = create_simple_2d_geff()
     return zarr.open_group(store)
 
 
@@ -102,6 +101,11 @@ class Test_validate_nodes_group:
         ):
             _validate_nodes_group(node_group, meta)
 
+    def test_ids_not_int(self, node_group, meta):
+        node_group[_path.IDS] = node_group[_path.IDS][:].astype("float")
+        with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
+            _validate_nodes_group(node_group, meta)
+
     # Other cases are caught in tests for _validate_props_group
 
 
@@ -160,6 +164,17 @@ class Test_validate_props_group:
                 "which does not match id length .*"
             ),
         ):
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
+
+    def test_missing_dtype(self, node_group):
+        # missing arrays must be boolean
+        key = "score"
+        node_group[f"{_path.PROPS}/{key}/{_path.MISSING}"] = np.zeros(
+            node_group[f"{_path.PROPS}/{key}/{_path.VALUES}"].shape, dtype="float"
+        )
+        id_len = node_group[_path.IDS].shape[0]
+
+        with pytest.raises(ValueError, match=f"Node property '{key}' missing must be boolean"):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node")
 
 
