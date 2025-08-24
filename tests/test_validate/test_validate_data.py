@@ -37,6 +37,13 @@ class Test_validate_data:
         with pytest.raises(ValueError, match="Repeated edges found in data"):
             validate_zarr_data(self.memory_geff)
 
+    def test_unique_node_ids(self, monkeypatch):
+        monkeypatch.setattr(
+            geff.validate.data, "validate_unique_node_ids", lambda node_ids: (False, [])
+        )
+        with pytest.raises(ValueError, match="Some node ids are not unique"):
+            validate_zarr_data(self.memory_geff)
+
 
 class Test_validate_optional_data:
     def test_sphere(self):

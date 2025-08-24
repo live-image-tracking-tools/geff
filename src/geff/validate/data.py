@@ -8,6 +8,7 @@ from geff.validate.graph import (
     validate_no_repeated_edges,
     validate_no_self_edges,
     validate_nodes_for_edges,
+    validate_unique_node_ids,
 )
 from geff.validate.shapes import validate_ellipsoid, validate_sphere
 from geff.validate.tracks import (
@@ -28,6 +29,10 @@ def validate_zarr_data(memory_geff: InMemoryGeff) -> None:
     """
     node_ids = memory_geff["node_ids"]
     edge_ids = memory_geff["edge_ids"]
+
+    valid, nonunique_nodes = validate_unique_node_ids(node_ids)
+    if not valid:
+        raise ValueError(f"Some node ids are not unique:\n{nonunique_nodes}")
 
     valid, invalid_edges = validate_nodes_for_edges(node_ids, edge_ids)
     if not valid:
