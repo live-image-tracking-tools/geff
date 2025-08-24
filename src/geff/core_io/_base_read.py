@@ -236,6 +236,7 @@ def read_to_memory(
         validate_data (bool, optional): Flag indicating whether to perform validation on the
             underlying data of the geff, e.g. edges. Defaults to False.
         validate_opt_data (ValidationConfig, optional): Optional configuration for which
+            optional types of data to validate
         node_props (iterable of str, optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
         edge_props (iterable of str, optional): The names of the edge properties to load,
