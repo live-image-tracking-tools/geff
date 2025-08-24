@@ -130,6 +130,7 @@ def from_ctc_to_geff(
                 n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
                 expand_dims = (np.newaxis,) * len(n_1_padding)
 
+            # Warning is triggered when the zarr_format argument is ignored by zarr 2
             with warnings.catch_warnings():
                 warnings.filterwarnings(
                     "ignore",
