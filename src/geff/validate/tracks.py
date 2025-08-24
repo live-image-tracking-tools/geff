@@ -79,7 +79,7 @@ def validate_tracklets(
         if len(preds_in_G) == 1:
             predecessor = preds_in_G[0]
             # If the predecessor is also part of a linear segment...
-            if G.out_degree(predecessor) == 1:  # pyright: ignore[reportCallIssue]
+            if G.out_degree(predecessor) == 1:  # pyright: ignore[reportArgumentType]
                 errors.append(
                     f"Tracklet {t_id}: Not maximal. Path can extend backward to node {predecessor}."
                 )
@@ -90,7 +90,7 @@ def validate_tracklets(
         if len(succs_in_G) == 1:
             successor = succs_in_G[0]
             # If the successor is also part of a linear segment...
-            if G.in_degree(successor) == 1:  # pyright: ignore[reportCallIssue]
+            if G.in_degree(successor) == 1:  # pyright: ignore[reportArgumentType]
                 errors.append(
                     f"Tracklet {t_id}: Not maximal. Path can extend forward to node {successor}."
                 )
