@@ -51,7 +51,9 @@ def ctc_tiffs_to_zarr(
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="ignoring keyword argument 'zarr_format'")
+        warnings.filterwarnings(
+            "ignore", message=r".*ignoring keyword argument.*zarr_format.*", category=UserWarning
+        )
         array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
 
 
