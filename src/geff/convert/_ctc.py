@@ -14,6 +14,8 @@ try:
 except ImportError as e:
     raise ImportError("Please install with geff[ctc] to use this module.") from e
 
+import warnings
+
 import numpy as np
 import zarr
 from zarr.storage import StoreLike
@@ -48,8 +50,9 @@ def ctc_tiffs_to_zarr(
         n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
-
-    array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="ignoring keyword argument 'zarr_format'")
+        array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
 
 
 def from_ctc_to_geff(
