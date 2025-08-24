@@ -50,6 +50,7 @@ def ctc_tiffs_to_zarr(
         n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
+    # Warning is triggered when the zarr_format argument is ignored by zarr 2
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore", message=r".*ignoring keyword argument.*zarr_format.*", category=UserWarning
