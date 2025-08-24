@@ -56,7 +56,7 @@ def validate_nodes_for_edges(node_ids: ArrayLike, edge_ids: ArrayLike) -> tuple[
     mask = valid_src & valid_tgt
 
     # Find invalid edges
-    invalid_edges = np.asarray([tuple(edge) for edge in edge_ids[~mask]])
+    invalid_edges = edge_ids[~mask]
     all_edges_valid = len(invalid_edges) == 0
     return all_edges_valid, invalid_edges
 
