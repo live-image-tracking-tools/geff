@@ -114,7 +114,7 @@ def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> No
     node_ids = expect_array(nodes_group, _path.IDS, _path.NODES)
 
     # Node ids must be int dtype
-    if not np.issubdtype(node_ids.dtype, np.integer) or any(np.asarray(node_ids) < 0):
+    if not np.issubdtype(np.dtype(node_ids.dtype), np.unsignedinteger):
         raise ValueError("Node ids must have an integer dtype")
 
     id_len = node_ids.shape[0]

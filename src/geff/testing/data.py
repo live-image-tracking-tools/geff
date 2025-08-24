@@ -72,7 +72,7 @@ if TYPE_CHECKING:
 
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
-NodeIdDTypeStr = Literal["int", "int8", "uint8", "int16", "uint16"]
+NodeIdDTypeStr = Literal["uint", "uint8", "uint16", "uint32", "uint64"]
 Axes = Literal["t", "z", "y", "x"]
 
 
@@ -510,7 +510,7 @@ def create_simple_2d_geff(
             >>> # graph is a networkx Graph with 2D spatial data (x, y, t)
     """
     return create_memory_mock_geff(
-        node_id_dtype="int",
+        node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
         num_nodes=num_nodes,
@@ -569,7 +569,7 @@ def create_simple_3d_geff(
             >>> x, y, z, t = node_data['x'], node_data['y'], node_data['z'], node_data['t']
     """
     return create_memory_mock_geff(
-        node_id_dtype="int",
+        node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
         num_nodes=num_nodes,
@@ -617,7 +617,7 @@ def create_simple_temporal_geff(
             >>> # Each node has only 't' coordinate, no x, y, z
     """
     return create_memory_mock_geff(
-        node_id_dtype="int",
+        node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
         num_nodes=num_nodes,

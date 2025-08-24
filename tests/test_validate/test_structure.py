@@ -28,7 +28,7 @@ from geff.validate.structure import (
 @pytest.fixture
 def z() -> zarr.Group:
     store, attrs = create_memory_mock_geff(
-        node_id_dtype="int",
+        node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=False,
         num_nodes=10,
