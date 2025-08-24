@@ -105,6 +105,11 @@ class Test_validate_nodes_group:
         with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
             _validate_nodes_group(node_group, meta)
 
+        # Must be positive integers
+        node_group[_path.IDS] = node_group[_path.IDS][:] * -1
+        with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
+            _validate_nodes_group(node_group, meta)
+
     # Other cases are caught in tests for _validate_props_group
 
 
