@@ -1809,30 +1809,27 @@ None all node properties will be loaded.</p>
           <div class="doc-overloads">
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;networkx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
-    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nx</span><span class="o">.</span><span class="n">Graph</span> <span class="o">|</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;rustworkx&quot;</span><span class="p">],</span>
-    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">PyGraph</span> <span class="o">|</span> <span class="n">rx</span><span class="o">.</span><span class="n">PyDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;spatial-graph&quot;</span><span class="p">],</span>
-    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
@@ -1841,12 +1838,11 @@ None all node properties will be loaded.</p>
 </code></pre></div>          </div>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">backend</span><span class="p">:</span> <span class="n">SupportedBackend</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
-    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">backend_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>
@@ -1886,7 +1882,7 @@ the .attrs contains the geff  metadata.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>validate</code>
+                <code>structure_validation</code>
             </td>
             <td>
                   <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
@@ -1955,24 +1951,7 @@ is "networkx".</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>validate_data</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Flag indicating whether to perform validation on the
-underlying data of the geff, e.g. edges. Defaults to False.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>validate_opt_data</code>
+                <code>data_validation</code>
             </td>
             <td>
                   <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
@@ -1980,7 +1959,7 @@ underlying data of the geff, e.g. edges. Defaults to False.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional configuration for which
-optional types of data to validate</p>
+optional types of data to validate. Each option defaults to False.</p>
               </div>
             </td>
             <td>
@@ -2045,11 +2024,10 @@ the backend when reading the data.</p>
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_nx</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>
 
@@ -2089,7 +2067,7 @@ itself. Opens in append mode, so will only overwrite geff-controlled groups.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>validate</code>
+                <code>structure_validation</code>
             </td>
             <td>
                   <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
@@ -2141,24 +2119,7 @@ if None all properties will be loaded, defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>validate_data</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Flag indicating whether to perform validation on the
-underlying data of the geff, e.g. edges. Defaults to False.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>validate_opt_data</code>
+                <code>data_validation</code>
             </td>
             <td>
                   <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
@@ -2166,7 +2127,7 @@ underlying data of the geff, e.g. edges. Defaults to False.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional configuration for which
-optional types of data to validate</p>
+optional types of data to validate. Each option defaults to false.</p>
               </div>
             </td>
             <td>
@@ -2214,11 +2175,10 @@ optional types of data to validate</p>
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_rx</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">PyGraph</span> <span class="o">|</span> <span class="n">rx</span><span class="o">.</span><span class="n">PyDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>
 
@@ -2261,7 +2221,7 @@ This can be used to map back to the original geff node ids.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>validate</code>
+                <code>structure_validation</code>
             </td>
             <td>
                   <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
@@ -2311,24 +2271,7 @@ if None all properties will be loaded, defaults to None.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>validate_data</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Flag indicating whether to perform validation on the
-underlying data of the geff, e.g. edges. Defaults to False.</p>
-              </div>
-            </td>
-            <td>
-                  <code>False</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>validate_opt_data</code>
+                <code>data_validation</code>
             </td>
             <td>
                   <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
@@ -2336,7 +2279,7 @@ underlying data of the geff, e.g. edges. Defaults to False.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional configuration for which
-optional types of data to validate</p>
+optional types of data to validate. Each option defaults to False.</p>
               </div>
             </td>
             <td>
@@ -2384,12 +2327,11 @@ optional types of data to validate</p>
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_sg</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">validate_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate_opt_data</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
     <span class="n">sg</span><span class="o">.</span><span class="n">SpatialGraph</span> <span class="o">|</span> <span class="n">sg</span><span class="o">.</span><span class="n">SpatialDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span>
 <span class="p">]</span>
@@ -2404,7 +2346,7 @@ missing arrays will be ignored, with a warning raised.</p>
 <pre><code>store (Path | str | zarr store):
     The path to the root of the geff zarr, where the .attrs contains
     the geff  metadata.
-validate (bool, optional):
+structure_validation (bool, optional):
     Flag indicating whether to perform validation on the geff file
     before loading into memory. If set to False and there are format
     issues, will likely fail with a cryptic error. Defaults to True.
@@ -2417,10 +2359,8 @@ node_props (list of str, optional):
 edge_props (list of str, optional):
     The names of the edge properties to load, if None all properties
     will be loaded, defaults to None.
-validate_data (bool, optional): Flag indicating whether to perform validation on the
-    underlying data of the geff, e.g. edges. Defaults to False.
-validate_opt_data (ValidationConfig, optional): Optional configuration for which
-    optional types of data to validate
+data_validation (ValidationConfig, optional): Optional configuration for which
+    optional types of data to validate. Each option defaults to False.
 </code></pre>
 
 

@@ -790,18 +790,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.validate.data.validate_optional_data" class="md-nav__link">
+  <a href="#geff.validate.data.validate_data" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_optional_data
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.validate.data.validate_zarr_data" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_zarr_data
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_data
     </span>
   </a>
   
@@ -994,18 +985,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.validate.data.validate_optional_data" class="md-nav__link">
+  <a href="#geff.validate.data.validate_data" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_optional_data
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.validate.data.validate_zarr_data" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_zarr_data
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_data
     </span>
   </a>
   
@@ -1067,19 +1049,19 @@
 <div class="doc doc-object doc-function">
 
 
-<h4 id="geff.validate.data.validate_optional_data" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_optional_data</span>
+<h4 id="geff.validate.data.validate_data" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_data</span>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_optional_data</span><span class="p">(</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">ValidationConfig</span><span class="p">,</span> <span class="n">memory_geff</span><span class="p">:</span> <span class="n">InMemoryGeff</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_data</span><span class="p">(</span>
+    <span class="n">memory_geff</span><span class="p">:</span> <span class="n">InMemoryGeff</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ValidationConfig</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Run data validation on optional data types based on the input</p>
+        <p>Validate the data of a geff based on the options selected in ValidationConfig</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1093,6 +1075,23 @@
         </tr>
       </thead>
       <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>memory_geff</code>
+            </td>
+            <td>
+                  <code><span title="geff._typing.InMemoryGeff">InMemoryGeff</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An InMemoryGeff which contains metadata and
+dictionaries of node/edge property arrays</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
           <tr class="doc-section-item">
             <td>
                 <code>config</code>
@@ -1103,75 +1102,6 @@
             <td>
               <div class="doc-md-description">
                 <p>Configuration for which validation to run</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>memory_geff</code>
-            </td>
-            <td>
-                  <code><span title="geff._typing.InMemoryGeff">InMemoryGeff</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A graphdict object which contains metadata and
-dictionaries of node/edge property arrays</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="geff.validate.data.validate_zarr_data" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_zarr_data</span>
-
-
-</h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_zarr_data</span><span class="p">(</span><span class="n">memory_geff</span><span class="p">:</span> <span class="n">InMemoryGeff</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Checks whether the graph meets spec requirements</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>memory_geff</code>
-            </td>
-            <td>
-                  <code><span title="geff._typing.InMemoryGeff">InMemoryGeff</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>An InMemoryGeff object which contains metadata and
-dictionaries of node/edge property arrays</p>
               </div>
             </td>
             <td>
