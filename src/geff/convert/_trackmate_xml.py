@@ -519,7 +519,7 @@ def _build_data(
                 # Removal of filtered spots / nodes.
                 if discard_filtered_spots:
                     # Those nodes belong to no tracks: they have a degree of 0.
-                    lone_nodes = [n for n, d in graph.degree if d == 0]  # pyright: ignore[reportArgumentType]
+                    lone_nodes = [n for n, d in graph.degree if d == 0]  # pyright: ignore[reportGeneralTypeIssues]
                     graph.remove_nodes_from(lone_nodes)
 
             # Filtering out tracks.
@@ -529,7 +529,7 @@ def _build_data(
                 if discard_filtered_tracks:
                     to_remove = [
                         n
-                        for n, t in graph.nodes(data="TRACK_ID")
+                        for n, t in graph.nodes(data="TRACK_ID")  # pyright: ignore[reportGeneralTypeIssues]
                         if t is None or t not in id_to_keep
                     ]
                     graph.remove_nodes_from(to_remove)
