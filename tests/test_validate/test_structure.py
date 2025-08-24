@@ -17,7 +17,6 @@ from geff.testing.data import (
     create_memory_mock_geff,
     create_simple_2d_geff,
 )
-from geff.validate.data import validate_zarr_data
 from geff.validate.structure import (
     _validate_axes_structure,
     _validate_edges_group,
@@ -274,13 +273,3 @@ class Test_validate_axes_structure:
         z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
         with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
             _validate_axes_structure(z, meta)
-
-
-def test_validate_zarr_data():
-    # We're not currently going to test/raise all of the ValueErrors
-    # because each of the sub functions is tested independently
-
-    store, _ = create_simple_2d_geff()
-    graph_dict = read_to_memory(store, validate=False)
-
-    validate_zarr_data(graph_dict)

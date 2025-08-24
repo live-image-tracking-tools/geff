@@ -188,4 +188,4 @@ def test_read_to_memory():
     # Mostly testing that conditionals run correctly since functionality is tested elsewhere
     store, attrs = create_simple_2d_geff()
 
-    read_to_memory(store, validate_data=True, validate_opt_data=ValidationConfig())
+    read_to_memory(store, structure_validation=True, data_validation=ValidationConfig())

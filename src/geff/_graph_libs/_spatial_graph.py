@@ -117,12 +117,11 @@ def write_sg(
 
 def read_sg(
     store: StoreLike,
-    validate: bool = True,
+    structure_validation: bool = True,
     position_attr: str = "position",
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-    validate_data: bool = False,
-    validate_opt_data: ValidationConfig | None = None,
+    data_validation: ValidationConfig | None = None,
 ) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]:
     """Read a geff file into a SpatialGraph.
 
@@ -134,7 +133,7 @@ def read_sg(
         store (Path | str | zarr store):
             The path to the root of the geff zarr, where the .attrs contains
             the geff  metadata.
-        validate (bool, optional):
+        structure_validation (bool, optional):
             Flag indicating whether to perform validation on the geff file
             before loading into memory. If set to False and there are format
             issues, will likely fail with a cryptic error. Defaults to True.
@@ -147,17 +146,15 @@ def read_sg(
         edge_props (list of str, optional):
             The names of the edge properties to load, if None all properties
             will be loaded, defaults to None.
-        validate_data (bool, optional): Flag indicating whether to perform validation on the
-            underlying data of the geff, e.g. edges. Defaults to False.
-        validate_opt_data (ValidationConfig, optional): Optional configuration for which
-            optional types of data to validate
+        data_validation (ValidationConfig, optional): Optional configuration for which
+            optional types of data to validate. Each option defaults to False.
 
     Returns:
         A tuple containing the spatial_graph graph and the metadata.
     """
 
     in_memory_geff = read_to_memory(
-        store, validate, node_props, edge_props, validate_data, validate_opt_data
+        store, structure_validation, node_props, edge_props, data_validation
     )
     graph = construct_sg(**in_memory_geff, position_attr=position_attr)
 

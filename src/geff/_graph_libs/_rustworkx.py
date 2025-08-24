@@ -251,11 +251,10 @@ def construct_rx(
 
 def read_rx(
     store: StoreLike,
-    validate: bool = True,
+    structure_validation: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-    validate_data: bool = False,
-    validate_opt_data: ValidationConfig | None = None,
+    data_validation: ValidationConfig | None = None,
 ) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]:
     """Read a geff file into a rustworkx graph.
     Metadata properties will be stored in the graph.attrs dict
@@ -267,21 +266,19 @@ def read_rx(
 
     Args:
         store: The path/str to the geff zarr, or the store itself.
-        validate: Whether to validate the geff file.
+        structure_validation: Whether to validate the geff file.
         node_props: The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
         edge_props: The names of the edge properties to load,
             if None all properties will be loaded, defaults to None.
-        validate_data (bool, optional): Flag indicating whether to perform validation on the
-            underlying data of the geff, e.g. edges. Defaults to False.
-        validate_opt_data (ValidationConfig, optional): Optional configuration for which
-            optional types of data to validate
+        data_validation (ValidationConfig, optional): Optional configuration for which
+            optional types of data to validate. Each option defaults to False.
 
     Returns:
         A tuple containing the rustworkx graph and the metadata.
     """
     graph_dict = read_to_memory(
-        store, validate, node_props, edge_props, validate_data, validate_opt_data
+        store, structure_validation, node_props, edge_props, data_validation
     )
     graph = construct_rx(**graph_dict)
 

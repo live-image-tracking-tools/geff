@@ -108,36 +108,33 @@ def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
 @overload
 def read(
     store: StoreLike,
-    validate: bool = True,
+    structure_validation: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
     backend: Literal["networkx"] = "networkx",
-    validate_data: bool = False,
-    validate_opt_data: ValidationConfig | None = None,
+    data_validation: ValidationConfig | None = None,
 ) -> tuple[nx.Graph | nx.DiGraph, GeffMetadata]: ...
 
 
 @overload
 def read(
     store: StoreLike,
-    validate: bool,
+    structure_validation: bool,
     node_props: list[str] | None,
     edge_props: list[str] | None,
     backend: Literal["rustworkx"],
-    validate_data: bool = False,
-    validate_opt_data: ValidationConfig | None = None,
+    data_validation: ValidationConfig | None = None,
 ) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]: ...
 
 
 @overload
 def read(
     store: StoreLike,
-    validate: bool,
+    structure_validation: bool,
     node_props: list[str] | None,
     edge_props: list[str] | None,
     backend: Literal["spatial-graph"],
-    validate_data: bool = False,
-    validate_opt_data: ValidationConfig | None = None,
+    data_validation: ValidationConfig | None = None,
     *,
     position_attr: str = "position",
 ) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]: ...
@@ -145,12 +142,11 @@ def read(
 
 def read(
     store: StoreLike,
-    validate: bool = True,
+    structure_validation: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
     backend: SupportedBackend = "networkx",
-    validate_data: bool = False,
-    validate_opt_data: ValidationConfig | None = None,
+    data_validation: ValidationConfig | None = None,
     **backend_kwargs: Any,
 ) -> tuple[Any, GeffMetadata]:
     """
@@ -159,7 +155,7 @@ def read(
     Args:
         store (StoreLike): The path or zarr store to the root of the geff zarr, where
             the .attrs contains the geff  metadata.
-        validate (bool, optional): Flag indicating whether to perform validation on the
+        structure_validation (bool, optional): Flag indicating whether to perform validation on the
             geff file before loading into memory. If set to False and there are
             format issues, will likely fail with a cryptic error. Defaults to True.
         node_props (list of str, optional): The names of the node properties to load,
@@ -168,10 +164,8 @@ def read(
             if None all properties will be loaded, defaults to None.
         backend ({"networkx", "rustworkx", "spatial-graph"}): Flag for the chosen backend, default
             is "networkx".
-        validate_data (bool, optional): Flag indicating whether to perform validation on the
-            underlying data of the geff, e.g. edges. Defaults to False.
-        validate_opt_data (ValidationConfig, optional): Optional configuration for which
-            optional types of data to validate
+        data_validation (ValidationConfig, optional): Optional configuration for which
+            optional types of data to validate. Each option defaults to False.
         backend_kwargs (Any): Additional kwargs that may be accepted by
             the backend when reading the data.
 
@@ -180,7 +174,7 @@ def read(
     """
     construct_func = get_construct_func(backend)
     in_memory_geff = read_to_memory(
-        store, validate, node_props, edge_props, validate_data, validate_opt_data
+        store, structure_validation, node_props, edge_props, data_validation
     )
     return (
         construct_func(**in_memory_geff, **backend_kwargs),

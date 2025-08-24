@@ -20,49 +20,44 @@ if TYPE_CHECKING:
     from geff._typing import InMemoryGeff
 
 
-def validate_zarr_data(memory_geff: InMemoryGeff) -> None:
-    """Checks whether the graph meets spec requirements
-
-    Args:
-        memory_geff (InMemoryGeff): An InMemoryGeff object which contains metadata and
-            dictionaries of node/edge property arrays
-    """
-    node_ids = memory_geff["node_ids"]
-    edge_ids = memory_geff["edge_ids"]
-
-    valid, nonunique_nodes = validate_unique_node_ids(node_ids)
-    if not valid:
-        raise ValueError(f"Some node ids are not unique:\n{nonunique_nodes}")
-
-    valid, invalid_edges = validate_nodes_for_edges(node_ids, edge_ids)
-    if not valid:
-        raise ValueError(f"Some edges are missing nodes:\n{invalid_edges}")
-
-    valid, invalid_edges = validate_no_self_edges(edge_ids)
-    if not valid:
-        raise ValueError(f"Self edges found in data:\n{invalid_edges}")
-
-    valid, invalid_edges = validate_no_repeated_edges(edge_ids)
-    if not valid:
-        raise ValueError(f"Repeated edges found in data:\n{invalid_edges}")
-
-
 class ValidationConfig(BaseModel):
+    graph: bool = False
     sphere: bool = False
     ellipsoid: bool = False
     lineage: bool = False
     tracklet: bool = False
 
 
-def validate_optional_data(config: ValidationConfig, memory_geff: InMemoryGeff) -> None:
-    """Run data validation on optional data types based on the input
+def validate_data(memory_geff: InMemoryGeff, config: ValidationConfig) -> None:
+    """Validate the data of a geff based on the options selected in ValidationConfig
 
     Args:
-        config (ValidationConfig): Configuration for which validation to run
-        memory_geff (InMemoryGeff): A graphdict object which contains metadata and
+        memory_geff (InMemoryGeff): An InMemoryGeff which contains metadata and
             dictionaries of node/edge property arrays
+        config (ValidationConfig): Configuration for which validation to run
     """
     meta = memory_geff["metadata"]
+
+    if config.graph:
+        node_ids = memory_geff["node_ids"]
+        edge_ids = memory_geff["edge_ids"]
+
+        valid, nonunique_nodes = validate_unique_node_ids(node_ids)
+        if not valid:
+            raise ValueError(f"Some node ids are not unique:\n{nonunique_nodes}")
+
+        valid, invalid_edges = validate_nodes_for_edges(node_ids, edge_ids)
+        if not valid:
+            raise ValueError(f"Some edges are missing nodes:\n{invalid_edges}")
+
+        valid, invalid_edges = validate_no_self_edges(edge_ids)
+        if not valid:
+            raise ValueError(f"Self edges found in data:\n{invalid_edges}")
+
+        valid, invalid_edges = validate_no_repeated_edges(edge_ids)
+        if not valid:
+            raise ValueError(f"Repeated edges found in data:\n{invalid_edges}")
+
     if config.sphere and meta.sphere is not None:
         radius = memory_geff["node_props"][meta.sphere]["values"]
         validate_sphere(radius)

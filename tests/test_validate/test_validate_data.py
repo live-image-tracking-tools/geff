@@ -4,16 +4,16 @@ import pytest
 import geff.validate.data
 from geff.core_io._base_read import read_to_memory
 from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
-from geff.validate.data import ValidationConfig, validate_optional_data, validate_zarr_data
+from geff.validate.data import ValidationConfig, validate_data
 
 
 class Test_validate_data:
     store, attrs = create_simple_2d_geff()
     memory_geff = read_to_memory(store)
 
-    def test_valid(self):
+    def test_valid_graph(self):
         # test valid
-        validate_zarr_data(self.memory_geff)
+        validate_data(self.memory_geff, ValidationConfig(graph=True))
 
     def test_nodes_for_edges(self, monkeypatch):
         # error on validate_nodes_for_edges
@@ -21,31 +21,29 @@ class Test_validate_data:
             geff.validate.data, "validate_nodes_for_edges", lambda node_ids, edge_ids: (False, [])
         )
         with pytest.raises(ValueError, match="Some edges are missing nodes"):
-            validate_zarr_data(self.memory_geff)
+            validate_data(self.memory_geff, ValidationConfig(graph=True))
 
     def test_no_self_edges(self, monkeypatch):
         monkeypatch.setattr(
             geff.validate.data, "validate_no_self_edges", lambda edge_ids: (False, [])
         )
         with pytest.raises(ValueError, match="Self edges found in data"):
-            validate_zarr_data(self.memory_geff)
+            validate_data(self.memory_geff, ValidationConfig(graph=True))
 
     def test_no_repeated_edges(self, monkeypatch):
         monkeypatch.setattr(
             geff.validate.data, "validate_no_repeated_edges", lambda edge_ids: (False, [])
         )
         with pytest.raises(ValueError, match="Repeated edges found in data"):
-            validate_zarr_data(self.memory_geff)
+            validate_data(self.memory_geff, ValidationConfig(graph=True))
 
     def test_unique_node_ids(self, monkeypatch):
         monkeypatch.setattr(
             geff.validate.data, "validate_unique_node_ids", lambda node_ids: (False, [])
         )
         with pytest.raises(ValueError, match="Some node ids are not unique"):
-            validate_zarr_data(self.memory_geff)
+            validate_data(self.memory_geff, ValidationConfig(graph=True))
 
-
-class Test_validate_optional_data:
     def test_sphere(self):
         # Invalid spheres are tested in test_shapes
         # Only need to test a valid case
@@ -65,7 +63,7 @@ class Test_validate_optional_data:
         # Add sphere metadata
         memory_geff["metadata"].sphere = "radius"
 
-        validate_optional_data(config=ValidationConfig(sphere=True), memory_geff=memory_geff)
+        validate_data(config=ValidationConfig(sphere=True), memory_geff=memory_geff)
 
     def test_ellipsoid(self):
         # Invalid ellipsoids are tested in test_shapes
@@ -91,7 +89,7 @@ class Test_validate_optional_data:
         covar[:, 1, 1] = 2
         memory_geff["node_props"]["covariance2d"]["values"] = covar
 
-        validate_optional_data(config=ValidationConfig(ellipsoid=True), memory_geff=memory_geff)
+        validate_data(config=ValidationConfig(ellipsoid=True), memory_geff=memory_geff)
 
     def test_tracklet(self, monkeypatch):
         # validate_tracklets is tested in test_graph
@@ -116,7 +114,7 @@ class Test_validate_optional_data:
         monkeypatch.setattr(geff.validate.data, "validate_tracklets", lambda x, y, z: (False, []))
 
         with pytest.raises(ValueError, match="Found invalid tracklets"):
-            validate_optional_data(config=ValidationConfig(tracklet=True), memory_geff=memory_geff)
+            validate_data(config=ValidationConfig(tracklet=True), memory_geff=memory_geff)
 
     def test_lineages(self, monkeypatch):
         # validate_lineages is tested in test_graph
@@ -141,4 +139,4 @@ class Test_validate_optional_data:
         monkeypatch.setattr(geff.validate.data, "validate_lineages", lambda x, y, z: (False, []))
 
         with pytest.raises(ValueError, match="Found invalid lineages"):
-            validate_optional_data(config=ValidationConfig(lineage=True), memory_geff=memory_geff)
+            validate_data(config=ValidationConfig(lineage=True), memory_geff=memory_geff)
