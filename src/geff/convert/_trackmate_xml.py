@@ -520,7 +520,7 @@ def _build_data(
                 if discard_filtered_spots:
                     # Those nodes belong to no tracks: they have a degree of 0.
                     # TODO: remove ignore, see issue 314
-                    lone_nodes = [n for n, d in graph.degree if d == 0]  # pyright: ignore[reportGeneralTypeIssues] 
+                    lone_nodes = [n for n, d in graph.degree if d == 0]  # pyright: ignore[reportGeneralTypeIssues]
                     graph.remove_nodes_from(lone_nodes)
 
             # Filtering out tracks.
