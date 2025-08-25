@@ -2,6 +2,58 @@
 
 This module provides functions to create mock geff graphs for testing and development.
 It includes both simple convenience functions and a comprehensive function for advanced use cases.
+
+
+Examples:
+    # Simple 2D graph with defaults
+    >>> store, memory_geff = create_simple_2d_geff()
+    >>> # Creates: 10 nodes, 15 edges, undirected, 2D (x, y, t)
+
+    # Simple 3D graph with custom size
+    >>> store, memory_geff = create_simple_3d_geff(num_nodes=20, num_edges=30)
+    >>> # Creates: 20 nodes, 30 edges, undirected, 3D (x, y, z, t)
+
+    # Advanced usage with full control
+    >>> store, memory_geff = create_mock_geff(
+    ...     node_id_dtype="int",
+    ...     node_axis_dtypes={"position": "float64", "time": "float32"},
+    ...     directed=True,
+    ...     num_nodes=5,
+    ...     num_edges=8,
+    ...     extra_node_props={"label": "str", "confidence": "float64"},
+    ...     extra_edge_props={"score": "float64", "color": "uint8",
+    ...           "weight": "float64", "type": "str"},
+    ...     include_t=True,
+    ...     include_z=False,  # 2D only
+    ...     include_y=True,
+    ...     include_x=True,
+    ... )
+
+    # Advanced usage with custom arrays
+    >>> import numpy as np
+    >>> custom_labels = np.array(["A", "B", "C", "D", "E"])
+    >>> custom_scores = np.array([0.1, 0.5, 0.8, 0.3, 0.9])
+    >>> custom_edge_weights = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
+    >>> store, memory_geff = create_mock_geff(
+    ...     node_id_dtype="int",
+    ...     node_axis_dtypes={"position": "float64", "time": "float64"},
+    ...     directed=False,
+    ...     num_nodes=5,
+    ...     num_edges=8,
+    ...     extra_node_props={"label": custom_labels, "score": custom_scores,
+    ...         "confidence": "float64"},
+    ...     extra_edge_props={"weight": custom_edge_weights, "type": "str"},
+    ...     include_t=True,
+    ...     include_z=False,
+    ...     include_y=True,
+    ...     include_x=True,
+    ... )
+
+    # To construct an graph with a backend graph lib
+    >>> # Import construct function of your choice
+    >>> store, memory_geff = create_simple_2d_geff()
+    >>> graph = construct_nx(**memory_geff)
+    >>> # graph is a networkx Graph ready for analysis
 """
 
 from __future__ import annotations
