@@ -8,6 +8,7 @@ import zarr
 from geff import _path
 from geff.core_io._utils import expect_array, expect_group, open_storelike, remove_tilde
 from geff.metadata._schema import GeffMetadata
+from geff.validate.data import ValidationConfig, validate_data
 from geff.validate.structure import validate_structure
 
 if TYPE_CHECKING:
@@ -214,9 +215,10 @@ class GeffReader:
 #   added to this function to select between them.
 def read_to_memory(
     source: StoreLike,
-    validate: bool = True,
+    structure_validation: bool = True,
     node_props: Iterable[str] | None = None,
     edge_props: Iterable[str] | None = None,
+    data_validation: ValidationConfig | None = None,
 ) -> InMemoryGeff:
     """
     Read a GEFF zarr file to into memory as a series of numpy arrays in a dictionary.
@@ -227,9 +229,11 @@ def read_to_memory(
     Args:
         source (str | Path | zarr store): Either a path to the root of the geff zarr
             (where the .attrs contains the geff metadata), or a zarr store object
-        validate (bool, optional): Flag indicating whether to perform validation on the
-            geff file before loading into memory. If set to False and there are
-            format issues, will likely fail with a cryptic error. Defaults to True.
+        structure_validation (bool, optional): Flag indicating whether to perform metadata/structure
+            validation on the geff file before loading into memory. If set to False and
+            there are format issues, will likely fail with a cryptic error. Defaults to True.
+        data_validation (ValidationConfig, optional): Optional configuration for which
+            optional types of data to validate. Each option defaults to False.
         node_props (iterable of str, optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
         edge_props (iterable of str, optional): The names of the edge properties to load,
@@ -240,10 +244,14 @@ def read_to_memory(
         (metadata, node_ids, edge_ids, node_props, edge_props)
     """
 
-    file_reader = GeffReader(source, validate)
+    file_reader = GeffReader(source, structure_validation)
 
     file_reader.read_node_props(node_props)
     file_reader.read_edge_props(edge_props)
 
     in_memory_geff = file_reader.build()
+
+    if data_validation is not None:
+        validate_data(config=data_validation, memory_geff=in_memory_geff)
+
     return in_memory_geff
