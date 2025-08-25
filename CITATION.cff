@@ -4,12 +4,12 @@ title: 'GEFF: Graph Exchange File Format'
 authors:
   - given-names: Morgan
     family-names: Schwartz
-    affiliation: Janelia Research Campus
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
     orcid: https://orcid.org/0000-0001-8131-9125
     alias: msschwartz21
   - given-names: Caroline
     family-names: Malin-Mayor
-    affiliation: Janelia Research Campus
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
     orcid: https://orcid.org/0000-0002-9627-6030
     alias: cmalinmayor
   - given-names: Talley
@@ -24,7 +24,7 @@ authors:
     alias: TeunHuijben
   - given-names: Jan
     family-names: Funke
-    affiliation: Janelia Research Campus
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
     orcid: https://orcid.org/0000-0003-4388-7783
     alias: funkey
   - given-names: Laura
@@ -34,7 +34,7 @@ authors:
     alias: lxenard
   - given-names: Mark
     family-names: Kittisopikul
-    affiliation: Janelia Research Campus
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
     orcid: https://orcid.org/0000-0002-9558-6248
     alias: mkitti
   - given-names: Draga
