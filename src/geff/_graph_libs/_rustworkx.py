@@ -24,10 +24,14 @@ from geff.metadata.utils import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
+
+GRAPH_TYPES = (rx.PyGraph, rx.PyDiGraph)
 
 
 def get_roi_rx(
@@ -158,33 +162,31 @@ def write_rx(
     metadata.write(store)
 
 
-def construct_rx(
+def construct(
     metadata: GeffMetadata,
     node_ids: NDArray[Any],
     edge_ids: NDArray[Any],
     node_props: dict[str, PropDictNpArray],
     edge_props: dict[str, PropDictNpArray],
-) -> rx.PyDiGraph | rx.PyGraph:
+) -> rx.PyGraph | rx.PyDiGraph:
     """
-    Convert a InMemoryGeff to a rustworkx graph.
-    The graph will have a `to_rx_id_map` attribute that maps geff node ids
-    to rustworkx node indices.
+    Construct a `rustworkx` graph instance from GEFF data.
 
     Args:
         metadata (GeffMetadata): The metadata of the graph.
-        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+        node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
             edge_ids.
-        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+        edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
             as node_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+        node_props (dict[str, PropDictNpArray]): A dictionary
             from node property names to (values, missing) arrays, which should have same
             length as node_ids.
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+        edge_props (dict[str, PropDictNpArray]): A dictionary
             from edge property names to (values, missing) arrays, which should have same
             length as edge_ids.
 
     Returns:
-        rx.PyGraph: A rustworkx graph.
+        (rx.PyGraph | rx.PyDiGraph): A `rustworkx` graph object.
     """
     metadata = metadata
 
@@ -273,7 +275,77 @@ def read_rx(
     Returns:
         A tuple containing the rustworkx graph and the metadata.
     """
-    graph_dict = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct_rx(**graph_dict)
+    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
+    graph = construct(**in_memory_geff)
 
-    return graph, graph_dict["metadata"]
+    return graph, in_memory_geff["metadata"]
+
+
+def get_node_ids(graph: rx.PyGraph | rx.PyDiGraph) -> Sequence[Any]:
+    """
+    Get the node ids of the graph.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+
+    Returns:
+        node_ids (Sequence[Any]): The node ids.
+    """
+    return list(graph.node_indices())
+
+
+def get_edge_ids(graph: rx.PyGraph | rx.PyDiGraph) -> Sequence[tuple[Any, Any]]:
+    """
+    Get the edges of the graph.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+
+    Returns:
+        edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
+    """
+    return list(graph.edge_list())
+
+
+def get_node_prop(
+    graph: rx.PyGraph | rx.PyDiGraph,
+    name: str,
+    nodes: Sequence[Any],
+    metadata: GeffMetadata,
+) -> NDArray[Any]:
+    """
+    Get a property of the nodes as a numpy array.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+        name (str): The name of the node property.
+        nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
+            array.
+        metadata (GeffMetadata): The GEFF metadata.
+
+    Returns:
+        numpy.ndarray: The values of the selected property as a numpy array.
+    """
+    return np.array([graph[node][name] for node in nodes])
+
+
+def get_edge_prop(
+    graph: rx.PyGraph | rx.PyDiGraph,
+    name: str,
+    edges: Sequence[tuple[Any, Any]],
+    metadata: GeffMetadata,
+) -> NDArray[Any]:
+    """
+    Get a property of the edges as a numpy array.
+
+    Args:
+        graph (nx.Graph | nx.DiGraph): The graph object.
+        name (str): The name of the edge property.
+        edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
+            determines the order of the property array.
+        metadata (GeffMetadata): The GEFF metadata.
+
+    Returns:
+        numpy.ndarray: The values of the selected property as a numpy array.
+    """
+    return np.array([graph.get_edge_data(*edge)[name] for edge in edges])
