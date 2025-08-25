@@ -136,9 +136,9 @@ def _detect_zarr_spec_version(store: StoreLike) -> int | None:
             # For store objects, try to detect based on metadata
             group = zarr.open_group(store, mode="r")
             # In zarr v3, metadata is stored differently
-            if hasattr(group, "_zarr_format") and group._zarr_format == 3:
+            if hasattr(group, "_zarr_format") and group._zarr_format == 3:  # pyright: ignore
                 return 3
-            elif hasattr(group, "_zarr_format") and group._zarr_format == 2:
+            elif hasattr(group, "_zarr_format") and group._zarr_format == 2:  # pyright: ignore
                 return 2
     except Exception:
         # If we can't detect, return None
