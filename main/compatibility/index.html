@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/main/what-is-geff/">
+        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/main/compatibility/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../command-line-tools/">
       
       
-        <link rel="next" href="../specification/">
+        <link rel="next" href="../convert/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>What is geff? - geff</title>
+        <title>Compatible Libraries - geff</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#what-is-geff" class="md-skip">
+        <a href="#compatible-libraries" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              What is geff?
+              Compatible Libraries
             
           </span>
         </div>
@@ -247,32 +247,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    What is geff?
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../what-is-geff/" class="md-nav__link">
         
   
   
@@ -283,35 +261,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#design-decisions-and-assumptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Design Decisions and Assumptions
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -386,10 +335,19 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../compatibility/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -400,6 +358,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -997,23 +956,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#design-decisions-and-assumptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Design Decisions and Assumptions
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -1031,18 +973,19 @@
   
 
 
-<h1 id="what-is-geff">What is geff?</h1>
-<p><code>geff</code> is a graph exchange file format that seeks to fulfill the following needs:</p>
+<h1 id="compatible-libraries">Compatible Libraries</h1>
+<p>The following libraries can read and/or write GEFF files:</p>
 <ul>
-<li>Provide a storage/exchange format for graphs and optional segmentation</li>
-<li>Provide a common API with reference implementations for use in other projects</li>
-</ul>
-<h2 id="design-decisions-and-assumptions">Design Decisions and Assumptions</h2>
-<ul>
-<li>Raw image data is not included in the <code>geff</code> spec. However, to keep nodes linked to segmentation labels, support for specifying the seg_id of each node in a standard way, along with the path to the segmentation, are included in the <code>spec</code>.</li>
-<li>Since <code>geff</code> is an exchange format, we do not provide support for searching or filtering.</li>
-<li>We do not provide support for editing or changing the graph on the fly.</li>
-<li>In order to support efficient reading/writing, we assume the graph can fit into memory.</li>
+<li><a href="https://github.com/funkelab/motile_tracker"><code>motile-tracker</code></a></li>
+<li><a href="https://github.com/live-image-tracking-tools/traccuracy/pulls"><code>traccuracy</code></a></li>
+<li><a href="https://github.com/royerlab/ultrack"><code>ultrack</code></a></li>
+<li><a href="https://github.com/fjorka/track_gardener"><code>track_gardener</code></a></li>
+<li><a href="https://github.com/yfukai/laptrack"><code>laptrack</code></a></li>
+<li><a href="https://github.com/weigertlab/trackastra"><code>trackastra</code></a></li>
+<li><a href="https://imagej.net/plugins/trackmate/"><code>TrackMate</code></a></li>
+<li><a href="https://github.com/royerlab/inTRACKtive"><code>InTRACKtive</code></a></li>
+<li><a href="https://github.com/royerlab/tracksdata"><code>tracksdata</code></a></li>
+<li><a href="https://github.com/live-image-tracking-tools/napari-geff"><code>napari-geff</code></a></li>
 </ul>
 
 
