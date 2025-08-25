@@ -1029,7 +1029,12 @@
 <h2 id="trackmate-xml">Trackmate XML</h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>TODO add description of what is currently missing for lossless conversion from trackmate to geff</p>
+<p>Conversion from TrackMate XML to GEFF is currently NOT lossless, but we are working on it.    <br />
+The output GEFF is missing:</p>
+<ul>
+<li>for each spot, the coordinates of its ROI (segmentation)</li>
+<li>for each track, the value of its features (e.g., <code>TRACK_DISPLACEMENT</code>, <code>TRACK_MEAN_SPEED</code>)</li>
+</ul>
 </div>
 <p>To convert a Trackmat XML file to GEFF using the <code>geff</code> cli, see the docs for <a class="autorefs autorefs-internal" href="../command-line-tools/#convert-trackmate-xml"><code>geff convert-trackmate-xml</code></a>.</p>
 <p>To use the <code>geff</code> python API, see the docs for <a class="autorefs autorefs-internal" title="            from_trackmate_xml_to_geff" href="../reference/geff/convert/#geff.convert.from_trackmate_xml_to_geff"><code>from_trackmate_xml_to_geff</code></a>.</p>
