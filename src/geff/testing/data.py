@@ -2,73 +2,24 @@
 
 This module provides functions to create mock geff graphs for testing and development.
 It includes both simple convenience functions and a comprehensive function for advanced use cases.
-
-Examples:
-    # Simple 2D graph with defaults
-    >>> store, props = create_simple_2d_geff()
-    >>> # Creates: 10 nodes, 15 edges, undirected, 2D (x, y, t)
-
-    # Simple 3D graph with custom size
-    >>> store, props = create_simple_3d_geff(num_nodes=20, num_edges=30)
-    >>> # Creates: 20 nodes, 30 edges, undirected, 3D (x, y, z, t)
-
-    # Advanced usage with full control
-    >>> store, props = create_memory_mock_geff(
-    ...     node_id_dtype="int",
-    ...     node_axis_dtypes={"position": "float64", "time": "float32"},
-    ...     directed=True,
-    ...     num_nodes=5,
-    ...     num_edges=8,
-    ...     extra_node_props={"label": "str", "confidence": "float64"},
-    ...     extra_edge_props={"score": "float64", "color": "uint8",
-    ...           "weight": "float64", "type": "str"},
-    ...     include_t=True,
-    ...     include_z=False,  # 2D only
-    ...     include_y=True,
-    ...     include_x=True,
-    ... )
-
-    # Advanced usage with custom arrays
-    >>> import numpy as np
-    >>> custom_labels = np.array(["A", "B", "C", "D", "E"])
-    >>> custom_scores = np.array([0.1, 0.5, 0.8, 0.3, 0.9])
-    >>> custom_edge_weights = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8])
-    >>> store, props = create_memory_mock_geff(
-    ...     node_id_dtype="int",
-    ...     node_axis_dtypes={"position": "float64", "time": "float64"},
-    ...     directed=False,
-    ...     num_nodes=5,
-    ...     num_edges=8,
-    ...     extra_node_props={"label": custom_labels, "score": custom_scores,
-    ...         "confidence": "float64"},
-    ...     extra_edge_props={"weight": custom_edge_weights, "type": "str"},
-    ...     include_t=True,
-    ...     include_z=False,
-    ...     include_y=True,
-    ...     include_x=True,
-    ... )
-
-    # Using with GeffReader
-    >>> from geff import GeffReader
-    >>> store, props = create_simple_2d_geff()
-    >>> reader = GeffReader(store)
-    >>> graph = reader.read_nx()
-    >>> # graph is a networkx Graph ready for analysis
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, get_args
 
-import networkx as nx
 import numpy as np
 import zarr
 import zarr.storage
 
-import geff
+from geff.core_io._base_write import write_arrays
+from geff.metadata._schema import _axes_from_lists
+from geff.metadata.utils import create_or_update_metadata
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from geff._typing import InMemoryGeff, PropDictNpArray
 
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
@@ -76,27 +27,12 @@ NodeIdDTypeStr = Literal["uint", "uint8", "uint16", "uint32", "uint64"]
 Axes = Literal["t", "z", "y", "x"]
 
 
-class GraphAttrs(TypedDict):
-    nodes: NDArray[Any]
-    edges: NDArray[Any]
-    t: NDArray[Any]
-    z: NDArray[Any]
-    y: NDArray[Any]
-    x: NDArray[Any]
-    extra_node_props: dict[str, NDArray[Any]]
-    extra_edge_props: dict[str, NDArray[Any]]
-    directed: bool
-    axis_names: tuple[Axes, ...]
-    axis_units: tuple[str, ...]
-    axis_types: tuple[str, ...]
-
-
 class ExampleNodeAxisPropsDtypes(TypedDict):
     position: DTypeStr
     time: DTypeStr
 
 
-def create_dummy_graph_props(
+def create_dummy_in_mem_geff(
     node_id_dtype: NodeIdDTypeStr,
     node_axis_dtypes: ExampleNodeAxisPropsDtypes,
     directed: bool,
@@ -108,7 +44,7 @@ def create_dummy_graph_props(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
-) -> GraphAttrs:
+) -> InMemoryGeff:
     """Create dummy graph properties for testing.
 
     Args:
@@ -125,7 +61,7 @@ def create_dummy_graph_props(
         include_x: Whether to include x dimension
 
     Returns:
-        Dictionary containing all graph properties
+        InMemoryGeff containing all graph properties
     """
     # Build axis_names, axis_units, and axis_types based on which dimensions to include
     axis_names_list = []
@@ -154,31 +90,32 @@ def create_dummy_graph_props(
 
     # Generate nodes with flexible count
     nodes = np.arange(num_nodes, dtype=node_id_dtype)
+    node_props: dict[str, PropDictNpArray] = {}
 
     # Generate spatiotemporal coordinates with flexible dimensions
-    t = (
-        np.array(
-            [(i * 5 // num_nodes) + 1 for i in range(num_nodes)],
-            dtype=node_axis_dtypes["time"],
-        )
-        if include_t
-        else np.array([], dtype="float64")  # Default dtype when time not included
-    )
-    z = (
-        np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
-        if include_z
-        else np.array([], dtype="float64")  # Default dtype when position not included
-    )
-    y = (
-        np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"])
-        if include_y
-        else np.array([], dtype="float64")  # Default dtype when position not included
-    )
-    x = (
-        np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
-        if include_x
-        else np.array([], dtype="float64")  # Default dtype when position not included
-    )
+    if include_t:
+        node_props["t"] = {
+            "values": np.array(
+                [(i * 5 // num_nodes) + 1 for i in range(num_nodes)],
+                dtype=node_axis_dtypes["time"],
+            ),
+            "missing": None,
+        }
+    if include_z:
+        node_props["z"] = {
+            "values": np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
+            "missing": None,
+        }
+    if include_y:
+        node_props["y"] = {
+            "values": np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"]),
+            "missing": None,
+        }
+    if include_x:
+        node_props["x"] = {
+            "values": np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
+            "missing": None,
+        }
 
     # Generate edges with flexible count (ensure we don't exceed possible edges)
     max_possible_edges = (
@@ -258,8 +195,8 @@ def create_dummy_graph_props(
                                 break
 
     edges = np.array(edges_, dtype=node_id_dtype)
+
     # Generate extra node properties
-    extra_node_props_dict = {}
     if extra_node_props is not None:
         # Validate input is a dict
         if not isinstance(extra_node_props, dict):
@@ -285,28 +222,25 @@ def create_dummy_graph_props(
 
                 # Generate different patterns for different property types
                 if prop_dtype == "str":
-                    extra_node_props_dict[prop_name] = np.array(
+                    values = np.array(
                         [f"{prop_name}_{i}" for i in range(num_nodes)], dtype=prop_dtype
                     )
                 elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
-                    extra_node_props_dict[prop_name] = np.arange(num_nodes, dtype=prop_dtype)
+                    values = np.arange(num_nodes, dtype=prop_dtype)
                 else:  # float types
-                    extra_node_props_dict[prop_name] = np.linspace(
-                        0.1, 1.0, num_nodes, dtype=prop_dtype
-                    )
+                    values = np.linspace(0.1, 1.0, num_nodes, dtype=prop_dtype)
+                node_props[prop_name] = {"values": values, "missing": None}
 
             elif isinstance(prop_value, np.ndarray):
                 # Use provided array directly
-                custom_array = prop_value
-
                 # Validate array length matches num_nodes
-                if len(custom_array) != num_nodes:
+                if len(prop_value) != num_nodes:
                     raise ValueError(
-                        f"extra_node_props[{prop_name}] array length {len(custom_array)} "
+                        f"extra_node_props[{prop_name}] array length {len(prop_value)} "
                         f"does not match num_nodes {num_nodes}"
                     )
 
-                extra_node_props_dict[prop_name] = custom_array
+                node_props[prop_name] = {"values": prop_value, "missing": None}
 
             else:
                 raise ValueError(
@@ -315,7 +249,7 @@ def create_dummy_graph_props(
                 )
 
     # Generate edge properties
-    edge_props_dict = {}
+    edge_props_dict: dict[str, PropDictNpArray] = {}
 
     # Generate edge properties from extra_edge_props
     if extra_edge_props is not None:
@@ -343,26 +277,26 @@ def create_dummy_graph_props(
 
                 # Generate different patterns for different property types
                 if prop_dtype == "str":
-                    edge_props_dict[prop_name] = np.array(
+                    values = np.array(
                         [f"{prop_name}_{i}" for i in range(len(edges))], dtype=prop_dtype
                     )
                 elif prop_dtype in ["int", "int8", "uint8", "int16", "uint16"]:
-                    edge_props_dict[prop_name] = np.arange(len(edges), dtype=prop_dtype)
+                    values = np.arange(len(edges), dtype=prop_dtype)
                 else:  # float types
-                    edge_props_dict[prop_name] = np.linspace(0.1, 1.0, len(edges), dtype=prop_dtype)
+                    values = np.linspace(0.1, 1.0, len(edges), dtype=prop_dtype)
+
+                edge_props_dict[prop_name] = {"values": values, "missing": None}
 
             elif isinstance(prop_value, np.ndarray):
                 # Use provided array directly
-                custom_array = prop_value
-
                 # Validate array length matches num_edges
-                if len(custom_array) != len(edges):
+                if len(prop_value) != len(edges):
                     raise ValueError(
-                        f"extra_edge_props[{prop_name}] array length {len(custom_array)} "
+                        f"extra_edge_props[{prop_name}] array length {len(prop_value)} "
                         f"does not match number of edges {len(edges)}"
                     )
 
-                edge_props_dict[prop_name] = custom_array
+                edge_props_dict[prop_name] = {"values": prop_value, "missing": None}
 
             else:
                 raise ValueError(
@@ -370,23 +304,23 @@ def create_dummy_graph_props(
                     f"got {type(prop_value)}"
                 )
 
+    axes = _axes_from_lists(
+        axis_names,
+        axis_units=axis_units,
+        axis_types=axis_types,
+    )
+    metadata = create_or_update_metadata(metadata=None, is_directed=directed, axes=axes)
+
     return {
-        "nodes": nodes,
-        "edges": edges,
-        "t": t,
-        "z": z,
-        "y": y,
-        "x": x,
-        "extra_node_props": extra_node_props_dict,
-        "extra_edge_props": edge_props_dict,
-        "directed": directed,
-        "axis_names": axis_names,
-        "axis_units": axis_units,
-        "axis_types": axis_types,
+        "metadata": metadata,
+        "node_ids": nodes,
+        "edge_ids": edges,
+        "node_props": node_props,
+        "edge_props": edge_props_dict,
     }
 
 
-def create_memory_mock_geff(
+def create_mock_geff(
     node_id_dtype: NodeIdDTypeStr,
     node_axis_dtypes: ExampleNodeAxisPropsDtypes,
     directed: bool,
@@ -398,8 +332,8 @@ def create_memory_mock_geff(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
-) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
-    """Create a mock geff graph in memory and return the zarr store and graph properties.
+) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
+    """Create a mock geff in memory and return the zarr store and the in memory geff.
 
     Args:
         node_id_dtype: Data type for node IDs
@@ -415,9 +349,9 @@ def create_memory_mock_geff(
         include_x: Whether to include x dimension
 
     Returns:
-        Tuple of (zarr store in memory, graph properties dictionary)
+        Tuple of (zarr store in memory, InMemoryGeff)
     """
-    graph_props = create_dummy_graph_props(
+    memory_geff = create_dummy_in_mem_geff(
         node_id_dtype=node_id_dtype,
         node_axis_dtypes=node_axis_dtypes,
         directed=directed,
@@ -431,52 +365,18 @@ def create_memory_mock_geff(
         include_x=include_x,
     )
 
-    # write graph with networkx api
-    graph = nx.DiGraph() if directed else nx.Graph()
-
-    for idx, node in enumerate(graph_props["nodes"]):
-        props = {
-            name: prop_array[idx] for name, prop_array in graph_props["extra_node_props"].items()
-        }
-        node_attrs = {}
-
-        # Only add spatial dimensions that are included
-        if include_t and len(graph_props["t"]) > 0:
-            node_attrs["t"] = graph_props["t"][idx]
-        if include_z and len(graph_props["z"]) > 0:
-            node_attrs["z"] = graph_props["z"][idx]
-        if include_y and len(graph_props["y"]) > 0:
-            node_attrs["y"] = graph_props["y"][idx]
-        if include_x and len(graph_props["x"]) > 0:
-            node_attrs["x"] = graph_props["x"][idx]
-
-        graph.add_node(node, **node_attrs, **props)
-
-    for idx, edge in enumerate(graph_props["edges"]):
-        props = {
-            name: prop_array[idx] for name, prop_array in graph_props["extra_edge_props"].items()
-        }
-        graph.add_edge(*edge.tolist(), **props)
-
     # Create memory store and write graph to it
     store = zarr.storage.MemoryStore()
+    write_arrays(store, **memory_geff)
 
-    geff.write_nx(
-        graph,
-        store,
-        axis_names=list(graph_props["axis_names"]),
-        axis_units=list(graph_props["axis_units"]),
-        axis_types=list(graph_props["axis_types"]),
-    )
-
-    return store, graph_props
+    return store, memory_geff
 
 
 def create_simple_2d_geff(
     num_nodes: int = 10,
     num_edges: int = 15,
     directed: bool = False,
-) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
+) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
     """Create a simple 2D geff graph with default settings.
 
     This is a convenience function for creating basic 2D graphs without having to
@@ -488,28 +388,9 @@ def create_simple_2d_geff(
         directed: Whether the graph is directed (default: False)
 
     Returns:
-        Tuple of (zarr store in memory, graph properties dictionary)
-
-    Examples:
-        Basic usage with defaults:
-            >>> store, props = create_simple_2d_geff()
-            >>> # store is a zarr.MemoryStore with 10 nodes, 15 edges
-
-        Custom graph size:
-            >>> store, props = create_simple_2d_geff(num_nodes=5, num_edges=8)
-            >>> # store has 5 nodes, 8 edges
-
-        Directed graph:
-            >>> store, props = create_simple_2d_geff(directed=True)
-            >>> # Creates a directed graph
-
-        Using with GeffReader:
-            >>> store, props = create_simple_2d_geff()
-            >>> reader = GeffReader(store)
-            >>> graph = reader.read_nx()
-            >>> # graph is a networkx Graph with 2D spatial data (x, y, t)
+        Tuple of (zarr store in memory, InMemoryGeff)
     """
-    return create_memory_mock_geff(
+    return create_mock_geff(
         node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
@@ -527,7 +408,7 @@ def create_simple_3d_geff(
     num_nodes: int = 10,
     num_edges: int = 15,
     directed: bool = False,
-) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
+) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
     """Create a simple 3D geff graph with default settings.
 
     This is a convenience function for creating basic 3D graphs without having to
@@ -539,36 +420,9 @@ def create_simple_3d_geff(
         directed: Whether the graph is directed (default: False)
 
     Returns:
-        Tuple of (zarr store in memory, graph properties dictionary)
-
-    Examples:
-        Basic usage with defaults:
-            >>> store, props = create_simple_3d_geff()
-            >>> # store is a zarr.MemoryStore with 10 nodes, 15 edges
-
-        Custom graph size:
-            >>> store, props = create_simple_3d_geff(num_nodes=5, num_edges=8)
-            >>> # store has 5 nodes, 8 edges
-
-        Directed graph:
-            >>> store, props = create_simple_3d_geff(directed=True)
-            >>> # Creates a directed graph
-
-        Using with GeffReader:
-            >>> store, props = create_simple_3d_geff()
-            >>> reader = GeffReader(store)
-            >>> graph = reader.read_nx()
-            >>> # graph is a networkx Graph with 3D spatial data (x, y, z, t)
-
-        Accessing spatial coordinates:
-            >>> store, props = create_simple_3d_geff()
-            >>> reader = GeffReader(store)
-            >>> graph = reader.read_nx()
-            >>> # Each node has x, y, z, t coordinates
-            >>> node_data = graph.nodes[0]
-            >>> x, y, z, t = node_data['x'], node_data['y'], node_data['z'], node_data['t']
+        Tuple of (zarr store in memory, InMemoryGeff)
     """
-    return create_memory_mock_geff(
+    return create_mock_geff(
         node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
@@ -586,7 +440,7 @@ def create_simple_temporal_geff(
     num_nodes: int = 10,
     num_edges: int = 15,
     directed: bool = False,
-) -> tuple[zarr.storage.MemoryStore, GraphAttrs]:
+) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
     """Create a simple geff graph with only time dimension (no spatial dimensions).
 
     This function creates a graph with nodes, edges, and time coordinates,
@@ -598,25 +452,9 @@ def create_simple_temporal_geff(
         directed: Whether the graph is directed (default: False)
 
     Returns:
-        Tuple of (zarr store in memory, graph properties dictionary)
-
-    Examples:
-        Basic usage with defaults:
-            >>> store, props = create_simple_temporal_geff()
-            >>> # store is a zarr.MemoryStore with 10 nodes, 15 edges, time only
-
-        Custom graph size:
-            >>> store, props = create_simple_temporal_geff(num_nodes=5, num_edges=8)
-            >>> # store has 5 nodes, 8 edges, time only
-
-        Using with GeffReader:
-            >>> store, props = create_simple_temporal_geff()
-            >>> reader = GeffReader(store)
-            >>> graph = reader.read_nx()
-            >>> # graph is a networkx Graph with only time data
-            >>> # Each node has only 't' coordinate, no x, y, z
+        Tuple of (zarr store in memory, InMemoryGeff)
     """
-    return create_memory_mock_geff(
+    return create_mock_geff(
         node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=directed,
