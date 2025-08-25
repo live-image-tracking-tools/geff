@@ -144,7 +144,6 @@ ALLOWED_NUMPY_DTYPES: set[npt.DTypeLike] = {
     np.bytes_,
     np.str_,
 }
-VAR_LEN_DTYPE = "varlength"
 
 
 def validate_data_type(data_type: Any) -> bool:
@@ -168,8 +167,6 @@ def validate_data_type(data_type: Any) -> bool:
     >>> validate_data_type(_np.float16)
     False
     """
-    if data_type == VAR_LEN_DTYPE:
-        return True
     try:
         return np.dtype(data_type).type in ALLOWED_NUMPY_DTYPES
     except TypeError:
