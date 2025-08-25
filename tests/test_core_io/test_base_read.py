@@ -3,7 +3,9 @@ import pytest
 
 from geff import GeffReader
 from geff._graph_libs._networkx import construct_nx
-from geff.testing.data import create_memory_mock_geff
+from geff.core_io._base_read import read_to_memory
+from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
+from geff.validate.data import ValidationConfig
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_axis_dtypes = [
@@ -180,3 +182,10 @@ def test_read_edge_props() -> None:
     )
 
     _ = construct_nx(**in_memory_geff)
+
+
+def test_read_to_memory():
+    # Mostly testing that conditionals run correctly since functionality is tested elsewhere
+    store, attrs = create_simple_2d_geff()
+
+    read_to_memory(store, structure_validation=True, data_validation=ValidationConfig())
