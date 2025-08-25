@@ -932,6 +932,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/geff/validate/data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>data
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/geff/validate/graph/" class="md-nav__link">
         
   
@@ -961,6 +984,29 @@
   
   <span class="md-ellipsis">
     <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>segmentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/shapes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes
     
   </span>
   
@@ -1248,7 +1294,7 @@
 
 
 <h1 id="geff-specification">Geff specification</h1>
-<p>The graph exchange file format is <code>zarr</code> based. A graph is stored in a zarr group, which can have any name. This allows storing multiple <code>geff</code> graphs inside the same zarr root directory. A <code>geff</code> group is identified by the presence of a <code>geff</code> key in the <code>.zattrs</code>. Other <code>geff</code> metadata is also stored in the <code>.zattrs</code> file of the <code>geff</code> group, nested under the <code>geff</code> key. The <code>geff</code> group must contain a <code>nodes</code> group and an <code>edges</code> group (albeit both can be empty). <code>geff</code> graphs have the option to provide properties for <code>nodes</code> and <code>edges</code>.</p>
+<p>The graph exchange file format is <code>zarr</code> based. A graph is stored in a zarr group, which can have any name. However the name of the group can include the <code>.geff</code> suffix to indicate that the group contains <code>geff</code> data. This allows storing multiple <code>geff</code> graphs inside the same zarr root directory. A <code>geff</code> group is identified by the presence of a <code>geff</code> key in the <code>.zattrs</code>. Other <code>geff</code> metadata is also stored in the <code>.zattrs</code> file of the <code>geff</code> group, nested under the <code>geff</code> key. The <code>geff</code> group must contain a <code>nodes</code> group and an <code>edges</code> group (albeit both can be empty). <code>geff</code> graphs have the option to provide properties for <code>nodes</code> and <code>edges</code>.</p>
 <p><code>geff</code> graphs have the option to provide time and spatial dimensions as special attributes. These attributes are specified in the <code>axes</code> section of the metadata, inspired by the OME-zarr <code>axes</code> specification. </p>
 <h2 id="zarr-specification">Zarr specification</h2>
 <p>Currently, <code>geff</code> supports zarr specifications <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html">2</a> and <a href="https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html">3</a>. However, <code>geff</code> will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.</p>
@@ -5931,7 +5977,7 @@ length mechanism.</p>
 <h2 id="the-nodes-group">The <code>nodes</code> group</h2>
 <p>The nodes group will contain an <code>ids</code> array and optionally a <code>props</code> group. </p>
 <h3 id="the-ids-array">The <code>ids</code> array</h3>
-<p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt;= 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs can have any type supported by zarr (except floats), but we recommend integer dtypes. For large graphs, <code>uint64</code> might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the <code>ids</code> array will be present but empty. </p>
+<p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt;= 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs must have an unsigned integer dtype. For large graphs, <code>uint64</code> might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the <code>ids</code> array will be present but empty. </p>
 <h3 id="the-props-group-and-node-property-groups">The <code>props</code> group and <code>node property</code> groups</h3>
 <p>The <code>nodes\props</code> group is optional and will contain one or more <code>node property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
 <ul>
@@ -5975,7 +6021,7 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
 <h2 id="example-file-structure-and-metadata">Example file structure and metadata</h2>
 <p>Here is a schematic of the expected file structure.
 <div class="highlight"><pre><span></span><code><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">.</span><span class="n">zarr</span>
-    <span class="o">/</span><span class="n">tracking_graph</span>
+    <span class="o">/</span><span class="n">tracking_graph</span><span class="o">.</span><span class="n">geff</span>
         <span class="o">.</span><span class="n">zattrs</span>  <span class="c1"># graph metadata with `geff_version`</span>
         <span class="n">nodes</span><span class="o">/</span>
             <span class="n">ids</span>  <span class="c1"># shape: (N,)  dtype: uint64</span>

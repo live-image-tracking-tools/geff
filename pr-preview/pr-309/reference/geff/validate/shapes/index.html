@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/reference/geff/validate/structure/">
+        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/reference/geff/validate/shapes/">
       
       
-        <link rel="prev" href="../shapes/">
+        <link rel="prev" href="../segmentation/">
       
       
-        <link rel="next" href="../tracks/">
+        <link rel="next" href="../structure/">
       
       
       <link rel="icon" href="../../../../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>geff.validate.structure - geff</title>
+        <title>geff.validate.shapes - geff</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#geff.validate.structure" class="md-skip">
+        <a href="#geff.validate.shapes" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              geff.validate.structure
+              geff.validate.shapes
             
           </span>
         </div>
@@ -800,29 +800,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../shapes/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -838,7 +815,7 @@
   
   
   <span class="md-ellipsis">
-    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>structure
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes
     
   </span>
   
@@ -851,7 +828,7 @@
   
   
   <span class="md-ellipsis">
-    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>structure
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes
     
   </span>
   
@@ -872,19 +849,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geff.validate.structure" class="md-nav__link">
+  <a href="#geff.validate.shapes" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;structure
+      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;shapes
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" structure">
+    <nav class="md-nav" aria-label=" shapes">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.validate.structure.validate_structure" class="md-nav__link">
+  <a href="#geff.validate.shapes.validate_ellipsoid" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_structure
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_ellipsoid
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.validate.shapes.validate_sphere" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_sphere
     </span>
   </a>
   
@@ -899,6 +885,29 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>structure
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -975,19 +984,28 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geff.validate.structure" class="md-nav__link">
+  <a href="#geff.validate.shapes" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;structure
+      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;shapes
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" structure">
+    <nav class="md-nav" aria-label=" shapes">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#geff.validate.structure.validate_structure" class="md-nav__link">
+  <a href="#geff.validate.shapes.validate_ellipsoid" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_structure
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_ellipsoid
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.validate.shapes.validate_sphere" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_sphere
     </span>
   </a>
   
@@ -1014,14 +1032,14 @@
 
 
 
-  <h1><code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>structure</h1>
+  <h1><code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes</h1>
 
 <div class="doc doc-object doc-module">
 
 
 
-<h3 id="geff.validate.structure" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">geff.validate.structure</span>
+<h3 id="geff.validate.shapes" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">geff.validate.shapes</span>
 
 
 </h3>
@@ -1049,17 +1067,21 @@
 <div class="doc doc-object doc-function">
 
 
-<h4 id="geff.validate.structure.validate_structure" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_structure</span>
+<h4 id="geff.validate.shapes.validate_ellipsoid" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_ellipsoid</span>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_structure</span><span class="p">(</span><span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_ellipsoid</span><span class="p">(</span>
+    <span class="n">covariance</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Axis</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Ensure that the structure of the zarr conforms to geff specification</p>
+        <p>Validate that ellipsoid data has a valid covariance matrix</p>
+<p>The first axis of the covariance array corresponds to the number of nodes. The
+remaining axes correspond to the number of spatial axes.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1075,14 +1097,30 @@
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>store</code>
+                <code>covariance</code>
             </td>
             <td>
-                  <code>str | Path | zarr store</code>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Check the geff zarr, either str/Path/store</p>
+                <p>Covariance array stored as values for an ellipsoid property</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>axes</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-internal" title="            Axis (geff.metadata._schema.Axis)" href="../../metadata/#geff.metadata.Axis">Axis</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of Axis metadata</p>
               </div>
             </td>
             <td>
@@ -1108,17 +1146,131 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If geff specs are violated</p>
+                <p>Must define space axes in order to have ellipsoid data</p>
               </div>
             </td>
           </tr>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError">FileNotFoundError</a></code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If store is not a valid zarr store or path doesn't exist</p>
+                <p>Ellipsoid covariance matrix must have 1 + number of spatial dimensions</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Spatial dimensions of covariance matrix must be equal</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ellipsoid covariance matrices must be symmetric</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Ellipsoid covariance matrices must be positive-definite</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="geff.validate.shapes.validate_sphere" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_sphere</span>
+
+
+</h4>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_sphere</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Validate that sphere data has nonzero radii and is 1d</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>radius</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Values array of a sphere property</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sphere radius values must be non-negative</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sphere radius values must be 1D</p>
               </div>
             </td>
           </tr>
