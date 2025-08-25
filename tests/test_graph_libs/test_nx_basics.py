@@ -5,7 +5,7 @@ import zarr
 
 import geff
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
-from geff.testing.data import create_memory_mock_geff
+from geff.testing.data import create_mock_geff
 
 node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_axis_dtypes = [
@@ -35,7 +35,7 @@ def test_read_write_consistency(
     include_t,
     include_z,
 ) -> None:
-    store, graph_props = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
         extra_edge_props=extra_edge_props,
@@ -47,17 +47,22 @@ def test_read_write_consistency(
     graph, _ = geff.read_nx(store)
 
     # Check that in memory representation is consistent with what we expected to have from fixture
-    assert set(graph.nodes) == {*graph_props["nodes"].tolist()}
-    assert set(graph.edges) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
-    for idx, node in enumerate(graph_props["nodes"]):
-        if include_t and len(graph_props["t"]) > 0:
-            np.testing.assert_array_equal(graph.nodes[node.item()]["t"], graph_props["t"][idx])
-        if include_z and len(graph_props["z"]) > 0:
-            np.testing.assert_array_equal(graph.nodes[node.item()]["z"], graph_props["z"][idx])
+    assert set(graph.nodes) == {*memory_geff["node_ids"].tolist()}
+    assert set(graph.edges) == {*[tuple(edges) for edges in memory_geff["edge_ids"].tolist()]}
+    for idx, node in enumerate(memory_geff["node_ids"]):
+        if include_t and len(memory_geff["node_props"]["t"]["values"]) > 0:
+            np.testing.assert_array_equal(
+                graph.nodes[node.item()]["t"], memory_geff["node_props"]["t"]["values"][idx]
+            )
+        if include_z and len(memory_geff["node_props"]["z"]["values"]) > 0:
+            np.testing.assert_array_equal(
+                graph.nodes[node.item()]["z"], memory_geff["node_props"]["z"]["values"][idx]
+            )
         # TODO: test other dimensions
 
-    for idx, edge in enumerate(graph_props["edges"]):
-        for name, values in graph_props["extra_edge_props"].items():
+    for idx, edge in enumerate(memory_geff["edge_ids"]):
+        for name, data in memory_geff["edge_props"].items():
+            values = data["values"]
             assert graph.edges[edge.tolist()][name] == values[idx].item()
 
     # TODO: test metadata

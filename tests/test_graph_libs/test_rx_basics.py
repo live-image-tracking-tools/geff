@@ -4,7 +4,7 @@ import zarr
 
 import geff
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
-from geff.testing.data import create_memory_mock_geff
+from geff.testing.data import create_mock_geff
 
 rx = pytest.importorskip("rustworkx")
 
@@ -76,8 +76,8 @@ def test_read_write_consistency(
     include_t,
     include_z,
 ) -> None:
-    """Test rustworkx read/write consistency using create_memory_mock_geff like networkx tests."""
-    store, graph_props = create_memory_mock_geff(
+    """Test rustworkx read/write consistency using create_mock_geff like networkx tests."""
+    store, memory_geff = create_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
         extra_edge_props=extra_edge_props,
@@ -90,8 +90,8 @@ def test_read_write_consistency(
     graph, _ = geff.read_rx(store)
 
     # Verify basic structure matches the mock data
-    assert graph.num_nodes() == len(graph_props["nodes"])
-    assert graph.num_edges() == len(graph_props["edges"])
+    assert graph.num_nodes() == len(memory_geff["node_ids"])
+    assert graph.num_edges() == len(memory_geff["edge_ids"])
     assert isinstance(graph, rx.PyDiGraph) == directed
 
     # Test that nodes and edges have proper structure
@@ -101,14 +101,14 @@ def test_read_write_consistency(
         node_data = graph[rx_idx]
         assert isinstance(node_data, dict)
         node_count += 1
-    assert node_count == len(graph_props["nodes"])
+    assert node_count == len(memory_geff["node_ids"])
 
     edge_count = 0
     for edge_idx in graph.edge_indices():
         edge_data = graph.get_edge_data_by_index(edge_idx)
         assert isinstance(edge_data, dict)
         edge_count += 1
-    assert edge_count == len(graph_props["edges"])
+    assert edge_count == len(memory_geff["edge_ids"])
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
