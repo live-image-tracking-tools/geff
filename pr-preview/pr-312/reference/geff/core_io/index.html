@@ -856,6 +856,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../validate/data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>data
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../validate/graph/" class="md-nav__link">
         
   
@@ -885,6 +908,29 @@
   
   <span class="md-ellipsis">
     <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>segmentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validate/shapes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes
     
   </span>
   
@@ -1088,9 +1134,10 @@
 </h4>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_to_memory</span><span class="p">(</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InMemoryGeff</span>
 </code></pre></div>
 
@@ -1131,20 +1178,37 @@
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>validate</code>
+                <code>structure_validation</code>
             </td>
             <td>
                   <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Flag indicating whether to perform validation on the
-geff file before loading into memory. If set to False and there are
-format issues, will likely fail with a cryptic error. Defaults to True.</p>
+                <p>Flag indicating whether to perform metadata/structure
+validation on the geff file before loading into memory. If set to False and
+there are format issues, will likely fail with a cryptic error. Defaults to True.</p>
               </div>
             </td>
             <td>
                   <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>data_validation</code>
+            </td>
+            <td>
+                  <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional configuration for which
+optional types of data to validate. Each option defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
