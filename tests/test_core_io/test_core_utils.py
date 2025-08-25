@@ -55,7 +55,7 @@ class TestZarrV3Warnings:
             open_storelike(str(zarr_path))
 
 
-def test_detect_zarr_spec_version_returns_none_for_invalid_path(self) -> None:
+def test_detect_zarr_spec_version_returns_none_for_invalid_path():
     """Test that _detect_zarr_spec_version returns None for invalid paths."""
     version = _detect_zarr_spec_version("/nonexistent/path")
     assert version is None
@@ -71,8 +71,12 @@ class TestZarrV2Warnings:
 
         # Create a zarr file explicitly using spec v2
         group = setup_zarr_group(str(zarr_path), zarr_format=2)
-        group.create_array("test", shape=(10,), dtype=int)
+        group.create_dataset("test", shape=(10,), dtype=int)
 
         # Should detect as v2
         version = _detect_zarr_spec_version(str(zarr_path))
         assert version == 2
+
+    def test_warn_if_writing_zarr_format_3(self, tmp_path: Path):
+        with pytest.warns(UserWarning, match="Requesting zarr spec v3 with zarr-python v2"):
+            setup_zarr_group(tmp_path / "test.zarr", zarr_format=3)
