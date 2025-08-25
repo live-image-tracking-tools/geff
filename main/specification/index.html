@@ -932,6 +932,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/geff/validate/data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>data
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/geff/validate/graph/" class="md-nav__link">
         
   
@@ -961,6 +984,29 @@
   
   <span class="md-ellipsis">
     <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>segmentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/shapes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes
     
   </span>
   
@@ -5931,7 +5977,7 @@ length mechanism.</p>
 <h2 id="the-nodes-group">The <code>nodes</code> group</h2>
 <p>The nodes group will contain an <code>ids</code> array and optionally a <code>props</code> group. </p>
 <h3 id="the-ids-array">The <code>ids</code> array</h3>
-<p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt;= 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs can have any type supported by zarr (except floats), but we recommend integer dtypes. For large graphs, <code>uint64</code> might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the <code>ids</code> array will be present but empty. </p>
+<p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt;= 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs must have an unsigned integer dtype. For large graphs, <code>uint64</code> might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the <code>ids</code> array will be present but empty. </p>
 <h3 id="the-props-group-and-node-property-groups">The <code>props</code> group and <code>node property</code> groups</h3>
 <p>The <code>nodes\props</code> group is optional and will contain one or more <code>node property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
 <ul>
