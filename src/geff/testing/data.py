@@ -6,14 +6,14 @@ It includes both simple convenience functions and a comprehensive function for a
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, get_args
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, get_args
 
 import numpy as np
 import zarr
 import zarr.storage
 
 from geff.core_io._base_write import write_arrays
-from geff.metadata._schema import _axes_from_lists
+from geff.metadata._schema import Axis
 from geff.metadata.utils import create_or_update_metadata
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 DTypeStr = Literal["double", "int", "int8", "uint8", "int16", "uint16", "float32", "float64", "str"]
 NodeIdDTypeStr = Literal["uint", "uint8", "uint16", "uint32", "uint64"]
-Axes = Literal["t", "z", "y", "x"]
+AxesOptions = Literal["t", "z", "y", "x"]
 
 
 class ExampleNodeAxisPropsDtypes(TypedDict):
@@ -63,59 +63,49 @@ def create_dummy_in_mem_geff(
     Returns:
         InMemoryGeff containing all graph properties
     """
-    # Build axis_names, axis_units, and axis_types based on which dimensions to include
-    axis_names_list = []
-    axis_units_list = []
-    axis_types_list = []
-    if include_t:
-        axis_names_list.append("t")
-        axis_units_list.append("second")
-        axis_types_list.append("time")
-    if include_z:
-        axis_names_list.append("z")
-        axis_units_list.append("nanometer")
-        axis_types_list.append("space")
-    if include_y:
-        axis_names_list.append("y")
-        axis_units_list.append("nanometer")
-        axis_types_list.append("space")
-    if include_x:
-        axis_names_list.append("x")
-        axis_units_list.append("nanometer")
-        axis_types_list.append("space")
-
-    axis_names = cast("tuple[Axes, ...]", tuple(axis_names_list))
-    axis_units = tuple(axis_units_list)
-    axis_types = tuple(axis_types_list)
-
     # Generate nodes with flexible count
     nodes = np.arange(num_nodes, dtype=node_id_dtype)
     node_props: dict[str, PropDictNpArray] = {}
 
     # Generate spatiotemporal coordinates with flexible dimensions
+    axes: list[Axis] = []
     if include_t:
+        values = np.array(
+            [(i * 5 // num_nodes) + 1 for i in range(num_nodes)],
+            dtype=node_axis_dtypes["time"],
+        )
         node_props["t"] = {
-            "values": np.array(
-                [(i * 5 // num_nodes) + 1 for i in range(num_nodes)],
-                dtype=node_axis_dtypes["time"],
-            ),
+            "values": values,
             "missing": None,
         }
+        axes.append(Axis(name="t", type="time", unit="second", min=values.min(), max=values.max()))
     if include_z:
+        values = np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
         node_props["z"] = {
-            "values": np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
+            "values": values,
             "missing": None,
         }
+        axes.append(
+            Axis(name="z", type="space", unit="nanometer", min=values.min(), max=values.max())
+        )
     if include_y:
+        values = np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"])
         node_props["y"] = {
-            "values": np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"]),
+            "values": values,
             "missing": None,
         }
+        axes.append(
+            Axis(name="y", type="space", unit="nanometer", min=values.min(), max=values.max())
+        )
     if include_x:
+        values = np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
         node_props["x"] = {
-            "values": np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
+            "values": values,
             "missing": None,
         }
+        axes.append(
+            Axis(name="x", type="space", unit="nanometer", min=values.min(), max=values.max())
+        )
 
     # Generate edges with flexible count (ensure we don't exceed possible edges)
     max_possible_edges = (
@@ -304,11 +294,6 @@ def create_dummy_in_mem_geff(
                     f"got {type(prop_value)}"
                 )
 
-    axes = _axes_from_lists(
-        axis_names,
-        axis_units=axis_units,
-        axis_types=axis_types,
-    )
     metadata = create_or_update_metadata(metadata=None, is_directed=directed, axes=axes)
 
     return {
