@@ -22,6 +22,10 @@ class TestZarrV3Warnings:
         version = _detect_zarr_spec_version(str(zarr_path))
         assert version == 2
 
+        # Should detect as v2
+        version = _detect_zarr_spec_version(group.store)
+        assert version == 2
+
     def test_detect_zarr_spec_version_v3(self, tmp_path: Path) -> None:
         """Test detection of zarr spec v3 files created explicitly."""
         zarr_path = tmp_path / "test_v3.zarr"
@@ -32,6 +36,10 @@ class TestZarrV3Warnings:
 
         # Should detect as v3
         version = _detect_zarr_spec_version(str(zarr_path))
+        assert version == 3
+
+        # Should detect as v3
+        version = _detect_zarr_spec_version(group.store)
         assert version == 3
 
     def test_open_storelike_warns_for_v3_with_zarr_v2(self, tmp_path: Path, monkeypatch) -> None:
