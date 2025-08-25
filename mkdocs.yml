@@ -10,6 +10,8 @@ nav:
   - specification.md
   - tracking.md
   - command-line-tools.md
+  - compatibility.md
+  - convert.md
 
 theme:
   name: "material"
@@ -64,3 +66,4 @@ plugins:
 - include-markdown
 - api-autonav:
     modules: ['src/geff']
+- autorefs
