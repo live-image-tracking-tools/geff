@@ -742,6 +742,51 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#geff.testing.data--simple-2d-graph-with-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple 2D graph with defaults
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--simple-3d-graph-with-custom-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple 3D graph with custom size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--advanced-usage-with-full-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced usage with full control
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--advanced-usage-with-custom-arrays" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced usage with custom arrays
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--to-construct-an-graph-with-a-backend-graph-lib" class="md-nav__link">
+    <span class="md-ellipsis">
+      To construct an graph with a backend graph lib
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#geff.testing.data.create_dummy_in_mem_geff" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;create_dummy_in_mem_geff
@@ -1065,6 +1110,51 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#geff.testing.data--simple-2d-graph-with-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple 2D graph with defaults
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--simple-3d-graph-with-custom-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple 3D graph with custom size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--advanced-usage-with-full-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced usage with full control
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--advanced-usage-with-custom-arrays" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced usage with custom arrays
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.testing.data--to-construct-an-graph-with-a-backend-graph-lib" class="md-nav__link">
+    <span class="md-ellipsis">
+      To construct an graph with a backend graph lib
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#geff.testing.data.create_dummy_in_mem_geff" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;create_dummy_in_mem_geff
@@ -1147,6 +1237,59 @@
         <p>Test data generation utilities for geff graphs.</p>
 <p>This module provides functions to create mock geff graphs for testing and development.
 It includes both simple convenience functions and a comprehensive function for advanced use cases.</p>
+
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <h4 id="geff.testing.data--simple-2d-graph-with-defaults">Simple 2D graph with defaults</h4>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">,</span> <span class="n">memory_geff</span> <span class="o">=</span> <span class="n">create_simple_2d_geff</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Creates: 10 nodes, 15 edges, undirected, 2D (x, y, t)</span>
+</code></pre></div>
+    <h4 id="geff.testing.data--simple-3d-graph-with-custom-size">Simple 3D graph with custom size</h4>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">,</span> <span class="n">memory_geff</span> <span class="o">=</span> <span class="n">create_simple_3d_geff</span><span class="p">(</span><span class="n">num_nodes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">num_edges</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Creates: 20 nodes, 30 edges, undirected, 3D (x, y, z, t)</span>
+</code></pre></div>
+    <h4 id="geff.testing.data--advanced-usage-with-full-control">Advanced usage with full control</h4>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">,</span> <span class="n">memory_geff</span> <span class="o">=</span> <span class="n">create_mock_geff</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">node_id_dtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">node_axis_dtypes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;float64&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;float32&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">directed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_nodes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_edges</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">extra_node_props</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span> <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="s2">&quot;float64&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">extra_edge_props</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="s2">&quot;float64&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;uint8&quot;</span><span class="p">,</span>
+<span class="gp">... </span>          <span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="s2">&quot;float64&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">include_t</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">include_z</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># 2D only</span>
+<span class="gp">... </span>    <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">include_x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+</code></pre></div>
+    <h4 id="geff.testing.data--advanced-usage-with-custom-arrays">Advanced usage with custom arrays</h4>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">custom_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">custom_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">custom_edge_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">,</span> <span class="n">memory_geff</span> <span class="o">=</span> <span class="n">create_mock_geff</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">node_id_dtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">node_axis_dtypes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;float64&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;float64&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_nodes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">num_edges</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">extra_node_props</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">custom_labels</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="n">custom_scores</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="s2">&quot;float64&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">extra_edge_props</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;weight&quot;</span><span class="p">:</span> <span class="n">custom_edge_weights</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="n">include_t</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">include_z</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">include_x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+</code></pre></div>
+    <h4 id="geff.testing.data--to-construct-an-graph-with-a-backend-graph-lib">To construct an graph with a backend graph lib</h4>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Import construct function of your choice</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">store</span><span class="p">,</span> <span class="n">memory_geff</span> <span class="o">=</span> <span class="n">create_simple_2d_geff</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">graph</span> <span class="o">=</span> <span class="n">construct_nx</span><span class="p">(</span><span class="o">**</span><span class="n">memory_geff</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># graph is a networkx Graph ready for analysis</span>
+</code></pre></div>
 
 
 
