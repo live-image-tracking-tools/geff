@@ -11,8 +11,11 @@ To use the `geff` python API, see the docs for [`ctc_tiffs_to_zarr`][geff.conver
 ## Trackmate XML
 
 !!! note
+    Conversion from TrackMate XML to GEFF is currently NOT lossless, but we are working on it.      
+    The output GEFF is missing:
 
-    TODO add description of what is currently missing for lossless conversion from trackmate to geff
+    * for each spot, the coordinates of its ROI (segmentation)
+    * for each track, the value of its features (e.g., `TRACK_DISPLACEMENT`, `TRACK_MEAN_SPEED`)
 
 To convert a Trackmat XML file to GEFF using the `geff` cli, see the docs for [`geff convert-trackmate-xml`][convert-trackmate-xml].
 
