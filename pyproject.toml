@@ -44,7 +44,7 @@ ctc = [
     "tifffile>=2024.10",
 ]
 rx = ["rustworkx>=0.16.0"]
-df = ["pandas"]
+df = ["pandas>=1"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
@@ -73,7 +73,7 @@ docs = [
     "mkdocs-typer>=0.0.3",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
-    "mkdocs-autorefs"
+    "mkdocs-autorefs>=1"
 ]
 bench = [
     { include-group = "test" },
