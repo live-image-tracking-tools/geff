@@ -34,5 +34,7 @@ uv.lock
 
 /.idea
 .vscode/
+.devcontainer/
+*.code-workspace
 site
 .codspeed
