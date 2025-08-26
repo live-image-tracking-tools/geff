@@ -3,51 +3,12 @@ try:
 except ImportError as e:
     raise ImportError("'pandas' is required to use the dataframe interoperability") from e
 
+import warnings
 from pathlib import Path
 
 from zarr.storage import StoreLike
 
-from geff._typing import PropDictNpArray
 from geff.core_io._base_read import read_to_memory
-
-
-def _expand_props(
-    prop_dict: PropDictNpArray,
-    name: str,
-) -> pd.DataFrame:
-    """
-    Expand a property dictionary to a pandas DataFrame.
-    The expanded DataFrame columns are named as:
-    name_0_0, name_0_1, name_1_0, name_1_1
-    for a (N, 2, 2) array.
-
-    Args:
-        prop_dict (PropDictNpArray): The property dictionary to expand.
-        name (str): The name of the property.
-
-    Returns:
-        pd.DataFrame: The expanded property dictionary.
-    """
-
-    df = pd.DataFrame(prop_dict["values"])
-
-    if prop_dict["missing"] is not None:
-        df.mask(prop_dict["missing"], inplace=True)
-
-    # add dimensions as the format of the columns
-    # name_0_0, name_0_1, name_1_0, name_1_1, ...
-    columns = [name]
-    remaining_dims = df.shape[1:]
-    while remaining_dims:
-        new_columns = []
-        for c in columns:
-            for i in range(remaining_dims[0]):
-                new_columns.append(f"{c}_{i}")
-        columns = new_columns
-
-    df.columns = columns
-
-    return df
 
 
 def geff_to_dataframes(
@@ -56,6 +17,10 @@ def geff_to_dataframes(
     """
     Convert a GEFF store to a pandas DataFrame.
 
+    Properties with more than 2 dimensions cannot be converted and will be skipped
+    Properties with two dimensions where the second dimension is > 1 will be unpacked
+    into separate columns with the name "{prop_name}_{dim_index}"
+
     Args:
         store (StoreLike): The store to convert.
 
@@ -63,22 +28,60 @@ def geff_to_dataframes(
         tuple[pd.DataFrame, pd.DataFrame]: The nodes and edges dataframes.
     """
     memory_geff = read_to_memory(store)
+    dataframes = []
 
-    nodes_df = pd.concat(
-        [_expand_props(node_props, name) for name, node_props in memory_geff["node_props"].items()],
-        axis="columns",
-    ).set_index(memory_geff["node_ids"])
+    # Construct dictionaries to convert to dataframes
+    for data_type in ["node", "edge"]:
+        df_dict = {}
 
-    edges_df = pd.concat(
-        [_expand_props(edge_props, name) for name, edge_props in memory_geff["edge_props"].items()],
-        axis="columns",
-    ).set_index(memory_geff["edge_ids"])
+        # Extract ids
+        if data_type == "node":
+            df_dict["id"] = memory_geff["node_ids"]
+        else:
+            df_dict["source"] = memory_geff["edge_ids"][:, 0]
+            df_dict["target"] = memory_geff["edge_ids"][:, 1]
 
-    return nodes_df, edges_df
+        # Conditional necessary to making typing happy :/
+        if data_type == "node":
+            props = memory_geff["node_props"]
+        else:
+            props = memory_geff["edge_props"]
+
+        for name, prop in props.items():
+            # Squeeze out any singleton dimensions
+            values = prop["values"].squeeze()
+            ndim = len(values.shape)
+            if ndim == 2:
+                # After squeezing out singleton dimensions, second dim must be > 1
+                for i in range(values.shape[1]):
+                    df_dict[f"{name}_{i}"] = values[:, i]
+            elif ndim > 2:
+                warnings.warn(
+                    f"{data_type} {name} ({ndim}D) will not be exported to csv "
+                    "with more than 2 dimensions",
+                    stacklevel=2,
+                )
+                continue
+            else:
+                # Data is 1d
+                df_dict[name] = values
+
+            # Missing is stored as its own column since we can't mask individual dataframe columns
+            missing = prop["missing"]
+            if missing is not None and any(missing):
+                df_dict[f"{name}-missing"] = missing
+
+        dataframes.append(pd.DataFrame(df_dict))
+
+    return tuple(dataframes)
 
 
 def geff_to_csv(store: StoreLike, outpath: Path | str) -> None:
     """Convert a geff store to two csvs of nodes and edges
+
+    Properties with more than 2 dimensions cannot be exported and will be skipped
+    Properties with two dimensions where the second dimension is > 1 will be unpacked
+    into separate columns with the name "{prop_name}_{dim_index}"
 
     Args:
         store (StoreLike): Path to store or StoreLike object

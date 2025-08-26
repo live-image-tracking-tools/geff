@@ -157,7 +157,7 @@ def convert_trackmate_xml(
 
 
 @app.command()
-def convert_geff_to_csv(
+def convert_to_csv(
     store: Annotated[Path, typer.Argument(help="Path to geff group to convert")],
     outpath: Annotated[
         Path,
