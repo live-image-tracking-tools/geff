@@ -120,43 +120,45 @@ def create_dummy_in_mem_geff(
     node_props: dict[str, PropDictNpArray] = {}
 
     # Generate spatiotemporal coordinates with flexible dimensions
+    def _add_axis(name: str, ax_type: str, unit: str, values: np.ndarray) -> None:
+        node_props[name] = {"values": values, "missing": None}
+        if num_nodes > 0:
+            roimin, roimax = values.min(), values.max()
+        else:
+            roimin, roimax = None, None
+        axes.append(Axis(name=name, type=ax_type, unit=unit, min=roimin, max=roimax))
+
     axes: list[Axis] = []
     if include_t:
-        values = np.array(
-            [(i * 5 // num_nodes) + 1 for i in range(num_nodes)],
-            dtype=node_axis_dtypes["time"],
+        _add_axis(
+            name="t",
+            ax_type="time",
+            unit="second",
+            values=np.array(
+                [(i * 5 // num_nodes) + 1 for i in range(num_nodes)],
+                dtype=node_axis_dtypes["time"],
+            ),
         )
-        node_props["t"] = {
-            "values": values,
-            "missing": None,
-        }
-        axes.append(Axis(name="t", type="time", unit="second", min=values.min(), max=values.max()))
     if include_z:
-        values = np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
-        node_props["z"] = {
-            "values": values,
-            "missing": None,
-        }
-        axes.append(
-            Axis(name="z", type="space", unit="nanometer", min=values.min(), max=values.max())
+        _add_axis(
+            name="z",
+            ax_type="space",
+            unit="nanometer",
+            values=np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
         )
     if include_y:
-        values = np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"])
-        node_props["y"] = {
-            "values": values,
-            "missing": None,
-        }
-        axes.append(
-            Axis(name="y", type="space", unit="nanometer", min=values.min(), max=values.max())
+        _add_axis(
+            name="y",
+            ax_type="space",
+            unit="nanometer",
+            values=np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"]),
         )
     if include_x:
-        values = np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"])
-        node_props["x"] = {
-            "values": values,
-            "missing": None,
-        }
-        axes.append(
-            Axis(name="x", type="space", unit="nanometer", min=values.min(), max=values.max())
+        _add_axis(
+            name="x",
+            ax_type="space",
+            unit="nanometer",
+            values=np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
         )
 
     # Generate edges with flexible count (ensure we don't exceed possible edges)
