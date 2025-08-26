@@ -14,7 +14,7 @@ from geff.core_io._utils import expect_group, open_storelike
 from geff.metadata._schema import GeffMetadata
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
-    create_memory_mock_geff,
+    create_mock_geff,
     create_simple_2d_geff,
 )
 from geff.validate.structure import (
@@ -27,7 +27,7 @@ from geff.validate.structure import (
 
 @pytest.fixture
 def z() -> zarr.Group:
-    store, attrs = create_memory_mock_geff(
+    store, _ = create_mock_geff(
         node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=False,
