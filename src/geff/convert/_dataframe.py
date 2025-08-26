@@ -3,6 +3,8 @@ try:
 except ImportError as e:
     raise ImportError("'pandas' is required to use the dataframe interoperability") from e
 
+from pathlib import Path
+
 from zarr.storage import StoreLike
 
 from geff._typing import PropDictNpArray
@@ -73,3 +75,23 @@ def geff_to_dataframes(
     ).set_index(memory_geff["edge_ids"])
 
     return nodes_df, edges_df
+
+
+def geff_to_csv(store: StoreLike, outpath: Path | str) -> None:
+    """Convert a geff store to two csvs of nodes and edges
+
+    Args:
+        store (StoreLike): Path to store or StoreLike object
+        outpath (Path | str): Path to save output csvs. Any file extension will be
+            stripped and replaced with "-nodes.csv" and "-edges.csv"
+    """
+    # Convert to path and remove any existing suffix
+    outpath = Path(outpath).with_suffix("")
+    # Add node/edge.csv to path
+    node_path = f"{outpath}-nodes.csv"
+    edge_path = f"{outpath}-edges.csv"
+
+    # Convert and write to disk
+    node_df, edge_df = geff_to_dataframes(store)
+    node_df.to_csv(node_path)
+    edge_df.to_csv(edge_path)
