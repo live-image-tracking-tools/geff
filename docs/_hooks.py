@@ -28,9 +28,6 @@ def _gen_schema_docs() -> str:
         # temporary path for the schema html docs
         dest = Path(tmpdir, "schema.html")
 
-        # uncomment if you want to ensure that the schema is up to date
-        # write_metadata_schema(ROOT / "geff-schema.json")
-
         # generate the schema documentation
         subprocess.run(
             [
