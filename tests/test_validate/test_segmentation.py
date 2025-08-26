@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
+from geff.testing.data import create_mock_geff, create_simple_2d_geff
 from geff.validate.segmentation import (
     axes_match_seg_dims,
     graph_is_in_seg_bounds,
@@ -13,8 +13,8 @@ from geff.validate.segmentation import (
 
 @pytest.fixture
 def valid_store_and_attrs():
-    store, graphattrs = create_memory_mock_geff(
-        node_id_dtype="int",
+    store, memory_geff = create_mock_geff(
+        node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=True,
         num_nodes=5,
@@ -25,13 +25,13 @@ def valid_store_and_attrs():
         include_x=True,
         extra_node_props={"seg_id": "int"},
     )
-    return store, graphattrs
+    return store, memory_geff
 
 
 @pytest.fixture
 def invalid_store_and_attrs():
-    store, graphattrs = create_memory_mock_geff(
-        node_id_dtype="int",
+    store, memory_geff = create_mock_geff(
+        node_id_dtype="uint8",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=True,
         num_nodes=5,
@@ -42,7 +42,7 @@ def invalid_store_and_attrs():
         include_x=True,
         extra_node_props={"seg_id": "float32"},  # floats should not be allowed for seg_id
     )
-    return store, graphattrs
+    return store, memory_geff
 
 
 @pytest.fixture

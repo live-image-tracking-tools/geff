@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -44,16 +45,22 @@ class TestWriteArrays:
         edge_ids = np.array([[1, 2], [2, 3]], dtype=np.int32)
         metadata = GeffMetadata(geff_version="0.0.1", directed=True)
 
-        # Call write_arrays
-        write_arrays(
-            geff_store=geff_path,
-            node_ids=node_ids,
-            node_props=None,
-            edge_ids=edge_ids,
-            edge_props=None,
-            metadata=metadata,
-            zarr_format=zarr_format,
-        )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                category=UserWarning,
+                message="Requesting zarr spec v3 with zarr-python v2.*",
+            )
+            # Call write_arrays
+            write_arrays(
+                geff_store=geff_path,
+                node_ids=node_ids,
+                node_props=None,
+                edge_ids=edge_ids,
+                edge_props=None,
+                metadata=metadata,
+                zarr_format=zarr_format,
+            )
 
         # Verify the zarr group was created
         assert geff_path.exists()
