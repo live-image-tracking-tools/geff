@@ -239,6 +239,8 @@ def create_dummy_in_mem_geff(
                                 break
 
     edges = np.array(edges_, dtype=node_id_dtype)
+    if edges.shape[0] == 0:
+        edges = edges.reshape((0, 2))
 
     # Generate extra node properties
     if extra_node_props is not None:
