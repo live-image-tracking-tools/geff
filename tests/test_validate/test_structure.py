@@ -121,11 +121,19 @@ class Test_validate_edges_group:
         ):
             _validate_edges_group(edge_group, meta)
 
-    def test_edge_ids_bad_shape(self, edge_group, meta):
+    def test_edge_ids_bad_second_dim(self, edge_group, meta):
         edge_group[_path.IDS] = np.zeros((3, 3))
         with pytest.raises(
             ValueError,
-            match="edges ids must have a last dimension of size 2, received shape .*",
+            match="edges ids must be 2d with a last dimension of size 2, received shape .*",
+        ):
+            _validate_edges_group(edge_group, meta)
+
+    def test_edge_ids_wrong_ndim(self, edge_group, meta):
+        edge_group[_path.IDS] = np.zeros((3, 1))
+        with pytest.raises(
+            ValueError,
+            match="edges ids must be 2d with a last dimension of size 2, received shape .*",
         ):
             _validate_edges_group(edge_group, meta)
 
