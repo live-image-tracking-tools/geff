@@ -8,7 +8,7 @@ try:
 except ImportError:
     pytest.skip("geff[spatial-graph] not installed", allow_module_level=True)
 
-from geff.testing.data import create_memory_mock_geff
+from geff.testing.data import create_mock_geff
 
 node_dtypes = ["int8", "uint8", "int16", "uint16"]
 node_attr_dtypes = [
@@ -31,7 +31,7 @@ def test_read_write_consistency(
     extra_edge_props,
     directed,
 ) -> None:
-    store, graph_attrs = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype=node_dtype,
         node_axis_dtypes=node_attr_dtypes,
         extra_edge_props=extra_edge_props,
@@ -42,18 +42,18 @@ def test_read_write_consistency(
     # not be triggered
     graph, _ = read_sg(store, position_attr="pos")
 
-    np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(graph_attrs["nodes"]))
-    np.testing.assert_array_equal(np.sort(graph.edges), np.sort(graph_attrs["edges"]))
+    np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(memory_geff["node_ids"]))
+    np.testing.assert_array_equal(np.sort(graph.edges), np.sort(memory_geff["edge_ids"]))
 
-    for idx, node in enumerate(graph_attrs["nodes"]):
+    for idx, node in enumerate(memory_geff["node_ids"]):
         np.testing.assert_array_equal(
             graph.node_attrs[node].pos,
-            np.array([graph_attrs[d][idx] for d in ["t", "z", "y", "x"]]),
+            np.array([memory_geff["node_props"][d]["values"][idx] for d in ["t", "z", "y", "x"]]),
         )
 
-    for idx, edge in enumerate(graph_attrs["edges"]):
-        for name, values in graph_attrs["extra_edge_props"].items():
-            assert getattr(graph.edge_attrs[edge], name) == values[idx].item()
+    for idx, edge in enumerate(memory_geff["edge_ids"]):
+        for name, data in memory_geff["edge_props"].items():
+            assert getattr(graph.edge_attrs[edge], name) == data["values"][idx].item()
 
 
 def test_write_empty_graph() -> None:
