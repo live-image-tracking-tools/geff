@@ -5,8 +5,8 @@ except ImportError as e:
 
 from zarr.storage import StoreLike
 
-from geff.dict_representation import PropDictNpArray
-from geff.geff_reader import read_to_dict
+from geff._typing import PropDictNpArray
+from geff.core_io._base_read import read_to_memory
 
 
 def _expand_props(
@@ -29,7 +29,7 @@ def _expand_props(
 
     df = pd.DataFrame(prop_dict["values"])
 
-    if "missing" in prop_dict:
+    if prop_dict["missing"] is not None:
         df.mask(prop_dict["missing"], inplace=True)
 
     # add dimensions as the format of the columns
@@ -60,16 +60,16 @@ def geff_to_dataframes(
     Returns:
         tuple[pd.DataFrame, pd.DataFrame]: The nodes and edges dataframes.
     """
-    geff_data = read_to_dict(store)
+    memory_geff = read_to_memory(store)
 
     nodes_df = pd.concat(
-        [_expand_props(node_props, name) for name, node_props in geff_data["node_props"].items()],
+        [_expand_props(node_props, name) for name, node_props in memory_geff["node_props"].items()],
         axis="columns",
-    ).set_index(geff_data["nodes"])
+    ).set_index(memory_geff["node_ids"])
 
     edges_df = pd.concat(
-        [_expand_props(edge_props, name) for name, edge_props in geff_data["edge_props"].items()],
+        [_expand_props(edge_props, name) for name, edge_props in memory_geff["edge_props"].items()],
         axis="columns",
-    ).set_index(geff_data["edges"])
+    ).set_index(memory_geff["edge_ids"])
 
     return nodes_df, edges_df
