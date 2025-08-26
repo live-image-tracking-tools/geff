@@ -1,0 +1,101 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+title: 'GEFF: Graph Exchange File Format'
+authors:
+  - given-names: Morgan
+    family-names: Schwartz
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
+    orcid: https://orcid.org/0000-0001-8131-9125
+    alias: msschwartz21
+  - given-names: Caroline
+    family-names: Malin-Mayor
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
+    orcid: https://orcid.org/0000-0002-9627-6030
+    alias: cmalinmayor
+  - given-names: Talley
+    family-names: Lambert
+    affiliation: Harvard Medical School
+    orcid: https://orcid.org/0000-0002-2409-0181
+    alias: tlambert03
+  - given-names: Teun
+    family-names: Huijben
+    affiliation: Chan Zuckerberg Biohub San Francisco
+    orcid: https://orcid.org/0000-0002-8984-2882
+    alias: TeunHuijben
+  - given-names: Jan
+    family-names: Funke
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
+    orcid: https://orcid.org/0000-0003-4388-7783
+    alias: funkey
+  - given-names: Laura
+    family-names: Xénard
+    affiliation: Institut Pasteur
+    orcid: https://orcid.org/0000-0002-8168-0970
+    alias: lxenard
+  - given-names: Mark
+    family-names: Kittisopikul
+    affiliation: Janelia Research Campus, Howard Hughes Medical Institute
+    orcid: https://orcid.org/0000-0002-9558-6248
+    alias: mkitti
+  - given-names: Draga
+    family-names: Doncila Pop
+    affiliation: Monash University
+    orcid: https://orcid.org/0000-0001-9116-5553
+    alias: DragaDoncila
+  - given-names: Yohsuke
+    family-names: Fukai
+    affiliation: RIKEN Pioneering Research Institute
+    orcid: https://orcid.org/0000-0002-8860-7178
+    alias: yfukai
+  - given-names: Jordão
+    family-names: Bragantini
+    affiliation: Chan Zuckerberg Biohub San Francisco
+    orcid: https://orcid.org/0000-0001-7652-2735
+    alias: JoOkuma
+  - given-names: Melisande
+    family-names: Croft
+    affiliation: Human Technopole
+    orcid: https://orcid.org/0009-0004-8184-683X
+    alias: melisande-c
+  - given-names: Anniek
+    family-names: Stokkermans
+    affiliation: Hubrecht Institute
+    orcid: https://orcid.org/0000-0002-9013-9983
+    alias: AnniekStok
+  - given-names: Georgeos
+    family-names: Hardo
+    affiliation: UAE University
+    orcid: https://orcid.org/0000-0003-0037-1293
+    alias: georgeoshardo
+  - given-names: Benjamin
+    family-names: Gallusser
+    affiliation: Chan Zuckerbeg Initiative
+    orcid: https://orcid.org/0000-0002-7906-4714
+    alias: bentaculum
+  - given-names: Kasia
+    family-names: Kedziora
+    affiliation: University of Pittsburgh
+    orcid: https://orcid.org/0000-0001-6524-7731
+    alias: fjorka
+  - given-names: Jean-Yves
+    family-names: Tinevez
+    affiliation: Institut Pasteur
+    orcid: https://orcid.org/0000-0002-0998-4718
+    alias: tinevez
+  - given-names: Ko
+    family-names: Sugawara
+    affiliation: RIKEN Center for Biosystems Dynamics Research
+    orcid: https://orcid.org/0000-0002-1392-9340
+    alias: ksugar
+  - given-names: Tobias
+    family-names: Pietzsch
+    affiliation: Independent Consultant
+    orcid: https://orcid.org/0000-0002-9477-3957
+    alias: tpietzsch
+  - given-names: Ilan
+    family-names: Theodoro
+    affiliation: Chan Zuckerberg Biohub San Francisco
+    orcid: https://orcid.org/0000-0003-4019-3380
+    alias: ilan-theodoro
+license: MIT
+repository-code: https://github.com/live-image-tracking-tools/geff
