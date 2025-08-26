@@ -44,7 +44,7 @@ ctc = [
     "tifffile>=2024.10",
 ]
 rx = ["rustworkx>=0.16.0"]
-df = ["pandas>=2"]
+df = ["pandas>=2","pandas>=2.3; python_version >= '3.13'"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
