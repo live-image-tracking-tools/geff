@@ -8,25 +8,25 @@
       
       
       
-        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/reference/geff/testing/">
+        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/convert/">
       
       
-        <link rel="prev" href="../metadata/utils/">
+        <link rel="prev" href="../compatibility/">
       
       
-        <link rel="next" href="data/">
+        <link rel="next" href="../reference/geff/">
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
     
     
       
-        <title>geff.testing - geff</title>
+        <title>Conversion to GEFF - geff</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
       
       
 
@@ -45,11 +45,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../css/schema_doc.css">
+      <link rel="stylesheet" href="../css/schema_doc.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#geff.testing" class="md-skip">
+        <a href="#conversion-to-geff" class="md-skip">
           Skip to content
         </a>
       
@@ -88,7 +88,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="geff" class="md-header__button md-logo" aria-label="geff" data-md-component="logo">
+    <a href=".." title="geff" class="md-header__button md-logo" aria-label="geff" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              geff.testing
+              Conversion to GEFF
             
           </span>
         </div>
@@ -198,7 +198,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="geff" class="md-nav__button md-logo" aria-label="geff" data-md-component="logo">
+    <a href=".." title="geff" class="md-nav__button md-logo" aria-label="geff" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -228,7 +228,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -250,7 +250,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../what-is-geff/" class="md-nav__link">
+      <a href="../what-is-geff/" class="md-nav__link">
         
   
   
@@ -272,7 +272,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../specification/" class="md-nav__link">
+      <a href="../specification/" class="md-nav__link">
         
   
   
@@ -294,7 +294,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tracking/" class="md-nav__link">
+      <a href="../tracking/" class="md-nav__link">
         
   
   
@@ -316,7 +316,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../command-line-tools/" class="md-nav__link">
+      <a href="../command-line-tools/" class="md-nav__link">
         
   
   
@@ -338,7 +338,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../compatibility/" class="md-nav__link">
+      <a href="../compatibility/" class="md-nav__link">
         
   
   
@@ -357,10 +357,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../convert/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Conversion to GEFF
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -371,6 +393,53 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cell-tracking-challenge-ctc" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cell Tracking Challenge (CTC)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trackmate-xml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trackmate XML
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acetree" class="md-nav__link">
+    <span class="md-ellipsis">
+      AceTree
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -379,20 +448,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
@@ -408,7 +475,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             API Reference
@@ -419,20 +486,18 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_1" >
         
           
           <label class="md-nav__link" for="__nav_8_1" id="__nav_8_1_label" tabindex="0">
@@ -448,7 +513,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8_1">
             <span class="md-nav__icon md-icon"></span>
             <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>geff
@@ -462,7 +527,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../reference/geff/" class="md-nav__link">
         
   
   
@@ -485,7 +550,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../convert/" class="md-nav__link">
+      <a href="../reference/geff/convert/" class="md-nav__link">
         
   
   
@@ -508,7 +573,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../core_io/" class="md-nav__link">
+      <a href="../reference/geff/core_io/" class="md-nav__link">
         
   
   
@@ -569,7 +634,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../metadata/" class="md-nav__link">
+      <a href="../reference/geff/metadata/" class="md-nav__link">
         
   
   
@@ -592,7 +657,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../metadata/utils/" class="md-nav__link">
+      <a href="../reference/geff/metadata/utils/" class="md-nav__link">
         
   
   
@@ -620,20 +685,18 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_1_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_1_5" >
         
           
           <label class="md-nav__link" for="__nav_8_1_5" id="__nav_8_1_5_label" tabindex="0">
@@ -649,7 +712,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_1_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_1_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8_1_5">
             <span class="md-nav__icon md-icon"></span>
             <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>testing
@@ -660,30 +723,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    geff.testing
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../reference/geff/testing/" class="md-nav__link">
         
   
   
@@ -694,33 +737,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#geff.testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;testing
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -733,7 +749,7 @@
   
   
     <li class="md-nav__item">
-      <a href="data/" class="md-nav__link">
+      <a href="../reference/geff/testing/data/" class="md-nav__link">
         
   
   
@@ -802,7 +818,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validate/" class="md-nav__link">
+      <a href="../reference/geff/validate/" class="md-nav__link">
         
   
   
@@ -825,7 +841,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validate/data/" class="md-nav__link">
+      <a href="../reference/geff/validate/data/" class="md-nav__link">
         
   
   
@@ -848,7 +864,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validate/graph/" class="md-nav__link">
+      <a href="../reference/geff/validate/graph/" class="md-nav__link">
         
   
   
@@ -871,7 +887,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validate/segmentation/" class="md-nav__link">
+      <a href="../reference/geff/validate/segmentation/" class="md-nav__link">
         
   
   
@@ -894,7 +910,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validate/shapes/" class="md-nav__link">
+      <a href="../reference/geff/validate/shapes/" class="md-nav__link">
         
   
   
@@ -917,7 +933,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validate/structure/" class="md-nav__link">
+      <a href="../reference/geff/validate/structure/" class="md-nav__link">
         
   
   
@@ -940,7 +956,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validate/tracks/" class="md-nav__link">
+      <a href="../reference/geff/validate/tracks/" class="md-nav__link">
         
   
   
@@ -996,6 +1012,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1004,9 +1022,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geff.testing" class="md-nav__link">
+  <a href="#cell-tracking-challenge-ctc" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-module"></code>&nbsp;testing
+      Cell Tracking Challenge (CTC)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trackmate-xml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trackmate XML
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acetree" class="md-nav__link">
+    <span class="md-ellipsis">
+      AceTree
     </span>
   </a>
   
@@ -1027,55 +1063,35 @@
                   
 
 
-
-  <h1>geff.testing</h1>
-
-<div class="doc doc-object doc-module">
+  
+  
 
 
-
-<h3 id="geff.testing" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">geff.testing</span>
-
-
-</h3>
-
-    <div class="doc doc-contents first">
-
-
-
-
-
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-    </div>
-
+<h1 id="conversion-to-geff">Conversion to GEFF</h1>
+<p>If you already have tracking data stored in another format, we have some functions for converting data to GEFF.</p>
+<h2 id="cell-tracking-challenge-ctc">Cell Tracking Challenge (CTC)</h2>
+<p>To use the <code>geff</code> cli to convert CTC data to GEFF, see the docs for <a class="autorefs autorefs-internal" href="../command-line-tools/#convert-ctc"><code>geff convert-ctc</code></a>.</p>
+<p>To use the <code>geff</code> python API, see the docs for <a class="autorefs autorefs-internal" title="            ctc_tiffs_to_zarr" href="../reference/geff/convert/#geff.convert.ctc_tiffs_to_zarr"><code>ctc_tiffs_to_zarr</code></a> and <a class="autorefs autorefs-internal" title="            from_ctc_to_geff" href="../reference/geff/convert/#geff.convert.from_ctc_to_geff"><code>from_ctc_to_geff</code></a>.</p>
+<h2 id="trackmate-xml">Trackmate XML</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Conversion from TrackMate XML to GEFF is currently NOT lossless, but we are working on it.    <br />
+The output GEFF is missing:</p>
+<ul>
+<li>for each spot, the coordinates of its ROI (segmentation)</li>
+<li>for each track, the value of its features (e.g., <code>TRACK_DISPLACEMENT</code>, <code>TRACK_MEAN_SPEED</code>)</li>
+</ul>
 </div>
+<p>To convert a Trackmat XML file to GEFF using the <code>geff</code> cli, see the docs for <a class="autorefs autorefs-internal" href="../command-line-tools/#convert-trackmate-xml"><code>geff convert-trackmate-xml</code></a>.</p>
+<p>To use the <code>geff</code> python API, see the docs for <a class="autorefs autorefs-internal" title="            from_trackmate_xml_to_geff" href="../reference/geff/convert/#geff.convert.from_trackmate_xml_to_geff"><code>from_trackmate_xml_to_geff</code></a>.</p>
+<h2 id="acetree">AceTree</h2>
+<p>An example of how to convert AceTree data to a GEFF is available <a href="https://github.com/zhirongbaolab/AceTreePythonReader/blob/main/testAceTreeReaderGeffWrite.py">here</a>. </p>
 
 
 
 
 
 
-
-  
-  
 
 
 
@@ -1118,12 +1134,12 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      <script src="../assets/javascripts/bundle.92b07e13.min.js"></script>
       
-        <script src="../../../js/schema_doc.min.js"></script>
+        <script src="../js/schema_doc.min.js"></script>
       
     
   </body>
