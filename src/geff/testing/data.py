@@ -64,8 +64,8 @@ import numpy as np
 import zarr
 import zarr.storage
 
-from geff.core_io._base_write import write_arrays
-from geff.metadata._schema import Axis
+from geff.core_io import write_arrays
+from geff.metadata import Axis
 from geff.metadata.utils import create_or_update_metadata
 
 if TYPE_CHECKING:
