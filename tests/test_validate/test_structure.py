@@ -125,7 +125,7 @@ class Test_validate_edges_group:
         edge_group[_path.IDS] = np.zeros((3, 3))
         with pytest.raises(
             ValueError,
-            match="edges ids must be 2d with a last dimension of size 2, received shape .*",
+            match="edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
             _validate_edges_group(edge_group, meta)
 
@@ -133,7 +133,7 @@ class Test_validate_edges_group:
         edge_group[_path.IDS] = np.zeros((3, 1))
         with pytest.raises(
             ValueError,
-            match="edges ids must be 2d with a last dimension of size 2, received shape .*",
+            match="edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
             _validate_edges_group(edge_group, meta)
 
