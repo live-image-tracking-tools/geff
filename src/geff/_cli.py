@@ -156,5 +156,21 @@ def convert_trackmate_xml(
     )
 
 
+@app.command()
+def convert_geff_to_csv(
+    store: Annotated[Path, typer.Argument(help="Path to geff group to convert")],
+    outpath: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to save output csvs. Any file extension will"
+            " be stripped and replaced with '-nodes.csv' and '-edges.csv'"
+        ),
+    ],
+) -> None:
+    from geff.convert import geff_to_csv
+
+    geff_to_csv(store=store, outpath=outpath)
+
+
 if __name__ == "__main__":
     app()
