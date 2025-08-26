@@ -1,10 +1,17 @@
+import pytest
+
+try:
+    import pandas as pd
+
+    from geff.convert._dataframe import geff_to_csv, geff_to_dataframes
+except ImportError:
+    pytest.skip("geff[df] not installed", allow_module_level=True)
+
 import os
 
 import numpy as np
-import pandas as pd
 import pytest
 
-from geff.convert._dataframe import geff_to_csv, geff_to_dataframes
 from geff.testing.data import create_mock_geff, create_simple_3d_geff
 
 
