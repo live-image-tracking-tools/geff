@@ -14,7 +14,7 @@ from geff.validate.segmentation import (
 @pytest.fixture
 def valid_store_and_attrs():
     store, graphattrs = create_memory_mock_geff(
-        node_id_dtype="int",
+        node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=True,
         num_nodes=5,
@@ -31,7 +31,7 @@ def valid_store_and_attrs():
 @pytest.fixture
 def invalid_store_and_attrs():
     store, graphattrs = create_memory_mock_geff(
-        node_id_dtype="int",
+        node_id_dtype="uint8",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=True,
         num_nodes=5,

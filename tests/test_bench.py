@@ -80,9 +80,9 @@ def graph_file_path(num_nodes: int) -> Path:
 # ###########################   TESTS   ##################################
 
 READ_PATH: Mapping[Callable, Callable[[Path], tuple[Any, Any]]] = {
-    geff.read_nx: lambda path: geff.read_nx(path, validate=False),
-    geff.read_rx: lambda path: geff.read_rx(path, validate=False),
-    geff.read_sg: lambda path: geff.read_sg(path, validate=False),
+    geff.read_nx: lambda path: geff.read_nx(path, structure_validation=False),
+    geff.read_rx: lambda path: geff.read_rx(path, structure_validation=False),
+    geff.read_sg: lambda path: geff.read_sg(path, structure_validation=False),
 }
 
 
@@ -111,4 +111,4 @@ def test_bench_validate(benchmark: BenchmarkFixture, nodes: int) -> None:
 @pytest.mark.parametrize("read_func", [geff.read_nx, geff.read_rx, geff.read_sg])
 def test_bench_read(read_func: Callable, benchmark: BenchmarkFixture, nodes: int) -> None:
     graph_path = graph_file_path(nodes)
-    benchmark(read_func, graph_path, validate=False)
+    benchmark(read_func, graph_path, structure_validation=False)
