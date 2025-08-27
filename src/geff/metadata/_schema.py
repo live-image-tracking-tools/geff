@@ -150,7 +150,6 @@ class GeffMetadata(BaseModel):
     )
 
     node_props_metadata: dict[str, PropMetadata] = Field(
-        default={},  # TODO: no default value?
         description=(
             "Metadata for node properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
@@ -158,7 +157,6 @@ class GeffMetadata(BaseModel):
         ),
     )
     edge_props_metadata: dict[str, PropMetadata] = Field(
-        default={},
         description=(
             "Metadata for edge properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."

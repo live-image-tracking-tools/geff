@@ -164,7 +164,6 @@
           "additionalProperties": {
             "$ref": "#/$defs/PropMetadata"
           },
-          "default": {},
           "description": "Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each node property.",
           "title": "Node Props Metadata",
           "type": "object"
@@ -173,7 +172,6 @@
           "additionalProperties": {
             "$ref": "#/$defs/PropMetadata"
           },
-          "default": {},
           "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each edge property.",
           "title": "Edge Props Metadata",
           "type": "object"
@@ -275,6 +273,8 @@
       },
       "required": [
         "directed",
+        "node_props_metadata",
+        "edge_props_metadata",
         "geff_version"
       ],
       "title": "geff_metadata",
