@@ -1,4 +1,5 @@
 import pytest
+import zarr
 
 try:
     import pandas as pd
@@ -12,7 +13,8 @@ import os
 import numpy as np
 import pytest
 
-from geff.testing.data import create_mock_geff, create_simple_3d_geff
+from geff import _path
+from geff.testing.data import create_mock_geff, create_simple_2d_geff, create_simple_3d_geff
 
 
 class Test_geff_to_dataframes:
@@ -95,6 +97,27 @@ class Test_geff_to_dataframes:
 
         assert isinstance(edge_df, pd.DataFrame)
         assert len(edge_df) == 0
+
+    def test_missing(self):
+        num_edges = 10
+        store, memory_geff = create_simple_2d_geff(num_edges=num_edges)
+        z = zarr.open(store)
+
+        # Missing array exists but is all False, e.g. nothing missing
+        missing = np.array([False] * num_edges)
+        z[f"{_path.EDGE_PROPS}/score/{_path.MISSING}"] = missing  # pyright: ignore[reportArgumentType]
+        node_df, edge_df = geff_to_dataframes(store)
+        # Missing column should not exist
+        assert "score-missing" not in edge_df.columns
+
+        # Missing array with some values missing
+        n_missing = 4
+        missing = np.array([True] * n_missing + [False] * (num_edges - n_missing))
+        z[f"{_path.EDGE_PROPS}/score/{_path.MISSING}"] = missing  # pyright: ignore[reportArgumentType]
+        node_df, edge_df = geff_to_dataframes(store)
+        # Missing column should exist
+        assert "score-missing" in edge_df.columns
+        assert np.count_nonzero(edge_df["score-missing"]) == n_missing
 
 
 class Test_geff_to_csv:
