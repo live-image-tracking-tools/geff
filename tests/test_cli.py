@@ -93,5 +93,5 @@ def test_convert_trackmate_xml(tmp_path: Path, other_arg: str | None) -> None:
 
 def test_convert_to_csv(example_geff_path, tmp_path):
     out_path = tmp_path / "dataframe"
-    result = CliRunner().invoke(app, ["convert-to-csv", example_geff_path, out_path])
-    assert result.exit_code == 1
+    result = CliRunner().invoke(app, ["convert-to-csv", str(example_geff_path), str(out_path)])
+    assert result.exit_code == 0
