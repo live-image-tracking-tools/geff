@@ -5,6 +5,7 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
+import numpy as np
 from pydantic import validate_call
 
 import geff
@@ -14,6 +15,7 @@ from ._axis import Axis
 
 if TYPE_CHECKING:
     T = TypeVar("T")
+    from geff._typing import PropDictNpArray
 
 
 def get_graph_existing_metadata(
@@ -183,3 +185,60 @@ def axes_from_lists(
             )
         )
     return axes
+
+
+def create_prop_metadata(
+    identifier: str,
+    prop_data: PropDictNpArray,
+    unit: str | None = None,
+    name: str | None = None,
+    description: str | None = None,
+) -> PropMetadata:
+    """Create PropMetadata from property data.
+
+    Automatically detects dtype and varlength from the provided data.
+
+    Args:
+        identifier: The property identifier/name
+        prop_data: Either InMemoryNormalProp (dict with values/missing) or
+                  InMemoryVarLenProp (sequence of arrays with None values)
+        unit: Optional unit for the property
+        name: Optional human-friendly name for the property
+        description: Optional description for the property
+
+    Returns:
+        PropMetadata object with inferred dtype and varlength settings
+
+    Raises:
+        ValueError: If var length array has mixed dtype
+    """
+    # Check if this is a variable length property (sequence of arrays)
+
+    if not isinstance(prop_data, dict):
+        raise ValueError(f"Expected dict of property data, got {prop_data}")
+    values = prop_data["values"]
+    if not np.issubdtype(values.dtype, np.object_):
+        # normal property case
+        varlength = False
+        dtype = values.dtype
+
+    else:
+        # variable length property case
+        varlength = True
+        dtype = values[0].dtype
+        # check that all arrays have the same dtype while we are here
+        for array in values:
+            if array.dtype != dtype:
+                raise ValueError(
+                    "Object array containing variable length properties has two "
+                    f"dtypes: {dtype, array.dtype}"
+                )
+
+    return PropMetadata(
+        identifier=identifier,
+        dtype=str(dtype),
+        varlength=varlength,
+        unit=unit,
+        name=name,
+        description=description,
+    )

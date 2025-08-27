@@ -30,6 +30,7 @@ class PropDictNpArray(TypedDict):
     A prop dictionary which has the keys "values" and optionally "missing", stored as numpy arrays.
 
     "values" is a numpy array of any type, "missing" is a numpy array of bools.
+    Variable length properties should have object dtype for their values array
     """
 
     values: NDArray[Any]
