@@ -7,7 +7,7 @@ from geff.core_io._base_read import read_to_memory
 from geff.testing.data import create_mock_geff, create_simple_2d_geff
 from geff.validate.data import ValidationConfig
 
-node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_id_dtypes = ["uint8", "uint16"]
 node_axis_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},

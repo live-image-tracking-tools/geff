@@ -174,7 +174,7 @@ class Test_create_mock_geff:
         }
 
         store, memory_geff = create_mock_geff(
-            node_id_dtype="int",
+            node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=False,
             num_nodes=5,
@@ -249,7 +249,7 @@ class Test_create_mock_geff:
         """Test create_mock_geff with no extra node properties"""
 
         store, _ = create_mock_geff(
-            node_id_dtype="int",
+            node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             extra_edge_props={"score": "float64", "color": "int"},
             directed=False,
@@ -426,7 +426,7 @@ class Test_create_mock_geff:
         }
 
         store, _ = create_mock_geff(
-            node_id_dtype="int",
+            node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             extra_edge_props={"score": "float64", "color": "int", "type": "str"},
             directed=False,
