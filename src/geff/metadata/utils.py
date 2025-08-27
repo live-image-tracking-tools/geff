@@ -85,6 +85,8 @@ def create_or_update_metadata(
             geff_version=geff.__version__,
             directed=is_directed,
             axes=axes,
+            node_props_metadata={},
+            edge_props_metadata={},
         )
     return metadata
 
