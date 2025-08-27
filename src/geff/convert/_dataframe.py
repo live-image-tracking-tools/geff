@@ -1,7 +1,7 @@
 try:
     import pandas as pd
 except ImportError as e:
-    raise ImportError("Please install with geff[df] to use this module.") from e
+    raise ImportError("Please install with geff[pandas] to use this module.") from e
 
 import warnings
 from pathlib import Path

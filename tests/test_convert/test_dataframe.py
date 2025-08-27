@@ -6,7 +6,7 @@ try:
 
     from geff.convert._dataframe import geff_to_csv, geff_to_dataframes
 except ImportError:
-    pytest.skip("geff[df] not installed", allow_module_level=True)
+    pytest.skip("geff[pandas] not installed", allow_module_level=True)
 
 import os
 
