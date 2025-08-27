@@ -29,7 +29,8 @@ class TestCreateOrUpdatePropsMetadata:
         """Test creating edge props metadata when metadata has no existing edge props."""
         metadata = GeffMetadata(
             directed=True,
-            edge_props_metadata=None,
+            node_props_metadata={},
+            edge_props_metadata={},
         )
         props_md = [
             PropMetadata(identifier="prop1", dtype="float64"),
@@ -47,6 +48,7 @@ class TestCreateOrUpdatePropsMetadata:
         metadata = GeffMetadata(
             directed=True,
             node_props_metadata=existing_props,
+            edge_props_metadata={},
         )
         props_md = [
             PropMetadata(identifier="new_prop", dtype="float64", name="New prop"),
@@ -63,6 +65,7 @@ class TestCreateOrUpdatePropsMetadata:
         }
         metadata = GeffMetadata(
             directed=True,
+            node_props_metadata={},
             edge_props_metadata=existing_props,
         )
         props_md = [
@@ -79,6 +82,7 @@ class TestCreateOrUpdatePropsMetadata:
         metadata = GeffMetadata(
             directed=True,
             node_props_metadata=existing_props,
+            edge_props_metadata={},
         )
         props_md = [
             PropMetadata(identifier="prop1", dtype="float64"),
@@ -93,6 +97,7 @@ class TestCreateOrUpdatePropsMetadata:
         metadata = GeffMetadata(
             directed=True,
             node_props_metadata=existing_props,
+            edge_props_metadata={},
         )
         result = create_or_update_props_metadata(metadata, [], "node")
         assert len(result.node_props_metadata) == 1
@@ -103,6 +108,7 @@ class TestCreateOrUpdatePropsMetadata:
         existing_props = {"newprop": PropMetadata(identifier="newprop", dtype="int")}
         metadata = GeffMetadata(
             directed=True,
+            node_props_metadata={},
             edge_props_metadata=existing_props,
         )
         props_md = [
@@ -126,6 +132,8 @@ class TestCreateOrUpdatePropsMetadata:
         metadata = GeffMetadata(
             geff_version="0.1.0",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
         )
         props_md = [PropMetadata(identifier="prop1", dtype="int64")]
         with pytest.raises(ValueError):
