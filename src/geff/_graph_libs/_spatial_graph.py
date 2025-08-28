@@ -44,33 +44,16 @@ def write_sg(
     the missing arrays will not be written.
 
     Args:
-        graph (sg.SpatialGraph):
-
-            The graph to write.
-
-        store (str | Path | zarr store):
-
-            The path to the output zarr. Opens in append mode, so will only
-            overwrite geff-controlled groups.
-
-        axis_names (Optional[list[str]], optional):
-
-            The names of the spatial dims represented in position attribute.
-            Defaults to None.
-
-        axis_units (Optional[list[str]], optional):
-
-            The units of the spatial dims represented in position attribute.
-            Defaults to None.
-
-        axis_types (Optional[list[str]], optional):
-
-            The types of the spatial dims represented in position property.
-            Usually one of "time", "space", or "channel". Defaults to None.
-
-        zarr_format (Literal[2, 3], optional):
-
-            The version of zarr to write. Defaults to 2.
+        graph (sg.SpatialGraph): The graph to write.
+        store (str | Path | zarr store): The path to the output zarr. Opens in append mode,
+            so will only overwrite geff-controlled groups.
+        axis_names (Optional[list[str]], optional): The names of the spatial dims represented in
+            position attribute. Defaults to None.
+        axis_units (Optional[list[str]], optional): The units of the spatial dims represented in
+            position attribute. Defaults to None.
+        axis_types (Optional[list[str]], optional): The types of the spatial dims represented in
+            position property. Usually one of "time", "space", or "channel". Defaults to None.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
     """
 
     store = remove_tilde(store)
@@ -130,22 +113,17 @@ def read_sg(
 
     Args:
 
-        store (Path | str | zarr store):
-            The path to the root of the geff zarr, where the .attrs contains
-            the geff  metadata.
-        structure_validation (bool, optional):
-            Flag indicating whether to perform validation on the geff file
-            before loading into memory. If set to False and there are format
+        store (Path | str | zarr store): The path to the root of the geff zarr, where the .attrs
+            contains the geff metadata.
+        structure_validation (bool, optional): Flag indicating whether to perform validation on
+            the geff file before loading into memory. If set to False and there are format
             issues, will likely fail with a cryptic error. Defaults to True.
-        position_attr (str, optional):
-            How to call the position attribute in the returned SpatialGraph.
-            Defaults to "position".
-        node_props (list of str, optional):
-            The names of the node properties to load, if None all properties
-            will be loaded, defaults to None.
-        edge_props (list of str, optional):
-            The names of the edge properties to load, if None all properties
-            will be loaded, defaults to None.
+        position_attr (str, optional): How to call the position attribute in the returned
+            SpatialGraph. Defaults to "position".
+        node_props (list of str, optional): The names of the node properties to load, if None
+            all properties will be loaded, defaults to None.
+        edge_props (list of str, optional): The names of the edge properties to load, if None
+            all properties will be loaded, defaults to None.
         data_validation (ValidationConfig, optional): Optional configuration for which
             optional types of data to validate. Each option defaults to False.
 
