@@ -9,7 +9,7 @@ from geff.testing.data import create_mock_geff
 
 rx = pytest.importorskip("rustworkx")
 
-node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_id_dtypes = ["uint8", "uint16"]
 node_axis_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},

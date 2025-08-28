@@ -194,7 +194,7 @@ def from_ctc_to_geff(
     if "z" in node_props:
         axis_names.insert(1, Axis(name="z", type="space"))
 
-    node_ids = np.asarray(node_props.pop("id"), dtype=int)
+    node_ids = np.asarray(node_props.pop("id"), dtype="uint")
 
     write_arrays(
         geff_store=geff_path,
