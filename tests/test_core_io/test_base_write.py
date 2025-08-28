@@ -11,11 +11,16 @@ from geff import _path
 from geff.core_io import write_arrays
 from geff.core_io._base_read import read_to_memory
 from geff.metadata._schema import GeffMetadata
-from geff.testing.data import create_simple_3d_geff
+from geff.testing._utils import check_equiv_geff
+from geff.testing.data import (
+    create_simple_2d_geff,
+    create_simple_3d_geff,
+    create_simple_temporal_geff,
+)
 from geff.validate.structure import validate_structure
 
 if TYPE_CHECKING:
-    from geff._typing import PropDictNpArray
+    from geff._typing import InMemoryGeff, PropDictNpArray
 
 
 from geff.core_io._base_write import dict_props_to_arr, write_dicts
@@ -23,7 +28,9 @@ from geff.core_io._base_write import dict_props_to_arr, write_dicts
 
 def _tmp_metadata():
     """Return minimal valid GeffMetadata object for tests."""
-    return GeffMetadata(geff_version="0.0.1", directed=True)
+    return GeffMetadata(
+        geff_version="0.0.1", directed=True, node_props_metadata={}, edge_props_metadata={}
+    )
 
 
 @pytest.fixture
@@ -44,7 +51,7 @@ class TestWriteArrays:
         geff_path = tmp_path / "test.geff"
         node_ids = np.array([1, 2, 3], dtype=np.uint32)
         edge_ids = np.array([[1, 2], [2, 3]], dtype=np.uint32)
-        metadata = GeffMetadata(geff_version="0.0.1", directed=True)
+        metadata = _tmp_metadata()
 
         with warnings.catch_warnings():
             warnings.filterwarnings(
@@ -140,6 +147,17 @@ class TestWriteArrays:
                 edge_props=None,
                 metadata=_tmp_metadata(),
             )
+
+    @pytest.mark.parametrize(
+        "data_func", [create_simple_2d_geff, create_simple_3d_geff, create_simple_temporal_geff]
+    )
+    @pytest.mark.parametrize("zarr_format", [2, 3])
+    def test_simple_geffs(self, data_func, zarr_format, tmp_path):
+        memory_geff: InMemoryGeff
+        store, memory_geff = data_func()
+        path = tmp_path / "test.geff"
+        write_arrays(path, **memory_geff, zarr_format=zarr_format)
+        check_equiv_geff(store, path)
 
 
 @pytest.mark.parametrize(

@@ -5,13 +5,17 @@ import warnings
 from collections.abc import Sequence  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
+import numpy as np
 from pydantic import validate_call
 
 import geff
 from geff.metadata import GeffMetadata, PropMetadata
 
+from ._axis import Axis
+
 if TYPE_CHECKING:
     T = TypeVar("T")
+    from geff._typing import PropDictNpArray
 
 
 def get_graph_existing_metadata(
@@ -81,12 +85,14 @@ def create_or_update_metadata(
             geff_version=geff.__version__,
             directed=is_directed,
             axes=axes,
+            node_props_metadata={},
+            edge_props_metadata={},
         )
     return metadata
 
 
 @validate_call
-def create_or_update_props_metadata(
+def add_or_update_props_metadata(
     metadata: GeffMetadata,
     props_md: Sequence[PropMetadata],
     c_type: Literal["node", "edge"],
@@ -124,3 +130,116 @@ def create_or_update_props_metadata(
             metadata.edge_props_metadata = md_to_update
 
     return metadata
+
+
+def axes_from_lists(
+    axis_names: Sequence[str] | None = None,
+    axis_units: Sequence[str | None] | None = None,
+    axis_types: Sequence[str | None] | None = None,
+    roi_min: Sequence[float | None] | None = None,
+    roi_max: Sequence[float | None] | None = None,
+) -> list[Axis]:
+    """Create a list of Axes objects from lists of axis names, units, types, mins,
+    and maxes. If axis_names is None, there are no spatial axes and the list will
+    be empty. Nones for all other arguments will omit them from the axes.
+
+    All provided arguments must have the same length. If an argument should not be specified
+    for a single property, use None.
+
+    Args:
+        axis_names (list[str] | None, optional): Names of properties for spatiotemporal
+            axes. Defaults to None.
+        axis_units (list[str | None] | None, optional): Units corresponding to named properties.
+            Defaults to None.
+        axis_types (list[str | None] | None, optional): Axis type for each property.
+            Choose from "space", "time", "channel". Defaults to None.
+        roi_min (list[float | None] | None, optional): Minimum value for each property.
+            Defaults to None.
+        roi_max (list[float | None] | None, optional): Maximum value for each property.
+            Defaults to None.
+
+    Returns:
+        list[Axis]:
+    """
+    axes: list[Axis] = []
+    if axis_names is None:
+        return axes
+
+    dims = len(axis_names)
+    if axis_types is not None:
+        assert len(axis_types) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
+    if axis_units is not None:
+        assert len(axis_units) == dims, (
+            "The number of axis types has to match the number of axis names"
+        )
+
+    for i in range(len(axis_names)):
+        axes.append(
+            Axis(
+                name=axis_names[i],
+                type=axis_types[i] if axis_types is not None else None,
+                unit=axis_units[i] if axis_units is not None else None,
+                min=roi_min[i] if roi_min is not None else None,
+                max=roi_max[i] if roi_max is not None else None,
+            )
+        )
+    return axes
+
+
+def create_props_metadata(
+    identifier: str,
+    prop_data: PropDictNpArray,
+    unit: str | None = None,
+    name: str | None = None,
+    description: str | None = None,
+) -> PropMetadata:
+    """Create PropMetadata from property data.
+
+    Automatically detects dtype and varlength from the provided data.
+
+    Args:
+        identifier: The property identifier/name
+        prop_data: Either InMemoryNormalProp (dict with values/missing) or
+                  InMemoryVarLenProp (sequence of arrays with None values)
+        unit: Optional unit for the property
+        name: Optional human-friendly name for the property
+        description: Optional description for the property
+
+    Returns:
+        PropMetadata object with inferred dtype and varlength settings
+
+    Raises:
+        ValueError: If var length array has mixed dtype
+    """
+    # Check if this is a variable length property (sequence of arrays)
+    if not isinstance(prop_data, dict):
+        raise ValueError(f"Expected dict of property data, got {prop_data}")
+    values = prop_data["values"]
+    if not np.issubdtype(values.dtype, np.object_):
+        # normal property case
+        varlength = False
+        dtype = values.dtype
+
+    else:
+        # variable length property case
+        varlength = True
+        dtype = values[0].dtype
+        # check that all arrays have the same dtype while we are here
+        for array in values:
+            if array.dtype != dtype:
+                raise ValueError(
+                    "Object array containing variable length properties has two "
+                    f"dtypes: {dtype, array.dtype}"
+                )
+
+    return PropMetadata(
+        identifier=identifier,
+        dtype=str(dtype),
+        varlength=varlength,
+        unit=unit,
+        name=name,
+        description=description,
+    )

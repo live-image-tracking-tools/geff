@@ -8,6 +8,7 @@ import numpy as np
 from geff import _path
 from geff.core_io._utils import remove_tilde, setup_zarr_group
 from geff.metadata._valid_values import validate_data_type
+from geff.metadata.utils import add_or_update_props_metadata, create_props_metadata
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-    from geff.metadata._schema import GeffMetadata
+    from geff.metadata import GeffMetadata, PropMetadata
 
 
 def write_dicts(
@@ -194,6 +195,7 @@ def write_arrays(
 
     Currently does not do any validation that the arrays are valid, but could be added
     as an optional flag.
+    Adds the PropMetadata for the nodes and edges, if not provided.
 
     Args:
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
@@ -224,13 +226,20 @@ def write_arrays(
 
     write_id_arrays(geff_store, node_ids, edge_ids, zarr_format=zarr_format)
     if node_props is not None:
-        write_props_arrays(
+        node_meta = write_props_arrays(
             geff_store, _path.NODES, node_props, node_props_unsquish, zarr_format=zarr_format
         )
+    else:
+        node_meta = []
     if edge_props is not None:
-        write_props_arrays(
+        edge_meta = write_props_arrays(
             geff_store, _path.EDGES, edge_props, edge_props_unsquish, zarr_format=zarr_format
         )
+    else:
+        edge_meta = []
+
+    add_or_update_props_metadata(metadata, node_meta, "node")
+    add_or_update_props_metadata(metadata, edge_meta, "edge")
     metadata.write(geff_store)
 
 
@@ -278,7 +287,7 @@ def write_props_arrays(
     props: dict[str, PropDictNpArray],
     props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
-) -> None:
+) -> Sequence[PropMetadata]:
     """Writes a set of properties to a geff nodes or edges group.
 
     Can be used to add new properties if they don't already exist.
@@ -295,6 +304,9 @@ def write_props_arrays(
             three individual properties called "z", "y", and "x".
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
+
+    Returns:
+        PropMetadata: The property metadata for each of the property arrays
     Raises:
         ValueError: If the group is not a 'nodes' or 'edges' group.
     TODO: validate attrs length based on group ids shape?
@@ -324,7 +336,10 @@ def write_props_arrays(
 
     geff_root = setup_zarr_group(geff_store, zarr_format)
     props_group = geff_root.require_group(f"{group}/{_path.PROPS}")
+    metadata = []
     for prop, prop_dict in props.items():
+        prop_metadata = create_props_metadata(prop, prop_dict)
+        metadata.append(prop_metadata)
         # data-type validation - ensure this property can round-trip through
         # Java Zarr readers before any data get written to disk.
         values = prop_dict["values"]
@@ -340,3 +355,5 @@ def write_props_arrays(
         prop_group[_path.VALUES] = values
         if missing is not None:
             prop_group[_path.MISSING] = missing
+
+    return metadata

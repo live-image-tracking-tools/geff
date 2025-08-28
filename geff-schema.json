@@ -22,7 +22,7 @@
       "type": "object"
     },
     "Axis": {
-      "description": "TODO docstring",
+      "description": "The spatiotemporal axes representing the position of a node in space.\n\nThe axes list is modeled after the OME-zarr specifications. If the same names are\nused in the axes metadata of the related image or segmentation data,\napplications can use this information to align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. Any downstream properties that are\nan array of values with one value per (spatial) axis will be in the order of the axis\nlist (filtering to only the spatial axes by the type field if needed).",
       "properties": {
         "name": {
           "title": "Name",
@@ -161,36 +161,20 @@
           "title": "Axes"
         },
         "node_props_metadata": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/PropMetadata"
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
-          "title": "Node Props Metadata"
+          "additionalProperties": {
+            "$ref": "#/$defs/PropMetadata"
+          },
+          "description": "Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each node property.",
+          "title": "Node Props Metadata",
+          "type": "object"
         },
         "edge_props_metadata": {
-          "anyOf": [
-            {
-              "additionalProperties": {
-                "$ref": "#/$defs/PropMetadata"
-              },
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.",
-          "title": "Edge Props Metadata"
+          "additionalProperties": {
+            "$ref": "#/$defs/PropMetadata"
+          },
+          "description": "Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each edge property.",
+          "title": "Edge Props Metadata",
+          "type": "object"
         },
         "sphere": {
           "anyOf": [
@@ -289,6 +273,8 @@
       },
       "required": [
         "directed",
+        "node_props_metadata",
+        "edge_props_metadata",
         "geff_version"
       ],
       "title": "geff_metadata",
@@ -304,10 +290,16 @@
           "type": "string"
         },
         "dtype": {
-          "description": "Data type of the property. Must be a non-empty string that can be parsed into a numpy dtype, or the special value 'varlength' to indicate a variable length property. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
+          "description": "Data type of the property. Must be a non-empty string that can be parsed into a numpy dtype.Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
           "minLength": 1,
           "title": "Dtype",
           "type": "string"
+        },
+        "varlength": {
+          "default": false,
+          "description": "True if the property contains variable length arrays. Variable length arrays cannot be of dtype string (e.g. you cannot have a property where each node has a string array)",
+          "title": "Varlength",
+          "type": "boolean"
         },
         "unit": {
           "anyOf": [
