@@ -1,5 +1,10 @@
 import numpy as np
 import pytest
+import zarr
+import zarr.storage
+
+from geff import _path
+from geff.validate.structure import validate_structure
 
 try:
     import spatial_graph as sg
@@ -65,5 +70,10 @@ def test_write_empty_graph() -> None:
         edge_attr_dtypes={},
         position_attr="pos",
     )
-    with pytest.warns(match="Graph is empty - not writing anything "):
-        write_sg(graph, store=".")
+
+    store = zarr.storage.MemoryStore()
+    write_sg(graph, store=store)
+    validate_structure(store)
+
+    z = zarr.open(store)
+    assert z[_path.NODE_IDS].shape[0] == 0

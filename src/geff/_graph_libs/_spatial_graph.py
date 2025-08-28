@@ -58,10 +58,6 @@ def write_sg(
 
     store = remove_tilde(store)
 
-    if len(graph) == 0:
-        warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
-        return
-
     if axis_names is None:
         assert graph.ndims <= 4, (
             "For SpatialGraphs with more than 4 dimension, axis_names has to be provided."
