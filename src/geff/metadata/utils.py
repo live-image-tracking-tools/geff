@@ -92,7 +92,7 @@ def create_or_update_metadata(
 
 
 @validate_call
-def create_or_update_props_metadata(
+def add_or_update_props_metadata(
     metadata: GeffMetadata,
     props_md: Sequence[PropMetadata],
     c_type: Literal["node", "edge"],
@@ -189,7 +189,7 @@ def axes_from_lists(
     return axes
 
 
-def create_prop_metadata(
+def create_props_metadata(
     identifier: str,
     prop_data: PropDictNpArray,
     unit: str | None = None,
@@ -215,7 +215,6 @@ def create_prop_metadata(
         ValueError: If var length array has mixed dtype
     """
     # Check if this is a variable length property (sequence of arrays)
-
     if not isinstance(prop_data, dict):
         raise ValueError(f"Expected dict of property data, got {prop_data}")
     values = prop_data["values"]
