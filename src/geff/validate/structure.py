@@ -127,9 +127,9 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
     """Validate the structure of an edges group in a GEFF zarr store."""
     # Edges only require ids which contain nodes for each edge
     edges_ids = expect_array(edges_group, _path.IDS, _path.EDGES)
-    if edges_ids.shape[-1] != 2:
+    if edges_ids.ndim != 2 or edges_ids.shape[-1] != 2:
         raise ValueError(
-            f"edges ids must have a last dimension of size 2, received shape {edges_ids.shape}"
+            f"edges ids must be 2d with last dimension of size 2, received shape {edges_ids.shape}"
         )
     if not np.issubdtype(np.dtype(edges_ids.dtype), np.unsignedinteger):
         raise ValueError("Edge ids must have an unsigned integer dtype")
