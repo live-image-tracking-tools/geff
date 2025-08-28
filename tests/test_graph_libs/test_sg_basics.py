@@ -10,7 +10,7 @@ except ImportError:
 
 from geff.testing.data import create_mock_geff
 
-node_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_dtypes = ["uint8", "uint16"]
 node_attr_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},

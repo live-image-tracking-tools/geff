@@ -115,8 +115,8 @@ def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> No
 
     # Node ids must be int dtype
     # TODO: enforce uint
-    if not np.issubdtype(np.dtype(node_ids.dtype), np.integer):
-        raise ValueError("Node ids must have an integer dtype")
+    if not np.issubdtype(np.dtype(node_ids.dtype), np.unsignedinteger):
+        raise ValueError("Node ids must have an unsigned integer dtype")
 
     id_len = node_ids.shape[0]
     node_props = expect_group(nodes_group, _path.PROPS, _path.NODES)
@@ -131,6 +131,8 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
         raise ValueError(
             f"edges ids must have a last dimension of size 2, received shape {edges_ids.shape}"
         )
+    if not np.issubdtype(np.dtype(edges_ids.dtype), np.unsignedinteger):
+        raise ValueError("Edge ids must have an unsigned integer dtype")
 
     # Edge property array length should match edge id length
     edge_id_len = edges_ids.shape[0]
