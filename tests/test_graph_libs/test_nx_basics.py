@@ -26,7 +26,7 @@ extra_edge_props = [
 @pytest.mark.parametrize("directed", [True, False])
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
-def test_read_write_consistency(
+def test_read_consistency(
     tmp_path,
     node_id_dtype,
     node_axis_dtypes,
