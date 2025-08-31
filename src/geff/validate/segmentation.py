@@ -4,26 +4,22 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import numpy as np
-import zarr
-import zarr.storage
-
-from geff import _path
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
-    from pathlib import Path
 
     from numpy.typing import ArrayLike
 
+    from geff._typing import InMemoryGeff
+    from geff.metadata._schema import GeffMetadata
 
-def has_valid_seg_id(
-    store: zarr.storage.StoreLike, seg_id: str = "seg_id"
-) -> tuple[bool, list[str]]:
+
+def has_valid_seg_id(memory_geff: InMemoryGeff, seg_id: str = "seg_id") -> tuple[bool, list[str]]:
     """
     Validate that all nodes in the geff have a property 'seg_id', that is of type integer.
 
     Args:
-        store (DirectoryStore, MemoryStore): A Zarr store or a path to one.
+        memory_geff (InMemoryGeff): An InMemoryGeff to check for seg_id
         seg_id (str): the key to the dataset storing the segmentation value.
 
     Returns:
@@ -34,39 +30,36 @@ def has_valid_seg_id(
     """
 
     errors: list[str] = []
-    group = zarr.open_group(store, mode="r")
-    node_ids = np.asarray(group[_path.NODE_IDS])
 
-    # check that 'seg_id' property is present in the nodes group.
-    try:
-        seg_ids = np.asarray(group[_path.NODE_PROPS][seg_id][_path.VALUES])  # type: ignore
-    except KeyError as e:
-        errors.append(f"Missing seg_id property in Zarr store: {e}")
+    # check that 'seg_id' property is present in the nodes group
+    if seg_id not in memory_geff["node_props"]:
+        errors.append("Missing seg_id property in Zarr store")
         return False, errors
 
-    # TODO check the missing values instead
-    # check that all nodes have a seg_id
-    if len(node_ids) != len(seg_ids):
-        errors.append("Mismatch in number of node IDs and seg_ids.")
-        return False, errors
-
+    seg_ids = memory_geff["node_props"][seg_id]["values"]
     # Check that seg_id array is of integer type
     if not np.issubdtype(seg_ids.dtype, np.integer):
         errors.append(f"'seg_id' array has non-integer dtype: {seg_ids.dtype}")
+        return False, errors
+
+    # Check for no missing seg ids
+    missing = memory_geff["node_props"][seg_id]["missing"]
+    if missing is not None and not any(missing):
+        errors.append("Mismatch in number of node IDs and seg_ids.")
         return False, errors
 
     return len(errors) == 0, errors
 
 
 def axes_match_seg_dims(
-    store: str | Path | zarr.storage.StoreLike,
+    memory_geff: InMemoryGeff,
     segmentation: ArrayLike,
 ) -> tuple[bool, list[str]]:
     """Validate that geff axes metadata have the same number of dimensions as the
     segmentation data.
 
     Args:
-        store (DirectoryStore, MemoryStore): A Zarr store or a path to one.
+        memory_geff (InMemoryGeff): An InMemoryGeff to validate
         segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
 
     Returns:
@@ -78,10 +71,7 @@ def axes_match_seg_dims(
     """
 
     errors: list[str] = []
-    group = zarr.open_group(store, mode="r")
-    metadata: dict = dict(group.attrs)
-
-    axes = metadata.get("geff", {}).get("axes")
+    axes = memory_geff["metadata"].axes
 
     if axes:
         return np.asanyarray(segmentation).ndim == len(axes), errors
@@ -91,7 +81,7 @@ def axes_match_seg_dims(
 
 
 def graph_is_in_seg_bounds(
-    store: str | Path | zarr.storage.StoreLike,
+    memory_geff: InMemoryGeff,
     segmentation: ArrayLike,
     scale: Sequence[float] | None = None,
 ) -> tuple[bool, list[str]]:
@@ -99,7 +89,7 @@ def graph_is_in_seg_bounds(
     segmentation data.
 
     Args:
-        store (DirectoryStore, MemoryStore): A geff zarr store or a path to one.
+        memory_geff (InMemoryGeff): An InMemoryGeff to validate
         segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
         scale (tuple[float] | list[float] | None = None): optional scaling tuple, with the
             same length as the number of dimensions in the segmentation data.
@@ -115,9 +105,7 @@ def graph_is_in_seg_bounds(
     """
 
     errors: list[str] = []
-    group = zarr.open_group(store, mode="r")
-    metadata: dict = dict(group.attrs)
-    axes = metadata.get("geff", {}).get("axes")
+    axes = memory_geff["metadata"].axes
 
     segmentation = np.asanyarray(segmentation)
     seg_shape = segmentation.shape
@@ -134,7 +122,7 @@ def graph_is_in_seg_bounds(
 
     if axes:
         for i, ax in enumerate(axes):
-            max_bound = ax.get("max")
+            max_bound = ax.max
             if max_bound:
                 if seg_shape[i] * scale[i] <= max_bound:
                     errors.append(
@@ -156,7 +144,7 @@ def has_seg_ids_at_time_points(
     segmentation: ArrayLike,
     time_points: Sequence[int],
     seg_ids: Sequence[int],
-    store: str | Path | zarr.storage.StoreLike | None = None,
+    metadata: GeffMetadata | None = None,
 ) -> tuple[bool, list[str]]:
     """
     Validates that labels with given seg_ids exist at time points t. If a store is
@@ -167,8 +155,7 @@ def has_seg_ids_at_time_points(
         segmentation (ArrayLike): a 3D or 4D segmentation array (t, (z), y, x).
         time_points (Sequence[int]): Sequence of time points to check.
         seg_ids (Sequence[int]): Sequence of seg_ids to check.
-        store (DirectoryStore, MemoryStore, | None = None): Optional geff Zarr store or a
-            path to one. If provided, it will attempt to read the axis order from the
+        metadata (GeffMetadata): If provided, it will attempt to read the axis order from the
             metadata. Otherwise, it is assumed that the dimension order is t(z)yx.
 
     Returns:
@@ -180,16 +167,14 @@ def has_seg_ids_at_time_points(
 
     errors: list[str] = []
     time_index = 0
-    if store is not None:
+    if metadata is not None:
         # load the axes metadata to extract the axes order. If it is not present, assume
         # that time is the first axes.
-        group = zarr.open_group(store, mode="r")
-        metadata: dict = dict(group.attrs)
-        axes = metadata.get("geff", {}).get("axes")
+        axes = metadata.axes
 
         # check the metadata to see if an alternative time index is provided there.
         if axes:
-            time_indices = [axes.index(ax) for ax in axes if ax["type"] == "time"]
+            time_indices = [axes.index(ax) for ax in axes if ax.type == "time"]
             if len(time_indices) == 1:
                 time_index = time_indices[0]
 

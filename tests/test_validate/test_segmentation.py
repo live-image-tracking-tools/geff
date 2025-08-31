@@ -61,36 +61,36 @@ def valid_segmentation():
 
 
 def test_has_valid_seg_id(valid_store_and_attrs, invalid_store_and_attrs) -> None:
-    store, _ = valid_store_and_attrs  # valid seg id
-    assert has_valid_seg_id(store)[0] is True
+    _, mem_geff = valid_store_and_attrs  # valid seg id
+    assert has_valid_seg_id(mem_geff)[0] is True
 
-    store, _ = invalid_store_and_attrs  # seg_id is of type float32
-    assert has_valid_seg_id(store)[0] is False
+    _, mem_geff = invalid_store_and_attrs  # seg_id is of type float32
+    assert has_valid_seg_id(mem_geff)[0] is False
 
-    store, _ = create_simple_2d_geff()  # no seg_id
-    assert has_valid_seg_id(store)[0] is False
+    _, mem_geff = create_simple_2d_geff()  # no seg_id
+    assert has_valid_seg_id(mem_geff)[0] is False
 
 
 def test_axes_match_seg_dims(valid_store_and_attrs, valid_segmentation) -> None:
-    store, _ = valid_store_and_attrs
-    assert axes_match_seg_dims(store, valid_segmentation)[0] is True
+    _, mem_geff = valid_store_and_attrs
+    assert axes_match_seg_dims(mem_geff, valid_segmentation)[0] is True
 
     seg_invalid = np.zeros((600, 200))  # invalid, 2D instead of 3D
-    assert axes_match_seg_dims(store, seg_invalid)[0] is False
+    assert axes_match_seg_dims(mem_geff, seg_invalid)[0] is False
 
 
 def test_graph_is_in_seg_bounds(valid_store_and_attrs, valid_segmentation) -> None:
-    store, _ = valid_store_and_attrs
+    _, memory_geff = valid_store_and_attrs
     scale = (1, 1, 100)
-    assert graph_is_in_seg_bounds(store, valid_segmentation, scale=scale)[0] is True
+    assert graph_is_in_seg_bounds(memory_geff, valid_segmentation, scale=scale)[0] is True
 
     # Invalid scale → graph exceeds segmentation shape
     bad_scale = (1, 1, 0.001)
-    assert graph_is_in_seg_bounds(store, valid_segmentation, scale=bad_scale)[0] is False
+    assert graph_is_in_seg_bounds(memory_geff, valid_segmentation, scale=bad_scale)[0] is False
 
     # Mismatched scale length
     bad_scale_len = (1, 1)
-    assert graph_is_in_seg_bounds(store, valid_segmentation, scale=bad_scale_len)[0] is False
+    assert graph_is_in_seg_bounds(memory_geff, valid_segmentation, scale=bad_scale_len)[0] is False
 
 
 @pytest.mark.parametrize(
@@ -108,9 +108,11 @@ def test_has_seg_ids_at_time_points(
     seg_ids: list[int],
     expected: bool,
 ) -> None:
-    store, _ = valid_store_and_attrs
+    _, mem_geff = valid_store_and_attrs
     assert (
-        has_seg_ids_at_time_points(valid_segmentation, time_points, seg_ids, store=store)[0]
+        has_seg_ids_at_time_points(
+            valid_segmentation, time_points, seg_ids, metadata=mem_geff["metadata"]
+        )[0]
         == expected
     )
 
