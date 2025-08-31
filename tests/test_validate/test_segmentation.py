@@ -70,6 +70,16 @@ def test_has_valid_seg_id(valid_store_and_attrs, invalid_store_and_attrs) -> Non
     _, mem_geff = create_simple_2d_geff()  # no seg_id
     assert has_valid_seg_id(mem_geff)[0] is False
 
+    # Add missing array with no missing values
+    _, mem_geff = valid_store_and_attrs
+    n_nodes = mem_geff["node_ids"].shape[0]
+    mem_geff["node_props"]["seg_id"]["missing"] = np.array([False] * n_nodes)
+    assert has_valid_seg_id(mem_geff)[0] is True
+
+    # Add in missing values
+    mem_geff["node_props"]["seg_id"]["missing"][0] = True
+    assert has_valid_seg_id(mem_geff)[0] is False
+
 
 def test_axes_match_seg_dims(valid_store_and_attrs, valid_segmentation) -> None:
     _, mem_geff = valid_store_and_attrs

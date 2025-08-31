@@ -44,7 +44,7 @@ def has_valid_seg_id(memory_geff: InMemoryGeff, seg_id: str = "seg_id") -> tuple
 
     # Check for no missing seg ids
     missing = memory_geff["node_props"][seg_id]["missing"]
-    if missing is not None and not any(missing):
+    if missing is not None and any(missing):
         errors.append("Mismatch in number of node IDs and seg_ids.")
         return False, errors
 
