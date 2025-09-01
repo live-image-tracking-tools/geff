@@ -60,8 +60,16 @@ def write_dicts(
 
     if len(node_ids) > 0:
         nodes_arr = np.asarray(node_ids)
+        # Check if we can cast to uint
+        if any(nodes_arr < 0):
+            raise ValueError("Cannot write a geff with node ids that are negative")
+        if not np.issubdtype(nodes_arr.dtype, np.integer):
+            warnings.warn(
+                f"Node ids with dtype {nodes_arr.dtype} are being cast to uint", stacklevel=2
+            )
+        nodes_arr = nodes_arr.astype("uint")
     else:
-        nodes_arr = np.empty((0,), dtype=np.int64)
+        nodes_arr = np.empty((0,), dtype=np.uint64)
 
     if len(edge_ids) > 0:
         edges_arr = np.asarray(edge_ids, dtype=nodes_arr.dtype)

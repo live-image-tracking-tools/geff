@@ -7,7 +7,7 @@ import geff
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.testing.data import create_mock_geff
 
-node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_id_dtypes = ["uint8", "uint16"]
 node_axis_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
@@ -26,7 +26,7 @@ extra_edge_props = [
 @pytest.mark.parametrize("directed", [True, False])
 @pytest.mark.parametrize("include_t", [True, False])
 @pytest.mark.parametrize("include_z", [True, False])
-def test_read_write_consistency(
+def test_read_consistency(
     tmp_path,
     node_id_dtype,
     node_axis_dtypes,

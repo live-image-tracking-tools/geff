@@ -102,13 +102,13 @@ class Test_validate_nodes_group:
 
     def test_ids_not_int(self, node_group, meta):
         node_group[_path.IDS] = node_group[_path.IDS][:].astype("float")
-        with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
+        with pytest.raises(ValueError, match="Node ids must have an unsigned integer dtype"):
             _validate_nodes_group(node_group, meta)
 
-        # TODO: Must be positive integers
-        # node_group[_path.IDS] = node_group[_path.IDS][:] * -1
-        # with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
-        #     _validate_nodes_group(node_group, meta)
+        # Must be uint, not just int
+        node_group[_path.IDS] = node_group[_path.IDS][:].astype("int")
+        with pytest.raises(ValueError, match="Node ids must have an unsigned integer dtype"):
+            _validate_nodes_group(node_group, meta)
 
     # Other cases are caught in tests for _validate_props_group
 
@@ -134,6 +134,14 @@ class Test_validate_edges_group:
         with pytest.raises(
             ValueError,
             match="edges ids must be 2d with last dimension of size 2, received shape .*",
+        ):
+            _validate_edges_group(edge_group, meta)
+
+    def test_edge_ids_not_uint(self, edge_group, meta):
+        edge_group[_path.IDS] = edge_group[_path.IDS][:].astype("float")
+        with pytest.raises(
+            ValueError,
+            match="Edge ids must have an unsigned integer dtype",
         ):
             _validate_edges_group(edge_group, meta)
 
