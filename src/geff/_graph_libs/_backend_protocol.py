@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from typing import Any, Protocol, TypeVar
 
 from numpy.typing import NDArray
@@ -6,7 +5,7 @@ from numpy.typing import NDArray
 from geff._typing import PropDictNpArray
 from geff.metadata import GeffMetadata
 
-T = TypeVar("T")
+T = TypeVar("T", covariant=True)
 
 
 class Backend(Protocol[T]):
@@ -53,70 +52,6 @@ class Backend(Protocol[T]):
 
         Returns:
             graph (T): The graph object.
-        """
-        ...
-
-    def get_node_ids(self, graph: T) -> Sequence[Any]:
-        """
-        Get the node ids of the graph.
-
-        Args:
-            graph (T): The graph object.
-
-        Returns:
-            node_ids (Sequence[Any]): The node ids.
-        """
-        ...
-
-    def get_edge_ids(self, graph: T) -> Sequence[tuple[Any, Any]]:
-        """
-        Get the edges of the graph.
-
-        Args:
-            graph (T): The graph object.
-
-        Returns:
-            edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
-        """
-        ...
-
-    def get_node_prop(
-        self, graph: T, name: str, nodes: Sequence[Any], metadata: GeffMetadata
-    ) -> NDArray[Any]:
-        """
-        Get a property of the nodes as a numpy array.
-
-        Args:
-            graph (T): The graph object.
-            name (str): The name of the node property.
-            nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
-                array.
-            metadata (GeffMetadata): The GEFF metadata.
-
-        Returns:
-            numpy.ndarray: The values of the selected property as a numpy array.
-        """
-        ...
-
-    def get_edge_prop(
-        self,
-        graph: T,
-        name: str,
-        edges: Sequence[tuple[Any, Any]],
-        metadata: GeffMetadata,
-    ) -> NDArray[Any]:
-        """
-        Get a property of the edges as a numpy array.
-
-        Args:
-            graph (T): The graph object.
-            name (str): The name of the edge property.
-            edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
-                determines the order of the property array.
-            metadata (GeffMetadata): The GEFF metadata.
-
-        Returns:
-            numpy.ndarray: The values of the selected property as a numpy array.
         """
         ...
 
