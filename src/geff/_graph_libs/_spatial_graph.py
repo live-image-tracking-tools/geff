@@ -28,7 +28,7 @@ from geff.core_io._base_read import read_to_memory
 from geff.core_io._utils import remove_tilde
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 
-from ._backend_protocol import Backend
+from ._backend_protocol import BaseBackend
 from ._graph_adapter import GraphAdapter
 
 GRAPH_TYPES = (sg.SpatialGraph, sg.SpatialDiGraph)
@@ -174,7 +174,7 @@ def read_sg(
     return graph, in_memory_geff["metadata"]
 
 
-class SgBackend(Backend):
+class SgBackend(BaseBackend):
     @staticmethod
     def construct(
         metadata: GeffMetadata,

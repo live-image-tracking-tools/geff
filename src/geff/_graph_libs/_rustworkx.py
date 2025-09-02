@@ -23,7 +23,7 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
-from ._backend_protocol import Backend
+from ._backend_protocol import BaseBackend
 from ._graph_adapter import GraphAdapter
 
 if TYPE_CHECKING:
@@ -163,7 +163,7 @@ def write_rx(
     metadata.write(store)
 
 
-class RxBackend(Backend):
+class RxBackend(BaseBackend):
     @staticmethod
     def construct(
         metadata: GeffMetadata,

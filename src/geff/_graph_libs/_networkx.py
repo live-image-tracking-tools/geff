@@ -14,7 +14,7 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
-from ._backend_protocol import Backend
+from ._backend_protocol import BaseBackend
 from ._graph_adapter import GraphAdapter
 
 if TYPE_CHECKING:
@@ -155,7 +155,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val.tolist()
 
 
-class NxBackend(Backend):
+class NxBackend(BaseBackend):
     @staticmethod
     def construct(
         metadata: GeffMetadata,

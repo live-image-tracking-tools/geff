@@ -1,8 +1,10 @@
 from typing import Any, Protocol, TypeVar
 
 from numpy.typing import NDArray
+from zarr.storage import StoreLike
 
 from geff._typing import PropDictNpArray
+from geff.core_io._base_read import read_to_memory
 from geff.metadata import GeffMetadata
 
 from ._graph_adapter import GraphAdapter
@@ -52,7 +54,32 @@ class Backend(Protocol[T]):
         """
         ...
 
+    @classmethod
+    def read(
+        cls,
+        store: StoreLike,
+        validate: bool = True,
+        node_props: list[str] | None = None,
+        edge_props: list[str] | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> T: ...
+
     @staticmethod
     def graph_adapter(graph: T) -> GraphAdapter[T]: ...
 
     # TODO: add write
+
+
+class BaseBackend(Backend[T]):
+    @classmethod
+    def read(
+        cls,
+        store: StoreLike,
+        validate: bool = True,
+        node_props: list[str] | None = None,
+        edge_props: list[str] | None = None,
+        **kwargs: Any,
+    ) -> T:
+        in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
+        return cls.construct(**in_memory_geff, **kwargs)
