@@ -72,7 +72,8 @@ docs = [
     "mkdocs-typer>=0.0.3",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
-    "mkdocs-autorefs"
+    "mkdocs-autorefs",
+    "griffe-pydantic"
 ]
 bench = [
     { include-group = "test" },

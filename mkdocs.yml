@@ -31,8 +31,8 @@ extra:
     provider: mike
     default: latest
 
-hooks:
-  - docs/_hooks.py
+# hooks:
+  # - docs/_hooks.py
 
 markdown_extensions:
   - admonition
@@ -51,7 +51,7 @@ plugins:
         options:
           docstring_section_style: table # or "table"
           docstring_style: "google"
-    #       filters: ["!^_"]
+          filters: ["!_^"]
           heading_level: 3 
           merge_init_into_class: true
           # parameter_headings: true # makes parameters show up in side TOC
@@ -63,6 +63,12 @@ plugins:
           show_symbol_type_toc: true
           # summary: true
           line_length: 60
+          show_docstring_attributes: true
+          show_attribute_values: true
+          show_labels: false
+          extensions:
+          - griffe_pydantic:
+                schema: false
 - include-markdown
 - api-autonav:
     modules: ['src/geff']
