@@ -28,6 +28,8 @@ from geff.core_io._base_read import read_to_memory
 from geff.core_io._utils import remove_tilde
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 
+from ._graph_adapter import GraphAdapter
+
 GRAPH_TYPES = (sg.SpatialGraph, sg.SpatialDiGraph)
 
 
@@ -89,7 +91,11 @@ def write_sg(
     # create metadata
     roi_min, roi_max = graph.roi
     axes = _axes_from_lists(
-        axis_names, axis_units=axis_units, axis_types=axis_types, roi_min=roi_min, roi_max=roi_max
+        axis_names,
+        axis_units=axis_units,
+        axis_types=axis_types,
+        roi_min=roi_min,
+        roi_max=roi_max,
     )
     metadata = GeffMetadata(
         geff_version=geff.__version__,
@@ -266,100 +272,54 @@ def construct(
     return graph
 
 
-def get_node_ids(graph: sg.SpatialGraph | sg.SpatialDiGraph) -> Sequence[Any]:
-    """
-    Get the node ids of the graph.
+class SgGraphAdapter(GraphAdapter):
+    def __init__(self, graph: sg.SpatialGraph | sg.SpatialDiGraph) -> None:
+        self.graph = graph
 
-    Args:
-        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
+    def get_node_ids(self) -> Sequence[Any]:
+        return list(self.graph.nodes)
 
-    Returns:
-        node_ids (Sequence[Any]): The node ids.
-    """
-    return list(graph.nodes)
+    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+        return [tuple(edge.tolist()) for edge in self.graph.edges]
 
+    def get_node_prop(
+        self,
+        name: str,
+        nodes: Sequence[Any],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        axes = metadata.axes
+        if axes is None:
+            raise ValueError("No axes found for spatial props")
+        axes_names = [ax.name for ax in axes]
+        if name in axes_names:
+            return self._get_node_spatial_props(name, nodes, axes_names)
+        else:
+            # TODO: is this the best way to access node attributes? Have to cast
+            self.graph.node_attrs[nodes]
+            return cast("NDArray[Any]", getattr(self.graph.node_attrs[nodes], name))
 
-def get_edge_ids(
-    graph: sg.SpatialGraph | sg.SpatialDiGraph,
-) -> Sequence[tuple[Any, Any]]:
-    """
-    Get the edges of the graph.
+    # This is not the most elegant solution but the idea is:
+    #   spatial-graph combines the spatial properties into a single position attr
+    #   so to compare with the results we need to index each position separately
+    def _get_node_spatial_props(
+        self,
+        name: str,
+        nodes: Sequence[Any],
+        axes_names: list[str],
+    ) -> NDArray[Any]:
+        if name not in axes_names:
+            raise ValueError(f"Node property '{name}' not found in axes names {axes_names}")
+        idx = axes_names.index(name)
+        position = getattr(self.graph.node_attrs[nodes], self.graph.position_attr)
+        position = cast("NDArray[Any]", position)  # cast because getattr call
+        return position[:, idx]
 
-    Args:
-        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
-
-    Returns:
-        edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
-    """
-    return [tuple(edge.tolist()) for edge in graph.edges]
-
-
-def get_node_prop(
-    graph: sg.SpatialGraph | sg.SpatialDiGraph,
-    name: str,
-    nodes: Sequence[Any],
-    metadata: GeffMetadata,
-) -> NDArray[Any]:
-    """
-    Get a property of the nodes as a numpy array.
-
-    Args:
-        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
-        name (str): The name of the node property.
-        nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
-            array.
-        metadata (GeffMetadata): The GEFF metadata.
-
-    Returns:
-        numpy.ndarray: The values of the selected property as a numpy array.
-    """
-    axes = metadata.axes
-    if axes is None:
-        raise ValueError("No axes found for spatial props")
-    axes_names = [ax.name for ax in axes]
-    if name in axes_names:
-        return _get_node_spatial_props(graph, name, nodes, axes_names)
-    else:
-        # TODO: is this the best way to access node attributes? Have to cast
-        graph.node_attrs[nodes]
-        return cast("NDArray[Any]", getattr(graph.node_attrs[nodes], name))
-
-
-# This is not the most elegant solution but the idea is:
-#   spatial graph takes the spatial properties defined in axes and combines them into a single attr
-#   so to compare with the results we need to index each position separately
-def _get_node_spatial_props(
-    graph: sg.SpatialGraph | sg.SpatialDiGraph,
-    name: str,
-    nodes: Sequence[Any],
-    axes_names: list[str],
-) -> NDArray[Any]:
-    if name not in axes_names:
-        raise ValueError(f"Node property '{name}' not found in axes names {axes_names}")
-    idx = axes_names.index(name)
-    position = getattr(graph.node_attrs[nodes], graph.position_attr)
-    position = cast("NDArray[Any]", position)  # cast because getattr call
-    return position[:, idx]
-
-
-def get_edge_prop(
-    graph: sg.SpatialGraph | sg.SpatialDiGraph,
-    name: str,
-    edges: Sequence[tuple[Any, Any]],
-    metadata: GeffMetadata,
-) -> NDArray[Any]:
-    """
-    Get a property of the edges as a numpy array.
-
-    Args:
-        graph (sg.SpatialGraph | sg.SpatialDiGraph): The graph object.
-        name (str): The name of the edge property.
-        edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
-            determines the order of the property array.
-        metadata (GeffMetadata): The GEFF metadata.
-
-    Returns:
-        numpy.ndarray: The values of the selected property as a numpy array.
-    """
-    # TODO: is this the best way to access edge attributes? Have to cast
-    return cast("NDArray[Any]", getattr(graph.edge_attrs[edges], name))
+    def get_edge_prop(
+        self,
+        name: str,
+        edges: Sequence[tuple[Any, Any]],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        # TODO: is this the best way to access edge attributes? Have to cast
+        return cast("NDArray[Any]", getattr(self.graph.edge_attrs[edges], name))

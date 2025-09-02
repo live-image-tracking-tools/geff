@@ -14,6 +14,8 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
+from ._graph_adapter import GraphAdapter
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -222,73 +224,30 @@ def read_nx(
     return graph, in_memory_geff["metadata"]
 
 
-def get_node_ids(graph: nx.Graph | nx.DiGraph) -> Sequence[Any]:
-    """
-    Get the node ids of the graph.
+class NxGraphAdapter(GraphAdapter):
+    def __init__(self, graph: nx.Graph | nx.DiGraph) -> None:
+        self.graph = graph
 
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
+    def get_node_ids(self) -> Sequence[Any]:
+        return list(self.graph.nodes)
 
-    Returns:
-        node_ids (Sequence[Any]): The node ids.
-    """
-    return list(graph.nodes)
+    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+        return list(self.graph.edges)
 
+    def get_node_prop(
+        self,
+        name: str,
+        nodes: Sequence[Any],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        prop = [self.graph.nodes[node][name] for node in nodes]
+        return np.array(prop)
 
-def get_edge_ids(graph: nx.Graph | nx.DiGraph) -> Sequence[tuple[Any, Any]]:
-    """
-    Get the edges of the graph.
-
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
-
-    Returns:
-        edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
-    """
-    return list(graph.edges)
-
-
-def get_node_prop(
-    graph: nx.Graph | nx.DiGraph,
-    name: str,
-    nodes: Sequence[Any],
-    metadata: GeffMetadata,
-) -> NDArray[Any]:
-    """
-    Get a property of the nodes as a numpy array.
-
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
-        name (str): The name of the node property.
-        nodes (Sequence[Any]): A sequence of node ids; this determines the order of the property
-            array.
-        metadata (GeffMetadata): The GEFF metadata.
-
-    Returns:
-        numpy.ndarray: The values of the selected property as a numpy array.
-    """
-    prop = [graph.nodes[node][name] for node in nodes]
-    return np.array(prop)
-
-
-def get_edge_prop(
-    graph: nx.Graph | nx.DiGraph,
-    name: str,
-    edges: Sequence[tuple[Any, Any]],
-    metadata: GeffMetadata,
-) -> NDArray[Any]:
-    """
-    Get a property of the edges as a numpy array.
-
-    Args:
-        graph (nx.Graph | nx.DiGraph): The graph object.
-        name (str): The name of the edge property.
-        edges (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
-            determines the order of the property array.
-        metadata (GeffMetadata): The GEFF metadata.
-
-    Returns:
-        numpy.ndarray: The values of the selected property as a numpy array.
-    """
-    prop = [graph.edges[edge][name] for edge in edges]
-    return np.array(prop)
+    def get_edge_prop(
+        self,
+        name: str,
+        edges: Sequence[tuple[Any, Any]],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        prop = [self.graph.edges[edge][name] for edge in edges]
+        return np.array(prop)
