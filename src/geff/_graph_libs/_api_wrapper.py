@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, overload
 
-from geff.core_io._base_read import read_to_memory
-
 R = TypeVar("R", covariant=True)
 
 if TYPE_CHECKING:
@@ -133,8 +131,4 @@ def read(
         tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
     """
     backend_io = get_backend(backend)
-    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    return (
-        backend_io.construct(**in_memory_geff, **backend_kwargs),
-        in_memory_geff["metadata"],
-    )
+    return backend_io.read(store, validate, node_props, edge_props, **backend_kwargs)

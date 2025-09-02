@@ -63,7 +63,7 @@ class Backend(Protocol[T]):
         edge_props: list[str] | None = None,
         *args: Any,
         **kwargs: Any,
-    ) -> T: ...
+    ) -> tuple[T, GeffMetadata]: ...
 
     @staticmethod
     def graph_adapter(graph: T) -> GraphAdapter[T]: ...
@@ -80,6 +80,6 @@ class BaseBackend(Backend[T]):
         node_props: list[str] | None = None,
         edge_props: list[str] | None = None,
         **kwargs: Any,
-    ) -> T:
+    ) -> tuple[T, GeffMetadata]:
         in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-        return cls.construct(**in_memory_geff, **kwargs)
+        return cls.construct(**in_memory_geff, **kwargs), in_memory_geff["metadata"]
