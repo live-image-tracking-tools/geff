@@ -28,6 +28,7 @@ from geff.core_io._base_read import read_to_memory
 from geff.core_io._utils import remove_tilde
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 
+from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
 
 GRAPH_TYPES = (sg.SpatialGraph, sg.SpatialDiGraph)
@@ -168,108 +169,116 @@ def read_sg(
     """
 
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct(**in_memory_geff, position_attr=position_attr)
+    graph = SgBackend.construct(**in_memory_geff, position_attr=position_attr)
 
     return graph, in_memory_geff["metadata"]
 
 
-def construct(
-    metadata: GeffMetadata,
-    node_ids: NDArray[Any],
-    edge_ids: NDArray[Any],
-    node_props: dict[str, PropDictNpArray],
-    edge_props: dict[str, PropDictNpArray],
-    position_attr: str = "position",
-) -> sg.SpatialGraph | sg.SpatialDiGraph:
-    """Construct a `spatial-graph` graph instance from GEFF data.
+class SgBackend(Backend):
+    @staticmethod
+    def construct(
+        metadata: GeffMetadata,
+        node_ids: NDArray[Any],
+        edge_ids: NDArray[Any],
+        node_props: dict[str, PropDictNpArray],
+        edge_props: dict[str, PropDictNpArray],
+        position_attr: str = "position",
+    ) -> sg.SpatialGraph | sg.SpatialDiGraph:
+        """Construct a `spatial-graph` graph instance from GEFF data.
 
-    Args:
-        metadata (GeffMetadata): The metadata of the graph.
-        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
-            edge_ids.
-        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
-            as node_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids. Spatial graph does not support missing attributes, so the missing
-            arrays should be None or all False. If present, the missing arrays are ignored
-            with warning
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids. Spatial graph does not support missing attributes, so the missing
-            arrays should be None or all False. If present, the missing array is ignored with
-            warning.
-        position_attr (str, optional): How to call the position attribute in the returned
-            SpatialGraph. Defaults to "position".
+        Args:
+            metadata (GeffMetadata): The metadata of the graph.
+            node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
+                edge_ids.
+            edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
+                as node_ids.
+            node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+                from node property names to (values, missing) arrays, which should have same
+                length as node_ids. Spatial graph does not support missing attributes, so the
+                missing arrays should be None or all False. If present, the missing arrays are
+                ignored with warning
+            edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
+                from edge property names to (values, missing) arrays, which should have same
+                length as edge_ids. Spatial graph does not support missing attributes, so the
+                missing
+                arrays should be None or all False. If present, the missing array is ignored with
+                warning.
+            position_attr (str, optional): How to call the position attribute in the returned
+                SpatialGraph. Defaults to "position".
 
-    Returns:
-        sg.SpatialGraph: A SpatialGraph containing the graph that was stored in the geff file format
-    """
-    assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"
+        Returns:
+            sg.SpatialGraph: A SpatialGraph containing the graph that was stored in the geff file
+            format.
+        """
+        assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"
 
-    position_attrs = [axis.name for axis in metadata.axes]
-    ndims = len(position_attrs)
+        position_attrs = [axis.name for axis in metadata.axes]
+        ndims = len(position_attrs)
 
-    def get_dtype_str(dataset: np.ndarray) -> str:
-        dtype = dataset.dtype
-        shape = dataset.shape
-        if len(shape) > 1:
-            size = shape[1]
-            return f"{dtype}[{size}]"
-        else:
-            return str(dtype)
+        def get_dtype_str(dataset: np.ndarray) -> str:
+            dtype = dataset.dtype
+            shape = dataset.shape
+            if len(shape) > 1:
+                size = shape[1]
+                return f"{dtype}[{size}]"
+            else:
+                return str(dtype)
 
-    # read nodes/edges
-    node_dtype = get_dtype_str(node_ids)
+        # read nodes/edges
+        node_dtype = get_dtype_str(node_ids)
 
-    # collect node and edge attributes
-    node_attr_dtypes = {
-        name: get_dtype_str(node_props[name]["values"]) for name in node_props.keys()
-    }
-    for name in node_props.keys():
-        if node_props[name]["missing"] is not None:
-            warnings.warn(
-                f"Potential missing values for attr {name} are being ignored",
-                stacklevel=2,
-            )
-    edge_attr_dtypes = {
-        name: get_dtype_str(edge_props[name]["values"]) for name in edge_props.keys()
-    }
-    for name in edge_props.keys():
-        if edge_props[name]["missing"] is not None:
-            warnings.warn(
-                f"Potential missing values for attr {name} are being ignored",
-                stacklevel=2,
-            )
+        # collect node and edge attributes
+        node_attr_dtypes = {
+            name: get_dtype_str(node_props[name]["values"]) for name in node_props.keys()
+        }
+        for name in node_props.keys():
+            if node_props[name]["missing"] is not None:
+                warnings.warn(
+                    f"Potential missing values for attr {name} are being ignored",
+                    stacklevel=2,
+                )
+        edge_attr_dtypes = {
+            name: get_dtype_str(edge_props[name]["values"]) for name in edge_props.keys()
+        }
+        for name in edge_props.keys():
+            if edge_props[name]["missing"] is not None:
+                warnings.warn(
+                    f"Potential missing values for attr {name} are being ignored",
+                    stacklevel=2,
+                )
 
-    node_attrs = {name: node_props[name]["values"] for name in node_props.keys()}
-    edge_attrs = {name: edge_props[name]["values"] for name in edge_props.keys()}
+        node_attrs = {name: node_props[name]["values"] for name in node_props.keys()}
+        edge_attrs = {name: edge_props[name]["values"] for name in edge_props.keys()}
 
-    # squish position attributes together into one position attribute
-    position = np.stack([node_attrs[name] for name in position_attrs], axis=1)
-    for name in position_attrs:
-        del node_attrs[name]
-        del node_attr_dtypes[name]
-    node_attrs[position_attr] = position
-    node_attr_dtypes[position_attr] = get_dtype_str(position)
+        # squish position attributes together into one position attribute
+        position = np.stack([node_attrs[name] for name in position_attrs], axis=1)
+        for name in position_attrs:
+            del node_attrs[name]
+            del node_attr_dtypes[name]
+        node_attrs[position_attr] = position
+        node_attr_dtypes[position_attr] = get_dtype_str(position)
 
-    # create graph
-    create_graph: Callable[..., sg.SpatialGraph | sg.SpatialDiGraph] = getattr(
-        sg, "create_graph", sg.SpatialGraph
-    )
-    graph = create_graph(
-        ndims=ndims,
-        node_dtype=node_dtype,
-        node_attr_dtypes=node_attr_dtypes,
-        edge_attr_dtypes=edge_attr_dtypes,
-        position_attr=position_attr,
-        directed=metadata.directed,
-    )
+        # create graph
+        create_graph: Callable[..., sg.SpatialGraph | sg.SpatialDiGraph] = getattr(
+            sg, "create_graph", sg.SpatialGraph
+        )
+        graph = create_graph(
+            ndims=ndims,
+            node_dtype=node_dtype,
+            node_attr_dtypes=node_attr_dtypes,
+            edge_attr_dtypes=edge_attr_dtypes,
+            position_attr=position_attr,
+            directed=metadata.directed,
+        )
 
-    graph.add_nodes(node_ids, **node_attrs)
-    graph.add_edges(edge_ids, **edge_attrs)
+        graph.add_nodes(node_ids, **node_attrs)
+        graph.add_edges(edge_ids, **edge_attrs)
 
-    return graph
+        return graph
+
+    @staticmethod
+    def graph_adapter(graph: sg.SpatialGraph | sg.SpatialDiGraph) -> SgGraphAdapter:
+        return SgGraphAdapter(graph)
 
 
 class SgGraphAdapter(GraphAdapter):

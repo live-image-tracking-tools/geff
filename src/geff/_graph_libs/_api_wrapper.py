@@ -50,17 +50,17 @@ def get_backend(backend: SupportedBackend) -> Backend:
     """
     match backend:
         case "networkx":
-            from geff._graph_libs import _networkx as nx_backend
+            from geff._graph_libs._networkx import NxBackend
 
-            return nx_backend
+            return NxBackend()
         case "rustworkx":
-            from geff._graph_libs import _rustworkx as rx_backend
+            from geff._graph_libs._rustworkx import RxBackend
 
-            return rx_backend
+            return RxBackend()
         case "spatial-graph":
-            from geff._graph_libs import _spatial_graph as sg_backend
+            from geff._graph_libs._spatial_graph import SgBackend
 
-            return sg_backend
+            return SgBackend()
         # Add cases for new backends, remember to add overloads
         case _:
             raise ValueError(f"Unsupported backend chosen: '{backend}'")
@@ -134,4 +134,7 @@ def read(
     """
     backend_io = get_backend(backend)
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    return (backend_io.construct(**in_memory_geff, **backend_kwargs), in_memory_geff["metadata"])
+    return (
+        backend_io.construct(**in_memory_geff, **backend_kwargs),
+        in_memory_geff["metadata"],
+    )

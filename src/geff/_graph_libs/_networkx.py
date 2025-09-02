@@ -14,6 +14,7 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
+from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
 
 if TYPE_CHECKING:
@@ -27,8 +28,6 @@ if TYPE_CHECKING:
 import logging
 
 logger = logging.getLogger(__name__)
-
-GRAPH_TYPES = (nx.Graph, nx.DiGraph)
 
 
 def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
@@ -156,43 +155,49 @@ def _set_property_values(
                 graph.edges[source, target][name] = val.tolist()
 
 
-def construct(
-    metadata: GeffMetadata,
-    node_ids: NDArray[Any],
-    edge_ids: NDArray[Any],
-    node_props: dict[str, PropDictNpArray],
-    edge_props: dict[str, PropDictNpArray],
-) -> nx.Graph | nx.DiGraph:
-    """
-    Construct a `networkx` graph instance from GEFF data.
+class NxBackend(Backend):
+    @staticmethod
+    def construct(
+        metadata: GeffMetadata,
+        node_ids: NDArray[Any],
+        edge_ids: NDArray[Any],
+        node_props: dict[str, PropDictNpArray],
+        edge_props: dict[str, PropDictNpArray],
+    ) -> nx.Graph | nx.DiGraph:
+        """
+        Construct a `networkx` graph instance from GEFF data.
 
-    Args:
-        metadata (GeffMetadata): The metadata of the graph.
-        node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
-            edge_ids.
-        edge_ids (NDArray[Any]): An array containing the edge ids. Must have same dtype
-            as node_ids.
-        node_props (dict[str, PropDictNpArray]): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids.
-        edge_props (dict[str, PropDictNpArray]): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids.
+        Args:
+            metadata (GeffMetadata): The metadata of the graph.
+            node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
+                edge_ids.
+            edge_ids (NDArray[Any]): An array containing the edge ids. Must have same dtype
+                as node_ids.
+            node_props (dict[str, PropDictNpArray]): A dictionary
+                from node property names to (values, missing) arrays, which should have same
+                length as node_ids.
+            edge_props (dict[str, PropDictNpArray]): A dictionary
+                from edge property names to (values, missing) arrays, which should have same
+                length as edge_ids.
 
-    Returns:
-        (nx.Graph | nx.DiGraph): A `networkx` graph object.
-    """
-    graph = nx.DiGraph() if metadata.directed else nx.Graph()
+        Returns:
+            (nx.Graph | nx.DiGraph): A `networkx` graph object.
+        """
+        graph = nx.DiGraph() if metadata.directed else nx.Graph()
 
-    graph.add_nodes_from(node_ids.tolist())
-    for name, prop_dict in node_props.items():
-        _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
+        graph.add_nodes_from(node_ids.tolist())
+        for name, prop_dict in node_props.items():
+            _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
 
-    graph.add_edges_from(edge_ids.tolist())
-    for name, prop_dict in edge_props.items():
-        _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
+        graph.add_edges_from(edge_ids.tolist())
+        for name, prop_dict in edge_props.items():
+            _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
 
-    return graph
+        return graph
+
+    @staticmethod
+    def graph_adapter(graph: Any) -> NxGraphAdapter:
+        return NxGraphAdapter(graph)
 
 
 def read_nx(
@@ -219,7 +224,7 @@ def read_nx(
         A networkx graph containing the graph that was stored in the geff file format
     """
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct(**in_memory_geff)
+    graph = NxBackend.construct(**in_memory_geff)
 
     return graph, in_memory_geff["metadata"]
 

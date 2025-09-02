@@ -23,6 +23,7 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
+from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
 
 if TYPE_CHECKING:
@@ -32,8 +33,6 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-
-GRAPH_TYPES = (rx.PyGraph, rx.PyDiGraph)
 
 
 def get_roi_rx(
@@ -164,73 +163,47 @@ def write_rx(
     metadata.write(store)
 
 
-def construct(
-    metadata: GeffMetadata,
-    node_ids: NDArray[Any],
-    edge_ids: NDArray[Any],
-    node_props: dict[str, PropDictNpArray],
-    edge_props: dict[str, PropDictNpArray],
-) -> rx.PyGraph | rx.PyDiGraph:
-    """
-    Construct a `rustworkx` graph instance from GEFF data.
+class RxBackend(Backend):
+    @staticmethod
+    def construct(
+        metadata: GeffMetadata,
+        node_ids: NDArray[Any],
+        edge_ids: NDArray[Any],
+        node_props: dict[str, PropDictNpArray],
+        edge_props: dict[str, PropDictNpArray],
+    ) -> rx.PyGraph | rx.PyDiGraph:
+        """
+        Construct a `rustworkx` graph instance from GEFF data.
 
-    Args:
-        metadata (GeffMetadata): The metadata of the graph.
-        node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
-            edge_ids.
-        edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
-            as node_ids.
-        node_props (dict[str, PropDictNpArray]): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids.
-        edge_props (dict[str, PropDictNpArray]): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids.
+        Args:
+            metadata (GeffMetadata): The metadata of the graph.
+            node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
+                edge_ids.
+            edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
+                as node_ids.
+            node_props (dict[str, PropDictNpArray]): A dictionary
+                from node property names to (values, missing) arrays, which should have same
+                length as node_ids.
+            edge_props (dict[str, PropDictNpArray]): A dictionary
+                from edge property names to (values, missing) arrays, which should have same
+                length as edge_ids.
 
-    Returns:
-        (rx.PyGraph | rx.PyDiGraph): A `rustworkx` graph object.
-    """
-    metadata = metadata
+        Returns:
+            (rx.PyGraph | rx.PyDiGraph): A `rustworkx` graph object.
+        """
+        metadata = metadata
 
-    graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()
-    graph.attrs = metadata.model_dump()
+        graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()
+        graph.attrs = metadata.model_dump()
 
-    # Add nodes with populated properties
-    node_ids = node_ids.tolist()
-    props_per_node: list[dict[str, Any]] = [{} for _ in node_ids]
+        # Add nodes with populated properties
+        node_ids = node_ids.tolist()
+        props_per_node: list[dict[str, Any]] = [{} for _ in node_ids]
 
-    # Populate node properties first
-    indices = np.arange(len(node_ids))
+        # Populate node properties first
+        indices = np.arange(len(node_ids))
 
-    for name, prop_dict in node_props.items():
-        values = prop_dict["values"]
-        if prop_dict["missing"] is not None:
-            current_indices = indices[~prop_dict["missing"]]
-            values = values[current_indices]
-        else:
-            current_indices = indices
-
-        values = values.tolist()
-        current_indices = current_indices.tolist()
-
-        for idx, val in zip(current_indices, values, strict=True):
-            props_per_node[idx][name] = val
-
-    # Add nodes with their properties
-    rx_node_ids = graph.add_nodes_from(props_per_node)
-
-    # Create mapping from geff node id to rustworkx node index
-    to_rx_id_map = dict(zip(node_ids, rx_node_ids, strict=False))
-
-    # Add edges if they exist
-    if len(edge_ids) > 0:
-        # converting to local rx ids
-        edge_ids = np.vectorize(to_rx_id_map.__getitem__)(edge_ids)
-        # Prepare edge data with properties
-        edges_data: list[dict[str, Any]] = [{} for _ in edge_ids]
-        indices = np.arange(len(edge_ids))
-
-        for name, prop_dict in edge_props.items():
+        for name, prop_dict in node_props.items():
             values = prop_dict["values"]
             if prop_dict["missing"] is not None:
                 current_indices = indices[~prop_dict["missing"]]
@@ -242,14 +215,48 @@ def construct(
             current_indices = current_indices.tolist()
 
             for idx, val in zip(current_indices, values, strict=True):
-                edges_data[idx][name] = val
+                props_per_node[idx][name] = val
 
-        # Add edges with their properties
-        graph.add_edges_from([(e[0], e[1], d) for e, d in zip(edge_ids, edges_data, strict=True)])
+        # Add nodes with their properties
+        rx_node_ids = graph.add_nodes_from(props_per_node)
 
-    graph.attrs["to_rx_id_map"] = to_rx_id_map
+        # Create mapping from geff node id to rustworkx node index
+        to_rx_id_map = dict(zip(node_ids, rx_node_ids, strict=False))
 
-    return graph
+        # Add edges if they exist
+        if len(edge_ids) > 0:
+            # converting to local rx ids
+            edge_ids = np.vectorize(to_rx_id_map.__getitem__)(edge_ids)
+            # Prepare edge data with properties
+            edges_data: list[dict[str, Any]] = [{} for _ in edge_ids]
+            indices = np.arange(len(edge_ids))
+
+            for name, prop_dict in edge_props.items():
+                values = prop_dict["values"]
+                if prop_dict["missing"] is not None:
+                    current_indices = indices[~prop_dict["missing"]]
+                    values = values[current_indices]
+                else:
+                    current_indices = indices
+
+                values = values.tolist()
+                current_indices = current_indices.tolist()
+
+                for idx, val in zip(current_indices, values, strict=True):
+                    edges_data[idx][name] = val
+
+            # Add edges with their properties
+            graph.add_edges_from(
+                [(e[0], e[1], d) for e, d in zip(edge_ids, edges_data, strict=True)]
+            )
+
+        graph.attrs["to_rx_id_map"] = to_rx_id_map
+
+        return graph
+
+    @staticmethod
+    def graph_adapter(graph: rx.PyGraph | rx.PyDiGraph) -> RxGraphAdapter:
+        return RxGraphAdapter(graph)
 
 
 def read_rx(
@@ -278,7 +285,7 @@ def read_rx(
         A tuple containing the rustworkx graph and the metadata.
     """
     in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    graph = construct(**in_memory_geff)
+    graph = RxBackend.construct(**in_memory_geff)
 
     return graph, in_memory_geff["metadata"]
 

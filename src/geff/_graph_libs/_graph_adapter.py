@@ -65,3 +65,5 @@ class GraphAdapter(Protocol[T]):
             numpy.ndarray: The values of the selected property as a numpy array.
         """
         ...
+
+    # TODO: add get roi?

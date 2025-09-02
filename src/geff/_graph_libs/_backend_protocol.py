@@ -5,7 +5,9 @@ from numpy.typing import NDArray
 from geff._typing import PropDictNpArray
 from geff.metadata import GeffMetadata
 
-T = TypeVar("T", covariant=True)
+from ._graph_adapter import GraphAdapter
+
+T = TypeVar("T")
 
 
 class Backend(Protocol[T]):
@@ -13,13 +15,8 @@ class Backend(Protocol[T]):
     A protocol that acts as a namespace for functions that allow for backend interoperability.
     """
 
-    @property
-    def GRAPH_TYPES(self) -> tuple[type[T], ...]:
-        """The expected backend types."""
-        ...
-
+    @staticmethod
     def construct(
-        self,
         metadata: GeffMetadata,
         node_ids: NDArray[Any],
         edge_ids: NDArray[Any],
@@ -55,6 +52,7 @@ class Backend(Protocol[T]):
         """
         ...
 
-    # TODO: add
-    # - get_roi
-    # - write
+    @staticmethod
+    def graph_adapter(graph: T) -> GraphAdapter[T]: ...
+
+    # TODO: add write
