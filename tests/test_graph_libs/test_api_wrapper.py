@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING, get_args
 import numpy as np
 import pytest
 
-from geff._graph_libs._api_wrapper import SupportedBackend, get_backend, read
+from geff import read, write
+from geff._graph_libs._api_wrapper import SupportedBackend, get_backend
+from geff._graph_libs._networkx import NxBackend
 from geff.testing.data import create_mock_geff
 
 if TYPE_CHECKING:
@@ -87,4 +89,76 @@ def test_read(
         )
 
 
-# TODO: test write
+@pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
+@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
+@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
+@pytest.mark.parametrize("directed", [True, False])
+@pytest.mark.parametrize("include_t", [True, False])
+@pytest.mark.parametrize("include_z", [True, False])
+@pytest.mark.parametrize("backend", get_args(SupportedBackend))
+def test_write(
+    tmp_path,
+    node_id_dtype,
+    node_axis_dtypes,
+    extra_edge_props,
+    directed,
+    include_t,
+    include_z,
+    backend,
+) -> None:
+    backend_module: Backend = get_backend(backend)
+
+    store, memory_geff = create_mock_geff(
+        node_id_dtype,
+        node_axis_dtypes,
+        extra_edge_props=extra_edge_props,
+        directed=directed,
+        include_t=include_t,
+        include_z=include_z,
+    )
+
+    # this will create a graph instance of the backend type
+    original_graph = backend_module.construct(**memory_geff)
+
+    # write with unified write function
+    path_store = tmp_path / "test_path.zarr"
+    write(original_graph, path_store, memory_geff["metadata"])
+
+    # read with the NxBackend to see if the graph is the same
+    graph, metadata = NxBackend.read(path_store)
+    graph_adapter = NxBackend.graph_adapter(graph)
+
+    # nodes and edges correct
+    assert {*graph_adapter.get_node_ids()} == {*memory_geff["node_ids"].tolist()}
+    assert {*graph_adapter.get_edge_ids()} == {
+        *[tuple(edges) for edges in memory_geff["edge_ids"].tolist()]
+    }
+
+    # check node properties are correct
+    spatial_node_properties = ["y", "x"]
+    if include_t:
+        spatial_node_properties.append("t")
+    if include_z:
+        spatial_node_properties.append("z")
+    for name in spatial_node_properties:
+        np.testing.assert_array_equal(
+            graph_adapter.get_node_prop(name, memory_geff["node_ids"].tolist(), metadata=metadata),
+            memory_geff["node_props"][name]["values"],
+        )
+
+    for name, data in memory_geff["node_props"].items():
+        values = data["values"]
+        np.testing.assert_array_equal(
+            graph_adapter.get_node_prop(name, memory_geff["node_ids"].tolist(), metadata=metadata),
+            values,
+        )
+
+    # check edge properties are correct
+    for name, data in memory_geff["edge_props"].items():
+        values = data["values"]
+        np.testing.assert_array_equal(
+            graph_adapter.get_edge_prop(name, memory_geff["edge_ids"].tolist(), metadata),
+            values,
+        )
+
+    # TODO: test metadata
