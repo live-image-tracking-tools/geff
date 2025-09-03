@@ -25,6 +25,8 @@ extra_css:
   - css/schema_doc.css
 extra_javascript:
   - js/schema_doc.min.js
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
 extra:
   version:
@@ -39,6 +41,9 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
   - mkdocs-typer
+  - pymdownx.arithmatex:
+      generic: true
+
 
 plugins:
 - search

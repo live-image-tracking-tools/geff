@@ -324,16 +324,16 @@ class GeffMetadata(BaseModel):
             properties.
 
             It is defined by
-            - a center point :math:`c`, already given by the `space` type properties
-            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this
+            - a center point $c$, already given by the `space` type properties
+            - a covariance matrix $\\Sigma$, symmetric and positive-definite, stored in this
               property as a `2x2`/`3x3` array.
 
             To plot the ellipsoid:
             - Compute the eigendecomposition of the covariance matrix
-            :math:`\\Sigma = Q \\Lambda Q^{\\top}`
-            - Sample points :math:`z` on the unit sphere
+            $\\Sigma = Q \\Lambda Q^{\\top}$
+            - Sample points $z$ on the unit sphere
             - Transform the points to the ellipsoid by
-            :math:`x = c + Q \\Lambda^{(1/2)} z`.
+            $x = c + Q \\Lambda^{(1/2)} z$.
             """
         ),
     )
