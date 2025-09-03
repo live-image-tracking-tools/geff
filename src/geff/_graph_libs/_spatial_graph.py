@@ -12,7 +12,6 @@ except ImportError as e:
     ) from e
 
 import numpy as np
-from zarr.storage import StoreLike
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
@@ -22,10 +21,10 @@ if TYPE_CHECKING:
 
     from geff._typing import PropDictNpArray
 
-import geff
 from geff.core_io import write_arrays
 from geff.core_io._utils import remove_tilde
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
+from geff.metadata.utils import create_or_update_metadata
 
 from ._backend_protocol import BaseBackend
 from ._graph_adapter import GraphAdapter
@@ -33,96 +32,11 @@ from ._graph_adapter import GraphAdapter
 GRAPH_TYPES = (sg.SpatialGraph, sg.SpatialDiGraph)
 
 
-def write_sg(
-    graph: sg.SpatialGraph | sg.SpatialDiGraph,
-    store: StoreLike,
-    axis_names: list[str] | None = None,
-    axis_units: list[str] | None = None,
-    axis_types: list[str] | None = None,
-    zarr_format: Literal[2, 3] = 2,
-) -> None:
-    """Write a SpatialGraph to the geff file format.
-
-    Because SpatialGraph does not support ragged or missing node/edge attributes,
-    the missing arrays will not be written.
-
-    Args:
-        graph (sg.SpatialGraph):
-
-            The graph to write.
-
-        store (str | Path | zarr store):
-
-            The path to the output zarr. Opens in append mode, so will only
-            overwrite geff-controlled groups.
-
-        axis_names (Optional[list[str]], optional):
-
-            The names of the spatial dims represented in position attribute.
-            Defaults to None.
-
-        axis_units (Optional[list[str]], optional):
-
-            The units of the spatial dims represented in position attribute.
-            Defaults to None.
-
-        axis_types (Optional[list[str]], optional):
-
-            The types of the spatial dims represented in position property.
-            Usually one of "time", "space", or "channel". Defaults to None.
-
-        zarr_format (Literal[2, 3], optional):
-
-            The version of zarr to write. Defaults to 2.
-    """
-
-    store = remove_tilde(store)
-
-    if len(graph) == 0:
-        warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
-        return
-
-    if axis_names is None:
-        assert graph.ndims <= 4, (
-            "For SpatialGraphs with more than 4 dimension, axis_names has to be provided."
-        )
-        axis_names = ["t", "z", "y", "x"][-graph.ndims :]
-
-    # create metadata
-    roi_min, roi_max = graph.roi
-    axes = _axes_from_lists(
-        axis_names,
-        axis_units=axis_units,
-        axis_types=axis_types,
-        roi_min=roi_min,
-        roi_max=roi_max,
-    )
-    metadata = GeffMetadata(
-        geff_version=geff.__version__,
-        directed=graph.directed,
-        axes=axes,
-    )
-
-    # write to geff
-    write_arrays(
-        geff_store=store,
-        node_ids=graph.nodes,
-        node_props={
-            name: {"values": getattr(graph.node_attrs, name), "missing": None}
-            for name in graph.node_attr_dtypes.keys()
-        },
-        node_props_unsquish={graph.position_attr: axis_names},
-        edge_ids=graph.edges,
-        edge_props={
-            name: {"values": getattr(graph.edge_attrs, name), "missing": None}
-            for name in graph.edge_attr_dtypes.keys()
-        },
-        metadata=metadata,
-        zarr_format=zarr_format,
-    )
-
-
 class SgBackend(BaseBackend):
+    @property
+    def GRAPH_TYPES(self) -> tuple[type[sg.SpatialGraph], type[sg.SpatialDiGraph]]:
+        return sg.SpatialGraph, sg.SpatialDiGraph
+
     @staticmethod
     def construct(
         metadata: GeffMetadata,
@@ -223,6 +137,95 @@ class SgBackend(BaseBackend):
         graph.add_edges(edge_ids, **edge_attrs)
 
         return graph
+
+    @staticmethod
+    def write(
+        graph: sg.SpatialGraph | sg.SpatialDiGraph,
+        store: StoreLike,
+        metadata: GeffMetadata | None = None,
+        axis_names: list[str] | None = None,
+        axis_units: list[str | None] | None = None,
+        axis_types: list[str | None] | None = None,
+        zarr_format: Literal[2, 3] = 2,
+    ) -> None:
+        """Write a SpatialGraph to the geff file format.
+
+        Because SpatialGraph does not support ragged or missing node/edge attributes,
+        the missing arrays will not be written.
+
+        Args:
+            graph (sg.SpatialGraph):
+
+                The graph to write.
+
+            store (str | Path | zarr store):
+
+                The path to the output zarr. Opens in append mode, so will only
+                overwrite geff-controlled groups.
+
+            metadata (GeffMetadata, optional): The original metadata of the graph.
+                Defaults to None. If provided, will override the graph properties.
+
+            axis_names (Optional[list[str]], optional):
+
+                The names of the spatial dims represented in position attribute.
+                Defaults to None.
+
+            axis_units (Optional[list[str]], optional):
+
+                The units of the spatial dims represented in position attribute.
+                Defaults to None.
+
+            axis_types (Optional[list[str]], optional):
+
+                The types of the spatial dims represented in position property.
+                Usually one of "time", "space", or "channel". Defaults to None.
+
+            zarr_format (Literal[2, 3], optional):
+
+                The version of zarr to write. Defaults to 2.
+        """
+
+        store = remove_tilde(store)
+
+        if len(graph) == 0:
+            warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
+            return
+
+        if axis_names is None:
+            assert graph.ndims <= 4, (
+                "For SpatialGraphs with more than 4 dimension, axis_names has to be provided."
+            )
+            axis_names = ["t", "z", "y", "x"][-graph.ndims :]
+
+        # create or update metadata
+        roi_min, roi_max = graph.roi
+        axes = _axes_from_lists(
+            axis_names,
+            axis_units=axis_units,
+            axis_types=axis_types,
+            roi_min=roi_min,
+            roi_max=roi_max,
+        )
+        metadata = create_or_update_metadata(metadata, graph.directed, axes)
+
+        # write to geff
+        write_arrays(
+            geff_store=store,
+            node_ids=graph.nodes,
+            node_props={
+                name: {"values": getattr(graph.node_attrs, name), "missing": None}
+                for name in graph.node_attr_dtypes.keys()
+            },
+            node_props_unsquish={graph.position_attr: axis_names},
+            edge_ids=graph.edges,
+            edge_props={
+                name: {"values": getattr(graph.edge_attrs, name), "missing": None}
+                for name in graph.edge_attr_dtypes.keys()
+            },
+            metadata=metadata,
+            zarr_format=zarr_format,
+        )
 
     @staticmethod
     def graph_adapter(graph: sg.SpatialGraph | sg.SpatialDiGraph) -> SgGraphAdapter:

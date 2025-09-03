@@ -47,79 +47,6 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
     )
 
 
-def write_nx(
-    graph: nx.Graph,
-    store: StoreLike,
-    metadata: GeffMetadata | None = None,
-    axis_names: list[str] | None = None,
-    axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
-    zarr_format: Literal[2, 3] = 2,
-) -> None:
-    """Write a networkx graph to the geff file format
-
-    Args:
-        graph (nx.Graph): A networkx graph
-        store (str | Path | zarr store): The path/str to the output zarr, or the store
-            itself. Opens in append mode, so will only overwrite geff-controlled groups.
-        metadata (GeffMetadata, optional): The original metadata of the graph.
-            Defaults to None. If provided, will override the graph properties.
-        axis_names (Optional[list[str]], optional): The names of the spatial dims
-            represented in position property. Defaults to None. Will override
-            both value in graph properties and metadata if provided.
-        axis_units (Optional[list[str]], optional): The units of the spatial dims
-            represented in position property. Defaults to None. Will override value
-            both value in graph properties and metadata if provided.
-        axis_types (Optional[list[str]], optional): The types of the spatial dims
-            represented in position property. Usually one of "time", "space", or "channel".
-            Defaults to None. Will override both value in graph properties and metadata
-            if provided.
-        zarr_format (Literal[2, 3], optional): The version of zarr to write.
-            Defaults to 2.
-    """
-
-    axis_names, axis_units, axis_types = get_graph_existing_metadata(
-        metadata, axis_names, axis_units, axis_types
-    )
-
-    node_props = list({k for _, data in graph.nodes(data=True) for k in data})
-
-    edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
-    edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
-    write_dicts(
-        store,
-        graph.nodes(data=True),
-        edge_data,
-        node_props,
-        edge_props,
-        axis_names,
-        zarr_format=zarr_format,
-    )
-
-    # write metadata
-    roi_min: tuple[float, ...] | None
-    roi_max: tuple[float, ...] | None
-    if axis_names is not None and graph.number_of_nodes() > 0:
-        roi_min, roi_max = get_roi(graph, axis_names)
-    else:
-        roi_min, roi_max = None, None
-
-    axes = _axes_from_lists(
-        axis_names,
-        axis_units=axis_units,
-        axis_types=axis_types,
-        roi_min=roi_min,
-        roi_max=roi_max,
-    )
-
-    metadata = create_or_update_metadata(
-        metadata,
-        isinstance(graph, nx.DiGraph),
-        axes,
-    )
-    metadata.write(store)
-
-
 def _set_property_values(
     graph: nx.Graph,
     ids: NDArray[Any],
@@ -155,6 +82,10 @@ def _set_property_values(
 
 
 class NxBackend(BaseBackend):
+    @property
+    def GRAPH_TYPES(self) -> tuple[type[nx.Graph], type[nx.DiGraph]]:
+        return nx.Graph, nx.DiGraph
+
     @staticmethod
     def construct(
         metadata: GeffMetadata,
@@ -193,6 +124,79 @@ class NxBackend(BaseBackend):
             _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
 
         return graph
+
+    @staticmethod
+    def write(
+        graph: nx.Graph | nx.DiGraph,
+        store: StoreLike,
+        metadata: GeffMetadata | None = None,
+        axis_names: list[str] | None = None,
+        axis_units: list[str | None] | None = None,
+        axis_types: list[str | None] | None = None,
+        zarr_format: Literal[2, 3] = 2,
+    ) -> None:
+        """Write a networkx graph to the geff file format
+
+        Args:
+            graph (nx.Graph): A networkx graph
+            store (str | Path | zarr store): The path/str to the output zarr, or the store
+                itself. Opens in append mode, so will only overwrite geff-controlled groups.
+            metadata (GeffMetadata, optional): The original metadata of the graph.
+                Defaults to None. If provided, will override the graph properties.
+            axis_names (Optional[list[str]], optional): The names of the spatial dims
+                represented in position property. Defaults to None. Will override
+                both value in graph properties and metadata if provided.
+            axis_units (Optional[list[str]], optional): The units of the spatial dims
+                represented in position property. Defaults to None. Will override value
+                both value in graph properties and metadata if provided.
+            axis_types (Optional[list[str]], optional): The types of the spatial dims
+                represented in position property. Usually one of "time", "space", or "channel".
+                Defaults to None. Will override both value in graph properties and metadata
+                if provided.
+            zarr_format (Literal[2, 3], optional): The version of zarr to write.
+                Defaults to 2.
+        """
+
+        axis_names, axis_units, axis_types = get_graph_existing_metadata(
+            metadata, axis_names, axis_units, axis_types
+        )
+
+        node_props = list({k for _, data in graph.nodes(data=True) for k in data})
+
+        edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
+        edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
+        write_dicts(
+            store,
+            graph.nodes(data=True),
+            edge_data,
+            node_props,
+            edge_props,
+            axis_names,
+            zarr_format=zarr_format,
+        )
+
+        # write metadata
+        roi_min: tuple[float, ...] | None
+        roi_max: tuple[float, ...] | None
+        if axis_names is not None and graph.number_of_nodes() > 0:
+            roi_min, roi_max = get_roi(graph, axis_names)
+        else:
+            roi_min, roi_max = None, None
+
+        axes = _axes_from_lists(
+            axis_names,
+            axis_units=axis_units,
+            axis_types=axis_types,
+            roi_min=roi_min,
+            roi_max=roi_max,
+        )
+
+        metadata = create_or_update_metadata(
+            metadata,
+            isinstance(graph, nx.DiGraph),
+            axes,
+        )
+        metadata.write(store)
 
     @staticmethod
     def graph_adapter(graph: Any) -> NxGraphAdapter:

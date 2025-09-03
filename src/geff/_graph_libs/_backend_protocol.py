@@ -1,4 +1,4 @@
-from typing import Any, Protocol, TypeVar
+from typing import Any, Literal, Protocol, TypeVar
 
 from numpy.typing import NDArray
 from zarr.storage import StoreLike
@@ -17,6 +17,9 @@ class Backend(Protocol[T]):
     """
     A protocol that acts as a namespace for functions that allow for backend interoperability.
     """
+
+    @property
+    def GRAPH_TYPES(self) -> tuple[type[T], ...]: ...
 
     @staticmethod
     def construct(
@@ -68,9 +71,20 @@ class Backend(Protocol[T]):
     ) -> tuple[T, GeffMetadata]: ...
 
     @staticmethod
-    def graph_adapter(graph: T) -> GraphAdapter[T]: ...
+    def write(
+        graph: T,
+        store: StoreLike,
+        metadata: GeffMetadata | None = None,
+        axis_names: list[str] | None = None,
+        axis_units: list[str | None] | None = None,
+        axis_types: list[str | None] | None = None,
+        zarr_format: Literal[2, 3] = 2,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None: ...
 
-    # TODO: add write
+    @staticmethod
+    def graph_adapter(graph: T) -> GraphAdapter[T]: ...
 
 
 class BaseBackend(Backend[T]):

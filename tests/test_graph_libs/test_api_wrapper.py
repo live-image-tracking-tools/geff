@@ -85,3 +85,6 @@ def test_read(
             graph_adapter.get_edge_prop(name, memory_geff["edge_ids"].tolist(), metadata),
             values,
         )
+
+
+# TODO: test write

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, TypeVar, overload
+from importlib.util import find_spec
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, get_args, overload
 
 R = TypeVar("R", covariant=True)
 
@@ -15,23 +16,41 @@ if TYPE_CHECKING:
 
     from ._backend_protocol import Backend
 
+    NxGraph: TypeAlias = nx.Graph | nx.DiGraph
+    RxGraph: TypeAlias = rx.PyGraph | rx.PyDiGraph
+    SgGraph: TypeAlias = sg.SpatialGraph | sg.SpatialDiGraph
+    SupportedGraphType: TypeAlias = NxGraph | RxGraph | SgGraph
+
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
 
+# A dictionary to map between supported backend literals and the correct type
+# Used in the get_backend_from_type function below
+BACKEND_TYPE_MAP: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]]
+
+
+# Used in the write function wrapper, where the backend should be determined from the graph type
+def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
+    for backend, graph_type in BACKEND_TYPE_MAP.items():
+        if isinstance(graph, graph_type):
+            return get_backend(backend)
+    raise TypeError(f"Unrecognized graph type '{type(graph)}'.")
+
+
 @overload
-def get_backend(backend: Literal["networkx"]) -> Backend[nx.Graph | nx.DiGraph]: ...
+def get_backend(backend: Literal["networkx"]) -> Backend[NxGraph]: ...
 
 
 @overload
 def get_backend(
     backend: Literal["rustworkx"],
-) -> Backend[rx.PyGraph | rx.PyDiGraph]: ...
+) -> Backend[RxGraph]: ...
 
 
 @overload
 def get_backend(
     backend: Literal["spatial-graph"],
-) -> Backend[sg.SpatialGraph | sg.SpatialDiGraph]: ...
+) -> Backend[SgGraph]: ...
 
 
 # NOTE: overload get_backend for new backends by typing the return type as Backend[GraphType]
@@ -65,6 +84,20 @@ def get_backend(backend: SupportedBackend) -> Backend:
             raise ValueError(f"Unsupported backend chosen: '{backend}'")
 
 
+# Only installed backends will be added to the backend type map
+def _create_backend_type_map() -> dict[SupportedBackend, tuple[type[SupportedGraphType], ...]]:
+    mapping: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]] = {}
+    backends: tuple[SupportedBackend] = get_args(SupportedBackend)
+    for backend in backends:
+        if find_spec(backend) is not None:
+            backend_io = get_backend(backend)
+            mapping[backend] = backend_io.GRAPH_TYPES
+    return mapping
+
+
+BACKEND_TYPE_MAP = _create_backend_type_map()
+
+
 @overload
 def read(
     store: StoreLike,
@@ -74,7 +107,7 @@ def read(
     data_validation: ValidationConfig | None = ...,
     *,
     backend: Literal["networkx"] = "networkx",
-) -> tuple[nx.Graph | nx.DiGraph, GeffMetadata]: ...
+) -> tuple[NxGraph, GeffMetadata]: ...
 
 
 @overload
@@ -86,7 +119,7 @@ def read(
     data_validation: ValidationConfig | None = ...,
     *,
     backend: Literal["rustworkx"],
-) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]: ...
+) -> tuple[RxGraph, GeffMetadata]: ...
 
 
 @overload
@@ -99,7 +132,7 @@ def read(
     *,
     backend: Literal["spatial-graph"],
     position_attr: str = "position",
-) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]: ...
+) -> tuple[SgGraph, GeffMetadata]: ...
 
 
 # NOTE: when overloading read for a new backend, if additional arguments can be accepted, explicitly
@@ -141,5 +174,63 @@ def read(
     """
     backend_io = get_backend(backend)
     return backend_io.read(
-        store, structure_validation, node_props, edge_props, data_validation, **backend_kwargs
+        store,
+        structure_validation,
+        node_props,
+        edge_props,
+        data_validation,
+        **backend_kwargs,
+    )
+
+
+# rustworkx has an additional nod_id_dict arg
+@overload
+def write(
+    graph: rx.PyGraph | rx.PyDiGraph,
+    store: StoreLike,
+    metadata: GeffMetadata | None = None,
+    axis_names: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+    zarr_format: Literal[2, 3] = 2,
+    node_id_dict: dict[int, int] | None = None,
+) -> None: ...
+
+
+@overload
+def write(
+    graph: SupportedGraphType,
+    store: StoreLike,
+    metadata: GeffMetadata | None = None,
+    axis_names: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+    zarr_format: Literal[2, 3] = 2,
+    *args: Any,
+    **kwargs: Any,
+) -> None: ...
+
+
+def write(
+    graph: SupportedGraphType,
+    store: StoreLike,
+    metadata: GeffMetadata | None = None,
+    axis_names: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+    zarr_format: Literal[2, 3] = 2,
+    *args: Any,
+    **kwargs: Any,
+) -> None:
+    backend_io = get_backend_from_graph_type(graph)
+    backend_io.write(
+        graph,
+        store,
+        metadata,
+        axis_names,
+        axis_units,
+        axis_types,
+        zarr_format,
+        *args,
+        **kwargs,
     )
