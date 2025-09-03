@@ -7,12 +7,12 @@ from numpy.typing import NDArray
 
 from geff import GeffMetadata
 from geff._graph_libs._api_wrapper import SupportedBackend, read
-from geff.testing.data import create_memory_mock_geff
+from geff.testing.data import create_mock_geff
 
 rx = pytest.importorskip("rustworkx")
 sg = pytest.importorskip("spatial_graph")
 
-node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_id_dtypes = ["uint8", "uint16"]
 node_axis_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
@@ -124,7 +124,7 @@ def test_read(
     include_z,
     backend,
 ) -> None:
-    store, graph_props = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
         extra_edge_props=extra_edge_props,
@@ -138,8 +138,8 @@ def test_read(
     assert is_expected_type(graph, backend)
 
     # nodes and edges correct
-    assert get_nodes(graph) == {*graph_props["nodes"].tolist()}
-    assert get_edges(graph) == {*[tuple(edges) for edges in graph_props["edges"].tolist()]}
+    assert get_nodes(graph) == {*memory_geff["node_ids"].tolist()}
+    assert get_edges(graph) == {*[tuple(edges) for edges in memory_geff["edge_ids"].tolist()]}
 
     # check node properties are correct
     spatial_node_properties = ["y", "x"]
@@ -149,15 +149,17 @@ def test_read(
         spatial_node_properties.append("z")
     for name in spatial_node_properties:
         np.testing.assert_array_equal(
-            get_node_prop(graph, name, graph_props["nodes"].tolist(), metadata=metadata),
-            graph_props[name],
+            get_node_prop(graph, name, memory_geff["node_ids"].tolist(), metadata=metadata),
+            memory_geff["node_props"][name]["values"],
         )
-    for name, values in graph_props["extra_node_props"].items():
+    for name, data in memory_geff["node_props"].items():
+        values = data["values"]
         np.testing.assert_array_equal(
-            get_node_prop(graph, name, graph_props["nodes"].tolist(), metadata=metadata), values
+            get_node_prop(graph, name, memory_geff["node_ids"].tolist(), metadata=metadata), values
         )
     # check edge properties are correct
-    for name, values in graph_props["extra_edge_props"].items():
+    for name, data in memory_geff["edge_props"].items():
+        values = data["values"]
         np.testing.assert_array_equal(
-            get_edge_prop(graph, name, graph_props["edges"].tolist()), values
+            get_edge_prop(graph, name, memory_geff["edge_ids"].tolist()), values
         )

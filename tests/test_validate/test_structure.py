@@ -14,7 +14,7 @@ from geff.core_io._utils import expect_group, open_storelike
 from geff.metadata._schema import GeffMetadata
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
-    create_memory_mock_geff,
+    create_mock_geff,
     create_simple_2d_geff,
 )
 from geff.validate.structure import (
@@ -27,7 +27,7 @@ from geff.validate.structure import (
 
 @pytest.fixture
 def z() -> zarr.Group:
-    store, attrs = create_memory_mock_geff(
+    store, _ = create_mock_geff(
         node_id_dtype="uint",
         node_axis_dtypes={"position": "float64", "time": "float64"},
         directed=False,
@@ -102,13 +102,13 @@ class Test_validate_nodes_group:
 
     def test_ids_not_int(self, node_group, meta):
         node_group[_path.IDS] = node_group[_path.IDS][:].astype("float")
-        with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
+        with pytest.raises(ValueError, match="Node ids must have an unsigned integer dtype"):
             _validate_nodes_group(node_group, meta)
 
-        # TODO: Must be positive integers
-        # node_group[_path.IDS] = node_group[_path.IDS][:] * -1
-        # with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
-        #     _validate_nodes_group(node_group, meta)
+        # Must be uint, not just int
+        node_group[_path.IDS] = node_group[_path.IDS][:].astype("int")
+        with pytest.raises(ValueError, match="Node ids must have an unsigned integer dtype"):
+            _validate_nodes_group(node_group, meta)
 
     # Other cases are caught in tests for _validate_props_group
 
@@ -126,6 +126,14 @@ class Test_validate_edges_group:
         with pytest.raises(
             ValueError,
             match="edges ids must have a last dimension of size 2, received shape .*",
+        ):
+            _validate_edges_group(edge_group, meta)
+
+    def test_edge_ids_not_uint(self, edge_group, meta):
+        edge_group[_path.IDS] = edge_group[_path.IDS][:].astype("float")
+        with pytest.raises(
+            ValueError,
+            match="Edge ids must have an unsigned integer dtype",
         ):
             _validate_edges_group(edge_group, meta)
 

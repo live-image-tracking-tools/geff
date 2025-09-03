@@ -4,10 +4,10 @@ import pytest
 from geff import GeffReader
 from geff._graph_libs._networkx import construct_nx
 from geff.core_io._base_read import read_to_memory
-from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
+from geff.testing.data import create_mock_geff, create_simple_2d_geff
 from geff.validate.data import ValidationConfig
 
-node_id_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_id_dtypes = ["uint8", "uint16"]
 node_axis_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
@@ -28,7 +28,7 @@ def test_build_w_masked_nodes(
     extra_edge_props,
     directed,
 ) -> None:
-    store, graph_props = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype=node_id_dtype,
         node_axis_dtypes=node_axis_dtypes,
         extra_edge_props=extra_edge_props,
@@ -44,7 +44,7 @@ def test_build_w_masked_nodes(
     in_memory_geff = file_reader.build(node_mask=node_mask)
 
     # make sure nodes and edges are masked as expected
-    np.testing.assert_array_equal(graph_props["nodes"][node_mask], in_memory_geff["node_ids"])
+    np.testing.assert_array_equal(memory_geff["node_ids"][node_mask], in_memory_geff["node_ids"])
 
     # assert no edges that reference non existing nodes
     assert np.isin(in_memory_geff["node_ids"], in_memory_geff["edge_ids"]).all()
@@ -63,7 +63,7 @@ def test_build_w_masked_edges(
     extra_edge_props,
     directed,
 ) -> None:
-    store, graph_props = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype=node_id_dtype,
         node_axis_dtypes=node_axis_dtypes,
         extra_edge_props=extra_edge_props,
@@ -77,7 +77,7 @@ def test_build_w_masked_edges(
 
     in_memory_geff = file_reader.build(edge_mask=edge_mask)
 
-    np.testing.assert_array_equal(graph_props["edges"][edge_mask], in_memory_geff["edge_ids"])
+    np.testing.assert_array_equal(memory_geff["edge_ids"][edge_mask], in_memory_geff["edge_ids"])
 
     # make sure graph dict can be ingested
     _ = construct_nx(**in_memory_geff)
@@ -93,7 +93,7 @@ def test_build_w_masked_nodes_edges(
     extra_edge_props,
     directed,
 ) -> None:
-    store, graph_props = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype=node_id_dtype,
         node_axis_dtypes=node_axis_dtypes,
         extra_edge_props=extra_edge_props,
@@ -112,14 +112,14 @@ def test_build_w_masked_nodes_edges(
     in_memory_geff = file_reader.build(node_mask=node_mask, edge_mask=edge_mask)
 
     # make sure nodes and edges are masked as expected
-    np.testing.assert_array_equal(graph_props["nodes"][node_mask], in_memory_geff["node_ids"])
+    np.testing.assert_array_equal(memory_geff["node_ids"][node_mask], in_memory_geff["node_ids"])
 
     # assert no edges that reference non existing nodes
     assert np.isin(in_memory_geff["node_ids"], in_memory_geff["edge_ids"]).all()
 
     # assert all the output edges are in the naively masked edges
     output_edges = in_memory_geff["edge_ids"]
-    masked_edges = graph_props["edges"][edge_mask]
+    masked_edges = memory_geff["edge_ids"][edge_mask]
     # Adding a new axis allows comparing each element
     assert (output_edges[:, :, np.newaxis] == masked_edges).all(axis=1).any(axis=1).all()
 
@@ -128,7 +128,7 @@ def test_build_w_masked_nodes_edges(
 
 
 def test_read_node_props() -> None:
-    store, graph_props = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype="uint8",
         node_axis_dtypes={"position": "double", "time": "double"},
         extra_edge_props={"score": "float64", "color": "uint8"},
@@ -149,7 +149,7 @@ def test_read_node_props() -> None:
     in_memory_geff = file_reader.build(node_mask=node_mask)
     assert "t" in in_memory_geff["node_props"]
     np.testing.assert_allclose(
-        graph_props["t"][node_mask],
+        memory_geff["node_props"]["t"]["values"][node_mask],
         in_memory_geff["node_props"]["t"]["values"],
     )
 
@@ -157,7 +157,7 @@ def test_read_node_props() -> None:
 
 
 def test_read_edge_props() -> None:
-    store, graph_props = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype="uint8",
         node_axis_dtypes={"position": "double", "time": "double"},
         extra_edge_props={"score": "float64", "color": "uint8"},
@@ -177,7 +177,7 @@ def test_read_edge_props() -> None:
     file_reader.read_edge_props(["score"])
     in_memory_geff = file_reader.build(edge_mask=edge_mask)
     np.testing.assert_allclose(
-        graph_props["extra_edge_props"]["score"][edge_mask],
+        memory_geff["edge_props"]["score"]["values"][edge_mask],
         in_memory_geff["edge_props"]["score"]["values"],
     )
 

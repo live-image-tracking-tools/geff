@@ -3,7 +3,7 @@ import pytest
 
 import geff.validate.data
 from geff.core_io._base_read import read_to_memory
-from geff.testing.data import create_memory_mock_geff, create_simple_2d_geff
+from geff.testing.data import create_mock_geff, create_simple_2d_geff
 from geff.validate.data import ValidationConfig, validate_data
 
 
@@ -47,7 +47,7 @@ class Test_validate_data:
     def test_sphere(self):
         # Invalid spheres are tested in test_shapes
         # Only need to test a valid case
-        store, _ = create_memory_mock_geff(
+        _, memory_geff = create_mock_geff(
             node_id_dtype="int",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
@@ -59,7 +59,6 @@ class Test_validate_data:
             include_y=True,
             include_x=True,
         )
-        memory_geff = read_to_memory(store)
         # Add sphere metadata
         memory_geff["metadata"].sphere = "radius"
 
@@ -68,7 +67,7 @@ class Test_validate_data:
     def test_ellipsoid(self):
         # Invalid ellipsoids are tested in test_shapes
         # Only need to test a valid case
-        store, _ = create_memory_mock_geff(
+        _, memory_geff = create_mock_geff(
             node_id_dtype="int",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
@@ -80,7 +79,6 @@ class Test_validate_data:
             include_y=True,
             include_x=True,
         )
-        memory_geff = read_to_memory(store)
         # Add ellipsoid metadata
         memory_geff["metadata"].ellipsoid = "covariance2d"
         # Overwrite ellipsoid values
@@ -94,7 +92,7 @@ class Test_validate_data:
     def test_tracklet(self, monkeypatch):
         # validate_tracklets is tested in test_graph
         # Just need to trigger the value error
-        store, _ = create_memory_mock_geff(
+        _, memory_geff = create_mock_geff(
             node_id_dtype="int",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
@@ -106,7 +104,6 @@ class Test_validate_data:
             include_y=True,
             include_x=True,
         )
-        memory_geff = read_to_memory(store)
         # Add tracklet metadata
         memory_geff["metadata"].track_node_props = {"tracklet": "tracklet"}
 
@@ -119,7 +116,7 @@ class Test_validate_data:
     def test_lineages(self, monkeypatch):
         # validate_lineages is tested in test_graph
         # Just need to trigger the value error
-        store, _ = create_memory_mock_geff(
+        _, memory_geff = create_mock_geff(
             node_id_dtype="int",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
@@ -131,7 +128,6 @@ class Test_validate_data:
             include_y=True,
             include_x=True,
         )
-        memory_geff = read_to_memory(store)
         # Add tracklet metadata
         memory_geff["metadata"].track_node_props = {"lineage": "lineage"}
 
