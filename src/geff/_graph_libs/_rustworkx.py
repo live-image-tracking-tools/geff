@@ -15,7 +15,6 @@ except ImportError as e:
 
 
 from geff.core_io import write_dicts
-from geff.core_io._base_read import read_to_memory
 from geff.core_io._utils import calculate_roi_from_nodes
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.metadata.utils import (
@@ -257,37 +256,6 @@ class RxBackend(BaseBackend):
     @staticmethod
     def graph_adapter(graph: rx.PyGraph | rx.PyDiGraph) -> RxGraphAdapter:
         return RxGraphAdapter(graph)
-
-
-def read_rx(
-    store: StoreLike,
-    validate: bool = True,
-    node_props: list[str] | None = None,
-    edge_props: list[str] | None = None,
-) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]:
-    """Read a geff file into a rustworkx graph.
-    Metadata properties will be stored in the graph.attrs dict
-    and can be accessed via `G.attrs[key]` where G is a rustworkx graph.
-
-    The graph will have a `to_rx_id_map` attribute that maps geff node ids
-    to rustworkx node indices.
-    This can be used to map back to the original geff node ids.
-
-    Args:
-        store: The path/str to the geff zarr, or the store itself.
-        validate: Whether to validate the geff file.
-        node_props: The names of the node properties to load,
-            if None all properties will be loaded, defaults to None.
-        edge_props: The names of the edge properties to load,
-            if None all properties will be loaded, defaults to None.
-
-    Returns:
-        A tuple containing the rustworkx graph and the metadata.
-    """
-    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    graph = RxBackend.construct(**in_memory_geff)
-
-    return graph, in_memory_geff["metadata"]
 
 
 class RxGraphAdapter(GraphAdapter):

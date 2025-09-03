@@ -24,7 +24,6 @@ if TYPE_CHECKING:
 
 import geff
 from geff.core_io import write_arrays
-from geff.core_io._base_read import read_to_memory
 from geff.core_io._utils import remove_tilde
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 
@@ -121,57 +120,6 @@ def write_sg(
         metadata=metadata,
         zarr_format=zarr_format,
     )
-
-
-def read_sg(
-    store: StoreLike,
-    validate: bool = True,
-    position_attr: str = "position",
-    node_props: list[str] | None = None,
-    edge_props: list[str] | None = None,
-) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]:
-    """Read a geff file into a SpatialGraph.
-
-    Because SpatialGraph does not support missing/ragged node/edge attributes,
-    missing arrays will be ignored, with a warning raised.
-
-    Args:
-
-        store (Path | str | zarr store):
-
-            The path to the root of the geff zarr, where the .attrs contains
-            the geff  metadata.
-
-        validate (bool, optional):
-
-            Flag indicating whether to perform validation on the geff file
-            before loading into memory. If set to False and there are format
-            issues, will likely fail with a cryptic error. Defaults to True.
-
-        position_attr (str, optional):
-
-            How to call the position attribute in the returned SpatialGraph.
-            Defaults to "position".
-
-        node_props (list of str, optional):
-
-            The names of the node properties to load, if None all properties
-            will be loaded, defaults to None.
-
-        edge_props (list of str, optional):
-
-            The names of the edge properties to load, if None all properties
-            will be loaded, defaults to None.
-
-    Returns:
-
-        A tuple containing the spatial_graph graph and the metadata.
-    """
-
-    in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
-    graph = SgBackend.construct(**in_memory_geff, position_attr=position_attr)
-
-    return graph, in_memory_geff["metadata"]
 
 
 class SgBackend(BaseBackend):

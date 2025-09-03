@@ -4,6 +4,7 @@ from geff.validate.graph import (
     validate_no_repeated_edges,
     validate_no_self_edges,
     validate_nodes_for_edges,
+    validate_unique_node_ids,
 )
 
 
@@ -72,3 +73,10 @@ def test_detects_repeated_edges() -> None:
     assert not is_valid, "Validator should detect repeated edges."
     assert [0, 1] in repeated_edges.tolist(), "Edge [0, 1] should be reported as repeated."
     assert len(repeated_edges) == 1, "There should be exactly one unique repeated edge."
+
+
+def test_validate_unique_node_ids() -> None:
+    node_ids = np.array([0, 0, 1, 2, 3])
+    valid, nonunique = validate_unique_node_ids(node_ids)
+    assert not valid
+    assert nonunique == np.array([0])

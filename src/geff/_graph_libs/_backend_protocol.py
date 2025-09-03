@@ -6,6 +6,7 @@ from zarr.storage import StoreLike
 from geff._typing import PropDictNpArray
 from geff.core_io._base_read import read_to_memory
 from geff.metadata import GeffMetadata
+from geff.validate.data import ValidationConfig
 
 from ._graph_adapter import GraphAdapter
 
@@ -58,9 +59,10 @@ class Backend(Protocol[T]):
     def read(
         cls,
         store: StoreLike,
-        validate: bool = True,
+        structure_validation: bool = True,
         node_props: list[str] | None = None,
         edge_props: list[str] | None = None,
+        data_validation: ValidationConfig | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> tuple[T, GeffMetadata]: ...
@@ -76,10 +78,13 @@ class BaseBackend(Backend[T]):
     def read(
         cls,
         store: StoreLike,
-        validate: bool = True,
+        structure_validation: bool = True,
         node_props: list[str] | None = None,
         edge_props: list[str] | None = None,
+        data_validation: ValidationConfig | None = None,
         **kwargs: Any,
     ) -> tuple[T, GeffMetadata]:
-        in_memory_geff = read_to_memory(store, validate, node_props, edge_props)
+        in_memory_geff = read_to_memory(
+            store, structure_validation, node_props, edge_props, data_validation
+        )
         return cls.construct(**in_memory_geff, **kwargs), in_memory_geff["metadata"]
