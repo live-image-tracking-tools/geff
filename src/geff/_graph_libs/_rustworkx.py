@@ -67,25 +67,6 @@ class RxBackend(BaseBackend):
         node_props: dict[str, PropDictNpArray],
         edge_props: dict[str, PropDictNpArray],
     ) -> rx.PyGraph | rx.PyDiGraph:
-        """
-        Construct a `rustworkx` graph instance from GEFF data.
-
-        Args:
-            metadata (GeffMetadata): The metadata of the graph.
-            node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
-                edge_ids.
-            edge_ids (NDArray[Any]y): An array containing the edge ids. Must have same dtype
-                as node_ids.
-            node_props (dict[str, PropDictNpArray]): A dictionary
-                from node property names to (values, missing) arrays, which should have same
-                length as node_ids.
-            edge_props (dict[str, PropDictNpArray]): A dictionary
-                from edge property names to (values, missing) arrays, which should have same
-                length as edge_ids.
-
-        Returns:
-            (rx.PyGraph | rx.PyDiGraph): A `rustworkx` graph object.
-        """
         metadata = metadata
 
         graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()
@@ -160,33 +141,6 @@ class RxBackend(BaseBackend):
         zarr_format: Literal[2, 3] = 2,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:
-        """Write a rustworkx graph to the geff file format
-
-        Note on RustworkX Node ID Handling:
-            RustworkX uses internal node indices that are not directly controllable by the user.
-            These indices are typically sequential integers starting from 0, but may have gaps
-            if nodes are removed. To maintain compatibility with geff's requirement for stable
-            node identifiers, this function uses the following approach:
-
-            1. If node_id_dict is None: Uses rustworkx's internal node indices directly
-            2. If node_id_dict is provided: Maps rx node indices to custom identifiers
-
-            When reading back with read_rx(), the mapping is reversed to restore the original
-            rustworkx node indices, ensuring round-trip consistency.
-
-        Args:
-            graph: The rustworkx graph to write.
-            store: The store to write the geff file to.
-            metadata: The original metadata of the graph. Defaults to None.
-            axis_names: The names of the axes.
-            axis_units: The units of the axes.
-            axis_types: The types of the axes.
-            zarr_format: The zarr format to use.
-            node_id_dict: A dictionary mapping rx node indices to arbitrary indices.
-                This allows custom node identifiers to be used in the geff file instead
-                of rustworkx's internal indices. If None, uses rx indices directly.
-        """
-
         axis_names, axis_units, axis_types = get_graph_existing_metadata(
             metadata, axis_names, axis_units, axis_types
         )

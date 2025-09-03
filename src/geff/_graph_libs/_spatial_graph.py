@@ -46,32 +46,6 @@ class SgBackend(BaseBackend):
         edge_props: dict[str, PropDictNpArray],
         position_attr: str = "position",
     ) -> sg.SpatialGraph | sg.SpatialDiGraph:
-        """Construct a `spatial-graph` graph instance from GEFF data.
-
-        Args:
-            metadata (GeffMetadata): The metadata of the graph.
-            node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
-                edge_ids.
-            edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
-                as node_ids.
-            node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-                from node property names to (values, missing) arrays, which should have same
-                length as node_ids. Spatial graph does not support missing attributes, so the
-                missing arrays should be None or all False. If present, the missing arrays are
-                ignored with warning
-            edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-                from edge property names to (values, missing) arrays, which should have same
-                length as edge_ids. Spatial graph does not support missing attributes, so the
-                missing
-                arrays should be None or all False. If present, the missing array is ignored with
-                warning.
-            position_attr (str, optional): How to call the position attribute in the returned
-                SpatialGraph. Defaults to "position".
-
-        Returns:
-            sg.SpatialGraph: A SpatialGraph containing the graph that was stored in the geff file
-            format.
-        """
         assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"
 
         position_attrs = [axis.name for axis in metadata.axes]
@@ -148,44 +122,6 @@ class SgBackend(BaseBackend):
         axis_types: list[str | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
-        """Write a SpatialGraph to the geff file format.
-
-        Because SpatialGraph does not support ragged or missing node/edge attributes,
-        the missing arrays will not be written.
-
-        Args:
-            graph (sg.SpatialGraph):
-
-                The graph to write.
-
-            store (str | Path | zarr store):
-
-                The path to the output zarr. Opens in append mode, so will only
-                overwrite geff-controlled groups.
-
-            metadata (GeffMetadata, optional): The original metadata of the graph.
-                Defaults to None. If provided, will override the graph properties.
-
-            axis_names (Optional[list[str]], optional):
-
-                The names of the spatial dims represented in position attribute.
-                Defaults to None.
-
-            axis_units (Optional[list[str]], optional):
-
-                The units of the spatial dims represented in position attribute.
-                Defaults to None.
-
-            axis_types (Optional[list[str]], optional):
-
-                The types of the spatial dims represented in position property.
-                Usually one of "time", "space", or "channel". Defaults to None.
-
-            zarr_format (Literal[2, 3], optional):
-
-                The version of zarr to write. Defaults to 2.
-        """
-
         store = remove_tilde(store)
 
         if len(graph) == 0:

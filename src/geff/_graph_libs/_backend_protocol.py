@@ -68,7 +68,31 @@ class Backend(Protocol[T]):
         data_validation: ValidationConfig | None = None,
         *args: Any,
         **kwargs: Any,
-    ) -> tuple[T, GeffMetadata]: ...
+    ) -> tuple[T, GeffMetadata]:
+        """
+        Read a GEFF to a chosen backend graph instance.
+
+        Args:
+            store (StoreLike): The path or zarr store to the root of the geff zarr, where
+                the .attrs contains the geff  metadata.
+            structure_validation (bool, optional): Flag indicating whether to perform validation
+                on the geff file before loading into memory. If set to False and there are format
+                issues, will likely fail with a cryptic error. Defaults to True.
+            node_props (list of str, optional): The names of the node properties to load,
+                if None all properties will be loaded, defaults to None.
+            edge_props (list of str, optional): The names of the edge properties to load,
+                if None all properties will be loaded, defaults to None.
+            data_validation (ValidationConfig, optional): Optional configuration for which
+                optional types of data to validate. Each option defaults to False.
+            *args (Any): Additional args that may be accepted by the backend when reading the
+                data.
+            **kwargs (Any): Additional kwargs that may be accepted by the backend when reading the
+                data.
+
+        Returns:
+            tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
+        """
+        ...
 
     @staticmethod
     def write(
@@ -81,10 +105,46 @@ class Backend(Protocol[T]):
         zarr_format: Literal[2, 3] = 2,
         *args: Any,
         **kwargs: Any,
-    ) -> None: ...
+    ) -> None:
+        """Write a supported graph object to the geff file format.
+
+        Args:
+            graph (T): An instance of a supported graph object.
+            store (str | Path | zarr store): The path/str to the output zarr, or the store
+                itself. Opens in append mode, so will only overwrite geff-controlled groups.
+            metadata (GeffMetadata, optional): The original metadata of the graph.
+                Defaults to None. If provided, will override the graph properties.
+            axis_names (list[str], optional): The names of the spatial dims
+                represented in position property. Defaults to None. Will override
+                both value in graph properties and metadata if provided.
+            axis_units (list[str | None], optional): The units of the spatial dims
+                represented in position property. Defaults to None. Will override value
+                both value in graph properties and metadata if provided.
+            axis_types (list[str | None], optional): The types of the spatial dims
+                represented in position property. Usually one of "time", "space", or "channel".
+                Defaults to None. Will override both value in graph properties and metadata
+                if provided.
+            zarr_format (Literal[2, 3], optional): The version of zarr to write.
+                Defaults to 2.
+            *args (Any): Additional args that may be accepted by the backend when writing from a
+                specific type of graph.
+            **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from
+                a specific type of graph.
+        """
+        ...
 
     @staticmethod
-    def graph_adapter(graph: T) -> GraphAdapter[T]: ...
+    def graph_adapter(graph: T) -> GraphAdapter[T]:
+        """
+        Wrap a graph in a GraphAdapter for a unified API for accessing data.
+
+        Args:
+            graph (T): An instance of a supported graph object.
+
+        Returns:
+            GraphAdapter[T]
+        """
+        ...
 
 
 class BaseBackend(Backend[T]):

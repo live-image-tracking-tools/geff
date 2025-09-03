@@ -29,6 +29,18 @@ SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 BACKEND_TYPE_MAP: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]]
 
 
+# This function is used to create BACKEND_TYPE_MAP after the get_backend definition
+# Only installed backends will be added to the backend type map
+def _create_backend_type_map() -> dict[SupportedBackend, tuple[type[SupportedGraphType], ...]]:
+    mapping: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]] = {}
+    backends: tuple[SupportedBackend] = get_args(SupportedBackend)
+    for backend in backends:
+        if find_spec(backend) is not None:
+            backend_io = get_backend(backend)
+            mapping[backend] = backend_io.GRAPH_TYPES
+    return mapping
+
+
 # Used in the write function wrapper, where the backend should be determined from the graph type
 def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
     for backend, graph_type in BACKEND_TYPE_MAP.items():
@@ -82,17 +94,6 @@ def get_backend(backend: SupportedBackend) -> Backend:
         # Add cases for new backends, remember to add overloads
         case _:
             raise ValueError(f"Unsupported backend chosen: '{backend}'")
-
-
-# Only installed backends will be added to the backend type map
-def _create_backend_type_map() -> dict[SupportedBackend, tuple[type[SupportedGraphType], ...]]:
-    mapping: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]] = {}
-    backends: tuple[SupportedBackend] = get_args(SupportedBackend)
-    for backend in backends:
-        if find_spec(backend) is not None:
-            backend_io = get_backend(backend)
-            mapping[backend] = backend_io.GRAPH_TYPES
-    return mapping
 
 
 BACKEND_TYPE_MAP = _create_backend_type_map()
@@ -194,7 +195,32 @@ def write(
     axis_types: list[str | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
     node_id_dict: dict[int, int] | None = None,
-) -> None: ...
+) -> None:
+    """Write a rustworkx graph object to the geff file format.
+
+    Args:
+        graph (SupportedGraphType): An instance of a supported graph object.
+        store (str | Path | zarr store): The path/str to the output zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
+        metadata (GeffMetadata, optional): The original metadata of the graph.
+            Defaults to None. If provided, will override the graph properties.
+        axis_names (list[str], optional): The names of the spatial dims
+            represented in position property. Defaults to None. Will override
+            both value in graph properties and metadata if provided.
+        axis_units (list[str | None], optional): The units of the spatial dims
+            represented in position property. Defaults to None. Will override value
+            both value in graph properties and metadata if provided.
+        axis_types (list[str | None], optional): The types of the spatial dims
+            represented in position property. Usually one of "time", "space", or "channel".
+            Defaults to None. Will override both value in graph properties and metadata
+            if provided.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write.
+            Defaults to 2.
+        node_id_dict (dict[int, int], optional): A dictionary mapping rx node indices to
+            arbitrary indices. This allows custom node identifiers to be used in the geff file
+            instead of rustworkx's internal indices. If None, uses rx indices directly.
+    """
+    ...
 
 
 @overload
@@ -222,6 +248,32 @@ def write(
     *args: Any,
     **kwargs: Any,
 ) -> None:
+    """Write a supported graph object to the geff file format.
+
+    Args:
+        graph (SupportedGraphType): An instance of a supported graph object.
+        store (str | Path | zarr store): The path/str to the output zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
+        metadata (GeffMetadata, optional): The original metadata of the graph.
+            Defaults to None. If provided, will override the graph properties.
+        axis_names (list[str], optional): The names of the spatial dims
+            represented in position property. Defaults to None. Will override
+            both value in graph properties and metadata if provided.
+        axis_units (list[str | None], optional): The units of the spatial dims
+            represented in position property. Defaults to None. Will override value
+            both value in graph properties and metadata if provided.
+        axis_types (list[str | None], optional): The types of the spatial dims
+            represented in position property. Usually one of "time", "space", or "channel".
+            Defaults to None. Will override both value in graph properties and metadata
+            if provided.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write.
+            Defaults to 2.
+        *args (Any): Additional args that may be accepted by the backend when writing from a
+            specific type of graph.
+        **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from a
+            specific type of graph.
+    """
+
     backend_io = get_backend_from_graph_type(graph)
     backend_io.write(
         graph,

@@ -94,25 +94,6 @@ class NxBackend(BaseBackend):
         node_props: dict[str, PropDictNpArray],
         edge_props: dict[str, PropDictNpArray],
     ) -> nx.Graph | nx.DiGraph:
-        """
-        Construct a `networkx` graph instance from GEFF data.
-
-        Args:
-            metadata (GeffMetadata): The metadata of the graph.
-            node_ids (NDArray[Any]): An array containing the node ids. Must have same dtype as
-                edge_ids.
-            edge_ids (NDArray[Any]): An array containing the edge ids. Must have same dtype
-                as node_ids.
-            node_props (dict[str, PropDictNpArray]): A dictionary
-                from node property names to (values, missing) arrays, which should have same
-                length as node_ids.
-            edge_props (dict[str, PropDictNpArray]): A dictionary
-                from edge property names to (values, missing) arrays, which should have same
-                length as edge_ids.
-
-        Returns:
-            (nx.Graph | nx.DiGraph): A `networkx` graph object.
-        """
         graph = nx.DiGraph() if metadata.directed else nx.Graph()
 
         graph.add_nodes_from(node_ids.tolist())
@@ -135,28 +116,6 @@ class NxBackend(BaseBackend):
         axis_types: list[str | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
-        """Write a networkx graph to the geff file format
-
-        Args:
-            graph (nx.Graph): A networkx graph
-            store (str | Path | zarr store): The path/str to the output zarr, or the store
-                itself. Opens in append mode, so will only overwrite geff-controlled groups.
-            metadata (GeffMetadata, optional): The original metadata of the graph.
-                Defaults to None. If provided, will override the graph properties.
-            axis_names (Optional[list[str]], optional): The names of the spatial dims
-                represented in position property. Defaults to None. Will override
-                both value in graph properties and metadata if provided.
-            axis_units (Optional[list[str]], optional): The units of the spatial dims
-                represented in position property. Defaults to None. Will override value
-                both value in graph properties and metadata if provided.
-            axis_types (Optional[list[str]], optional): The types of the spatial dims
-                represented in position property. Usually one of "time", "space", or "channel".
-                Defaults to None. Will override both value in graph properties and metadata
-                if provided.
-            zarr_format (Literal[2, 3], optional): The version of zarr to write.
-                Defaults to 2.
-        """
-
         axis_names, axis_units, axis_types = get_graph_existing_metadata(
             metadata, axis_names, axis_units, axis_types
         )
