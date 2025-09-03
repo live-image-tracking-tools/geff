@@ -128,11 +128,15 @@ class SgBackend(Backend):
             warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
             return
 
-        if axis_names is None:
-            assert graph.ndims <= 4, (
-                "For SpatialGraphs with more than 4 dimension, axis_names has to be provided."
+        if (axis_names is None) and (metadata is not None) and (metadata.axes is not None):
+            axis_names = [axis.name for axis in metadata.axes]
+        elif axis_names is not None:
+            pass
+        else:
+            raise ValueError(
+                "Axis names must be specified either using the `axis_names` argument or within the "
+                "geff metadata."
             )
-            axis_names = ["t", "z", "y", "x"][-graph.ndims :]
 
         # create or update metadata
         roi_min, roi_max = graph.roi
@@ -150,13 +154,13 @@ class SgBackend(Backend):
             geff_store=store,
             node_ids=graph.nodes,
             node_props={
-                name: {"values": getattr(graph.node_attrs, name), "missing": None}
+                name: {"values": getattr(graph.node_attrs[graph.nodes], name), "missing": None}
                 for name in graph.node_attr_dtypes.keys()
             },
             node_props_unsquish={graph.position_attr: axis_names},
             edge_ids=graph.edges,
             edge_props={
-                name: {"values": getattr(graph.edge_attrs, name), "missing": None}
+                name: {"values": getattr(graph.edge_attrs[graph.edges], name), "missing": None}
                 for name in graph.edge_attr_dtypes.keys()
             },
             metadata=metadata,
