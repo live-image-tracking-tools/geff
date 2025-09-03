@@ -23,6 +23,11 @@ if TYPE_CHECKING:
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
+MODULE_NAMES: dict[SupportedBackend, str] = {
+    "networkx": "networkx",
+    "rustworkx": "rustworkx",
+    "spatial-graph": "spatial_graph",
+}
 
 # A dictionary to map between supported backend literals and the correct type
 # Used in the get_backend_from_type function below
@@ -35,7 +40,7 @@ def _create_backend_type_map() -> dict[SupportedBackend, tuple[type[SupportedGra
     mapping: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]] = {}
     backends: tuple[SupportedBackend] = get_args(SupportedBackend)
     for backend in backends:
-        if find_spec(backend) is not None:
+        if find_spec(MODULE_NAMES[backend]) is not None:
             backend_io = get_backend(backend)
             mapping[backend] = backend_io.GRAPH_TYPES
     return mapping
