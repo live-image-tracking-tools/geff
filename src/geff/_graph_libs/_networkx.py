@@ -13,7 +13,7 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
-from ._backend_protocol import BaseBackend
+from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
 
 if TYPE_CHECKING:
@@ -81,7 +81,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val.tolist()
 
 
-class NxBackend(BaseBackend):
+class NxBackend(Backend):
     @property
     def GRAPH_TYPES(self) -> tuple[type[nx.Graph], type[nx.DiGraph]]:
         return nx.Graph, nx.DiGraph

@@ -22,7 +22,7 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
-from ._backend_protocol import BaseBackend
+from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
 
 if TYPE_CHECKING:
@@ -54,7 +54,7 @@ def get_roi_rx(
     )
 
 
-class RxBackend(BaseBackend):
+class RxBackend(Backend):
     @property
     def GRAPH_TYPES(self) -> tuple[type[rx.PyGraph], type[rx.PyDiGraph]]:
         return rx.PyGraph, rx.PyDiGraph

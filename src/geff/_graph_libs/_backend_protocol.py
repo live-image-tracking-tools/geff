@@ -92,7 +92,10 @@ class Backend(Protocol[T]):
         Returns:
             tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
         """
-        ...
+        in_memory_geff = read_to_memory(
+            store, structure_validation, node_props, edge_props, data_validation
+        )
+        return cls.construct(**in_memory_geff, **kwargs), in_memory_geff["metadata"]
 
     @staticmethod
     def write(
@@ -145,20 +148,3 @@ class Backend(Protocol[T]):
             GraphAdapter[T]
         """
         ...
-
-
-class BaseBackend(Backend[T]):
-    @classmethod
-    def read(
-        cls,
-        store: StoreLike,
-        structure_validation: bool = True,
-        node_props: list[str] | None = None,
-        edge_props: list[str] | None = None,
-        data_validation: ValidationConfig | None = None,
-        **kwargs: Any,
-    ) -> tuple[T, GeffMetadata]:
-        in_memory_geff = read_to_memory(
-            store, structure_validation, node_props, edge_props, data_validation
-        )
-        return cls.construct(**in_memory_geff, **kwargs), in_memory_geff["metadata"]

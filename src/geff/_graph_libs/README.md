@@ -6,7 +6,7 @@ Follow these steps to add read support for a new graph backend.
 
 1. Add your backend to the [`SupportedBackend`](_api_wrapper.py#L24) `Literal` type at the start of the `_graph_libs/_api_wrapper.py` file.
 
-2. Create a concrete implementation of the [`Backend`](_backend_protocol.py#L16) class, you can subclass [`BaseBackend`](_backend_protocol.py#L150) to automatically have the `read` method after implementing the `construct` method. Have a look at the [`NxBackend`](_networkx.py#L84) as an example.
+2. Create a concrete implementation of the [`Backend`](_backend_protocol.py#L16) class, you can subclass the `Backend` class to automatically have the `read` method after implementing the `construct` method. Have a look at the [`NxBackend`](_networkx.py#L84) as an example.
 
 > [!NOTE]
 > You will also have to create a concrete implementation of the [`GraphAdapter`](_graph_adapter.py#L11) class and have an instance of it be returned from the [`Backend.graph_adapter`](_backend_protocol.py#L137) method.

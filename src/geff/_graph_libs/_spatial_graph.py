@@ -26,13 +26,13 @@ from geff.core_io._utils import remove_tilde
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.metadata.utils import create_or_update_metadata
 
-from ._backend_protocol import BaseBackend
+from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
 
 GRAPH_TYPES = (sg.SpatialGraph, sg.SpatialDiGraph)
 
 
-class SgBackend(BaseBackend):
+class SgBackend(Backend):
     @property
     def GRAPH_TYPES(self) -> tuple[type[sg.SpatialGraph], type[sg.SpatialDiGraph]]:
         return sg.SpatialGraph, sg.SpatialDiGraph
