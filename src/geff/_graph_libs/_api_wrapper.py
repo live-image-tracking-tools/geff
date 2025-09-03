@@ -184,7 +184,7 @@ def read(
     )
 
 
-# rustworkx has an additional nod_id_dict arg
+# rustworkx has an additional node_id_dict arg
 @overload
 def write(
     graph: rx.PyGraph | rx.PyDiGraph,
