@@ -9,8 +9,10 @@ if TYPE_CHECKING:
     import networkx as nx
     import rustworkx as rx
     import spatial_graph as sg
+    from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
+    from geff._typing import PropDictNpArray
     from geff.metadata._schema import GeffMetadata
     from geff.validate.data import ValidationConfig
 
@@ -46,28 +48,16 @@ def _create_backend_type_map() -> dict[SupportedBackend, tuple[type[SupportedGra
     return mapping
 
 
-# Used in the write function wrapper, where the backend should be determined from the graph type
-def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
-    for backend, graph_type in BACKEND_TYPE_MAP.items():
-        if isinstance(graph, graph_type):
-            return get_backend(backend)
-    raise TypeError(f"Unrecognized graph type '{type(graph)}'.")
-
-
 @overload
 def get_backend(backend: Literal["networkx"]) -> Backend[NxGraph]: ...
 
 
 @overload
-def get_backend(
-    backend: Literal["rustworkx"],
-) -> Backend[RxGraph]: ...
+def get_backend(backend: Literal["rustworkx"]) -> Backend[RxGraph]: ...
 
 
 @overload
-def get_backend(
-    backend: Literal["spatial-graph"],
-) -> Backend[SgGraph]: ...
+def get_backend(backend: Literal["spatial-graph"]) -> Backend[SgGraph]: ...
 
 
 # NOTE: overload get_backend for new backends by typing the return type as Backend[GraphType]
@@ -104,6 +94,14 @@ def get_backend(backend: SupportedBackend) -> Backend:
 BACKEND_TYPE_MAP = _create_backend_type_map()
 
 
+# Used in the write function wrapper, where the backend should be determined from the graph type
+def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
+    for backend, graph_type in BACKEND_TYPE_MAP.items():
+        if isinstance(graph, graph_type):
+            return get_backend(backend)
+    raise TypeError(f"Unrecognized graph type '{type(graph)}'.")
+
+
 @overload
 def read(
     store: StoreLike,
@@ -119,7 +117,7 @@ def read(
 @overload
 def read(
     store: StoreLike,
-    structure_validation: bool,
+    structure_validation: bool = ...,
     node_props: list[str] | None = ...,
     edge_props: list[str] | None = ...,
     data_validation: ValidationConfig | None = ...,
@@ -154,7 +152,7 @@ def read(
     *,
     backend: SupportedBackend = "networkx",
     **backend_kwargs: Any,
-) -> tuple[Any, GeffMetadata]:
+) -> tuple[SupportedGraphType, GeffMetadata]:
     """
     Read a GEFF to a chosen backend.
 
@@ -189,18 +187,84 @@ def read(
     )
 
 
+@overload
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: Literal["networkx"] = "networkx",
+) -> NxGraph: ...
+
+
+@overload
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: Literal["rustworkx"],
+) -> RxGraph: ...
+
+
+@overload
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: Literal["spatial-graph"],
+    position_attr: str = "position",
+) -> RxGraph: ...
+
+
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: SupportedBackend = "networkx",
+    **backend_kwargs: Any,
+) -> SupportedGraphType:
+    backend_io = get_backend(backend)
+    return backend_io.construct(
+        metadata, node_ids, edge_ids, node_props, edge_props, **backend_kwargs
+    )
+
+
+@overload
+def write(
+    graph: NxGraph,
+    store: StoreLike,
+    metadata: GeffMetadata | None = ...,
+    axis_names: list[str] | None = ...,
+    axis_units: list[str | None] | None = ...,
+    axis_types: list[str | None] | None = ...,
+    zarr_format: Literal[2, 3] = ...,
+) -> None: ...
+
+
 # rustworkx has an additional node_id_dict arg
 @overload
 def write(
-    graph: rx.PyGraph | rx.PyDiGraph,
+    graph: RxGraph,
     store: StoreLike,
-    metadata: GeffMetadata | None = None,
-    axis_names: list[str] | None = None,
-    axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
-    zarr_format: Literal[2, 3] = 2,
-    node_id_dict: dict[int, int] | None = None,
+    metadata: GeffMetadata | None = ...,
+    axis_names: list[str] | None = ...,
+    axis_units: list[str | None] | None = ...,
+    axis_types: list[str | None] | None = ...,
+    zarr_format: Literal[2, 3] = ...,
+    node_id_dict: dict[int, int] | None = ...,
 ) -> None:
+    # TODO: what is best practice for overload docstrings, want to document node_id_dict
     """Write a rustworkx graph object to the geff file format.
 
     Args:
