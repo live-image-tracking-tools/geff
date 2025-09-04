@@ -308,6 +308,7 @@ class GeffMetadata(BaseModel):
             Name of the optional `sphere` property.
 
             A sphere is defined by
+
             - a center point, already given by the `space` type properties
             - a radius scalar, stored in this property
             """
@@ -324,11 +325,13 @@ class GeffMetadata(BaseModel):
             properties.
 
             It is defined by
+
             - a center point $c$, already given by the `space` type properties
             - a covariance matrix $\\Sigma$, symmetric and positive-definite, stored in this
               property as a `2x2`/`3x3` array.
 
             To plot the ellipsoid:
+
             - Compute the eigendecomposition of the covariance matrix
             $\\Sigma = Q \\Lambda Q^{\\top}$
             - Sample points $z$ on the unit sphere
