@@ -7,12 +7,7 @@ Using a lower level component ([`GeffReader`][geff.GeffReader]) of the `geff` AP
 ### Loading a subset of properties
 
 ```python
-from geff import GeffReader
-
-# Load the construct function for your choice of graph
-from geff._graph_libs._networkx import construct_nx
-# from geff._graph_libs._rustworkx import construct_rx
-# from geff._graph_libs._spatial_graph import construct_sg
+from geff import GeffReader, construct
 
 
 # Open the geff file without reading any data into memory
@@ -29,8 +24,8 @@ geff_reader.read_edge_props()
 # Read the data of the geff into memory including only properties that have been loaded
 in_memory_geff = geff_reader.build()
 
-# Construct a graph representation of the data
-graph = construct_nx(**in_memory_geff)
+# Construct a graph representation of the data with the backend of your choice
+graph = construct(**in_memory_geff, backend="networkx")
 # Nodes will contain the attributes t, x, and y
 # Edges will contain the attributes color and score
 ```
@@ -38,12 +33,7 @@ graph = construct_nx(**in_memory_geff)
 ### Filtering based on nodes
 
 ```python
-from geff import GeffReader
-
-# Load the construct function for your choice of graph
-from geff._graph_libs._networkx import construct_nx
-# from geff._graph_libs._rustworkx import construct_rx
-# from geff._graph_libs._spatial_graph import construct_sg
+from geff import GeffReader, construct
 
 
 # Open the geff file without reading any data into memory
@@ -57,8 +47,8 @@ node_mask = file_reader.node_props["t"]["values"][:] < 5
 # Read the data of the geff into memory using the mask to filter which nodes to load
 in_memory_geff = geff_reader.build(node_mask=node_mask)
 
-# Construct a graph representation of the data
-graph = construct_nx(**in_memory_geff)
+# Construct a graph representation of the data with the backend of your choice
+graph = construct(**in_memory_geff, backend="networkx")
 ```
 
 ### Filtering based on edges
@@ -68,12 +58,7 @@ graph = construct_nx(**in_memory_geff)
     When loading a GEFF using an edge mask, by default all nodes will be loaded even if they are not contained within an unmasked edge. However `GeffReader.build` can take both a node and edge mask if constructed by the user.
 
 ```python
-from geff import GeffReader
-
-# Load the construct function for your choice of graph
-from geff._graph_libs._networkx import construct_nx
-# from geff._graph_libs._rustworkx import construct_rx
-# from geff._graph_libs._spatial_graph import construct_sg
+from geff import GeffReader, construct
 
 
 # Open the geff file without reading any data into memory
@@ -87,6 +72,6 @@ edge_mask = file_reader.edge_props["score"]["values"][:] < 0.5
 # Read the data of the geff into memory using the mask to filter which edges to load
 in_memory_geff = geff_reader.build(edge_mask=edge_mask)
 
-# Construct a graph representation of the data
-graph = construct_nx(**in_memory_geff)
+# Construct a graph representation of the data with the backend of your choice
+graph = construct(**in_memory_geff, backend="networkx")
 ```
