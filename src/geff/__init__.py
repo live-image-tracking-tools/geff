@@ -5,7 +5,7 @@ try:
 except PackageNotFoundError:  # pragma: no cover
     __version__ = "uninstalled"
 
-from ._graph_libs._api_wrapper import read, write
+from ._graph_libs._api_wrapper import construct, read, write
 from .core_io._base_read import GeffReader
 from .metadata._schema import GeffMetadata
 from .validate.structure import validate_structure
@@ -13,6 +13,7 @@ from .validate.structure import validate_structure
 __all__ = [
     "GeffMetadata",
     "GeffReader",
+    "construct",
     "read",
     "validate_structure",
     "write",
