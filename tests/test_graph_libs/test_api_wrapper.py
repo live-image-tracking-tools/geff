@@ -13,6 +13,7 @@ from geff.testing.data import create_mock_geff
 
 if TYPE_CHECKING:
     from geff._graph_libs._backend_protocol import Backend
+    from geff.testing.data import DTypeStr
 
 
 rx = pytest.importorskip("rustworkx")
@@ -26,7 +27,35 @@ node_axis_dtypes = [
 extra_edge_props = [
     {"score": "float64", "color": "uint8"},
     {"score": "float32", "color": "int16"},
+    {},
 ]
+
+
+def create_test_geff(
+    backend,
+    node_id_dtype,
+    node_axis_dtypes,
+    extra_edge_props,
+    directed,
+    include_t,
+    include_z,
+):
+    extra_node_props: dict[str, DTypeStr] = {
+        "score": "float32",
+        "sub_id": "int",
+    }
+    # spatial-graph doesn't accept str as node property dtype
+    if backend != "spatial-graph":
+        extra_edge_props["label"] = "str"
+    return create_mock_geff(
+        node_id_dtype,
+        node_axis_dtypes,
+        extra_node_props=extra_node_props,
+        extra_edge_props=extra_edge_props,
+        directed=directed,
+        include_t=include_t,
+        include_z=include_z,
+    )
 
 
 # assert that all the data in the graph are equal to those in the memory geff it was created from
@@ -93,6 +122,11 @@ def test_read(
     store, memory_geff = create_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
+        extra_node_props={
+            "label": "str" if backend != "spatial-graph" else "int",
+            "score": "float32",
+            "sub_id": "int",
+        },
         extra_edge_props=extra_edge_props,
         directed=directed,
         include_t=include_t,
@@ -126,6 +160,11 @@ def test_construct(
     store, memory_geff = create_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
+        extra_node_props={
+            "label": "str" if backend != "spatial-graph" else "int",
+            "score": "float32",
+            "sub_id": "int",
+        },
         extra_edge_props=extra_edge_props,
         directed=directed,
         include_t=include_t,
@@ -161,6 +200,11 @@ def test_write(
     store, memory_geff = create_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
+        extra_node_props={
+            "label": "str" if backend != "spatial-graph" else "int",
+            "score": "float32",
+            "sub_id": "int",
+        },
         extra_edge_props=extra_edge_props,
         directed=directed,
         include_t=include_t,
