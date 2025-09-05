@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, get_args
 import numpy as np
 import pytest
 
-from geff import read, write
+from geff import construct, read, write
 from geff._graph_libs._api_wrapper import SupportedBackend, get_backend
 from geff._graph_libs._backend_protocol import GraphAdapter
 from geff._graph_libs._networkx import NxBackend
@@ -133,7 +133,7 @@ def test_construct(
     )
 
     in_memory_geff = read_to_memory(store)
-    graph = backend_module.construct(**in_memory_geff)
+    graph = construct(**in_memory_geff, backend=backend)
     graph_adapter = backend_module.graph_adapter(graph)
 
     _assert_graph_equal_to_geff(graph_adapter, memory_geff, include_t, include_z)
