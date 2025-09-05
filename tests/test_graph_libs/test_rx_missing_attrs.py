@@ -6,10 +6,8 @@ import zarr
 
 import geff
 
-try:
-    import rustworkx as rx
-except ImportError:
-    pytest.skip("geff[rustworkx] not installed", allow_module_level=True)
+rx = pytest.importorskip("rustworkx")
+from geff._graph_libs._rustworkx import RxBackend  # noqa: E402
 
 
 def create_rx_graph_sparse_node_props():
@@ -54,7 +52,7 @@ def test_sparse_node_props_rx(tmp_path) -> None:
     # Create node_id_dict to map rx indices to specific ids [1,2,3,4,5]
     node_id_dict = {idx: idx + 1 for idx in node_indices}
 
-    geff.write_rx(graph, store=zarr_path, node_id_dict=node_id_dict, axis_names=["t", "y", "x"])
+    RxBackend.write(graph, store=zarr_path, node_id_dict=node_id_dict, axis_names=["t", "y", "x"])
 
     # Check that the written file is valid
     assert Path(zarr_path).exists()
@@ -78,7 +76,7 @@ def test_sparse_node_props_rx(tmp_path) -> None:
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 0, 1, 1, 0]))
 
     # Read it back and verify consistency
-    read_graph, metadata = geff.read_rx(zarr_path)
+    read_graph, metadata = RxBackend.read(zarr_path)
 
     # Check that we have the right number of nodes and structure
     assert read_graph.num_nodes() == graph.num_nodes()
@@ -93,7 +91,7 @@ def test_sparse_edge_props_rx(tmp_path) -> None:
     # Create node_id_dict to map rx indices to specific ids [1,2,3,4,5]
     node_id_dict = {idx: idx + 1 for idx in node_indices}
 
-    geff.write_rx(graph, store=zarr_path, node_id_dict=node_id_dict, axis_names=["t", "y", "x"])
+    RxBackend.write(graph, store=zarr_path, node_id_dict=node_id_dict, axis_names=["t", "y", "x"])
 
     # Check that the written file is valid
     assert Path(zarr_path).exists()
@@ -112,7 +110,7 @@ def test_sparse_edge_props_rx(tmp_path) -> None:
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 1, 0]))
 
     # Read it back and verify consistency
-    read_graph, metadata = geff.read_rx(zarr_path)
+    read_graph, metadata = RxBackend.read(zarr_path)
 
     # Check basic structure
     assert read_graph.num_nodes() == graph.num_nodes()
@@ -127,7 +125,7 @@ def test_missing_pos_prop_rx(tmp_path) -> None:
     # Test with wrong property name (z instead of x)
     with pytest.raises(UserWarning, match="Property .* is not present on any graph elements"):
         with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
-            geff.write_rx(graph, store=zarr_path, axis_names=["t", "y", "z"])
+            RxBackend.write(graph, store=zarr_path, axis_names=["t", "y", "z"])
 
     # Test with missing required spatial property
     # Remove 't' property from first node
@@ -138,6 +136,9 @@ def test_missing_pos_prop_rx(tmp_path) -> None:
         # Create a complete node_id_dict for all nodes
         node_id_dict = {idx: idx + 1 for idx in node_indices}
         with pytest.raises(ValueError, match=r"Spatiotemporal property 't' not found in : \[1\]"):
-            geff.write_rx(
-                graph, store=zarr_path, node_id_dict=node_id_dict, axis_names=["t", "y", "x"]
+            RxBackend.write(
+                graph,
+                store=zarr_path,
+                node_id_dict=node_id_dict,
+                axis_names=["t", "y", "x"],
             )

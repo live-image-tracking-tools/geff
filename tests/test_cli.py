@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import pytest
 from typer.testing import CliRunner
 
-import geff
 from geff import GeffMetadata
 from geff._cli import app
+from geff._graph_libs._networkx import NxBackend
 from geff.testing.data import create_simple_temporal_geff
 from tests.test_convert.test_ctc import create_mock_data
 
@@ -21,8 +21,8 @@ runner = CliRunner()
 def example_geff_path(tmp_path: Path) -> str:
     file_path = str(tmp_path / "test.geff")
     store, graph_props = create_simple_temporal_geff()
-    graph, metadata = geff.read_nx(store)
-    geff.write_nx(graph, file_path, metadata=metadata)
+    graph, metadata = NxBackend.read(store)
+    NxBackend.write(graph, file_path, metadata=metadata)
     return file_path
 
 

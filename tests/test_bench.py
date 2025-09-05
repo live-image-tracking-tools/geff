@@ -14,15 +14,16 @@ import tempfile
 from functools import cache
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, get_args
 
 import networkx as nx
 import numpy as np
 
 import geff
+from geff._graph_libs._api_wrapper import SupportedBackend, get_backend
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Mapping
 
     from pytest_codspeed.plugin import BenchmarkFixture
 
@@ -30,6 +31,8 @@ if TYPE_CHECKING:
 np.random.seed(42)  # for reproducibility
 
 # ###########################   Utils   ##################################
+
+BACKEND_STRINGS: tuple[SupportedBackend] = get_args(SupportedBackend)
 
 
 @cache
@@ -73,26 +76,34 @@ def create_nx_graph(num_nodes: int) -> nx.DiGraph:
 def graph_file_path(num_nodes: int) -> Path:
     tmp_dir = tempfile.mkdtemp(suffix=".zarr")
     atexit.register(shutil.rmtree, tmp_dir, ignore_errors=True)
-    geff.write_nx(graph=create_nx_graph(num_nodes), store=tmp_dir, axis_names=["t", "z", "y", "x"])
+    geff.write(graph=create_nx_graph(num_nodes), store=tmp_dir, axis_names=["t", "z", "y", "x"])
     return Path(tmp_dir)
 
 
 # ###########################   TESTS   ##################################
 
-READ_PATH: Mapping[Callable, Callable[[Path], tuple[Any, Any]]] = {
-    geff.read_nx: lambda path: geff.read_nx(path, structure_validation=False),
-    geff.read_rx: lambda path: geff.read_rx(path, structure_validation=False),
-    geff.read_sg: lambda path: geff.read_sg(path, structure_validation=False),
+# to keep consistency before api refac
+WRITE_TEST_IDS: dict[SupportedBackend, str] = {
+    "networkx": "write_nx",
+    "rustworkx": "write_rx",
+    "spatial-graph": "write_sg",
 }
 
 
 @pytest.mark.parametrize("nodes", [500])
-@pytest.mark.parametrize("write_func", [geff.write_nx, geff.write_rx, geff.write_sg])
+@pytest.mark.parametrize(
+    "backend",
+    BACKEND_STRINGS,
+    # to keep consistency before api refac
+    ids=[WRITE_TEST_IDS[backend] for backend in BACKEND_STRINGS],
+)
 def test_bench_write(
-    write_func: Callable, benchmark: BenchmarkFixture, tmp_path: Path, nodes: int
+    backend: SupportedBackend, benchmark: BenchmarkFixture, tmp_path: Path, nodes: int
 ) -> None:
     path = tmp_path / "test_write.zarr"
-    read_func = getattr(geff, f"read_{write_func.__name__.split('_')[1]}")
+    backend_io = get_backend(backend)
+    write_func = backend_io.write
+    read_func = backend_io.read
     graph = read_func(graph_file_path(nodes))[0]
     benchmark.pedantic(
         write_func,
@@ -107,8 +118,22 @@ def test_bench_validate(benchmark: BenchmarkFixture, nodes: int) -> None:
     benchmark(geff.validate_structure, store=graph_path)
 
 
+# to keep consistency before api refac
+READ_TEST_IDS: dict[SupportedBackend, str] = {
+    "networkx": "read_nx",
+    "rustworkx": "read_rx",
+    "spatial-graph": "read_sg",
+}
+
+
 @pytest.mark.parametrize("nodes", [500])
-@pytest.mark.parametrize("read_func", [geff.read_nx, geff.read_rx, geff.read_sg])
-def test_bench_read(read_func: Callable, benchmark: BenchmarkFixture, nodes: int) -> None:
+@pytest.mark.parametrize(
+    "backend",
+    BACKEND_STRINGS,
+    # to keep consistency before api refac
+    ids=[READ_TEST_IDS[backend] for backend in BACKEND_STRINGS],
+)
+def test_bench_read(backend: SupportedBackend, benchmark: BenchmarkFixture, nodes: int) -> None:
+    read_func = get_backend(backend).read
     graph_path = graph_file_path(nodes)
     benchmark(read_func, graph_path, structure_validation=False)

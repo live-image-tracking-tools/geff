@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-import geff
+from geff._graph_libs._networkx import NxBackend
 from geff.testing.data import (
     create_dummy_in_mem_geff,
     create_mock_geff,
@@ -19,7 +19,7 @@ class Test_create_simple_2d_geff:
         store, _ = create_simple_2d_geff()
 
         # Verify it creates a valid geff store
-        graph, metadata = geff.read_nx(store)
+        graph, metadata = NxBackend.read(store)
 
         # Check basic properties
         assert len(graph.nodes) == 10  # default num_nodes
@@ -47,7 +47,7 @@ class Test_create_simple_2d_geff:
 
         # Test 2D
         store_2d, _ = create_simple_2d_geff()
-        graph_2d, _ = geff.read_nx(store_2d)
+        graph_2d, _ = NxBackend.read(store_2d)
 
         # Check that edges have the expected properties
         for edge in graph_2d.edges:
@@ -59,7 +59,7 @@ class Test_create_simple_2d_geff:
 
         # Test 3D
         store_3d, _ = create_simple_3d_geff()
-        graph_3d, _ = geff.read_nx(store_3d)
+        graph_3d, _ = NxBackend.read(store_3d)
 
         # Check that edges have the expected properties
         for edge in graph_3d.edges:
@@ -71,7 +71,7 @@ class Test_create_simple_2d_geff:
 
         # Test temporal
         store_temporal, _ = create_simple_temporal_geff()
-        graph_temporal, _ = geff.read_nx(store_temporal)
+        graph_temporal, _ = NxBackend.read(store_temporal)
 
         # Check that edges have the expected properties
         for edge in graph_temporal.edges:
@@ -89,7 +89,7 @@ def test_create_simple_3d_geff() -> None:
     store, _ = create_simple_3d_geff()
 
     # Verify it creates a valid geff store
-    graph, metadata = geff.read_nx(store)
+    graph, metadata = NxBackend.read(store)
 
     # Check basic properties
     assert len(graph.nodes) == 10  # default num_nodes
@@ -120,7 +120,7 @@ def test_create_simple_temporal_geff() -> None:
     store, _ = create_simple_temporal_geff()
 
     # Verify it creates a valid geff store
-    graph, metadata = geff.read_nx(store)
+    graph, metadata = NxBackend.read(store)
 
     # Check basic properties
     assert len(graph.nodes) == 10  # default num_nodes
@@ -184,7 +184,7 @@ class Test_create_mock_geff:
         )
 
         # Verify the graph was created correctly
-        graph, _ = geff.read_nx(store)
+        graph, _ = NxBackend.read(store)
 
         for node in graph.nodes:
             node_data = graph.nodes[node]
@@ -259,7 +259,7 @@ class Test_create_mock_geff:
         )
 
         # Verify the graph was created correctly
-        graph, metadata = geff.read_nx(store)
+        graph, metadata = NxBackend.read(store)
 
         # Check that no extra node properties are present
         for node in graph.nodes:
@@ -436,7 +436,7 @@ class Test_create_mock_geff:
         )
 
         # Verify the graph was created correctly
-        graph, metadata = geff.read_nx(store)
+        graph, metadata = NxBackend.read(store)
 
         # Check that all properties are present with correct types
         for node in graph.nodes:

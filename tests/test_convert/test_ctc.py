@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import zarr
 
-from geff import read_nx
+from geff._graph_libs._networkx import NxBackend
 
 
 def create_mock_data(
@@ -81,7 +81,7 @@ def test_ctc_to_geff(
 
     assert geff_path.exists()
 
-    graph, _ = read_nx(geff_path)
+    graph, _ = NxBackend.read(geff_path)
 
     expected_nodes = {0, 1, 2, 3, 4, 5}
     expected_edges = {(0, 2), (2, 3), (2, 4), (1, 5)}
