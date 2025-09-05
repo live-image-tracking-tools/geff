@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 license = { text = "MIT License" }
 dynamic = ['version']
 dependencies = [
-    "typer>=0.14.0,<0.17.0",
+    "typer>=0.14.0",
     "zarr>=2.18,<4",
     "pydantic>=2.11",
     "networkx>=3.2.1",
@@ -70,6 +70,7 @@ docs = [
     "mkdocs-material>=9.6.16",
     "mkdocstrings-python>=1.16.12",
     "mkdocs-typer>=0.0.3",
+    "typer>=0.14.0,<0.17.0",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
     "mkdocs-autorefs",
