@@ -32,6 +32,8 @@ np.random.seed(42)  # for reproducibility
 
 # ###########################   Utils   ##################################
 
+BACKEND_STRINGS: tuple[SupportedBackend] = get_args(SupportedBackend)
+
 
 @cache
 def node_data(n_nodes: int) -> Mapping[int, dict[str, float]]:
@@ -80,9 +82,21 @@ def graph_file_path(num_nodes: int) -> Path:
 
 # ###########################   TESTS   ##################################
 
+# to keep consistency before api refac
+WRITE_TEST_IDS: dict[SupportedBackend, str] = {
+    "networkx": "write_nx",
+    "rustworkx": "write_rx",
+    "spatial-graph": "write_sg",
+}
+
 
 @pytest.mark.parametrize("nodes", [500])
-@pytest.mark.parametrize("backend", [*get_args(SupportedBackend)])
+@pytest.mark.parametrize(
+    "backend",
+    BACKEND_STRINGS,
+    # to keep consistency before api refac
+    ids=[WRITE_TEST_IDS[backend] for backend in BACKEND_STRINGS],
+)
 def test_bench_write(
     backend: SupportedBackend, benchmark: BenchmarkFixture, tmp_path: Path, nodes: int
 ) -> None:
@@ -104,8 +118,21 @@ def test_bench_validate(benchmark: BenchmarkFixture, nodes: int) -> None:
     benchmark(geff.validate_structure, store=graph_path)
 
 
+# to keep consistency before api refac
+READ_TEST_IDS: dict[SupportedBackend, str] = {
+    "networkx": "read_nx",
+    "rustworkx": "read_rx",
+    "spatial-graph": "read_sg",
+}
+
+
 @pytest.mark.parametrize("nodes", [500])
-@pytest.mark.parametrize("backend", [*get_args(SupportedBackend)])
+@pytest.mark.parametrize(
+    "backend",
+    BACKEND_STRINGS,
+    # to keep consistency before api refac
+    ids=[READ_TEST_IDS[backend] for backend in BACKEND_STRINGS],
+)
 def test_bench_read(backend: SupportedBackend, benchmark: BenchmarkFixture, nodes: int) -> None:
     read_func = get_backend(backend).read
     graph_path = graph_file_path(nodes)
