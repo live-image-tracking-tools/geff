@@ -20,10 +20,14 @@ theme:
   #   scheme: slate
   #   primary: purple
   #   accent: purple
+  features:
+    - navigation.indexes
 
 extra_javascript:
   - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+extra_css:
+  - css/extra.css
 
 extra:
   version:
@@ -66,9 +70,9 @@ plugins:
           show_attribute_values: true
           show_labels: false
           extensions:
-          - griffe_pydantic:
-                schema: false
+          - griffe_fieldz
 - include-markdown
 - api-autonav:
+    nav_section_title: "Python API"
     modules: ['src/geff']
 - autorefs
