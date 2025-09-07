@@ -32,6 +32,7 @@ from ._graph_adapter import GraphAdapter
 GRAPH_TYPES = (sg.SpatialGraph, sg.SpatialDiGraph)
 
 
+# NOTE: see _api_wrapper.py read/write/construct for docs
 class SgBackend(Backend):
     @property
     def GRAPH_TYPES(self) -> tuple[type[sg.SpatialGraph], type[sg.SpatialDiGraph]]:

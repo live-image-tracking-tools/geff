@@ -81,6 +81,7 @@ def _set_property_values(
                 graph.edges[source, target][name] = val.tolist()
 
 
+# NOTE: see _api_wrapper.py read/write/construct for docs
 class NxBackend(Backend):
     @property
     def GRAPH_TYPES(self) -> tuple[type[nx.Graph], type[nx.DiGraph]]:

@@ -54,6 +54,7 @@ def get_roi_rx(
     )
 
 
+# NOTE: see _api_wrapper.py read/write/construct for docs
 class RxBackend(Backend):
     @property
     def GRAPH_TYPES(self) -> tuple[type[rx.PyGraph], type[rx.PyDiGraph]]:
