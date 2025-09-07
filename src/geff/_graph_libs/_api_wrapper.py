@@ -40,21 +40,13 @@ def _create_backend_map() -> dict[SupportedBackend, Backend]:
     return mapping
 
 
+# NOTE: overload get_backend for new backends by typing the return type as Backend[GraphType]
 @overload
 def get_backend(backend: Literal["networkx"]) -> Backend[NxGraph]: ...
-
-
 @overload
 def get_backend(backend: Literal["rustworkx"]) -> Backend[RxGraph]: ...
-
-
 @overload
 def get_backend(backend: Literal["spatial-graph"]) -> Backend[SgGraph]: ...
-
-
-# NOTE: overload get_backend for new backends by typing the return type as Backend[GraphType]
-
-
 def get_backend(backend: SupportedBackend) -> Backend:
     """
     Get a specified backend io module.
@@ -94,6 +86,8 @@ def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
     raise TypeError(f"Unrecognized graph type '{type(graph)}'.")
 
 
+# NOTE: when overloading read for a new backend, if additional arguments can be accepted, explicitly
+# define them such as in the spatial-graph overload below, where position_attr has been added.
 @overload
 def read(
     store: StoreLike,
@@ -104,8 +98,6 @@ def read(
     *,
     backend: Literal["networkx"] = "networkx",
 ) -> tuple[NxGraph, GeffMetadata]: ...
-
-
 @overload
 def read(
     store: StoreLike,
@@ -116,8 +108,6 @@ def read(
     *,
     backend: Literal["rustworkx"],
 ) -> tuple[RxGraph, GeffMetadata]: ...
-
-
 @overload
 def read(
     store: StoreLike,
@@ -129,12 +119,6 @@ def read(
     backend: Literal["spatial-graph"],
     position_attr: str = "position",
 ) -> tuple[SgGraph, GeffMetadata]: ...
-
-
-# NOTE: when overloading read for a new backend, if additional arguments can be accepted, explicitly
-# define them such as in the spatial-graph overload above, where position_attr has been added.
-
-
 def read(
     store: StoreLike,
     structure_validation: bool = True,
@@ -187,10 +171,8 @@ def construct(
     node_props: dict[str, PropDictNpArray],
     edge_props: dict[str, PropDictNpArray],
     *,
-    backend: Literal["networkx"] = "networkx",
+    backend: Literal["networkx"] = ...,
 ) -> NxGraph: ...
-
-
 @overload
 def construct(
     metadata: GeffMetadata,
@@ -201,8 +183,6 @@ def construct(
     *,
     backend: Literal["rustworkx"],
 ) -> RxGraph: ...
-
-
 @overload
 def construct(
     metadata: GeffMetadata,
@@ -213,9 +193,7 @@ def construct(
     *,
     backend: Literal["spatial-graph"],
     position_attr: str = "position",
-) -> RxGraph: ...
-
-
+) -> SgGraph: ...
 def construct(
     metadata: GeffMetadata,
     node_ids: NDArray[Any],
@@ -276,16 +254,14 @@ def write(
 def write(
     graph: SupportedGraphType,
     store: StoreLike,
-    metadata: GeffMetadata | None = None,
-    axis_names: list[str] | None = None,
-    axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
+    metadata: GeffMetadata | None = ...,
+    axis_names: list[str] | None = ...,
+    axis_units: list[str | None] | None = ...,
+    axis_types: list[str | None] | None = ...,
     zarr_format: Literal[2, 3] = 2,
     *args: Any,
     **kwargs: Any,
 ) -> None: ...
-
-
 def write(
     graph: SupportedGraphType,
     store: StoreLike,
@@ -322,7 +298,6 @@ def write(
         **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from a
             specific type of graph.
     """
-
     backend_io = get_backend_from_graph_type(graph)
     backend_io.write(
         graph,
