@@ -24,20 +24,18 @@ if TYPE_CHECKING:
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
-BACKEND_MAP: dict[SupportedBackend, Backend]
+AVAILABLE_BACKENDS: list[Backend] = []
 
 
-# This function is used to create BACKEND_MAP after the get_backend definition
-# Only installed backends will be added to the backend type map
-def _create_backend_map() -> dict[SupportedBackend, Backend]:
-    mapping: dict[SupportedBackend, Backend] = {}
+# This function will add available backends to the available backend list
+# it has to be called after the definition of get_backends
+def _import_available_backends() -> None:
     backends: tuple[SupportedBackend] = get_args(SupportedBackend)
     for backend in backends:
         try:
-            mapping[backend] = get_backend(backend)
+            AVAILABLE_BACKENDS.append(get_backend(backend))
         except ImportError:
             pass
-    return mapping
 
 
 # NOTE: overload get_backend for new backends by typing the return type as Backend[GraphType]
@@ -75,14 +73,14 @@ def get_backend(backend: SupportedBackend) -> Backend:
             raise ValueError(f"Unsupported backend chosen: '{backend}'")
 
 
-BACKEND_MAP = _create_backend_map()
+_import_available_backends()
 
 
 # Used in the write function wrapper, where the backend should be determined from the graph type
 def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
-    for backend_name, backend_module in BACKEND_MAP.items():
+    for backend_module in AVAILABLE_BACKENDS:
         if isinstance(graph, backend_module.GRAPH_TYPES):
-            return get_backend(backend_name)
+            return backend_module
     raise TypeError(f"Unrecognized graph type '{type(graph)}'.")
 
 
