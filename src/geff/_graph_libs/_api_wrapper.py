@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from importlib.util import find_spec
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, get_args, overload
 
 R = TypeVar("R", covariant=True)
@@ -25,26 +24,19 @@ if TYPE_CHECKING:
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
-MODULE_NAMES: dict[SupportedBackend, str] = {
-    "networkx": "networkx",
-    "rustworkx": "rustworkx",
-    "spatial-graph": "spatial_graph",
-}
-
-# A dictionary to map between supported backend literals and the correct type
-# Used in the get_backend_from_type function below
-BACKEND_TYPE_MAP: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]]
+BACKEND_MAP: dict[SupportedBackend, Backend]
 
 
-# This function is used to create BACKEND_TYPE_MAP after the get_backend definition
+# This function is used to create BACKEND_MAP after the get_backend definition
 # Only installed backends will be added to the backend type map
-def _create_backend_type_map() -> dict[SupportedBackend, tuple[type[SupportedGraphType], ...]]:
-    mapping: dict[SupportedBackend, tuple[type[SupportedGraphType], ...]] = {}
+def _create_backend_map() -> dict[SupportedBackend, Backend]:
+    mapping: dict[SupportedBackend, Backend] = {}
     backends: tuple[SupportedBackend] = get_args(SupportedBackend)
     for backend in backends:
-        if find_spec(MODULE_NAMES[backend]) is not None:
-            backend_io = get_backend(backend)
-            mapping[backend] = backend_io.GRAPH_TYPES
+        try:
+            mapping[backend] = get_backend(backend)
+        except ImportError:
+            pass
     return mapping
 
 
@@ -91,14 +83,14 @@ def get_backend(backend: SupportedBackend) -> Backend:
             raise ValueError(f"Unsupported backend chosen: '{backend}'")
 
 
-BACKEND_TYPE_MAP = _create_backend_type_map()
+BACKEND_MAP = _create_backend_map()
 
 
 # Used in the write function wrapper, where the backend should be determined from the graph type
 def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
-    for backend, graph_type in BACKEND_TYPE_MAP.items():
-        if isinstance(graph, graph_type):
-            return get_backend(backend)
+    for backend_name, backend_module in BACKEND_MAP.items():
+        if isinstance(graph, backend_module.GRAPH_TYPES):
+            return get_backend(backend_name)
     raise TypeError(f"Unrecognized graph type '{type(graph)}'.")
 
 
