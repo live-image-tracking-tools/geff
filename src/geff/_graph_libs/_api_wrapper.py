@@ -232,18 +232,6 @@ def construct(
     )
 
 
-@overload
-def write(
-    graph: NxGraph,
-    store: StoreLike,
-    metadata: GeffMetadata | None = ...,
-    axis_names: list[str] | None = ...,
-    axis_units: list[str | None] | None = ...,
-    axis_types: list[str | None] | None = ...,
-    zarr_format: Literal[2, 3] = ...,
-) -> None: ...
-
-
 # rustworkx has an additional node_id_dict arg
 @overload
 def write(
