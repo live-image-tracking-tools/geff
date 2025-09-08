@@ -5,13 +5,13 @@ ci:
   autofix_prs: false
 
 repos:
-  - repo: https://github.com/crate-ci/typos
-    rev: v1.35.4
+  - repo: https://github.com/adhtruong/mirrors-typos
+    rev: v1.36.2
     hooks:
       - id: typos
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.7
+    rev: v0.12.12
     hooks:
       - id: ruff-check
         args: [--fix, --unsafe-fixes]

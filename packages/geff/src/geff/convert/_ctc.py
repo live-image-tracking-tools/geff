@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+from typing import Literal
 
 try:
     import tifffile
@@ -12,6 +13,8 @@ try:
     from skimage.measure import regionprops
 except ImportError as e:
     raise ImportError("Please install with geff[ctc] to use this module.") from e
+
+import warnings
 
 import numpy as np
 import zarr
@@ -27,23 +30,32 @@ def ctc_tiffs_to_zarr(
     output_store: StoreLike,
     ctzyx: bool = False,
     overwrite: bool = False,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
     Convert a CTC file to a Zarr file.
 
     Args:
-        ctc_path: The path to the CTC file.
-        output_store: The path to the Zarr file.
-        ctzyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
-        overwrite: Whether to overwrite the Zarr file if it already exists.
+        ctc_path (Path): The path to the CTC file.
+        output_store (StoreLike): The path to the Zarr file.
+        ctzyx (optional, bool): Expand data to make it (T, C, Z, Y, X)
+            otherwise it's (T,) + Frame shape. Defaults to False.
+        overwrite (optional, bool): Whether to overwrite the Zarr file if it already exists.
+            Defaults to False.
+        zarr_format (optional, Literal[2, 3]): The zarr specification to use when writing the zarr.
+            Defaults to 2.
     """
     array = imread(str(ctc_path / "*.tif"))
     if ctzyx:
         n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
-
-    array.to_zarr(url=output_store, overwrite=overwrite)
+    # Warning is triggered when the zarr_format argument is ignored by zarr 2
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore", message=r".*ignoring keyword argument.*zarr_format.*", category=UserWarning
+        )
+        array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
 
 
 def from_ctc_to_geff(
@@ -52,6 +64,7 @@ def from_ctc_to_geff(
     segmentation_store: StoreLike | None = None,
     tczyx: bool = False,
     overwrite: bool = False,
+    zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
     Convert a CTC file to a GEFF file.
@@ -63,6 +76,8 @@ def from_ctc_to_geff(
                             If not provided, it won't be exported.
         tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite: Whether to overwrite the GEFF file if it already exists.
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
+            Defaults to 2.
     """
     ctc_path = Path(ctc_path)
     geff_path = Path(geff_path).with_suffix(".geff")
@@ -115,13 +130,21 @@ def from_ctc_to_geff(
                 n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
                 expand_dims = (np.newaxis,) * len(n_1_padding)
 
-            segm_array = zarr.open_array(
-                segmentation_store,
-                shape=(len(sorted_files), *n_1_padding, *frame.shape),
-                chunks=(1, *n_1_padding, *frame.shape),
-                dtype=frame.dtype,
-                mode="w" if overwrite else "w-",
-            )
+            # Warning is triggered when the zarr_format argument is ignored by zarr 2
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message=r".*ignoring keyword argument.*zarr_format.*",
+                    category=UserWarning,
+                )
+                segm_array = zarr.open_array(
+                    segmentation_store,
+                    shape=(len(sorted_files), *n_1_padding, *frame.shape),
+                    chunks=(1, *n_1_padding, *frame.shape),
+                    dtype=frame.dtype,
+                    mode="w" if overwrite else "w-",
+                    zarr_format=zarr_format,
+                )
 
         if segm_array is not None:
             segm_array[t] = frame[expand_dims]
@@ -171,7 +194,7 @@ def from_ctc_to_geff(
     if "z" in node_props:
         axis_names.insert(1, Axis(name="z", type="space"))
 
-    node_ids = np.asarray(node_props.pop("id"), dtype=int)
+    node_ids = np.asarray(node_props.pop("id"), dtype="uint")
 
     write_arrays(
         geff_store=geff_path,
@@ -187,4 +210,5 @@ def from_ctc_to_geff(
             axes=axis_names,
             directed=True,
         ),
+        zarr_format=zarr_format,
     )

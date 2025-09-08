@@ -4,10 +4,9 @@ import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
-import zarr
 
 from geff import _path
-from geff.core_io._utils import remove_tilde
+from geff.core_io._utils import remove_tilde, setup_zarr_group
 from geff.metadata._valid_values import validate_data_type
 
 if TYPE_CHECKING:
@@ -61,8 +60,16 @@ def write_dicts(
 
     if len(node_ids) > 0:
         nodes_arr = np.asarray(node_ids)
+        # Check if we can cast to uint
+        if any(nodes_arr < 0):
+            raise ValueError("Cannot write a geff with node ids that are negative")
+        if not np.issubdtype(nodes_arr.dtype, np.integer):
+            warnings.warn(
+                f"Node ids with dtype {nodes_arr.dtype} are being cast to uint", stacklevel=2
+            )
+        nodes_arr = nodes_arr.astype("uint")
     else:
-        nodes_arr = np.empty((0,), dtype=np.int64)
+        nodes_arr = np.empty((0,), dtype=np.uint64)
 
     if len(edge_ids) > 0:
         edges_arr = np.asarray(edge_ids, dtype=nodes_arr.dtype)
@@ -260,12 +267,7 @@ def write_id_arrays(
             stacklevel=2,
         )
 
-    if zarr.__version__.startswith("3"):
-        geff_root = zarr.open_group(
-            geff_store, mode="a", zarr_format=zarr_format
-        )  # zarr format defaulted to 2
-    else:
-        geff_root = zarr.open_group(geff_store, mode="a")
+    geff_root = setup_zarr_group(geff_store, zarr_format)
     geff_root[_path.NODE_IDS] = node_ids
     geff_root[_path.EDGE_IDS] = edge_ids
 
@@ -320,12 +322,7 @@ def write_props_arrays(
                 props.update(replace_arrays)
             del props[name]
 
-    if zarr.__version__.startswith("3"):
-        geff_root = zarr.open_group(
-            geff_store, mode="a", zarr_format=zarr_format
-        )  # zarr format defaulted to 2
-    else:
-        geff_root = zarr.open_group(geff_store, mode="a")
+    geff_root = setup_zarr_group(geff_store, zarr_format)
     props_group = geff_root.require_group(f"{group}/{_path.PROPS}")
     for prop, prop_dict in props.items():
         # data-type validation - ensure this property can round-trip through
