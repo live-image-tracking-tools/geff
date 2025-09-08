@@ -124,7 +124,7 @@ exclude_lines = [
     '^\s*\.\.\.\s*$', # regex for lines with ONLY ellipses with any amount of whitespace either side.
 ]
 [tool.coverage.run]
-source = ["src/geff"]
+source = ["packages/geff/src/geff", "packages/geff-spec/src/geff_spec"]
 omit = ["*/__init__.py"]
 
 [tool.typos.default]
