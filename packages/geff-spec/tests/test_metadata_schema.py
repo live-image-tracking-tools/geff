@@ -9,13 +9,9 @@ import zarr
 
 import geff
 from geff.testing.data import create_simple_2d_geff
-from geff_spec import (
+from geff_spec import Affine, Axis, GeffMetadata, GeffSchema, PropMetadata
+from geff_spec._schema import (
     VERSION_PATTERN,
-    Affine,
-    Axis,
-    GeffMetadata,
-    GeffSchema,
-    PropMetadata,
     _formatted_schema_json,
     _validate_key_identifier_equality,
 )

@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field, model_validator, validate_call
 from pydantic.config import ConfigDict
 from zarr.storage import StoreLike
 
-import geff
+import geff_spec
 
 # The next two imports are needed at runtime for Pydantic validation
 from ._affine import Affine  # noqa: TC001
@@ -164,7 +164,7 @@ class RelatedObject(BaseModel):
         return self
 
 
-GEFF_VERSION = ".".join(geff.__version__.split(".")[:2])
+GEFF_VERSION = ".".join(geff_spec.__version__.split(".")[:2])
 
 
 class GeffMetadata(BaseModel):

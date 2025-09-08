@@ -3,7 +3,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from geff.metadata._valid_values import validate_data_type
+from geff_spec import validate_data_type
 
 
 # -----------------------------------------------------------------------------
