@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.19">
     
     
       
@@ -602,33 +602,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.read_nx" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_nx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.read_rx" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_rx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.read_sg" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_sg
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#geff.validate_structure" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_structure
@@ -638,27 +611,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.write_nx" class="md-nav__link">
+  <a href="#geff.write" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_nx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.write_rx" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_rx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.write_sg" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_sg
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write
     </span>
   </a>
   
@@ -1249,33 +1204,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.read_nx" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_nx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.read_rx" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_rx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.read_sg" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_sg
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#geff.validate_structure" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_structure
@@ -1285,27 +1213,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#geff.write_nx" class="md-nav__link">
+  <a href="#geff.write" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_nx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.write_rx" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_rx
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#geff.write_sg" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write_sg
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;write
     </span>
   </a>
   
@@ -1859,42 +1769,43 @@ None all node properties will be loaded.</p>
           <div class="doc-overloads">
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;networkx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
-    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nx</span><span class="o">.</span><span class="n">Graph</span> <span class="o">|</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
-</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;rustworkx&quot;</span><span class="p">],</span>
-    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">PyGraph</span> <span class="o">|</span> <span class="n">rx</span><span class="o">.</span><span class="n">PyDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
-</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;spatial-graph&quot;</span><span class="p">],</span>
-    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;networkx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NxGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;rustworkx&quot;</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">RxGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
+    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;spatial-graph&quot;</span><span class="p">],</span>
     <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
-    <span class="n">sg</span><span class="o">.</span><span class="n">SpatialGraph</span> <span class="o">|</span> <span class="n">sg</span><span class="o">.</span><span class="n">SpatialDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span>
-<span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SgGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>          </div>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">SupportedBackend</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
     <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">SupportedBackend</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
     <span class="o">**</span><span class="n">backend_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SupportedGraphType</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -2048,388 +1959,11 @@ the backend when reading the data.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>, <a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a>]</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="geff._graph_libs._api_wrapper.SupportedGraphType">SupportedGraphType</span>, <a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="geff.read_nx" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">read_nx</span>
-
-
-</h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_nx</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Read a geff file into a networkx graph. Metadata properties will be stored in
-the graph properties, accessed via <code>G.graph[key]</code> where G is a networkx graph.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>store</code>
-            </td>
-            <td>
-                  <code>str | Path | zarr store</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The path/str to the geff zarr, or the store
-itself. Opens in append mode, so will only overwrite geff-controlled groups.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>structure_validation</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Flag indicating whether to perform validation on the
-geff file before loading into memory. If set to False and there are
-format issues, will likely fail with a cryptic error. Defaults to True.</p>
-              </div>
-            </td>
-            <td>
-                  <code>True</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>node_props</code>
-            </td>
-            <td>
-                  <code>list of str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The names of the node properties to load,
-if None all properties will be loaded, defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>edge_props</code>
-            </td>
-            <td>
-                  <code>list of str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The names of the edge properties to load,
-if None all properties will be loaded, defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>data_validation</code>
-            </td>
-            <td>
-                  <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional configuration for which
-optional types of data to validate. Each option defaults to false.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<a class="autorefs autorefs-external" title="networkx.Graph" href="https://networkx.org/documentation/stable/reference/classes/graph.html#networkx.Graph">Graph</a>, <a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A networkx graph containing the graph that was stored in the geff file format</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="geff.read_rx" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">read_rx</span>
-
-
-</h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_rx</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">PyGraph</span> <span class="o">|</span> <span class="n">rx</span><span class="o">.</span><span class="n">PyDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Read a geff file into a rustworkx graph.
-Metadata properties will be stored in the graph.attrs dict
-and can be accessed via <code>G.attrs[key]</code> where G is a rustworkx graph.</p>
-<p>The graph will have a <code>to_rx_id_map</code> attribute that maps geff node ids
-to rustworkx node indices.
-This can be used to map back to the original geff node ids.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>store</code>
-            </td>
-            <td>
-                  <code><span title="zarr.storage.StoreLike">StoreLike</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The path/str to the geff zarr, or the store itself.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>structure_validation</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Whether to validate the geff file.</p>
-              </div>
-            </td>
-            <td>
-                  <code>True</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>node_props</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The names of the node properties to load,
-if None all properties will be loaded, defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>edge_props</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The names of the edge properties to load,
-if None all properties will be loaded, defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>data_validation</code>
-            </td>
-            <td>
-                  <code><span title="geff.validate.data.ValidationConfig">ValidationConfig</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Optional configuration for which
-optional types of data to validate. Each option defaults to False.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="rustworkx.PyGraph">PyGraph</span> | <span title="rustworkx.PyDiGraph">PyDiGraph</span>, <a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A tuple containing the rustworkx graph and the metadata.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="geff.read_sg" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">read_sg</span>
-
-
-</h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">read_sg</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">structure_validation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span>
-    <span class="n">node_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
-    <span class="n">sg</span><span class="o">.</span><span class="n">SpatialGraph</span> <span class="o">|</span> <span class="n">sg</span><span class="o">.</span><span class="n">SpatialDiGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span>
-<span class="p">]</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Read a geff file into a SpatialGraph.</p>
-<p>Because SpatialGraph does not support missing/ragged node/edge attributes,
-missing arrays will be ignored, with a warning raised.</p>
-<p>Args:</p>
-<pre><code>store (Path | str | zarr store):
-    The path to the root of the geff zarr, where the .attrs contains
-    the geff  metadata.
-structure_validation (bool, optional):
-    Flag indicating whether to perform validation on the geff file
-    before loading into memory. If set to False and there are format
-    issues, will likely fail with a cryptic error. Defaults to True.
-position_attr (str, optional):
-    How to call the position attribute in the returned SpatialGraph.
-    Defaults to "position".
-node_props (list of str, optional):
-    The names of the node properties to load, if None all properties
-    will be loaded, defaults to None.
-edge_props (list of str, optional):
-    The names of the edge properties to load, if None all properties
-    will be loaded, defaults to None.
-data_validation (ValidationConfig, optional): Optional configuration for which
-    optional types of data to validate. Each option defaults to False.
-</code></pre>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a>[<span title="spatial_graph.SpatialGraph">SpatialGraph</span> | <span title="spatial_graph.SpatialDiGraph">SpatialDiGraph</span>, <a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A tuple containing the spatial_graph graph and the metadata.</p>
               </div>
             </td>
           </tr>
@@ -2528,25 +2062,50 @@ data_validation (ValidationConfig, optional): Optional configuration for which
 <div class="doc doc-object doc-function">
 
 
-<h4 id="geff.write_nx" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">write_nx</span>
+<h4 id="geff.write" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">write</span>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_nx</span><span class="p">(</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">,</span>
+          <div class="doc-overloads">
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">RxGraph</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">axis_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">node_id_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">SupportedGraphType</span><span class="p">,</span>
+    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">axis_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>          </div>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write</span><span class="p">(</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="n">SupportedGraphType</span><span class="p">,</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">axis_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Write a networkx graph to the geff file format</p>
+        <p>Write a supported graph object to the geff file format.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2565,11 +2124,11 @@ data_validation (ValidationConfig, optional): Optional configuration for which
                 <code>graph</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="networkx.Graph" href="https://networkx.org/documentation/stable/reference/classes/graph.html#networkx.Graph">Graph</a></code>
+                  <code><span title="geff._graph_libs._api_wrapper.SupportedGraphType">SupportedGraphType</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A networkx graph</p>
+                <p>An instance of a supported graph object.</p>
               </div>
             </td>
             <td>
@@ -2615,7 +2174,7 @@ Defaults to None. If provided, will override the graph properties.</p>
                 <code>axis_names</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2633,7 +2192,7 @@ both value in graph properties and metadata if provided.</p>
                 <code>axis_units</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2651,7 +2210,7 @@ both value in graph properties and metadata if provided.</p>
                 <code>axis_types</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2682,336 +2241,38 @@ Defaults to 2.</p>
                   <code>2</code>
             </td>
           </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="geff.write_rx" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">write_rx</span>
-
-
-</h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_rx</span><span class="p">(</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="n">PyGraph</span><span class="p">,</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">node_id_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">axis_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Write a rustworkx graph to the geff file format</p>
-
-
-<details class="note-on-rustworkx-node-id-handling" open>
-  <summary>Note on RustworkX Node ID Handling</summary>
-  <p>RustworkX uses internal node indices that are not directly controllable by the user.
-These indices are typically sequential integers starting from 0, but may have gaps
-if nodes are removed. To maintain compatibility with geff's requirement for stable
-node identifiers, this function uses the following approach:</p>
-<ol>
-<li>If node_id_dict is None: Uses rustworkx's internal node indices directly</li>
-<li>If node_id_dict is provided: Maps rx node indices to custom identifiers</li>
-</ol>
-<p>When reading back with read_rx(), the mapping is reversed to restore the original
-rustworkx node indices, ensuring round-trip consistency.</p>
-</details>
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>graph</code>
+                <code>*args</code>
             </td>
             <td>
-                  <code><span title="rustworkx.PyGraph">PyGraph</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The rustworkx graph to write.</p>
+                <p>Additional args that may be accepted by the backend when writing from a
+specific type of graph.</p>
               </div>
             </td>
             <td>
-                <em>required</em>
+                  <code>()</code>
             </td>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>store</code>
+                <code>**kwargs</code>
             </td>
             <td>
-                  <code><span title="zarr.storage.StoreLike">StoreLike</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The store to write the geff file to.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>metadata</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="#geff.GeffMetadata">GeffMetadata</a> | None</code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The original metadata of the graph. Defaults to None.</p>
+                <p>Additional kwargs that may be accepted by the backend when writing from a
+specific type of graph.</p>
               </div>
             </td>
             <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>node_id_dict</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A dictionary mapping rx node indices to arbitrary indices.
-This allows custom node identifiers to be used in the geff file instead
-of rustworkx's internal indices. If None, uses rx indices directly.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>axis_names</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The names of the axes.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>axis_units</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The units of the axes.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>axis_types</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The types of the axes.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>zarr_format</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[2, 3]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The zarr format to use.</p>
-              </div>
-            </td>
-            <td>
-                  <code>2</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="geff.write_sg" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">write_sg</span>
-
-
-</h4>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">write_sg</span><span class="p">(</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="n">SpatialGraph</span> <span class="o">|</span> <span class="n">SpatialDiGraph</span><span class="p">,</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
-    <span class="n">axis_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">axis_units</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">axis_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
-</code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Write a SpatialGraph to the geff file format.</p>
-<p>Because SpatialGraph does not support ragged or missing node/edge attributes,
-the missing arrays will not be written.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>graph</code>
-            </td>
-            <td>
-                  <code><span title="spatial_graph.SpatialGraph">SpatialGraph</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The graph to write.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>store</code>
-            </td>
-            <td>
-                  <code>str | Path | zarr store</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The path to the output zarr. Opens in append mode, so will only
-overwrite geff-controlled groups.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>axis_names</code>
-            </td>
-            <td>
-                  <code><span title="Optional">Optional</span>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The names of the spatial dims represented in position attribute.
-Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>axis_units</code>
-            </td>
-            <td>
-                  <code><span title="Optional">Optional</span>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The units of the spatial dims represented in position attribute.
-Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>axis_types</code>
-            </td>
-            <td>
-                  <code><span title="Optional">Optional</span>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The types of the spatial dims represented in position property.
-Usually one of "time", "space", or "channel". Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>zarr_format</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[2, 3]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The version of zarr to write. Defaults to 2.</p>
-              </div>
-            </td>
-            <td>
-                  <code>2</code>
+                  <code>{}</code>
             </td>
           </tr>
       </tbody>

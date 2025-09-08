@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.19">
     
     
       
@@ -1325,9 +1325,9 @@ It includes both simple convenience functions and a comprehensive function for a
     <span class="n">directed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">num_nodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">num_edges</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">extra_node_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">extra_node_props</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
     <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">extra_edge_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">extra_edge_props</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
     <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">include_t</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">include_z</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -1437,7 +1437,7 @@ It includes both simple convenience functions and a comprehensive function for a
                 <code>extra_node_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Mapping" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping">Mapping</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1453,7 +1453,7 @@ It includes both simple convenience functions and a comprehensive function for a
                 <code>extra_edge_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Mapping" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping">Mapping</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1573,9 +1573,9 @@ It includes both simple convenience functions and a comprehensive function for a
     <span class="n">directed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">num_nodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">num_edges</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="n">extra_node_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">extra_node_props</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
     <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">extra_edge_props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">extra_edge_props</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DTypeStr</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
     <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">include_t</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">include_z</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -1685,7 +1685,7 @@ It includes both simple convenience functions and a comprehensive function for a
                 <code>extra_node_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Mapping" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping">Mapping</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1701,7 +1701,7 @@ It includes both simple convenience functions and a comprehensive function for a
                 <code>extra_edge_props</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Mapping" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping">Mapping</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <span title="geff.testing.data.DTypeStr">DTypeStr</span> | <span title="numpy.typing.NDArray">NDArray</span>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
