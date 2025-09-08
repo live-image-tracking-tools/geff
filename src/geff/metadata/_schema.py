@@ -19,7 +19,9 @@ from ._valid_values import (
     VALID_AXIS_TYPES,
     VALID_SPACE_UNITS,
     VALID_TIME_UNITS,
-    validate_axis_type,
+    AxisType,
+    SpaceUnits,
+    TimeUnits,
     validate_space_unit,
     validate_time_unit,
 )
@@ -49,25 +51,24 @@ class Axis(BaseModel):
     writing out a geff with an associated segmentation and/or image dataset, we
     highly recommend providing the axis names for your segmentation/image using
     the OME-zarr spec, including channel dimensions if needed.
-
-    ::: geff.metadata._valid_values.AxisType
-        options:
-            heading_level: 3
-
-    ::: geff.metadata._valid_values.SpaceUnits
-        options:
-            heading_level: 3
-
-    ::: geff.metadata._valid_values.TimeUnits
-        options:
-            heading_level: 3
     """
 
-    name: str
-    type: str | None = None
-    unit: str | None = None
-    min: float | None = None
-    max: float | None = None
+    name: str = Field(..., description="Name of the corresponding node property")
+    type: Literal[AxisType] | None = Field(
+        default=None,
+        description=f"The type of data encoded in this axis, one of {VALID_AXIS_TYPES} or None",
+    )
+    unit: str | Literal[SpaceUnits] | Literal[TimeUnits] | None = Field(
+        default=None,
+        description="Optional, the unit for this axis. If the type is 'space' "
+        "or 'time', we recommend utilzing the OME-NGFF spatial or temporal units respectively.",
+    )
+    min: float | None = Field(
+        default=None, description="Optional, the minimum value for this axis."
+    )
+    max: float | None = Field(
+        default=None, description="Optional, the minimum value for this axis."
+    )
 
     @model_validator(mode="after")
     def _validate_model(self) -> Axis:
@@ -77,13 +78,6 @@ class Axis(BaseModel):
             )
         if self.min is not None and self.max is not None and self.min > self.max:
             raise ValueError(f"Min {self.min} is greater than max {self.max}")
-
-        if self.type is not None and not validate_axis_type(self.type):
-            warnings.warn(
-                f"Type {self.type} not in valid types {VALID_AXIS_TYPES}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
 
         if self.unit:
             if self.type == "space" and not validate_space_unit(self.unit):
@@ -206,7 +200,10 @@ def _validate_key_identifier_equality(
 
 
 class RelatedObject(BaseModel):
-    """TODO docstring"""
+    """A set of metadata for data that is associated with the graph. The types
+    'labels' and 'image' should be used for label and image objects, respectively.
+    Other types are also allowed.
+    """
 
     type: str = Field(
         ...,
