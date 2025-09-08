@@ -8,7 +8,7 @@ test-cov:
 
 # run benchmarks
 benchmark:
-    uv run --group bench pytest tests/test_bench.py
+    uv run --group bench pytest packages/geff/tests/test_bench.py
 
 # build wheel and sdist
 build:

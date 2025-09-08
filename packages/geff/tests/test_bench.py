@@ -5,7 +5,9 @@ import sys
 import pytest
 
 # only run this file if benchmarks are requested, or running directly
-if all(x not in {"--codspeed", "--benchmark", "tests/test_bench.py"} for x in sys.argv):
+if all(
+    x not in {"--codspeed", "--benchmark", "packages/geff/tests/test_bench.py"} for x in sys.argv
+):
     pytest.skip("use --benchmark to run benchmark", allow_module_level=True)
 
 import atexit
