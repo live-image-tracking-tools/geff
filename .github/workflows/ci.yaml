@@ -97,7 +97,7 @@ jobs:
           python-version: "3.13"
       - uses: CodSpeedHQ/action@v3
         with:
-          run: uv run --group bench --no-dev pytest --codspeed -v tests/test_bench.py
+          run: uv run --group bench --no-dev pytest --codspeed -v packages/geff/tests/test_bench.py
 
   build-and-inspect-package:
     name: Build & inspect package.
