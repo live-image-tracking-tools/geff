@@ -3,7 +3,7 @@ from typing import Any, Protocol, TypeVar
 
 from numpy.typing import NDArray
 
-from geff.metadata import GeffMetadata
+from geff_spec import GeffMetadata
 
 T = TypeVar("T", covariant=True)
 

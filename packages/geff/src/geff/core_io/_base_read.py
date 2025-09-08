@@ -7,9 +7,9 @@ import zarr
 
 from geff import _path
 from geff.core_io._utils import expect_array, expect_group, open_storelike, remove_tilde
-from geff.metadata._schema import GeffMetadata
 from geff.validate.data import ValidationConfig, validate_data
 from geff.validate.structure import validate_structure
+from geff_spec import GeffMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

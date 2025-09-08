@@ -2,8 +2,9 @@ import numpy as np
 import pytest
 import zarr
 
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.testing.data import create_mock_geff
+from geff_spec import GeffMetadata
+from geff_spec.utils import axes_from_lists
 
 rx = pytest.importorskip("rustworkx")
 
@@ -221,7 +222,7 @@ def test_write_rx_with_metadata(tmp_path) -> None:
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
     # Create metadata object
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -250,7 +251,7 @@ def test_write_rx_metadata_extra_properties(tmp_path) -> None:
 
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -276,7 +277,7 @@ def test_write_rx_metadata_override_precedence(tmp_path) -> None:
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=True, include_z=True)
 
     # Create metadata with one set of axes
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],

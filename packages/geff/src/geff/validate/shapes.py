@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from geff.metadata._schema import Axis
+    from geff_spec import Axis
 
 
 def validate_ellipsoid(covariance: np.ndarray, axes: list[Axis] | None) -> None:

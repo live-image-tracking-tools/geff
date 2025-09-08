@@ -12,8 +12,8 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-    from geff.metadata._schema import GeffMetadata
     from geff.validate.data import ValidationConfig
+    from geff_spec import GeffMetadata
 
     from ._backend_protocol import Backend
 

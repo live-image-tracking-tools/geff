@@ -8,17 +8,17 @@ import pytest
 import zarr
 
 import geff
-from geff.metadata import PropMetadata
-from geff.metadata._affine import Affine
-from geff.metadata._schema import (
+from geff.testing.data import create_simple_2d_geff
+from geff_spec import (
     VERSION_PATTERN,
+    Affine,
     Axis,
     GeffMetadata,
     GeffSchema,
+    PropMetadata,
     _formatted_schema_json,
     _validate_key_identifier_equality,
 )
-from geff.testing.data import create_simple_2d_geff
 
 
 class TestMetadataModel:

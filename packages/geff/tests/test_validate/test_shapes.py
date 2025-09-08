@@ -3,8 +3,8 @@ from typing import ClassVar
 import numpy as np
 import pytest
 
-from geff.metadata._schema import Axis
 from geff.validate.shapes import validate_ellipsoid, validate_sphere
+from geff_spec import Axis
 
 
 class Test_validate_ellipsoid:

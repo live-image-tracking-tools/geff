@@ -7,7 +7,7 @@ import numpy as np
 
 from geff import _path
 from geff.core_io._utils import remove_tilde, setup_zarr_group
-from geff.metadata._valid_values import validate_data_type
+from geff_spec import validate_data_type
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-    from geff.metadata._schema import GeffMetadata
+    from geff_spec import GeffMetadata
 
 
 def write_dicts(

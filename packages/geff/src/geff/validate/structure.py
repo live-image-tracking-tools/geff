@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
 
-from geff.metadata import GeffMetadata
+from geff_spec import GeffMetadata
 
 
 def validate_structure(store: StoreLike) -> None:

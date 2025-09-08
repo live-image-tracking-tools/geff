@@ -10,9 +10,9 @@ import zarr.storage
 from geff import _path
 from geff.core_io import write_arrays
 from geff.core_io._base_read import read_to_memory
-from geff.metadata._schema import GeffMetadata
 from geff.testing.data import create_simple_3d_geff
 from geff.validate.structure import validate_structure
+from geff_spec import GeffMetadata
 
 if TYPE_CHECKING:
     from geff._typing import PropDictNpArray

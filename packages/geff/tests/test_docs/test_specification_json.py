@@ -5,7 +5,7 @@ from pathlib import Path
 import pydantic
 import pytest
 
-from geff.metadata._schema import GeffSchema
+from geff_spec import GeffSchema
 
 DOCS = Path(__file__).parent.parent.parent.parent.parent / "docs"
 SPECIFICATION_MD_PATH = DOCS / "specification.md"

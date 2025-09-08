@@ -20,11 +20,11 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
+    from geff_spec import GeffMetadata
 
 from geff.core_io import write_arrays
 from geff.core_io._utils import remove_tilde
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
-from geff.metadata.utils import create_or_update_metadata
+from geff_spec.utils import axes_from_lists, create_or_update_metadata
 
 from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
@@ -141,7 +141,7 @@ class SgBackend(Backend):
 
         # create or update metadata
         roi_min, roi_max = graph.roi
-        axes = _axes_from_lists(
+        axes = axes_from_lists(
             axis_names,
             axis_units=axis_units,
             axis_types=axis_types,

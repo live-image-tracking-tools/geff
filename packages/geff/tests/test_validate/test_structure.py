@@ -11,7 +11,6 @@ from geff import _path, validate_structure
 from geff.core_io._base_read import read_to_memory
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import expect_group, open_storelike
-from geff.metadata._schema import GeffMetadata
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
     create_mock_geff,
@@ -23,6 +22,7 @@ from geff.validate.structure import (
     _validate_nodes_group,
     _validate_props_group,
 )
+from geff_spec import GeffMetadata
 
 
 @pytest.fixture

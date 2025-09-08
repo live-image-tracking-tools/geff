@@ -65,8 +65,8 @@ import zarr
 import zarr.storage
 
 from geff.core_io import write_arrays
-from geff.metadata import Axis
-from geff.metadata.utils import create_or_update_metadata
+from geff_spec import Axis
+from geff_spec.utils import create_or_update_metadata
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

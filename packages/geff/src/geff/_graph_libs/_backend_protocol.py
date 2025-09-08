@@ -5,8 +5,8 @@ from zarr.storage import StoreLike
 
 from geff._typing import PropDictNpArray
 from geff.core_io._base_read import read_to_memory
-from geff.metadata import GeffMetadata
 from geff.validate.data import ValidationConfig
+from geff_spec import GeffMetadata
 
 from ._graph_adapter import GraphAdapter
 
