@@ -14,23 +14,9 @@ Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedoc
         filters:
             - "!read"
             - "!write"
-        docstring_section_style: table
+        docstring_section_style: list
         show_symbol_type_heading: false
         show_symbol_type_toc: false
-
-### Property metadata
-The metadata for each node/edge property is (optionally) stored in the `node_props_metadata` and `edge_props_metadata` entries.
-Each property must have a string identifier (the group name for the property) and a dtype. The dtype can be any string
-that can be coerced into a numpy dtype, or the special `varlength` dtype indicating this is a variable length property (coming soon).
-String properties should have dtype `str`, not `varlength`, even though they are stored using the same variable
-length mechanism.
-
-### Affine transformations
-The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
-
-### Extra attributes 
-
-The optional `extra` object is a free-form dictionary that can hold any additional, application-specific metadata that is **not** covered by the core geff schema. Users may place arbitrary keys and values inside `extra` without fear of clashing with future reserved fields. Although the core `geff` reader makes these attributes available, their meaning and use are left entirely to downstream applications. 
 
 ## The `nodes` group
 The nodes group will contain an `ids` array and optionally a `props` group. 

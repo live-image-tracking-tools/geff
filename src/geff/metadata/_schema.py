@@ -369,9 +369,11 @@ class GeffMetadata(BaseModel):
     )
     affine: Affine | None = Field(
         default=None,
-        description="Affine transformation matrix to transform the graph coordinates to the "
-        "physical coordinates. The matrix must have the same number of dimensions as the number of "
-        "axes in the graph.",
+        description="The optional `affine` field allows specifying a global affine transformation "
+        "that maps the graph coordinates stored in the node properties to a physical coordinate "
+        "system. The value **matrix** is stored as a `(N + 1) x (N + 1)` homogeneous matrix "
+        "following the `scipy.ndimage.affine_transform` convention, where **N** equals the "
+        "number of spatio-temporal axes declared in `axes`.",
     )
     display_hints: DisplayHint | None = Field(
         default=None,
@@ -379,7 +381,12 @@ class GeffMetadata(BaseModel):
     )
     extra: dict[str, Any] = Field(
         default_factory=dict,
-        description="Extra metadata that is not part of the schema",
+        description="The optional `extra` object is a free-form dictionary that can hold any "
+        "additional, application-specific metadata that is **not** covered by the core geff "
+        "schema. Users may place arbitrary keys and values inside `extra` without fear of "
+        "clashing with future reserved fields. Although the core `geff` reader makes these "
+        "attributes available, their meaning and use are left entirely to downstream "
+        "applications. ",
     )
 
     @model_validator(mode="after")
