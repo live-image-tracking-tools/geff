@@ -19,11 +19,11 @@ The axes list is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.
 
 The order of the axes in the list is meaningful. For one, any downstream properties that are an array of values with one value per (spatial) axis will be in the order of the axis list (filtering to only the spatial axes by the `type` field if needed). Secondly, if associated image or segmentation data does not have axes metadata, the order of the spatiotemporal axes is a good default guess for aligning the graph and the image data, although there is no way to denote the channel dimension in the graph spec. If you are writing out a geff with an associated segmentation and/or image dataset, we highly recommend providing the axis names for your segmentation/image using the OME-zarr spec, including channel dimensions if needed.
 
-::: geff.metadata._valid_values.VALID_AXIS_TYPES
+::: geff_spec._valid_values.VALID_AXIS_TYPES
 
-::: geff.metadata._valid_values.VALID_SPACE_UNITS
+::: geff_spec._valid_values.VALID_SPACE_UNITS
 
-::: geff.metadata._valid_values.VALID_TIME_UNITS
+::: geff_spec._valid_values.VALID_TIME_UNITS
 
 ### Property metadata
 The metadata for each node/edge property is (optionally) stored in the `node_props_metadata` and `edge_props_metadata` entries.

@@ -65,5 +65,5 @@ plugins:
           line_length: 60
 - include-markdown
 - api-autonav:
-    modules: ['src/geff']
+    modules: ['packages/geff/src/geff', 'packages/geff-spec/src/geff_spec']
 - autorefs
