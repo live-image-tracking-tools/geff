@@ -9,11 +9,11 @@ from pydantic import validate_call
 
 import geff
 
+# The next import is needed at runtime for Pydantic validation
+from ._prop_metadata import PropMetadata  # noqa: TC001
 from ._schema import Axis, GeffMetadata
 
 if TYPE_CHECKING:
-    from ._prop_metadata import PropMetadata
-
     T = TypeVar("T")
 
 
