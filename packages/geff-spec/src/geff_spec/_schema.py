@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import warnings
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
@@ -71,63 +71,6 @@ class Axis(BaseModel):
                 )
 
         return self
-
-
-def _axes_from_lists(
-    axis_names: Sequence[str] | None = None,
-    axis_units: Sequence[str | None] | None = None,
-    axis_types: Sequence[str | None] | None = None,
-    roi_min: Sequence[float | None] | None = None,
-    roi_max: Sequence[float | None] | None = None,
-) -> list[Axis]:
-    """Create a list of Axes objects from lists of axis names, units, types, mins,
-    and maxes. If axis_names is None, there are no spatial axes and the list will
-    be empty. Nones for all other arguments will omit them from the axes.
-
-    All provided arguments must have the same length. If an argument should not be specified
-    for a single property, use None.
-
-    Args:
-        axis_names (list[str] | None, optional): Names of properties for spatiotemporal
-            axes. Defaults to None.
-        axis_units (list[str | None] | None, optional): Units corresponding to named properties.
-            Defaults to None.
-        axis_types (list[str | None] | None, optional): Axis type for each property.
-            Choose from "space", "time", "channel". Defaults to None.
-        roi_min (list[float | None] | None, optional): Minimum value for each property.
-            Defaults to None.
-        roi_max (list[float | None] | None, optional): Maximum value for each property.
-            Defaults to None.
-
-    Returns:
-        list[Axis]:
-    """
-    axes: list[Axis] = []
-    if axis_names is None:
-        return axes
-
-    dims = len(axis_names)
-    if axis_types is not None:
-        assert len(axis_types) == dims, (
-            "The number of axis types has to match the number of axis names"
-        )
-
-    if axis_units is not None:
-        assert len(axis_units) == dims, (
-            "The number of axis types has to match the number of axis names"
-        )
-
-    for i in range(len(axis_names)):
-        axes.append(
-            Axis(
-                name=axis_names[i],
-                type=axis_types[i] if axis_types is not None else None,
-                unit=axis_units[i] if axis_units is not None else None,
-                min=roi_min[i] if roi_min is not None else None,
-                max=roi_max[i] if roi_max is not None else None,
-            )
-        )
-    return axes
 
 
 class DisplayHint(BaseModel):
