@@ -1,4 +1,9 @@
-__version__ = "0.0.0"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__: str = version("geff_spec")
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = "uninstalled"
 
 from ._affine import Affine
 from ._prop_metadata import PropMetadata
