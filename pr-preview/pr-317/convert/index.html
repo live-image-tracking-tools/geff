@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/what-is-geff/">
+        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/convert/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../compatibility/">
       
       
-        <link rel="next" href="../specification/">
+        <link rel="next" href="../reference/geff/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>What is geff? - geff</title>
+        <title>Conversion to GEFF - geff</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#what-is-geff" class="md-skip">
+        <a href="#conversion-to-geff" class="md-skip">
           Skip to content
         </a>
       
@@ -108,7 +108,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              What is geff?
+              Conversion to GEFF
             
           </span>
         </div>
@@ -247,32 +247,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    What is geff?
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../what-is-geff/" class="md-nav__link">
         
   
   
@@ -283,35 +261,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#design-decisions-and-assumptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Design Decisions and Assumptions
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -430,10 +379,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../convert/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Conversion to GEFF
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -444,6 +415,53 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cell-tracking-challenge-ctc" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cell Tracking Challenge (CTC)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trackmate-xml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trackmate XML
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acetree" class="md-nav__link">
+    <span class="md-ellipsis">
+      AceTree
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1026,9 +1044,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#design-decisions-and-assumptions" class="md-nav__link">
+  <a href="#cell-tracking-challenge-ctc" class="md-nav__link">
     <span class="md-ellipsis">
-      Design Decisions and Assumptions
+      Cell Tracking Challenge (CTC)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trackmate-xml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Trackmate XML
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acetree" class="md-nav__link">
+    <span class="md-ellipsis">
+      AceTree
     </span>
   </a>
   
@@ -1053,19 +1089,25 @@
   
 
 
-<h1 id="what-is-geff">What is geff?</h1>
-<p><code>geff</code> is a graph exchange file format that seeks to fulfill the following needs:</p>
+<h1 id="conversion-to-geff">Conversion to GEFF</h1>
+<p>If you already have tracking data stored in another format, we have some functions for converting data to GEFF.</p>
+<h2 id="cell-tracking-challenge-ctc">Cell Tracking Challenge (CTC)</h2>
+<p>To use the <code>geff</code> cli to convert CTC data to GEFF, see the docs for <a class="autorefs autorefs-internal" href="../command-line-tools/#convert-ctc"><code>geff convert-ctc</code></a>.</p>
+<p>To use the <code>geff</code> python API, see the docs for <a class="autorefs autorefs-internal" title="            ctc_tiffs_to_zarr" href="../reference/geff/convert/#geff.convert.ctc_tiffs_to_zarr"><code>ctc_tiffs_to_zarr</code></a> and <a class="autorefs autorefs-internal" title="            from_ctc_to_geff" href="../reference/geff/convert/#geff.convert.from_ctc_to_geff"><code>from_ctc_to_geff</code></a>.</p>
+<h2 id="trackmate-xml">Trackmate XML</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Conversion from TrackMate XML to GEFF is currently NOT lossless, but we are working on it.    <br />
+The output GEFF is missing:</p>
 <ul>
-<li>Provide a storage/exchange format for graphs and optional segmentation</li>
-<li>Provide a common API with reference implementations for use in other projects</li>
+<li>for each spot, the coordinates of its ROI (segmentation)</li>
+<li>for each track, the value of its features (e.g., <code>TRACK_DISPLACEMENT</code>, <code>TRACK_MEAN_SPEED</code>)</li>
 </ul>
-<h2 id="design-decisions-and-assumptions">Design Decisions and Assumptions</h2>
-<ul>
-<li>Raw image data is not included in the <code>geff</code> spec. However, to keep nodes linked to segmentation labels, support for specifying the seg_id of each node in a standard way, along with the path to the segmentation, are included in the <code>spec</code>.</li>
-<li>Since <code>geff</code> is an exchange format, we do not provide support for searching or filtering.</li>
-<li>We do not provide support for editing or changing the graph on the fly.</li>
-<li>In order to support efficient reading/writing, we assume the graph can fit into memory.</li>
-</ul>
+</div>
+<p>To convert a Trackmat XML file to GEFF using the <code>geff</code> cli, see the docs for <a class="autorefs autorefs-internal" href="../command-line-tools/#convert-trackmate-xml"><code>geff convert-trackmate-xml</code></a>.</p>
+<p>To use the <code>geff</code> python API, see the docs for <a class="autorefs autorefs-internal" title="            from_trackmate_xml_to_geff" href="../reference/geff/convert/#geff.convert.from_trackmate_xml_to_geff"><code>from_trackmate_xml_to_geff</code></a>.</p>
+<h2 id="acetree">AceTree</h2>
+<p>An example of how to convert AceTree data to a GEFF is available <a href="https://github.com/zhirongbaolab/AceTreePythonReader/blob/main/testAceTreeReaderGeffWrite.py">here</a>. </p>
 
 
 
