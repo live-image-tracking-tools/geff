@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, overload
-
-from geff._graph_libs._networkx import construct_nx
-from geff.core_io._base_read import read_to_memory
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, get_args, overload
 
 R = TypeVar("R", covariant=True)
 
@@ -18,137 +15,118 @@ if TYPE_CHECKING:
     from geff.metadata._schema import GeffMetadata
     from geff.validate.data import ValidationConfig
 
+    from ._backend_protocol import Backend
+
+    NxGraph: TypeAlias = nx.Graph | nx.DiGraph
+    RxGraph: TypeAlias = rx.PyGraph | rx.PyDiGraph
+    SgGraph: TypeAlias = sg.SpatialGraph | sg.SpatialDiGraph
+    SupportedGraphType: TypeAlias = NxGraph | RxGraph | SgGraph
+
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
-
-class ConstructFunc(Protocol[R]):
-    """A protocol for callables that construct a graph from GEFF data."""
-
-    def __call__(
-        self,
-        metadata: GeffMetadata,
-        node_ids: NDArray[Any],
-        edge_ids: NDArray[Any],
-        node_props: dict[str, PropDictNpArray],
-        edge_props: dict[str, PropDictNpArray],
-        *args: Any,
-        **kwargs: Any,
-    ) -> R:
-        """
-        The callable must have this function signature.
-
-        The callable must have the first argument `in_memory_geff`, it may have additional
-        args and kwargs.
-
-        Args:
-            metadata (GeffMetadata): The metadata of the graph.
-            node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
-                edge_ids.
-            edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
-                as node_ids.
-            node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-                from node property names to (values, missing) arrays, which should have same
-                length as node_ids.
-            edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-                from edge property names to (values, missing) arrays, which should have same
-                length as edge_ids.
-            *args (Any): Optional args for constructing the `in_memory_geff`.
-            **kwargs (Any): Optional kwargs for constructing the `in_memory_geff`.
-
-        Returns:
-            A graph object instance for a particular backend.
-        """
-        ...
+AVAILABLE_BACKENDS: list[Backend] = []
 
 
+# This function will add available backends to the available backend list
+# it has to be called after the definition of get_backends
+def _import_available_backends() -> None:
+    backends: tuple[SupportedBackend] = get_args(SupportedBackend)
+    for backend in backends:
+        try:
+            AVAILABLE_BACKENDS.append(get_backend(backend))
+        except ImportError:
+            pass
+
+
+# NOTE: overload get_backend for new backends by typing the return type as Backend[GraphType]
 @overload
-def get_construct_func(
-    backend: Literal["networkx"],
-) -> ConstructFunc[nx.Graph | nx.DiGraph]: ...
-
-
+def get_backend(backend: Literal["networkx"]) -> Backend[NxGraph]: ...
 @overload
-def get_construct_func(
-    backend: Literal["rustworkx"],
-) -> ConstructFunc[rx.PyGraph | rx.PyDiGraph]: ...
-
-
+def get_backend(backend: Literal["rustworkx"]) -> Backend[RxGraph]: ...
 @overload
-def get_construct_func(
-    backend: Literal["spatial-graph"],
-) -> ConstructFunc[sg.SpatialGraph | sg.SpatialDiGraph]: ...
-
-
-def get_construct_func(backend: SupportedBackend) -> ConstructFunc[Any]:
+def get_backend(backend: Literal["spatial-graph"]) -> Backend[SgGraph]: ...
+def get_backend(backend: SupportedBackend) -> Backend:
     """
-    Get the construct function for different backends.
+    Get a specified backend io module.
 
     Args:
         backend (SupportedBackend): Flag for the chosen backend.
 
     Returns:
-        ConstructFunc: A function that construct a graph from GEFF data.
+        Backend: A module for reading and writing GEFF data to and from the specified backend.
     """
     match backend:
         case "networkx":
-            return construct_nx
+            from geff._graph_libs._networkx import NxBackend
+
+            return NxBackend()
         case "rustworkx":
-            from geff._graph_libs._rustworkx import construct_rx
+            from geff._graph_libs._rustworkx import RxBackend
 
-            return construct_rx
+            return RxBackend()
         case "spatial-graph":
-            from geff._graph_libs._spatial_graph import construct_sg
+            from geff._graph_libs._spatial_graph import SgBackend
 
-            return construct_sg
+            return SgBackend()
         # Add cases for new backends, remember to add overloads
         case _:
             raise ValueError(f"Unsupported backend chosen: '{backend}'")
 
 
+_import_available_backends()
+
+
+# Used in the write function wrapper, where the backend should be determined from the graph type
+def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
+    for backend_module in AVAILABLE_BACKENDS:
+        if isinstance(graph, backend_module.GRAPH_TYPES):
+            return backend_module
+    raise TypeError(f"Unrecognized graph type '{type(graph)}'.")
+
+
+# NOTE: when overloading read for a new backend, if additional arguments can be accepted, explicitly
+# define them such as in the spatial-graph overload below, where position_attr has been added.
 @overload
+def read(
+    store: StoreLike,
+    structure_validation: bool = ...,
+    node_props: list[str] | None = ...,
+    edge_props: list[str] | None = ...,
+    data_validation: ValidationConfig | None = ...,
+    *,
+    backend: Literal["networkx"] = "networkx",
+) -> tuple[NxGraph, GeffMetadata]: ...
+@overload
+def read(
+    store: StoreLike,
+    structure_validation: bool = ...,
+    node_props: list[str] | None = ...,
+    edge_props: list[str] | None = ...,
+    data_validation: ValidationConfig | None = ...,
+    *,
+    backend: Literal["rustworkx"],
+) -> tuple[RxGraph, GeffMetadata]: ...
+@overload
+def read(
+    store: StoreLike,
+    structure_validation: bool = ...,
+    node_props: list[str] | None = ...,
+    edge_props: list[str] | None = ...,
+    data_validation: ValidationConfig | None = ...,
+    *,
+    backend: Literal["spatial-graph"],
+    position_attr: str = "position",
+) -> tuple[SgGraph, GeffMetadata]: ...
 def read(
     store: StoreLike,
     structure_validation: bool = True,
     node_props: list[str] | None = None,
     edge_props: list[str] | None = None,
-    backend: Literal["networkx"] = "networkx",
-    data_validation: ValidationConfig | None = None,
-) -> tuple[nx.Graph | nx.DiGraph, GeffMetadata]: ...
-
-
-@overload
-def read(
-    store: StoreLike,
-    structure_validation: bool,
-    node_props: list[str] | None,
-    edge_props: list[str] | None,
-    backend: Literal["rustworkx"],
-    data_validation: ValidationConfig | None = None,
-) -> tuple[rx.PyGraph | rx.PyDiGraph, GeffMetadata]: ...
-
-
-@overload
-def read(
-    store: StoreLike,
-    structure_validation: bool,
-    node_props: list[str] | None,
-    edge_props: list[str] | None,
-    backend: Literal["spatial-graph"],
     data_validation: ValidationConfig | None = None,
     *,
-    position_attr: str = "position",
-) -> tuple[sg.SpatialGraph | sg.SpatialDiGraph, GeffMetadata]: ...
-
-
-def read(
-    store: StoreLike,
-    structure_validation: bool = True,
-    node_props: list[str] | None = None,
-    edge_props: list[str] | None = None,
     backend: SupportedBackend = "networkx",
-    data_validation: ValidationConfig | None = None,
     **backend_kwargs: Any,
-) -> tuple[Any, GeffMetadata]:
+) -> tuple[SupportedGraphType, GeffMetadata]:
     """
     Read a GEFF to a chosen backend.
 
@@ -172,11 +150,161 @@ def read(
     Returns:
         tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
     """
-    construct_func = get_construct_func(backend)
-    in_memory_geff = read_to_memory(
-        store, structure_validation, node_props, edge_props, data_validation
+    backend_io = get_backend(backend)
+    return backend_io.read(
+        store,
+        structure_validation,
+        node_props,
+        edge_props,
+        data_validation,
+        **backend_kwargs,
     )
-    return (
-        construct_func(**in_memory_geff, **backend_kwargs),
-        in_memory_geff["metadata"],
+
+
+@overload
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: Literal["networkx"] = ...,
+) -> NxGraph: ...
+@overload
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: Literal["rustworkx"],
+) -> RxGraph: ...
+@overload
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: Literal["spatial-graph"],
+    position_attr: str = "position",
+) -> SgGraph: ...
+def construct(
+    metadata: GeffMetadata,
+    node_ids: NDArray[Any],
+    edge_ids: NDArray[Any],
+    node_props: dict[str, PropDictNpArray],
+    edge_props: dict[str, PropDictNpArray],
+    *,
+    backend: SupportedBackend = "networkx",
+    **backend_kwargs: Any,
+) -> SupportedGraphType:
+    backend_io = get_backend(backend)
+    return backend_io.construct(
+        metadata, node_ids, edge_ids, node_props, edge_props, **backend_kwargs
+    )
+
+
+# rustworkx has an additional node_id_dict arg
+@overload
+def write(
+    graph: RxGraph,
+    store: StoreLike,
+    metadata: GeffMetadata | None = ...,
+    axis_names: list[str] | None = ...,
+    axis_units: list[str | None] | None = ...,
+    axis_types: list[str | None] | None = ...,
+    zarr_format: Literal[2, 3] = ...,
+    node_id_dict: dict[int, int] | None = ...,
+) -> None:
+    # TODO: what is best practice for overload docstrings, want to document node_id_dict
+    """Write a rustworkx graph object to the geff file format.
+
+    Args:
+        graph (SupportedGraphType): An instance of a supported graph object.
+        store (str | Path | zarr store): The path/str to the output zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
+        metadata (GeffMetadata, optional): The original metadata of the graph.
+            Defaults to None. If provided, will override the graph properties.
+        axis_names (list[str], optional): The names of the spatial dims
+            represented in position property. Defaults to None. Will override
+            both value in graph properties and metadata if provided.
+        axis_units (list[str | None], optional): The units of the spatial dims
+            represented in position property. Defaults to None. Will override value
+            both value in graph properties and metadata if provided.
+        axis_types (list[str | None], optional): The types of the spatial dims
+            represented in position property. Usually one of "time", "space", or "channel".
+            Defaults to None. Will override both value in graph properties and metadata
+            if provided.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write.
+            Defaults to 2.
+        node_id_dict (dict[int, int], optional): A dictionary mapping rx node indices to
+            arbitrary indices. This allows custom node identifiers to be used in the geff file
+            instead of rustworkx's internal indices. If None, uses rx indices directly.
+    """
+    ...
+
+
+@overload
+def write(
+    graph: SupportedGraphType,
+    store: StoreLike,
+    metadata: GeffMetadata | None = ...,
+    axis_names: list[str] | None = ...,
+    axis_units: list[str | None] | None = ...,
+    axis_types: list[str | None] | None = ...,
+    zarr_format: Literal[2, 3] = 2,
+    *args: Any,
+    **kwargs: Any,
+) -> None: ...
+def write(
+    graph: SupportedGraphType,
+    store: StoreLike,
+    metadata: GeffMetadata | None = None,
+    axis_names: list[str] | None = None,
+    axis_units: list[str | None] | None = None,
+    axis_types: list[str | None] | None = None,
+    zarr_format: Literal[2, 3] = 2,
+    *args: Any,
+    **kwargs: Any,
+) -> None:
+    """Write a supported graph object to the geff file format.
+
+    Args:
+        graph (SupportedGraphType): An instance of a supported graph object.
+        store (str | Path | zarr store): The path/str to the output zarr, or the store
+            itself. Opens in append mode, so will only overwrite geff-controlled groups.
+        metadata (GeffMetadata, optional): The original metadata of the graph.
+            Defaults to None. If provided, will override the graph properties.
+        axis_names (list[str], optional): The names of the spatial dims
+            represented in position property. Defaults to None. Will override
+            both value in graph properties and metadata if provided.
+        axis_units (list[str | None], optional): The units of the spatial dims
+            represented in position property. Defaults to None. Will override value
+            both value in graph properties and metadata if provided.
+        axis_types (list[str | None], optional): The types of the spatial dims
+            represented in position property. Usually one of "time", "space", or "channel".
+            Defaults to None. Will override both value in graph properties and metadata
+            if provided.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write.
+            Defaults to 2.
+        *args (Any): Additional args that may be accepted by the backend when writing from a
+            specific type of graph.
+        **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from a
+            specific type of graph.
+    """
+    backend_io = get_backend_from_graph_type(graph)
+    backend_io.write(
+        graph,
+        store,
+        metadata,
+        axis_names,
+        axis_units,
+        axis_types,
+        zarr_format,
+        *args,
+        **kwargs,
     )

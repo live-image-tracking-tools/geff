@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
+import numpy as np
 
 from geff.core_io import write_dicts
-from geff.core_io._base_read import read_to_memory
 from geff.core_io._utils import calculate_roi_from_nodes
 from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.metadata.utils import (
@@ -13,12 +13,16 @@ from geff.metadata.utils import (
     get_graph_existing_metadata,
 )
 
+from ._backend_protocol import Backend
+from ._graph_adapter import GraphAdapter
+
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-    from geff.validate.data import ValidationConfig
 
 import logging
 
@@ -41,79 +45,6 @@ def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], 
         axis_names,
         lambda node_tuple: node_tuple[1],  # Extract data from (node_id, data) tuple
     )
-
-
-def write_nx(
-    graph: nx.Graph,
-    store: StoreLike,
-    metadata: GeffMetadata | None = None,
-    axis_names: list[str] | None = None,
-    axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
-    zarr_format: Literal[2, 3] = 2,
-) -> None:
-    """Write a networkx graph to the geff file format
-
-    Args:
-        graph (nx.Graph): A networkx graph
-        store (str | Path | zarr store): The path/str to the output zarr, or the store
-            itself. Opens in append mode, so will only overwrite geff-controlled groups.
-        metadata (GeffMetadata, optional): The original metadata of the graph.
-            Defaults to None. If provided, will override the graph properties.
-        axis_names (Optional[list[str]], optional): The names of the spatial dims
-            represented in position property. Defaults to None. Will override
-            both value in graph properties and metadata if provided.
-        axis_units (Optional[list[str]], optional): The units of the spatial dims
-            represented in position property. Defaults to None. Will override value
-            both value in graph properties and metadata if provided.
-        axis_types (Optional[list[str]], optional): The types of the spatial dims
-            represented in position property. Usually one of "time", "space", or "channel".
-            Defaults to None. Will override both value in graph properties and metadata
-            if provided.
-        zarr_format (Literal[2, 3], optional): The version of zarr to write.
-            Defaults to 2.
-    """
-
-    axis_names, axis_units, axis_types = get_graph_existing_metadata(
-        metadata, axis_names, axis_units, axis_types
-    )
-
-    node_props = list({k for _, data in graph.nodes(data=True) for k in data})
-
-    edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
-    edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
-    write_dicts(
-        store,
-        graph.nodes(data=True),
-        edge_data,
-        node_props,
-        edge_props,
-        axis_names,
-        zarr_format=zarr_format,
-    )
-
-    # write metadata
-    roi_min: tuple[float, ...] | None
-    roi_max: tuple[float, ...] | None
-    if axis_names is not None and graph.number_of_nodes() > 0:
-        roi_min, roi_max = get_roi(graph, axis_names)
-    else:
-        roi_min, roi_max = None, None
-
-    axes = _axes_from_lists(
-        axis_names,
-        axis_units=axis_units,
-        axis_types=axis_types,
-        roi_min=roi_min,
-        roi_max=roi_max,
-    )
-
-    metadata = create_or_update_metadata(
-        metadata,
-        isinstance(graph, nx.DiGraph),
-        axes,
-    )
-    metadata.write(store)
 
 
 def _set_property_values(
@@ -150,74 +81,112 @@ def _set_property_values(
                 graph.edges[source, target][name] = val.tolist()
 
 
-def construct_nx(
-    metadata: GeffMetadata,
-    node_ids: NDArray[Any],
-    edge_ids: NDArray[Any],
-    node_props: dict[str, PropDictNpArray],
-    edge_props: dict[str, PropDictNpArray],
-) -> nx.Graph | nx.DiGraph:
-    """
-    Construct a `networkx` graph instance from a dictionary representation of the GEFF data.
+# NOTE: see _api_wrapper.py read/write/construct for docs
+class NxBackend(Backend):
+    @property
+    def GRAPH_TYPES(self) -> tuple[type[nx.Graph], type[nx.DiGraph]]:
+        return nx.Graph, nx.DiGraph
 
-    Args:
-        metadata (GeffMetadata): The metadata of the graph.
-        node_ids (np.ndarray): An array containing the node ids. Must have same dtype as
-            edge_ids.
-        edge_ids (np.ndarray): An array containing the edge ids. Must have same dtype
-            as node_ids.
-        node_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from node property names to (values, missing) arrays, which should have same
-            length as node_ids.
-        edge_props (dict[str, tuple[np.ndarray, np.ndarray | None]] | None): A dictionary
-            from edge property names to (values, missing) arrays, which should have same
-            length as edge_ids.
+    @staticmethod
+    def construct(
+        metadata: GeffMetadata,
+        node_ids: NDArray[Any],
+        edge_ids: NDArray[Any],
+        node_props: dict[str, PropDictNpArray],
+        edge_props: dict[str, PropDictNpArray],
+    ) -> nx.Graph | nx.DiGraph:
+        graph = nx.DiGraph() if metadata.directed else nx.Graph()
 
-    Returns:
-        (nx.Graph | nx.DiGraph): A `networkx` graph object.
-    """
-    graph = nx.DiGraph() if metadata.directed else nx.Graph()
+        graph.add_nodes_from(node_ids.tolist())
+        for name, prop_dict in node_props.items():
+            _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
 
-    graph.add_nodes_from(node_ids.tolist())
-    for name, prop_dict in node_props.items():
-        _set_property_values(graph, node_ids, name, prop_dict, nodes=True)
+        graph.add_edges_from(edge_ids.tolist())
+        for name, prop_dict in edge_props.items():
+            _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
 
-    graph.add_edges_from(edge_ids.tolist())
-    for name, prop_dict in edge_props.items():
-        _set_property_values(graph, edge_ids, name, prop_dict, nodes=False)
+        return graph
 
-    return graph
+    @staticmethod
+    def write(
+        graph: nx.Graph | nx.DiGraph,
+        store: StoreLike,
+        metadata: GeffMetadata | None = None,
+        axis_names: list[str] | None = None,
+        axis_units: list[str | None] | None = None,
+        axis_types: list[str | None] | None = None,
+        zarr_format: Literal[2, 3] = 2,
+    ) -> None:
+        axis_names, axis_units, axis_types = get_graph_existing_metadata(
+            metadata, axis_names, axis_units, axis_types
+        )
+
+        node_props = list({k for _, data in graph.nodes(data=True) for k in data})
+
+        edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
+        edge_props = list({k for _, _, data in graph.edges(data=True) for k in data})
+        write_dicts(
+            store,
+            graph.nodes(data=True),
+            edge_data,
+            node_props,
+            edge_props,
+            axis_names,
+            zarr_format=zarr_format,
+        )
+
+        # write metadata
+        roi_min: tuple[float, ...] | None
+        roi_max: tuple[float, ...] | None
+        if axis_names is not None and graph.number_of_nodes() > 0:
+            roi_min, roi_max = get_roi(graph, axis_names)
+        else:
+            roi_min, roi_max = None, None
+
+        axes = _axes_from_lists(
+            axis_names,
+            axis_units=axis_units,
+            axis_types=axis_types,
+            roi_min=roi_min,
+            roi_max=roi_max,
+        )
+
+        metadata = create_or_update_metadata(
+            metadata,
+            isinstance(graph, nx.DiGraph),
+            axes,
+        )
+        metadata.write(store)
+
+    @staticmethod
+    def graph_adapter(graph: Any) -> NxGraphAdapter:
+        return NxGraphAdapter(graph)
 
 
-def read_nx(
-    store: StoreLike,
-    structure_validation: bool = True,
-    node_props: list[str] | None = None,
-    edge_props: list[str] | None = None,
-    data_validation: ValidationConfig | None = None,
-) -> tuple[nx.Graph, GeffMetadata]:
-    """Read a geff file into a networkx graph. Metadata properties will be stored in
-    the graph properties, accessed via `G.graph[key]` where G is a networkx graph.
+class NxGraphAdapter(GraphAdapter):
+    def __init__(self, graph: nx.Graph | nx.DiGraph) -> None:
+        self.graph = graph
 
-    Args:
-        store (str | Path | zarr store): The path/str to the geff zarr, or the store
-            itself. Opens in append mode, so will only overwrite geff-controlled groups.
-        structure_validation (bool, optional): Flag indicating whether to perform validation on the
-            geff file before loading into memory. If set to False and there are
-            format issues, will likely fail with a cryptic error. Defaults to True.
-        node_props (list of str, optional): The names of the node properties to load,
-            if None all properties will be loaded, defaults to None.
-        edge_props (list of str, optional): The names of the edge properties to load,
-            if None all properties will be loaded, defaults to None.
-        data_validation (ValidationConfig, optional): Optional configuration for which
-            optional types of data to validate. Each option defaults to false.
+    def get_node_ids(self) -> Sequence[Any]:
+        return list(self.graph.nodes)
 
-    Returns:
-        A networkx graph containing the graph that was stored in the geff file format
-    """
-    in_memory_geff = read_to_memory(
-        store, structure_validation, node_props, edge_props, data_validation
-    )
-    graph = construct_nx(**in_memory_geff)
+    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+        return list(self.graph.edges)
 
-    return graph, in_memory_geff["metadata"]
+    def get_node_prop(
+        self,
+        name: str,
+        nodes: Sequence[Any],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        prop = [self.graph.nodes[node][name] for node in nodes]
+        return np.array(prop)
+
+    def get_edge_prop(
+        self,
+        name: str,
+        edges: Sequence[tuple[Any, Any]],
+        metadata: GeffMetadata,
+    ) -> NDArray[Any]:
+        prop = [self.graph.edges[edge][name] for edge in edges]
+        return np.array(prop)

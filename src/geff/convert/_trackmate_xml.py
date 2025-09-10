@@ -23,7 +23,7 @@ else:
     except ImportError:  # pragma: no cover
         import xml.etree.ElementTree as ET
 
-from geff._graph_libs._networkx import write_nx
+from geff._graph_libs._networkx import NxBackend
 from geff.metadata._schema import Axis, DisplayHint, GeffMetadata, RelatedObject
 
 # TODO: extract _preliminary_checks() to a common module since similar code is already
@@ -997,7 +997,7 @@ def from_trackmate_xml_to_geff(
         props_metadata=props_metadata,
     )
     # Create the GEFF :D
-    write_nx(
+    NxBackend.write(
         graph,
         store=geff_path,
         metadata=metadata,
