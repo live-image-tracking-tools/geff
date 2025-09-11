@@ -114,7 +114,7 @@ jobs:
         with:
           path: packages/geff
 
-  upload-to-pypi:
+  upload-geff-to-pypi:
     if: success() && startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule'
     name: Upload package to PyPI
     needs: build-and-inspect-package
@@ -134,4 +134,26 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: "./dist/*"
+          files: "./dist/geff-*"
+  
+  upload-geff-spec-to-pypi:
+    if: success() && startsWith(github.ref, 'refs/tags/spec') && github.event_name != 'schedule'
+    name: Upload package to PyPI
+    needs: build-and-inspect-package
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # this permission is required for trusted publishing
+      contents: write # this permission is required for generate_release_notes
+    steps:
+      - name: Download built artifact to dist/
+        uses: actions/download-artifact@v5
+        with:
+          name: Packages
+          path: dist
+          merge-multiple: true
+      - name: 🚢 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: "./dist/geff_spec*"
