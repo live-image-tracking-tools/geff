@@ -48,13 +48,18 @@ def geff_to_dataframes(
             props = memory_geff["edge_props"]
 
         for name, prop in props.items():
+            missing = prop["missing"]
             # Squeeze out any singleton dimensions
             values = prop["values"].squeeze()
             ndim = len(values.shape)
             if ndim == 2:
                 # After squeezing out singleton dimensions, second dim must be > 1
                 for i in range(values.shape[1]):
-                    df_dict[f"{name}_{i}"] = values[:, i]
+                    series = pd.Series(values[:, i])
+                    if missing is not None and any(missing):
+                        series.mask(missing, inplace=True)
+                    df_dict[f"{name}_{i}"] = series
+
             elif ndim > 2:
                 warnings.warn(
                     f"{data_type} {name} ({ndim}D) will not be exported to csv "
@@ -64,12 +69,10 @@ def geff_to_dataframes(
                 continue
             else:
                 # Data is 1d
-                df_dict[name] = values
-
-            # Missing is stored as its own column since we can't mask individual dataframe columns
-            missing = prop["missing"]
-            if missing is not None and any(missing):
-                df_dict[f"{name}-missing"] = missing
+                series = pd.Series(values)
+                if missing is not None and any(missing):
+                    series.mask(missing, inplace=True)
+                df_dict[name] = series
 
         dataframes.append(pd.DataFrame(df_dict))
 

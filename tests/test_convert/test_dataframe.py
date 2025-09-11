@@ -40,8 +40,6 @@ class Test_geff_to_dataframes:
             for name, prop in props.items():
                 assert df[name].dtype == prop["values"].dtype
                 assert all(df[name].to_numpy() == prop["values"])
-                if prop["missing"] is not None and any(prop["missing"]):
-                    assert all(df[f"{name}-missing"].to_numpy() == prop["missing"])
 
     def test_2d_prop(self):
         # Create data with a 2d node attribute
@@ -107,17 +105,16 @@ class Test_geff_to_dataframes:
         missing = np.array([False] * num_edges)
         z[f"{_path.EDGE_PROPS}/score/{_path.MISSING}"] = missing  # pyright: ignore[reportArgumentType]
         node_df, edge_df = geff_to_dataframes(store)
-        # Missing column should not exist
-        assert "score-missing" not in edge_df.columns
+        # No missing so shouldn't be any nans in values
+        assert not any(edge_df["score"].isna())
 
         # Missing array with some values missing
         n_missing = 4
         missing = np.array([True] * n_missing + [False] * (num_edges - n_missing))
         z[f"{_path.EDGE_PROPS}/score/{_path.MISSING}"] = missing  # pyright: ignore[reportArgumentType]
         node_df, edge_df = geff_to_dataframes(store)
-        # Missing column should exist
-        assert "score-missing" in edge_df.columns
-        assert np.count_nonzero(edge_df["score-missing"]) == n_missing
+        # Number of nans should match number missing
+        assert np.count_nonzero(edge_df["score"].isna()) == n_missing
 
 
 class Test_geff_to_csv:
