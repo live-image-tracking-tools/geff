@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from geff import GeffReader
-from geff._graph_libs._networkx import construct_nx
+from geff._graph_libs._networkx import NxBackend
 from geff.core_io._base_read import read_to_memory
 from geff.testing.data import create_mock_geff, create_simple_2d_geff
 from geff.validate.data import ValidationConfig
@@ -50,7 +50,7 @@ def test_build_w_masked_nodes(
     assert np.isin(in_memory_geff["node_ids"], in_memory_geff["edge_ids"]).all()
 
     # make sure graph dict can be ingested
-    _ = construct_nx(**in_memory_geff)
+    _ = NxBackend.construct(**in_memory_geff)
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
@@ -80,7 +80,7 @@ def test_build_w_masked_edges(
     np.testing.assert_array_equal(memory_geff["edge_ids"][edge_mask], in_memory_geff["edge_ids"])
 
     # make sure graph dict can be ingested
-    _ = construct_nx(**in_memory_geff)
+    _ = NxBackend.construct(**in_memory_geff)
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
@@ -124,7 +124,7 @@ def test_build_w_masked_nodes_edges(
     assert (output_edges[:, :, np.newaxis] == masked_edges).all(axis=1).any(axis=1).all()
 
     # make sure graph dict can be ingested
-    _ = construct_nx(**in_memory_geff)
+    _ = NxBackend.construct(**in_memory_geff)
 
 
 def test_read_node_props() -> None:
@@ -153,7 +153,7 @@ def test_read_node_props() -> None:
         in_memory_geff["node_props"]["t"]["values"],
     )
 
-    _ = construct_nx(**in_memory_geff)
+    _ = NxBackend.construct(**in_memory_geff)
 
 
 def test_read_edge_props() -> None:
@@ -181,7 +181,7 @@ def test_read_edge_props() -> None:
         in_memory_geff["edge_props"]["score"]["values"],
     )
 
-    _ = construct_nx(**in_memory_geff)
+    _ = NxBackend.construct(**in_memory_geff)
 
 
 def test_read_to_memory():

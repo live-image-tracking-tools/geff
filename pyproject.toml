@@ -71,6 +71,7 @@ docs = [
     "mkdocs-material>=9.6.16",
     "mkdocstrings-python>=1.16.12",
     "mkdocs-typer>=0.0.3",
+    "typer>=0.14.0,<0.17.0",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
     "mkdocs-autorefs>=1"
@@ -163,6 +164,7 @@ exclude_lines = [
     "except ImportError",
     "raise NotImplementedError()",
     "pass",
+    '^\s*\.\.\.\s*$', # regex for lines with ONLY ellipses with any amount of whitespace either side.
 ]
 [tool.coverage.run]
 source = ["src/geff"]
