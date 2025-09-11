@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
+    from geff.metadata._valid_values import AxisType
 
 from geff.core_io import write_arrays
 from geff.core_io._utils import remove_tilde
@@ -120,7 +121,7 @@ class SgBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[str | None] | None = None,
+        axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
         store = remove_tilde(store)
