@@ -67,7 +67,7 @@ def test_write_empty_graph() -> None:
     )
 
     store = zarr.storage.MemoryStore()
-    SgBackend.write(graph, store=store)
+    SgBackend.write(graph, store=store, axis_names=[])
     validate_structure(store)
 
     z = zarr.open(store)
