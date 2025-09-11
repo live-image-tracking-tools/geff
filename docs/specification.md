@@ -113,15 +113,15 @@ Here is a schematic of the expected file structure.
                     values # shape: (N, 3, 3) dtype: float
                     missing # shape: (N,) dtype: bool
                 color/
-                    values # shape: (N, 4) dtype: float16
+                    values # shape: (N, 4) dtype: float32
                     missing # shape: (N,) dtype: bool
 	    edges/
             ids  # shape: (E, 2) dtype: uint64
             props/
                 distance/
-                    values # shape: (E,) dtype: float16
+                    values # shape: (E,) dtype: float32
                 score/
-                    values # shape: (E,) dtype: float16
+                    values # shape: (E,) dtype: float32
                     missing # shape: (E,) dtype: bool
     # optional:
     /segmentation
@@ -137,7 +137,7 @@ This is a geff metadata zattrs file that matches the above example structure.
 {
   "geff": {
     "directed": true,
-    "geff_version": "0.1.3.dev4+gd5d1132.d20250616",
+    "geff_version": "0.1.3",
     // axes are optional
     "axes": [
       { "name": "t", "type": "time", "unit": "second", "min": 0, "max": 125 },
@@ -208,15 +208,15 @@ This is a geff metadata zattrs file that matches the above example structure.
         "dtype": "float32",
         "varlength": false
       },
-      "color": { "identifier": "color", "dtype": "float16", "varlength": false }
+      "color": { "identifier": "color", "dtype": "float32", "varlength": false }
     },
     "edge_props_metadata": {
       "distance": {
         "identifier": "distance",
-        "dtype": "float16",
+        "dtype": "float32",
         "varlength": false
       },
-      "score": { "identifier": "score", "dtype": "float16", "varlength": false }
+      "score": { "identifier": "score", "dtype": "float32", "varlength": false }
     },
     // node attributes corresponding to tracklet and/or lineage IDs
     "track_node_props": {
@@ -251,13 +251,16 @@ This is a geff metadata zattrs file that matches the above example structure.
 }
 ```
 
-Minimal geff metadata must have `version` and `directed` fields under a `geff` field.
+Minimal geff metadata must have `version` and `directed` fields under a `geff` field, as
+well as empty `node_props_metadata` and `edge_props_metadata` fields.
 
 ```jsonc
 {
   "geff": {
     "version": "0.0.0",
-    "directed": false
+    "directed": false,
+    "node_props_metadata": {},
+    "edge_props_metadata": {}
   }
 }
 ```
