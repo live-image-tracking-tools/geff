@@ -275,9 +275,9 @@ class GeffMetadata(BaseModel):
     axes: list[Axis] | None = Field(
         default=None,
         description="Optional list of `Axis` objects defining the axes of each node in the graph.\n"
-        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
+        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key "
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
-        "Each axis can additionally optionally define a `unit` key, which should match the valid"
+        "Each axis can additionally optionally define a `unit` key, which should match the valid "
         "OME-Zarr units, and `min` and `max` keys to define the range of the axis. See "
         "[`Axis`][geff.metadata._schema.Axis] for more information.",
     )
