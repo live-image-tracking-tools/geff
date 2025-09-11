@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff._typing import InMemoryGeff, PropDictNpArray, PropDictZArray
+    from geff._typing import InMemoryGeff, PropDictNpArray, ZarrNormalProp
 
 
 class GeffReader:
@@ -68,8 +68,8 @@ class GeffReader:
         self.metadata = GeffMetadata.read(source)
         self.nodes = zarr.open_array(source, path=_path.NODE_IDS, mode="r")
         self.edges = zarr.open_array(source, path=_path.EDGE_IDS, mode="r")
-        self.node_props: dict[str, PropDictZArray] = {}
-        self.edge_props: dict[str, PropDictZArray] = {}
+        self.node_props: dict[str, ZarrNormalProp] = {}
+        self.edge_props: dict[str, ZarrNormalProp] = {}
 
         # get node properties names
         nodes_group = expect_group(self.group, _path.NODES)
@@ -107,7 +107,7 @@ class GeffReader:
                 self.group.store, path=f"{_path.NODE_PROPS}/{name}", mode="r"
             )
             values = expect_array(prop_group, _path.VALUES, "node")
-            prop_dict: PropDictZArray = {"values": values}
+            prop_dict: ZarrNormalProp = {"values": values}
             if _path.MISSING in prop_group.keys():
                 missing = expect_array(prop_group, _path.MISSING, "node")
                 prop_dict[_path.MISSING] = missing
@@ -133,7 +133,7 @@ class GeffReader:
                 self.group.store, path=f"{_path.EDGE_PROPS}/{name}", mode="r"
             )
             values = expect_array(prop_group, _path.VALUES, "edge")
-            prop_dict: PropDictZArray = {"values": values}
+            prop_dict: ZarrNormalProp = {"values": values}
             if _path.MISSING in prop_group.keys():
                 missing = expect_array(prop_group, _path.MISSING, "edge")
                 prop_dict[_path.MISSING] = missing

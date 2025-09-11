@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -37,13 +37,22 @@ class PropDictNpArray(TypedDict):
     missing: NDArray[np.bool_] | None
 
 
-class PropDictZArray(TypedDict):
+class ZarrNormalProp(TypedDict):
     """
     A prop dictionary which has the keys "values" and optionally "missing", stored as zarr arrays.
     """
 
     values: zarr.Array
     missing: NotRequired[zarr.Array]
+
+
+class ZarrVarLenProp(TypedDict):
+    values: zarr.Array
+    missing: NotRequired[zarr.Array]
+    data: zarr.Array
+
+
+ZarrProp: TypeAlias = ZarrNormalProp | ZarrVarLenProp
 
 
 # Intermediate dict format that can be constructed to different backend types

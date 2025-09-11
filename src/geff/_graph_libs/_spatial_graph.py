@@ -95,6 +95,8 @@ def write_sg(
         geff_version=geff.__version__,
         directed=graph.directed,
         axes=axes,
+        node_props_metadata={},
+        edge_props_metadata={},
     )
 
     # write to geff
