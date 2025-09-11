@@ -61,7 +61,7 @@ class Axis(BaseModel):
     unit: str | Literal[SpaceUnits] | Literal[TimeUnits] | None = Field(
         default=None,
         description="Optional, the unit for this axis. If the type is 'space' "
-        "or 'time', we recommend utilzing the OME-NGFF spatial or temporal units respectively.",
+        "or 'time', we recommend utilizing the OME-NGFF spatial or temporal units respectively.",
     )
     min: float | None = Field(
         default=None, description="Optional, the minimum value for this axis."
