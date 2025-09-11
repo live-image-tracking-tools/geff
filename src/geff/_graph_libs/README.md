@@ -4,41 +4,22 @@
 
 Follow these steps to add read support for a new graph backend.
 
-1. Add your backend to the [`SupportedBackend`](read.py#L20) `Literal` type at the start of the read.py file.
+1. Add your backend to the [`SupportedBackend`](_api_wrapper.py#L24) `Literal` type at the start of the `_graph_libs/_api_wrapper.py` file.
 
-2. Write a function that constructs your graph object from a set of NumPy arrays containing the GEFF data. Your construct function must follow the [`ConstructFunc`](read.py#L23) protocol.
+2. Create a concrete implementation of the [`Backend`](_backend_protocol.py#L16) class, you can subclass the `Backend` class to automatically have the `read` method after implementing the `construct` method. Have a look at the [`NxBackend`](_networkx.py#L84) as an example.
 
-> [!TIP]
-> A python `Protocol` is a way to do structural type hinting, in our case it means a static type checker, such as `mypy`, will enforce anything typed as a `ConstructFunc` to have a matching function signature, i.e. it must have the arguments `metadata`, `node_ids`, `edge_ids`, `node_props` and `edge_props`; additional `args` and `kwargs` are allowed and the return type can be anything.
+> [!NOTE]
+> You will also have to create a concrete implementation of the [`GraphAdapter`](_graph_adapter.py#L11) class and have an instance of it be returned from the [`Backend.graph_adapter`](_backend_protocol.py#L137) method.
 
-3. Add a case to the function [`get_construct_func`](read.py#L81) so that when your backend flag, which you added to `SupportedBackend`, is chosen, the new construct function you defined will be returned.
+3. Add a case to the `match-case` block in the [`get_backend`](_api_wrapper.py#38) function. You should also add an overload for this function, following the other backends as an example.
 
-4. i. Add new overloads for the `get_construct_func` and [`read`](read.py#L139) functions, check the `networkx` overloads to see how it should be done. 
+> [!NOTE]
+> `Backend` is defined in a way that means you can use the syntax `Backend[GraphType]` so that a static type checker will know, for example, that the `construct` function in the backend will return an object with the type `GraphType`. This is how you should overload the return of `get_backend` for your case.
+
+4. 
+    i. Additionally overload the [`read`](_api_wrapper.py#L98) function, following the other backends as an example. The backend argument should be typed as `Literal[<your-backend-string>]` and if you can accept any additional arguments they should come after.
     
-    ii. In the `read` implementation you will also need to add your backend to the `Literal` type for the `backend` argument.
+    ii. If your write function has additional `args` and `kwargs` you should also write an overload for the write function so that users know what arguments are available for each graph type.
 
-> [!TIP]
-> - For the `get_construct_func` function this should be:
->   ```python
->    @overload
->    def get_construct_func(
->        backend: Literal[SupportedBackend.YOUR_NEW_BACKEND],
->    ) -> ConstructFunc[<your graph type>]: ...
->   ```
-> - For the `read` function this should be:
->   ```python
->    @overload
->    def read(
->        path: Path | str,
->        validate: bool,
->        node_props: list[str] | None,
->        edge_props: list[str] | None,
->        backend: Literal[SupportedBackend.YOUR_NEW_BACKEND],
->        backend_kwargs: dict[str, Any] | None = None,
->    ) -> tuple[<your graph type>, GeffMetadata]: ...
->   ```
-
-5. Your new backend will be tested automatically, you will need to modify some utility functions to get the tests to pass:
-
-    Add a case for your backend to the test utility functions, that are located above the `test_read` function, these are `is_expected_type`, `get_nodes`, `get_edges`, `get_node_prop` and `get_edge_prop`.
+5. Your new backend will be tested automatically!
 

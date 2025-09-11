@@ -4,16 +4,11 @@ import zarr
 import zarr.storage
 
 from geff import _path
+from geff.testing.data import create_mock_geff
 from geff.validate.structure import validate_structure
 
-try:
-    import spatial_graph as sg
-
-    from geff import read_sg, write_sg
-except ImportError:
-    pytest.skip("geff[spatial-graph] not installed", allow_module_level=True)
-
-from geff.testing.data import create_mock_geff
+sg = pytest.importorskip("spatial_graph")
+from geff._graph_libs._spatial_graph import SgBackend  # noqa: E402
 
 node_dtypes = ["uint8", "uint16"]
 node_attr_dtypes = [
@@ -45,7 +40,7 @@ def test_read_write_consistency(
     # with pytest.warns(UserWarning, match="Potential missing values for attr"):
     # TODO: make sure test data has missing values, otherwise this warning will
     # not be triggered
-    graph, _ = read_sg(store, position_attr="pos")
+    graph, _ = SgBackend.read(store, position_attr="pos")
 
     np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(memory_geff["node_ids"]))
     np.testing.assert_array_equal(np.sort(graph.edges), np.sort(memory_geff["edge_ids"]))
@@ -72,7 +67,7 @@ def test_write_empty_graph() -> None:
     )
 
     store = zarr.storage.MemoryStore()
-    write_sg(graph, store=store)
+    SgBackend.write(graph, store=store)
     validate_structure(store)
 
     z = zarr.open(store)
