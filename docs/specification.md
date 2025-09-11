@@ -8,39 +8,15 @@ The graph exchange file format is `zarr` based. A graph is stored in a zarr grou
 
 Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html). However, `geff` will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.
 
-## Geff metadata
-
-This is an auto-generated description of the schema for GEFF metadata. Further description of specific sections of interest are below.
-
-<!-- GEFF-SCHEMA -->
-
-### Axes list
-
-The axes list is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data.
-
-The order of the axes in the list is meaningful. For one, any downstream properties that are an array of values with one value per (spatial) axis will be in the order of the axis list (filtering to only the spatial axes by the `type` field if needed). Secondly, if associated image or segmentation data does not have axes metadata, the order of the spatiotemporal axes is a good default guess for aligning the graph and the image data, although there is no way to denote the channel dimension in the graph spec. If you are writing out a geff with an associated segmentation and/or image dataset, we highly recommend providing the axis names for your segmentation/image using the OME-zarr spec, including channel dimensions if needed.
-
-::: geff.metadata.\_valid_values.VALID_AXIS_TYPES
-
-::: geff.metadata.\_valid_values.VALID_SPACE_UNITS
-
-::: geff.metadata.\_valid_values.VALID_TIME_UNITS
-
-### Property metadata
-
-The metadata for each node/edge property is stored in the `node_props_metadata` and `edge_props_metadata` entries. Every node/edge property must have an entry in the appropriate metadata dictionary.
-Each property must have a string identifier (the group name for the property) and a dtype. The dtype can be any string
-that can be coerced into a numpy dtype, or the special `varlength` dtype indicating this is a variable length property (coming soon).
-String properties should have dtype `str`, not `varlength`, even though they are stored using the same variable
-length mechanism.
-
-### Affine transformations
-
-The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
-
-### Extra attributes
-
-The optional `extra` object is a free-form dictionary that can hold any additional, application-specific metadata that is **not** covered by the core geff schema. Users may place arbitrary keys and values inside `extra` without fear of clashing with future reserved fields. Although the core `geff` reader makes these attributes available, their meaning and use are left entirely to downstream applications.
+::: geff.GeffMetadata
+    options:
+        heading_level: 2
+        filters:
+            - "!read"
+            - "!write"
+        docstring_section_style: list
+        show_symbol_type_heading: false
+        show_symbol_type_toc: false
 
 ## The `nodes` group
 

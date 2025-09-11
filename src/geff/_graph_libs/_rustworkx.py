@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
     from geff._typing import PropDictNpArray
     from geff.metadata import GeffMetadata
+    from geff.metadata._valid_values import AxisType
 
 
 def get_roi_rx(
@@ -139,7 +140,7 @@ class RxBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[str | None] | None = None,
+        axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:

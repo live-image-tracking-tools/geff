@@ -14,7 +14,13 @@ from ._valid_values import (
 
 
 class PropMetadata(BaseModel):
-    """Metadata describing a property in the geff graph."""
+    """Each property must have a string identifier (the group name for the
+    property) and a dtype. The dtype can be any string
+    that can be coerced into a numpy dtype, or the special `varlength` dtype
+    indicating this is a variable length property (coming soon). String properties
+    should have dtype `str`, not `varlength`, even though they are stored using the
+    same variable length mechanism.
+    """
 
     identifier: Annotated[str, MinLen(1)] = Field(
         ...,

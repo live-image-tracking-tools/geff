@@ -71,7 +71,10 @@ def _validate_key_identifier_equality(
 
 
 class RelatedObject(BaseModel):
-    """TODO docstring"""
+    """A set of metadata for data that is associated with the graph. The types
+    'labels' and 'image' should be used for label and image objects, respectively.
+    Other types are also allowed.
+    """
 
     type: str = Field(
         ...,
@@ -142,11 +145,12 @@ class GeffMetadata(BaseModel):
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: list[Axis] | None = Field(
         default=None,
-        description="Optional list of Axis objects defining the axes of each node in the graph.\n"
-        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
+        description="Optional list of `Axis` objects defining the axes of each node in the graph.\n"
+        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key "
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
-        "Each axis can additionally optionally define a `unit` key, which should match the valid"
-        "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+        "Each axis can additionally optionally define a `unit` key, which should match the valid "
+        "OME-Zarr units, and `min` and `max` keys to define the range of the axis. See "
+        "[`Axis`][geff.metadata._schema.Axis] for more information.",
     )
 
     node_props_metadata: dict[str, PropMetadata] = Field(
@@ -172,6 +176,7 @@ class GeffMetadata(BaseModel):
             Name of the optional `sphere` property.
 
             A sphere is defined by
+
             - a center point, already given by the `space` type properties
             - a radius scalar, stored in this property
             """
@@ -188,16 +193,18 @@ class GeffMetadata(BaseModel):
             properties.
 
             It is defined by
-            - a center point :math:`c`, already given by the `space` type properties
-            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this
+
+            - a center point $c$, already given by the `space` type properties
+            - a covariance matrix $\\Sigma$, symmetric and positive-definite, stored in this
               property as a `2x2`/`3x3` array.
 
             To plot the ellipsoid:
+
             - Compute the eigendecomposition of the covariance matrix
-            :math:`\\Sigma = Q \\Lambda Q^{\\top}`
-            - Sample points :math:`z` on the unit sphere
+            $\\Sigma = Q \\Lambda Q^{\\top}$
+            - Sample points $z$ on the unit sphere
             - Transform the points to the ellipsoid by
-            :math:`x = c + Q \\Lambda^{(1/2)} z`.
+            $x = c + Q \\Lambda^{(1/2)} z$.
             """
         ),
     )
@@ -206,7 +213,7 @@ class GeffMetadata(BaseModel):
         description=(
             "Node properties denoting tracklet and/or lineage IDs.\n"
             "A tracklet is defined as a simple path of connected nodes "
-            "where the initiating node has any incoming degree and outgoing degree at most 1,"
+            "where the initiating node has any incoming degree and outgoing degree at most 1, "
             "and the terminating node has incoming degree at most 1 and any outgoing degree, "
             "and other nodes along the path have in/out degree of 1. Each tracklet must contain "
             "the maximal set of connected nodes that match this definition - no sub-tracklets.\n"
@@ -230,9 +237,11 @@ class GeffMetadata(BaseModel):
     )
     affine: Affine | None = Field(
         default=None,
-        description="Affine transformation matrix to transform the graph coordinates to the "
-        "physical coordinates. The matrix must have the same number of dimensions as the number of "
-        "axes in the graph.",
+        description="The optional `affine` field allows specifying a global affine transformation "
+        "that maps the graph coordinates stored in the node properties to a physical coordinate "
+        "system. The value **matrix** is stored as a `(N + 1) x (N + 1)` homogeneous matrix "
+        "following the `scipy.ndimage.affine_transform` convention, where **N** equals the "
+        "number of spatio-temporal axes declared in `axes`.",
     )
     display_hints: DisplayHint | None = Field(
         default=None,
@@ -240,7 +249,12 @@ class GeffMetadata(BaseModel):
     )
     extra: dict[str, Any] = Field(
         default_factory=dict,
-        description="Extra metadata that is not part of the schema",
+        description="The optional `extra` object is a free-form dictionary that can hold any "
+        "additional, application-specific metadata that is **not** covered by the core geff "
+        "schema. Users may place arbitrary keys and values inside `extra` without fear of "
+        "clashing with future reserved fields. Although the core `geff` reader makes these "
+        "attributes available, their meaning and use are left entirely to downstream "
+        "applications. ",
     )
 
     @model_validator(mode="after")
