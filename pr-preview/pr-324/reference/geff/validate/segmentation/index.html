@@ -1167,7 +1167,7 @@
 
 </h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">axes_match_seg_dims</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">StoreLike</span><span class="p">,</span> <span class="n">segmentation</span><span class="p">:</span> <span class="n">ArrayLike</span>
+    <span class="n">memory_geff</span><span class="p">:</span> <span class="n">InMemoryGeff</span><span class="p">,</span> <span class="n">segmentation</span><span class="p">:</span> <span class="n">ArrayLike</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 </code></pre></div>
 
@@ -1190,14 +1190,14 @@ segmentation data.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>store</code>
+                <code>memory_geff</code>
             </td>
             <td>
-                  <code>(<span title="DirectoryStore">DirectoryStore</span>, <span title="MemoryStore">MemoryStore</span>)</code>
+                  <code><span title="geff._typing.InMemoryGeff">InMemoryGeff</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A Zarr store or a path to one.</p>
+                <p>An InMemoryGeff to validate</p>
               </div>
             </td>
             <td>
@@ -1300,7 +1300,7 @@ segmentation data.</p>
 
 </h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">graph_is_in_seg_bounds</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">StoreLike</span><span class="p">,</span>
+    <span class="n">memory_geff</span><span class="p">:</span> <span class="n">InMemoryGeff</span><span class="p">,</span>
     <span class="n">segmentation</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">scale</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
@@ -1325,14 +1325,14 @@ segmentation data.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>store</code>
+                <code>memory_geff</code>
             </td>
             <td>
-                  <code>(<span title="DirectoryStore">DirectoryStore</span>, <span title="MemoryStore">MemoryStore</span>)</code>
+                  <code><span title="geff._typing.InMemoryGeff">InMemoryGeff</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A geff zarr store or a path to one.</p>
+                <p>An InMemoryGeff to validate</p>
               </div>
             </td>
             <td>
@@ -1608,7 +1608,7 @@ length as the number of dimensions in the segmentation data.</p>
     <span class="n">segmentation</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">time_points</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">seg_ids</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-    <span class="n">store</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="n">StoreLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 </code></pre></div>
 
@@ -1680,15 +1680,14 @@ this is not possible, it is assumed that time is on axis 0.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>store</code>
+                <code>metadata</code>
             </td>
             <td>
-                  <code>DirectoryStore, MemoryStore, | None = None</code>
+                  <code><a class="autorefs autorefs-internal" title="            GeffMetadata (geff.metadata._schema.GeffMetadata)" href="../../#geff.GeffMetadata">GeffMetadata</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional geff Zarr store or a
-path to one. If provided, it will attempt to read the axis order from the
+                <p>If provided, it will attempt to read the axis order from the
 metadata. Otherwise, it is assumed that the dimension order is t(z)yx.</p>
               </div>
             </td>
@@ -1766,7 +1765,7 @@ metadata. Otherwise, it is assumed that the dimension order is t(z)yx.</p>
 
 </h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">has_valid_seg_id</span><span class="p">(</span>
-    <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span> <span class="n">seg_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;seg_id&quot;</span>
+    <span class="n">memory_geff</span><span class="p">:</span> <span class="n">InMemoryGeff</span><span class="p">,</span> <span class="n">seg_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;seg_id&quot;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 </code></pre></div>
 
@@ -1788,14 +1787,14 @@ metadata. Otherwise, it is assumed that the dimension order is t(z)yx.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>store</code>
+                <code>memory_geff</code>
             </td>
             <td>
-                  <code>(<span title="DirectoryStore">DirectoryStore</span>, <span title="MemoryStore">MemoryStore</span>)</code>
+                  <code><span title="geff._typing.InMemoryGeff">InMemoryGeff</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A Zarr store or a path to one.</p>
+                <p>An InMemoryGeff to check for seg_id</p>
               </div>
             </td>
             <td>

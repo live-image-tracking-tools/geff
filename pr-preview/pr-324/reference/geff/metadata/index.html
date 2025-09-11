@@ -1180,7 +1180,7 @@ the OME-zarr spec, including channel dimensions if needed.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional, the unit for this axis. If the type is 'space' or 'time', we recommend utilzing the OME-NGFF spatial or temporal units respectively.</p>
+                <p>Optional, the unit for this axis. If the type is 'space' or 'time', we recommend utilizing the OME-NGFF spatial or temporal units respectively.</p>
               </div>
             </td>
             <td>
@@ -1450,7 +1450,7 @@ If not provided, the version will be set to the current geff package version.</p
             <td>
               <div class="doc-md-description">
                 <p>Optional list of <code>Axis</code> objects defining the axes of each node in the graph.
-Each object's <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> keymust be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information. Each axis can additionally optionally define a <code>unit</code> key, which should match the validOME-Zarr units, and <code>min</code> and <code>max</code> keys to define the range of the axis. See <a class="autorefs autorefs-internal" title="            Axis" href="#geff.metadata.Axis"><code>Axis</code></a> for more information.</p>
+Each object's <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> key must be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information. Each axis can additionally optionally define a <code>unit</code> key, which should match the valid OME-Zarr units, and <code>min</code> and <code>max</code> keys to define the range of the axis. See <a class="autorefs autorefs-internal" title="            Axis" href="#geff.metadata.Axis"><code>Axis</code></a> for more information.</p>
               </div>
             </td>
             <td>
@@ -1552,7 +1552,7 @@ properties.</p>
             <td>
               <div class="doc-md-description">
                 <p>Node properties denoting tracklet and/or lineage IDs.
-A tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1,and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.
+A tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1, and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.
 A lineage is defined as a weakly connected component on the graph.
 The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
               </div>
