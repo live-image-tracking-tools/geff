@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/pypi/l/geff.svg?color=green)](https://github.com/live-image-tracking-tools/geff/raw/main/LICENSE)
 [![geff PyPI](https://img.shields.io/pypi/v/geff?label=geff%20pypi&color=green)](https://pypi.org/project/geff)
-[![geff-spec PyPI](https://img.shields.io/pypi/v/geff?label=geff-spec%20pypi&color=green)](https://pypi.org/project/geff-spec)
+[![geff-spec PyPI](https://img.shields.io/pypi/v/geff-spec?label=geff-spec%20pypi&color=green)](https://pypi.org/project/geff-spec)
 [![Python Version](https://img.shields.io/pypi/pyversions/geff.svg?color=green)](https://python.org)
 [![Test geff](https://github.com/live-image-tracking-tools/geff/actions/workflows/ci.yaml/badge.svg)](https://github.com/live-image-tracking-tools/geff/actions/workflows/ci.yaml)
 [![Benchmarks](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://codspeed.io/live-image-tracking-tools/geff)

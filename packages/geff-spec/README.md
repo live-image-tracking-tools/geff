@@ -3,7 +3,7 @@
 # Graph Exchange File Format Specification
 
 [![License](https://img.shields.io/pypi/l/geff.svg?color=green)](https://github.com/live-image-tracking-tools/geff/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/geff.svg?color=green)](https://pypi.org/project/geff-spec)
+[![PyPI](https://img.shields.io/pypi/v/geff-spec.svg?color=green)](https://pypi.org/project/geff-spec)
 [![Python Version](https://img.shields.io/pypi/pyversions/geff-spec.svg?color=green)](https://python.org)
 
 GEFF is a specification for a file format for **exchanging** spatial graph data. It is not intended to be mutable, editable, chunked, or optimized for use in an application setting.
