@@ -99,7 +99,7 @@ class Axis(BaseModel):
 def _axes_from_lists(
     axis_names: Sequence[str] | None = None,
     axis_units: Sequence[str | None] | None = None,
-    axis_types: Sequence[str | None] | None = None,
+    axis_types: Sequence[Literal[AxisType] | None] | None = None,
     roi_min: Sequence[float | None] | None = None,
     roi_max: Sequence[float | None] | None = None,
 ) -> list[Axis]:
@@ -115,7 +115,7 @@ def _axes_from_lists(
             axes. Defaults to None.
         axis_units (list[str | None] | None, optional): Units corresponding to named properties.
             Defaults to None.
-        axis_types (list[str | None] | None, optional): Axis type for each property.
+        axis_types (list[Literal[AxisType] | None] | None, optional): Axis type for each property.
             Choose from "space", "time", "channel". Defaults to None.
         roi_min (list[float | None] | None, optional): Minimum value for each property.
             Defaults to None.
