@@ -125,10 +125,6 @@ class SgBackend(Backend):
     ) -> None:
         store = remove_tilde(store)
 
-        if len(graph) == 0:
-            warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
-            return
-
         if (axis_names is None) and (metadata is not None) and (metadata.axes is not None):
             axis_names = [axis.name for axis in metadata.axes]
         elif axis_names is not None:
