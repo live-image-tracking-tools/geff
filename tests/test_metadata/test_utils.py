@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from geff.metadata._schema import GeffMetadata, PropMetadata
-from geff.metadata.utils import create_or_update_props_metadata, create_prop_metadata
+from geff.metadata.utils import add_or_update_props_metadata, create_props_metadata
 
 
 class TestCreateOrUpdatePropsMetadata:
@@ -19,7 +19,7 @@ class TestCreateOrUpdatePropsMetadata:
             PropMetadata(identifier="prop1", dtype="int64"),
             PropMetadata(identifier="prop2", dtype="float32"),
         ]
-        result = create_or_update_props_metadata(metadata, props_md, "node")
+        result = add_or_update_props_metadata(metadata, props_md, "node")
         assert result.node_props_metadata == {
             "prop1": PropMetadata(identifier="prop1", dtype="int64"),
             "prop2": PropMetadata(identifier="prop2", dtype="float32"),
@@ -36,7 +36,7 @@ class TestCreateOrUpdatePropsMetadata:
             PropMetadata(identifier="prop1", dtype="float64"),
             PropMetadata(identifier="prop2", dtype="str"),
         ]
-        result = create_or_update_props_metadata(metadata, props_md, "edge")
+        result = add_or_update_props_metadata(metadata, props_md, "edge")
         assert result.edge_props_metadata == {
             "prop1": PropMetadata(identifier="prop1", dtype="float64"),
             "prop2": PropMetadata(identifier="prop2", dtype="str"),
@@ -53,7 +53,7 @@ class TestCreateOrUpdatePropsMetadata:
         props_md = [
             PropMetadata(identifier="new_prop", dtype="float64", name="New prop"),
         ]
-        result = create_or_update_props_metadata(metadata, props_md, "node")
+        result = add_or_update_props_metadata(metadata, props_md, "node")
         assert len(result.node_props_metadata) == 2
         assert "existing_prop" in result.node_props_metadata
         assert "new_prop" in result.node_props_metadata
@@ -71,7 +71,7 @@ class TestCreateOrUpdatePropsMetadata:
         props_md = [
             PropMetadata(identifier="new_edge_prop", dtype="str"),
         ]
-        result = create_or_update_props_metadata(metadata, props_md, "edge")
+        result = add_or_update_props_metadata(metadata, props_md, "edge")
         assert len(result.edge_props_metadata) == 2
         assert "existing_edge_prop" in result.edge_props_metadata
         assert "new_edge_prop" in result.edge_props_metadata
@@ -87,7 +87,7 @@ class TestCreateOrUpdatePropsMetadata:
         props_md = [
             PropMetadata(identifier="prop1", dtype="float64"),
         ]
-        result = create_or_update_props_metadata(metadata, props_md, "node")
+        result = add_or_update_props_metadata(metadata, props_md, "node")
         assert len(result.node_props_metadata) == 1
         assert result.node_props_metadata["prop1"].dtype == "float64"
 
@@ -99,7 +99,7 @@ class TestCreateOrUpdatePropsMetadata:
             node_props_metadata=existing_props,
             edge_props_metadata={},
         )
-        result = create_or_update_props_metadata(metadata, [], "node")
+        result = add_or_update_props_metadata(metadata, [], "node")
         assert len(result.node_props_metadata) == 1
         assert "existing_prop" in result.node_props_metadata
 
@@ -116,7 +116,7 @@ class TestCreateOrUpdatePropsMetadata:
             PropMetadata(identifier="newprop2", dtype="str"),
             PropMetadata(identifier="newprop3", dtype="bool"),
         ]
-        result = create_or_update_props_metadata(metadata, props_md, "edge")
+        result = add_or_update_props_metadata(metadata, props_md, "edge")
         assert len(result.edge_props_metadata) == 4
         assert "newprop" in result.edge_props_metadata
         assert "newprop1" in result.edge_props_metadata
@@ -137,7 +137,7 @@ class TestCreateOrUpdatePropsMetadata:
         )
         props_md = [PropMetadata(identifier="prop1", dtype="int64")]
         with pytest.raises(ValueError):
-            create_or_update_props_metadata(metadata, props_md, "invalid_type")
+            add_or_update_props_metadata(metadata, props_md, "invalid_type")
 
 
 class TestCreatePropMetadata:
@@ -148,7 +148,7 @@ class TestCreatePropMetadata:
         values = np.array([1, 2, 3, 4], dtype=np.int64)
         prop_data = {"values": values, "missing": None}
 
-        result = create_prop_metadata("test_prop", prop_data)
+        result = create_props_metadata("test_prop", prop_data)
 
         assert result.identifier == "test_prop"
         assert result.dtype == "int64"
@@ -163,7 +163,7 @@ class TestCreatePropMetadata:
         missing = np.array([False, False, True, False], dtype=bool)
         prop_data = {"values": values, "missing": missing}
 
-        result = create_prop_metadata("float_prop", prop_data, unit="meters", name="Distance")
+        result = create_props_metadata("float_prop", prop_data, unit="meters", name="Distance")
 
         assert result.identifier == "float_prop"
         assert result.dtype == "float32"
@@ -177,7 +177,7 @@ class TestCreatePropMetadata:
         values = np.array(["apple", "banana", "cherry"], dtype=np.str_)
         prop_data = {"values": values, "missing": None}
 
-        result = create_prop_metadata("fruit", prop_data, description="Types of fruit")
+        result = create_props_metadata("fruit", prop_data, description="Types of fruit")
 
         assert result.identifier == "fruit"
         assert np.issubdtype(result.dtype, "U")
@@ -193,7 +193,7 @@ class TestCreatePropMetadata:
         arr3 = np.array([6], dtype=np.int32)
         prop_data = {"values": np.array([arr1, arr2, arr3], dtype=object)}
 
-        result = create_prop_metadata("varlen_prop", prop_data)
+        result = create_props_metadata("varlen_prop", prop_data)
 
         assert result.identifier == "varlen_prop"
         assert result.dtype == "int32"
@@ -210,7 +210,7 @@ class TestCreatePropMetadata:
             "missing": np.array([0, 1, 0], dtype=bool),
         }
 
-        result = create_prop_metadata("sparse_varlen", prop_data, unit="kg")
+        result = create_props_metadata("sparse_varlen", prop_data, unit="kg")
 
         assert result.identifier == "sparse_varlen"
         assert result.dtype == "float64"
@@ -228,21 +228,21 @@ class TestCreatePropMetadata:
         with pytest.raises(
             ValueError, match="Object array containing variable length properties has two dtypes.*"
         ):
-            create_prop_metadata("mixed_dtype", prop_data)
+            create_props_metadata("mixed_dtype", prop_data)
 
     def test_invalid_prop_data_raises_error(self):
         """Test that invalid property data raises ValueError."""
         invalid_data = "not_valid_data"
 
         with pytest.raises(ValueError, match="Expected dict of property data, got.*"):
-            create_prop_metadata("invalid", invalid_data)
+            create_props_metadata("invalid", invalid_data)
 
     def test_all_optional_parameters(self):
         """Test creating PropMetadata with all optional parameters provided."""
         values = np.array([True, False, True], dtype=bool)
         prop_data = {"values": values, "missing": None}
 
-        result = create_prop_metadata(
+        result = create_props_metadata(
             identifier="bool_prop",
             prop_data=prop_data,
             unit="boolean",
