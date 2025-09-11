@@ -73,6 +73,8 @@ from geff.metadata.utils import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from numpy.typing import NDArray
 
     from geff._typing import InMemoryGeff, PropDictNpArray
@@ -94,8 +96,8 @@ def create_dummy_in_mem_geff(
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
-    extra_edge_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
+    extra_node_props: Mapping[str, DTypeStr | NDArray[Any]] | None = None,
+    extra_edge_props: Mapping[str, DTypeStr | NDArray[Any]] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,
@@ -382,8 +384,8 @@ def create_mock_geff(
     directed: bool,
     num_nodes: int = 5,
     num_edges: int = 4,
-    extra_node_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
-    extra_edge_props: dict[str, DTypeStr | NDArray[Any]] | None = None,
+    extra_node_props: Mapping[str, DTypeStr | NDArray[Any]] | None = None,
+    extra_edge_props: Mapping[str, DTypeStr | NDArray[Any]] | None = None,
     include_t: bool = True,
     include_z: bool = True,
     include_y: bool = True,

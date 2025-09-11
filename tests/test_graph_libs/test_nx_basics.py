@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import zarr
 
-import geff
+from geff._graph_libs._networkx import NxBackend
 from geff.metadata import GeffMetadata
 from geff.metadata.utils import axes_from_lists
 from geff.testing.data import create_mock_geff
@@ -45,7 +45,7 @@ def test_read_consistency(
         include_z=include_z,
     )
 
-    graph, _ = geff.read_nx(store)
+    graph, _ = NxBackend.read(store)
 
     # Check that in memory representation is consistent with what we expected to have from fixture
     assert set(graph.nodes) == {*memory_geff["node_ids"].tolist()}
@@ -101,9 +101,9 @@ def test_read_write_no_spatial(
 
     path = tmp_path / "rw_consistency.zarr/graph"
 
-    geff.write_nx(graph, path, axis_names=[])
+    NxBackend.write(graph, path, axis_names=[])
 
-    compare, _ = geff.read_nx(path)
+    compare, _ = NxBackend.read(path)
 
     assert set(graph.nodes) == set(compare.nodes)
     assert set(graph.edges) == set(compare.edges)
@@ -117,7 +117,7 @@ def test_read_write_no_spatial(
 
 def test_write_empty_graph(tmp_path) -> None:
     graph = nx.DiGraph()
-    geff.write_nx(graph, axis_names=["t", "y", "x"], store=tmp_path / "empty.zarr")
+    NxBackend.write(graph, axis_names=["t", "y", "x"], store=tmp_path / "empty.zarr")
 
 
 def test_write_nx_with_metadata(tmp_path) -> None:
@@ -139,12 +139,13 @@ def test_write_nx_with_metadata(tmp_path) -> None:
     metadata = GeffMetadata(geff_version="0.3.0", directed=False, axes=axes)
 
     path = tmp_path / "metadata_test.zarr"
-    geff.write_nx(graph, path, metadata=metadata)
+    NxBackend.write(graph, path, metadata=metadata)
 
     # Read it back and verify metadata is preserved
-    _, read_metadata = geff.read_nx(path)
+    _, read_metadata = NxBackend.read(path)
 
     assert not read_metadata.directed
+    assert read_metadata.axes is not None
     assert len(read_metadata.axes) == 2
     assert read_metadata.axes[0].name == "x"
     assert read_metadata.axes[1].name == "y"
@@ -175,8 +176,8 @@ def test_write_nx_metadata_extra_properties(tmp_path) -> None:
     )
     path = tmp_path / "extra_properties_test.zarr"
 
-    geff.write_nx(graph, path, metadata=metadata)
-    _, compare = geff.read_nx(path)
+    NxBackend.write(graph, path, metadata=metadata)
+    _, compare = NxBackend.read(path)
     assert compare.extra["foo"] == "bar"
     assert compare.extra["bar"]["baz"] == "qux"
 
@@ -199,7 +200,7 @@ def test_write_nx_metadata_override_precedence(tmp_path) -> None:
 
     # Should log warning when both metadata and axis lists are provided
     with pytest.warns(UserWarning):
-        geff.write_nx(
+        NxBackend.write(
             graph,
             store=path,
             metadata=metadata,
@@ -209,7 +210,8 @@ def test_write_nx_metadata_override_precedence(tmp_path) -> None:
         )
 
     # Verify that axis lists took precedence
-    _, read_metadata = geff.read_nx(path)
+    _, read_metadata = NxBackend.read(path)
+    assert read_metadata.axes is not None
     assert len(read_metadata.axes) == 3
     axis_names = [axis.name for axis in read_metadata.axes]
     axis_units = [axis.unit for axis in read_metadata.axes]
@@ -230,30 +232,30 @@ def test_write_nx_different_store_types(tmp_path) -> None:
 
     # Test 1: Path object
     path_store = tmp_path / "test_path.zarr"
-    geff.write_nx(graph, path_store, axis_names=["x", "y"])
+    NxBackend.write(graph, path_store, axis_names=["x", "y"])
 
     # Verify it was written correctly
-    graph_read, _ = geff.read_nx(path_store)
+    graph_read, _ = NxBackend.read(path_store)
     assert len(graph_read.nodes) == 2
     assert len(graph_read.edges) == 1
     assert (1, 2) in graph_read.edges
 
     # Test 2: String path
     string_store = str(tmp_path / "test_string.zarr")
-    geff.write_nx(graph, string_store, axis_names=["x", "y"])
+    NxBackend.write(graph, string_store, axis_names=["x", "y"])
 
     # Verify it was written correctly
-    graph_read, _ = geff.read_nx(string_store)
+    graph_read, _ = NxBackend.read(string_store)
     assert len(graph_read.nodes) == 2
     assert len(graph_read.edges) == 1
     assert (1, 2) in graph_read.edges
 
     # Test 3: Zarr MemoryStore
     memory_store = zarr.storage.MemoryStore()
-    geff.write_nx(graph, memory_store, axis_names=["x", "y"])
+    NxBackend.write(graph, memory_store, axis_names=["x", "y"])
 
     # Verify it was written correctly
-    graph_read, _ = geff.read_nx(memory_store)
+    graph_read, _ = NxBackend.read(memory_store)
     assert len(graph_read.nodes) == 2
     assert len(graph_read.edges) == 1
     assert (1, 2) in graph_read.edges

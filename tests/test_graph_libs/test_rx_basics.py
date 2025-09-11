@@ -2,12 +2,13 @@ import numpy as np
 import pytest
 import zarr
 
-import geff
 from geff.metadata import GeffMetadata
 from geff.metadata.utils import axes_from_lists
 from geff.testing.data import create_mock_geff
 
 rx = pytest.importorskip("rustworkx")
+
+from geff._graph_libs._rustworkx import RxBackend  # noqa: E402
 
 node_id_dtypes = ["uint8", "uint16"]
 node_axis_dtypes = [
@@ -88,7 +89,7 @@ def test_read_write_consistency(
     )
 
     # Read with rustworkx backend
-    graph, _ = geff.read_rx(store)
+    graph, _ = RxBackend.read(store)
 
     # Verify basic structure matches the mock data
     assert graph.num_nodes() == len(memory_geff["node_ids"])
@@ -153,9 +154,9 @@ def test_read_write_no_spatial_rx(
 
     path = tmp_path / "rw_consistency.zarr/graph"
 
-    geff.write_rx(graph, path, node_id_dict=node_id_dict, axis_names=[])
+    RxBackend.write(graph, path, node_id_dict=node_id_dict, axis_names=[])
 
-    compare, _ = geff.read_rx(path)
+    compare, _ = RxBackend.read(path)
 
     assert compare.num_nodes() == graph.num_nodes()
     assert compare.num_edges() == graph.num_edges()
@@ -183,10 +184,10 @@ def test_read_write_consistency_rx(tmp_path, directed, include_t, include_z) -> 
     node_id_dict = {idx: idx + 10 for idx in node_indices}
 
     # Write the graph
-    geff.write_rx(graph, path, node_id_dict=node_id_dict, axis_names=axis_names)
+    RxBackend.write(graph, path, node_id_dict=node_id_dict, axis_names=axis_names)
 
     # Read it back
-    read_graph, metadata = geff.read_rx(path)
+    read_graph, metadata = RxBackend.read(path)
 
     assert rx.is_isomorphic(graph, read_graph)
 
@@ -197,6 +198,7 @@ def test_read_write_consistency_rx(tmp_path, directed, include_t, include_z) -> 
 
     # Check metadata
     assert metadata.directed == directed
+    assert metadata.axes is not None
     assert len(metadata.axes) == len(axis_names)
 
 
@@ -206,10 +208,10 @@ def test_write_empty_graph_rx(tmp_path) -> None:
     path = tmp_path / "empty.zarr"
 
     with pytest.warns(UserWarning, match="Graph is empty - only writing metadata"):
-        geff.write_rx(graph, path, axis_names=["t", "y", "x"])
+        RxBackend.write(graph, path, axis_names=["t", "y", "x"])
 
     # Should be able to read it back
-    read_graph, metadata = geff.read_rx(path)
+    read_graph, metadata = RxBackend.read(path)
     assert read_graph.num_nodes() == 0
     assert read_graph.num_edges() == 0
 
@@ -231,10 +233,10 @@ def test_write_rx_with_metadata(tmp_path) -> None:
 
     path = tmp_path / "metadata_test.zarr"
     with pytest.warns(UserWarning, match="Both axis lists and metadata provided"):
-        geff.write_rx(graph, path, metadata=metadata, axis_names=["x", "y"])
+        RxBackend.write(graph, path, metadata=metadata, axis_names=["x", "y"])
 
     # Read it back and verify metadata is preserved
-    _, read_metadata = geff.read_rx(path)
+    _, read_metadata = RxBackend.read(path)
 
     assert not read_metadata.directed
     assert len(read_metadata.axes) == 2
@@ -263,8 +265,8 @@ def test_write_rx_metadata_extra_properties(tmp_path) -> None:
     path = tmp_path / "extra_properties_test.zarr"
 
     with pytest.warns(UserWarning, match="Both axis lists and metadata provided"):
-        geff.write_rx(graph, path, metadata=metadata, axis_names=["x", "y"])
-    _, read_metadata = geff.read_rx(path)
+        RxBackend.write(graph, path, metadata=metadata, axis_names=["x", "y"])
+    _, read_metadata = RxBackend.read(path)
     assert read_metadata.extra["foo"] == "bar"
     assert read_metadata.extra["bar"]["baz"] == "qux"
 
@@ -286,7 +288,7 @@ def test_write_rx_metadata_override_precedence(tmp_path) -> None:
 
     # Should log warning when both metadata and axis lists are provided
     with pytest.warns(UserWarning):
-        geff.write_rx(
+        RxBackend.write(
             graph,
             store=path,
             metadata=metadata,
@@ -296,7 +298,7 @@ def test_write_rx_metadata_override_precedence(tmp_path) -> None:
         )
 
     # Verify that axis lists took precedence
-    _, read_metadata = geff.read_rx(path)
+    _, read_metadata = RxBackend.read(path)
     assert len(read_metadata.axes) == 4
     axis_names = [axis.name for axis in read_metadata.axes]
     axis_units = [axis.unit for axis in read_metadata.axes]
@@ -314,27 +316,27 @@ def test_write_rx_different_store_types(tmp_path) -> None:
 
     # Test 1: Path object
     path_store = tmp_path / "test_path.zarr"
-    geff.write_rx(graph, path_store, axis_names=["x", "y"])
+    RxBackend.write(graph, path_store, axis_names=["x", "y"])
 
     # Verify it was written correctly
-    graph_read, _ = geff.read_rx(path_store)
+    graph_read, _ = RxBackend.read(path_store)
     assert graph_read.num_nodes() == 3
     assert graph_read.num_edges() == 2
 
     # Test 2: String path
     string_store = str(tmp_path / "test_string.zarr")
-    geff.write_rx(graph, string_store, axis_names=["x", "y"])
+    RxBackend.write(graph, string_store, axis_names=["x", "y"])
 
     # Verify it was written correctly
-    graph_read, _ = geff.read_rx(string_store)
+    graph_read, _ = RxBackend.read(string_store)
     assert graph_read.num_nodes() == 3
     assert graph_read.num_edges() == 2
 
     # Test 3: Zarr MemoryStore
     memory_store = zarr.storage.MemoryStore()
-    geff.write_rx(graph, memory_store, axis_names=["x", "y"])
+    RxBackend.write(graph, memory_store, axis_names=["x", "y"])
 
     # Verify it was written correctly
-    graph_read, _ = geff.read_rx(memory_store)
+    graph_read, _ = RxBackend.read(memory_store)
     assert graph_read.num_nodes() == 3
     assert graph_read.num_edges() == 2
