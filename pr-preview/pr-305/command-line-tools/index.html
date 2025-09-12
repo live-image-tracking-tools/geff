@@ -385,6 +385,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#convert-to-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      convert-to-csv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#convert-trackmate-xml" class="md-nav__link">
     <span class="md-ellipsis">
       convert-trackmate-xml
@@ -1103,6 +1112,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#convert-to-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      convert-to-csv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#convert-trackmate-xml" class="md-nav__link">
     <span class="md-ellipsis">
       convert-trackmate-xml
@@ -1207,6 +1225,15 @@
   --overwrite / --no-overwrite  Whether to overwrite the GEFF file if it
                                 already exists.  \[default: no-overwrite]
   --zarr-format INTEGER         The version of zarr to write.  \[default: 2]
+</code></pre></div>
+<h3 id="convert-to-csv">convert-to-csv</h3>
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code> convert-to-csv [OPTIONS] STORE OUTPATH
+</code></pre></div>
+<p>Options:</p>
+<div class="highlight"><pre><span></span><code>  STORE    Path to geff group to convert  \[required]
+  OUTPATH  Path to save output csvs. Any file extension will be stripped and
+           replaced with &#39;-nodes.csv&#39; and &#39;-edges.csv&#39;  \[required]
 </code></pre></div>
 <h3 id="convert-trackmate-xml">convert-trackmate-xml</h3>
 <p>Convert a TrackMate XML file to a GEFF file.</p>
