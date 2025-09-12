@@ -22,15 +22,21 @@
       "type": "object"
     },
     "Axis": {
-      "description": "The spatiotemporal axes representing the position of a node in space.\n\nThe axes list is modeled after the OME-zarr specifications. If the same names are\nused in the axes metadata of the related image or segmentation data,\napplications can use this information to align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. Any downstream properties that are\nan array of values with one value per (spatial) axis will be in the order of the axis\nlist (filtering to only the spatial axes by the type field if needed).",
+      "description": "The axes list is modeled after the\n[OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)\nspecifications and is used to identify spatio-temporal properties on the\ngraph nodes. If the same names are used in the axes metadata of the\nrelated image or segmentation data, applications can use this information\nto align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. For one, any downstream\nproperties that are an array of values with one value per (spatial) axis\nwill be in the order of the axis list (filtering to only the spatial axes by\nthe `type` field if needed). Secondly, if associated image or segmentation\ndata does not have axes metadata, the order of the spatiotemporal axes is a\ngood default guess for aligning the graph and the image data, although there\nis no way to denote the channel dimension in the graph spec. If you are\nwriting out a geff with an associated segmentation and/or image dataset, we\nhighly recommend providing the axis names for your segmentation/image using\nthe OME-zarr spec, including channel dimensions if needed.",
       "properties": {
         "name": {
+          "description": "Name of the corresponding node property",
           "title": "Name",
           "type": "string"
         },
         "type": {
           "anyOf": [
             {
+              "enum": [
+                "space",
+                "time",
+                "channel"
+              ],
               "type": "string"
             },
             {
@@ -38,6 +44,7 @@
             }
           ],
           "default": null,
+          "description": "The type of data encoded in this axis, one of ('space', 'time', 'channel') or None",
           "title": "Type"
         },
         "unit": {
@@ -46,10 +53,70 @@
               "type": "string"
             },
             {
+              "enum": [
+                "angstrom",
+                "attometer",
+                "centimeter",
+                "decimeter",
+                "exameter",
+                "femtometer",
+                "foot",
+                "gigameter",
+                "hectometer",
+                "inch",
+                "kilometer",
+                "megameter",
+                "meter",
+                "micrometer",
+                "mile",
+                "millimeter",
+                "nanometer",
+                "parsec",
+                "petameter",
+                "picometer",
+                "terameter",
+                "yard",
+                "yoctometer",
+                "yottameter",
+                "zeptometer",
+                "zettameter"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "attosecond",
+                "centisecond",
+                "day",
+                "decisecond",
+                "exasecond",
+                "femtosecond",
+                "gigasecond",
+                "hectosecond",
+                "hour",
+                "kilosecond",
+                "megasecond",
+                "microsecond",
+                "millisecond",
+                "minute",
+                "nanosecond",
+                "petasecond",
+                "picosecond",
+                "second",
+                "terasecond",
+                "yoctosecond",
+                "yottasecond",
+                "zeptosecond",
+                "zettasecond"
+              ],
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
           "default": null,
+          "description": "Optional, the unit for this axis. If the type is 'space' or 'time', we recommend utilizing the OME-NGFF spatial or temporal units respectively.",
           "title": "Unit"
         },
         "min": {
@@ -62,6 +129,7 @@
             }
           ],
           "default": null,
+          "description": "Optional, the minimum value for this axis.",
           "title": "Min"
         },
         "max": {
@@ -74,6 +142,7 @@
             }
           ],
           "default": null,
+          "description": "Optional, the minimum value for this axis.",
           "title": "Max"
         }
       },
