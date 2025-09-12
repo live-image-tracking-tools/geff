@@ -156,8 +156,14 @@ class TestWriteArrays:
         memory_geff: InMemoryGeff
         store, memory_geff = data_func()
         path = tmp_path / "test.geff"
-        write_arrays(path, **memory_geff, zarr_format=zarr_format)
-        check_equiv_geff(store, path)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                category=UserWarning,
+                message="Requesting zarr spec v3 with zarr-python v2.*",
+            )
+            write_arrays(path, **memory_geff, zarr_format=zarr_format)
+            check_equiv_geff(store, path)
 
 
 @pytest.mark.parametrize(
