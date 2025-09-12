@@ -2,14 +2,12 @@ import numpy as np
 import pytest
 
 import geff.validate.data
-from geff.core_io._base_read import read_to_memory
 from geff.testing.data import create_mock_geff, create_simple_2d_geff
 from geff.validate.data import ValidationConfig, validate_data
 
 
 class Test_validate_data:
-    store, attrs = create_simple_2d_geff()
-    memory_geff = read_to_memory(store)
+    store, memory_geff = create_simple_2d_geff()
 
     def test_valid_graph(self):
         # test valid

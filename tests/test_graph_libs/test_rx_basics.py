@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 import zarr
 
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
+from geff.metadata import GeffMetadata
+from geff.metadata.utils import axes_from_lists
 from geff.testing.data import create_mock_geff
 
 rx = pytest.importorskip("rustworkx")
@@ -221,14 +222,20 @@ def test_write_rx_with_metadata(tmp_path) -> None:
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
     # Create metadata object
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
         roi_min=(1.0, 2.0),
         roi_max=(3.0, 4.0),
     )
-    metadata = GeffMetadata(geff_version="0.3.0", directed=False, axes=axes)
+    metadata = GeffMetadata(
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        node_props_metadata={},
+        edge_props_metadata={},
+    )
 
     path = tmp_path / "metadata_test.zarr"
     with pytest.warns(UserWarning, match="Both axis lists and metadata provided"):
@@ -250,7 +257,7 @@ def test_write_rx_metadata_extra_properties(tmp_path) -> None:
 
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -260,6 +267,8 @@ def test_write_rx_metadata_extra_properties(tmp_path) -> None:
         directed=False,
         axes=axes,
         extra={"foo": "bar", "bar": {"baz": "qux"}},
+        node_props_metadata={},
+        edge_props_metadata={},
     )
     path = tmp_path / "extra_properties_test.zarr"
 
@@ -276,12 +285,18 @@ def test_write_rx_metadata_override_precedence(tmp_path) -> None:
     graph, node_indices = create_rustworkx_graph(directed=False, include_t=True, include_z=True)
 
     # Create metadata with one set of axes
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
     )
-    metadata = GeffMetadata(geff_version="0.3.0", directed=False, axes=axes)
+    metadata = GeffMetadata(
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        node_props_metadata={},
+        edge_props_metadata={},
+    )
 
     path = tmp_path / "override_test.zarr"
 

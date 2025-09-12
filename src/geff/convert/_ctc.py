@@ -22,7 +22,7 @@ from zarr.storage import StoreLike
 
 import geff
 from geff.core_io import write_arrays
-from geff.metadata._schema import Axis, GeffMetadata
+from geff.metadata import Axis, GeffMetadata
 
 
 def ctc_tiffs_to_zarr(
@@ -209,6 +209,8 @@ def from_ctc_to_geff(
             geff_version=geff.__version__,
             axes=axis_names,
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
         ),
         zarr_format=zarr_format,
     )
