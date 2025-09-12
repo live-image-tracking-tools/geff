@@ -21,25 +21,28 @@ theme:
   #   scheme: slate
   #   primary: purple
   #   accent: purple
+  features:
+    - navigation.indexes
 
-extra_css:
-  - css/schema_doc.css
 extra_javascript:
-  - js/schema_doc.min.js
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+extra_css:
+  - css/extra.css
 
 extra:
   version:
     provider: mike
     default: latest
 
-hooks:
-  - docs/_hooks.py
-
 markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
   - mkdocs-typer
+  - pymdownx.arithmatex:
+      generic: true
+
 
 plugins:
 - search
@@ -50,9 +53,9 @@ plugins:
           - https://docs.python.org/3/objects.inv
           - https://networkx.org/documentation/stable/objects.inv
         options:
-          docstring_section_style: table # or "table"
+          docstring_section_style: table # "list" or "table"
           docstring_style: "google"
-    #       filters: ["!^_"]
+          filters: ["!_^"]
           heading_level: 3 
           merge_init_into_class: true
           # parameter_headings: true # makes parameters show up in side TOC
@@ -64,7 +67,13 @@ plugins:
           show_symbol_type_toc: true
           # summary: true
           line_length: 60
+          show_docstring_attributes: true
+          show_attribute_values: true
+          show_labels: false
+          extensions:
+          - griffe_fieldz
 - include-markdown
 - api-autonav:
+    nav_section_title: "Python API"
     modules: ['src/geff']
 - autorefs
