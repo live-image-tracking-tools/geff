@@ -116,20 +116,9 @@ def add_or_update_props_metadata(
     md_dict = {prop.identifier: prop for prop in props_md}
     match c_type:
         case "node":
-            md_to_update = metadata.node_props_metadata
+            metadata.node_props_metadata.update(md_dict)
         case "edge":
-            md_to_update = metadata.edge_props_metadata
-
-    if md_to_update is None:
-        md_to_update = md_dict
-    else:
-        md_to_update.update(md_dict)
-
-    match c_type:
-        case "node":
-            metadata.node_props_metadata = md_to_update
-        case "edge":
-            metadata.edge_props_metadata = md_to_update
+            metadata.edge_props_metadata.update(md_dict)
 
     return metadata
 

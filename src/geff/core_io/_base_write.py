@@ -238,8 +238,8 @@ def write_arrays(
     else:
         edge_meta = []
 
-    add_or_update_props_metadata(metadata, node_meta, "node")
-    add_or_update_props_metadata(metadata, edge_meta, "edge")
+    metadata = add_or_update_props_metadata(metadata, node_meta, "node")
+    metadata = add_or_update_props_metadata(metadata, edge_meta, "edge")
     metadata.write(geff_store)
 
 

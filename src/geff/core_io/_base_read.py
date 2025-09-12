@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -202,8 +203,21 @@ class GeffReader:
                 "missing": missing,
             }
 
+        # we have to remove the unused properties from the props_metadata
+        output_metadata = copy.deepcopy(self.metadata)
+
+        all_node_props = self.metadata.node_props_metadata.keys()
+        for prop in all_node_props:
+            if prop not in self.node_props.keys():
+                del output_metadata.node_props_metadata[prop]
+
+        all_edge_props = self.metadata.edge_props_metadata.keys()
+        for prop in all_edge_props:
+            if prop not in self.edge_props.keys():
+                del output_metadata.edge_props_metadata[prop]
+
         return {
-            "metadata": self.metadata,
+            "metadata": output_metadata,
             "node_ids": nodes,
             "node_props": node_props,
             "edge_ids": edges,
