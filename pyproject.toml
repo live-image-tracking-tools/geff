@@ -44,12 +44,13 @@ ctc = [
     "tifffile>=2024.10",
 ]
 rx = ["rustworkx>=0.16.0"]
+pandas = ["pandas>=2","pandas>=2.3; python_version >= '3.12'"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
 test-third-party = [
     { include-group = "test" },
-    "geff[spatial-graph,ctc,rx]",
+    "geff[spatial-graph,ctc,rx,pandas]",
     "lxml>=6.0.0",
 ]
 dev = [
@@ -72,7 +73,7 @@ docs = [
     "typer>=0.14.0,<0.17.0",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
-    "mkdocs-autorefs",
+    "mkdocs-autorefs>=1",
     "griffe-fieldz",
 ]
 bench = [
