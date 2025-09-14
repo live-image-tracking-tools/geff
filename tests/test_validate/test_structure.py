@@ -8,10 +8,9 @@ import zarr
 import zarr.storage
 
 from geff import _path, validate_structure
-from geff.core_io._base_read import read_to_memory
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import expect_group, open_storelike
-from geff.metadata._schema import GeffMetadata
+from geff.metadata._schema import GeffMetadata, PropMetadata
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
     create_mock_geff,
@@ -83,6 +82,8 @@ class TestValidateStructure:
         ):
             validate_structure(z.store)
 
+    # other cases are tested in validate_nodes_group and validate_edges_group
+
 
 class Test_validate_nodes_group:
     def test_no_node_ids(self, node_group, meta):
@@ -149,7 +150,7 @@ class Test_validate_edges_group:
 
 
 class Test_validate_props_group:
-    def test_node_prop_no_values(self, node_group):
+    def test_node_prop_no_values(self, node_group, meta):
         # Subgroups in props must have values
         key = "t"
         del node_group[_path.PROPS][key][_path.VALUES]
@@ -157,9 +158,9 @@ class Test_validate_props_group:
         with pytest.raises(
             ValueError, match=f"Node property group '{key}' must have a '{_path.VALUES}' array"
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
-    def test_node_prop_shape_mismatch(self, node_group):
+    def test_node_prop_shape_mismatch(self, node_group, meta):
         # Property shape mismatch
         key = "badshape"
         node_group[f"{_path.PROPS}/{key}/{_path.VALUES}"] = np.zeros(1)
@@ -170,9 +171,9 @@ class Test_validate_props_group:
                 f"Node property '{key}' values has length {1}, which does not match id length .*"
             ),
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
-    def test_node_prop_missing_mismatch(self, node_group):
+    def test_node_prop_missing_mismatch(self, node_group, meta):
         # Property missing shape mismatch
         key = "t"
         node_group[f"{_path.PROPS}/{key}/{_path.MISSING}"] = np.zeros(shape=(1))
@@ -184,9 +185,9 @@ class Test_validate_props_group:
                 "which does not match id length .*"
             ),
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
-    def test_missing_dtype(self, node_group):
+    def test_missing_dtype(self, node_group, meta):
         # missing arrays must be boolean
         key = "score"
         node_group[f"{_path.PROPS}/{key}/{_path.MISSING}"] = np.zeros(
@@ -195,7 +196,29 @@ class Test_validate_props_group:
         id_len = node_group[_path.IDS].shape[0]
 
         with pytest.raises(ValueError, match=f"Node property '{key}' missing must be boolean"):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node")
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+
+    def test_missing_prop_metadata(self, node_group):
+        id_len = node_group[_path.IDS].shape[0]
+        with pytest.raises(ValueError, match="Property .* is missing from the property metadata"):
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", {})
+
+    def test_extra_prop_metadata(self, node_group, meta):
+        meta.node_props_metadata["extra"] = PropMetadata(identifier="extra", dtype="int")
+        id_len = node_group[_path.IDS].shape[0]
+        with pytest.raises(
+            ValueError, match="Property .* is in the metadata but missing from the property group"
+        ):
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+
+    def test_mismatched_dtype_prop_metadata(self, node_group, meta):
+        id_len = node_group[_path.IDS].shape[0]
+        x_meta = meta.node_props_metadata["x"]
+        x_meta.dtype = "uint64"
+        meta.node_props_metadata["x"] = x_meta
+
+        with pytest.raises(ValueError, match="Property .* has stated dtype .* but actual dtype .*"):
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
 
 def test_open_storelike(tmp_path):
@@ -222,7 +245,7 @@ def test_open_storelike(tmp_path):
 
 class Test_check_equiv_geff:
     store, attrs = create_simple_2d_geff(num_nodes=10, num_edges=15)
-    in_mem = read_to_memory(store)
+    in_mem = attrs
 
     def _write_new_store(self, in_mem):
         store = zarr.storage.MemoryStore()
@@ -242,6 +265,10 @@ class Test_check_equiv_geff:
     def test_props_mismatch(self):
         bad_mem = copy.deepcopy(self.in_mem)
         bad_mem["node_props"]["new prop"] = bad_mem["node_props"]["t"]
+        bad_mem["metadata"].node_props_metadata["new prop"] = PropMetadata(
+            identifier="new prop", dtype="uint64"
+        )
+        print(bad_mem["metadata"].node_props_metadata)
         bad_store = self._write_new_store(bad_mem)
         with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
             check_equiv_geff(self.store, bad_store)
@@ -281,6 +308,7 @@ class Test_validate_axes_structure:
     def test_missing_axes_prop(self, z, meta):
         key = "x"
         del z[_path.NODE_PROPS][key]
+        del meta.node_props_metadata["x"]
         with pytest.raises(AssertionError, match=f"Axis {key} data is missing"):
             _validate_axes_structure(z, meta)
 
