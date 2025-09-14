@@ -42,7 +42,7 @@ class PropMetadata(BaseModel):
         default=False,
         description="True if the property contains variable length arrays. Variable length "
         "arrays cannot be of dtype string (e.g. you cannot have a property where each "
-        "node has a string array)",
+        "node has an array of strings)",
     )
     unit: str | None = Field(
         default=None,
