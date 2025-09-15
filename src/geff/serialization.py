@@ -1,9 +1,9 @@
 from collections.abc import Sequence
-from typing import cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from zarr import Group
+
+from geff._typing import PropDictNpArray
 
 
 def serialize_vlen_property_data_as_dict(
@@ -84,10 +84,10 @@ def serialize_vlen_property_data(
 
 def _deserialize_vlen_array(
     values: NDArray,
-    missing: NDArray | None,
+    missing: NDArray[np.bool_] | None,
     data: NDArray,
     index: int,
-) -> NDArray | None:
+) -> NDArray:
     """
     Deserialize a variable-length array from the data and values arrays.
 
@@ -106,30 +106,17 @@ def _deserialize_vlen_array(
     if index < 0 or index >= values.shape[0]:
         raise IndexError(f"Index {index} out of bounds for property data.")
     if missing is not None and missing[index]:
-        return None
+        return np.zeros(shape=(0,), dtype=values.dtype)
     offset = values[index][0]
     shape = values[index][1:]
     return data[offset : offset + np.prod(shape)].reshape(shape)
 
 
-@overload
 def deserialize_vlen_property_data(
-    vlen_props: Group | dict[str, NDArray | None],
-    index: int,
-) -> NDArray | None: ...
-
-
-@overload
-def deserialize_vlen_property_data(
-    vlen_props: Group | dict[str, NDArray | None],
-    index: None = None,
-) -> Sequence[NDArray | None]: ...
-
-
-def deserialize_vlen_property_data(
-    vlen_props: Group | dict[str, NDArray | None],
-    index: int | None = None,
-) -> NDArray | Sequence[NDArray | None] | None:
+    values: NDArray,
+    missing: NDArray[np.bool_] | None,
+    data: NDArray,
+) -> PropDictNpArray:
     """
     Get deserialized vlen property data for a specific property name.
 
@@ -142,23 +129,7 @@ def deserialize_vlen_property_data(
         NDArray | Sequence[NDArray | None] | None: The deserialized vlen property data, or None if
             the indexed item is missing.
     """
-    if "values" not in vlen_props:
-        raise ValueError(f"Group {vlen_props} does not contain 'values'.")
-    if "data" not in vlen_props:
-        raise ValueError(f"Group {vlen_props} does not contain 'data'.")
-    data = cast("NDArray", vlen_props["data"])
-    values = cast("NDArray", vlen_props["values"])
-    if "missing" in vlen_props:
-        missing = cast("NDArray | None", vlen_props["missing"])
-        if missing is not None and missing.shape[0] != values.shape[0]:
-            raise ValueError(
-                f"Length of 'missing' ({missing.shape[0]}) does not match length of 'values'"
-                + f"({values.shape[0]})."
-            )
-    else:
-        missing = None
-
-    if index is not None:
-        return _deserialize_vlen_array(values, missing, data, index)
-
-    return [_deserialize_vlen_array(values, missing, data, i) for i in range(values.shape[0])]
+    decoded_values = [
+        _deserialize_vlen_array(values, missing, data, i) for i in range(values.shape[0])
+    ]
+    return {"values": decoded_values, "missing": missing}

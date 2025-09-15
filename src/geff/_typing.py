@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -35,34 +35,18 @@ class PropDictNpArray(TypedDict):
     Variable length properties should have object dtype for their values array
     """
 
-    values: NDArray[Any]
+    values: NDArray[Any] | Sequence[NDArray[Any]]
     missing: NDArray[np.bool_] | None
 
 
-class PropDictSequence(TypedDict):
-    """
-    A prop dictionary which has the variable length "values", stored as list or tuple.
-    """
-
-    values: Sequence[NDArray[Any] | None]
-
-
-class ZarrNormalProp(TypedDict):
+class ZarrPropDict(TypedDict):
     """
     A prop dictionary which has the keys "values" and optionally "missing", stored as zarr arrays.
     """
 
     values: zarr.Array
     missing: NotRequired[zarr.Array]
-
-
-class ZarrVarLenProp(TypedDict):
-    values: zarr.Array
-    missing: NotRequired[zarr.Array]
-    data: zarr.Array
-
-
-ZarrProp: TypeAlias = ZarrNormalProp | ZarrVarLenProp
+    data: NotRequired[zarr.Array]
 
 
 # Intermediate dict format that can be constructed to different backend types
@@ -74,5 +58,5 @@ class InMemoryGeff(TypedDict):
     metadata: GeffMetadata
     node_ids: NDArray[Any]
     edge_ids: NDArray[Any]
-    node_props: dict[str, PropDictNpArray | PropDictSequence]
-    edge_props: dict[str, PropDictNpArray | PropDictSequence]
+    node_props: dict[str, PropDictNpArray]
+    edge_props: dict[str, PropDictNpArray]

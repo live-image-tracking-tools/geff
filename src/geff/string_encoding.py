@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from geff._typing import PropDictNpArray, VarLenPropDictNpArray
+    from numpy.typing import NDArray
+
+    from geff._typing import PropDictNpArray
 
 
 def encode_string_data(data: PropDictNpArray) -> VarLenPropDictNpArray:
@@ -39,7 +41,9 @@ def encode_string_data(data: PropDictNpArray) -> VarLenPropDictNpArray:
     return {"values": new_values, "missing": missing, "data": encoded_data}
 
 
-def decode_string_data(data: VarLenPropDictNpArray) -> PropDictNpArray:
+def decode_string_data(
+    values: NDArray, missing: NDArray[np.bool_] | None, data: NDArray
+) -> PropDictNpArray:
     """Turns encoded string values back into a native python string array of values
 
     Args:
@@ -53,16 +57,13 @@ def decode_string_data(data: VarLenPropDictNpArray) -> PropDictNpArray:
         PropDictNpArray: The values and missing arrays representing the string values
             for each node/edge as native python strings in a numpy string array
     """
-    encoded_data = data["data"]
-    if not encoded_data.dtype.kind == "S":
+    if not data.dtype.kind == "S":
         raise TypeError("Cannot decode non-bytes array")
-    decoded_data = encoded_data.tobytes().decode("utf-8")
-    offset_shape = data["values"]
-    missing = data["missing"]
+    decoded_data = data.tobytes().decode("utf-8")
     str_values = []
-    for i in range(len(offset_shape)):
-        offset = offset_shape[i][0]
-        shape = offset_shape[i][1:]
+    for i in range(len(values)):
+        offset = values[i][0]
+        shape = values[i][1:]
         size = shape.prod()
         str_val = decoded_data[offset : offset + size]
         str_values.append(str_val)
