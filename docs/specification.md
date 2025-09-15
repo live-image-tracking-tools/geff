@@ -8,7 +8,7 @@ The graph exchange file format is `zarr` based. A graph is stored in a zarr grou
 
 Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html). However, `geff` will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.
 
-::: geff.GeffMetadata
+::: geff_spec.GeffMetadata
     options:
         heading_level: 2
         filters:
