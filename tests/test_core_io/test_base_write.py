@@ -196,9 +196,9 @@ class Test_write_dicts:
     def test_node_ids_not_int(self):
         store = zarr.storage.MemoryStore()
         node_data = [(float(node), {}) for node in range(10)]
-
+        meta = GeffMetadata(directed=False, node_props_metadata={}, edge_props_metadata={})
         with pytest.raises(UserWarning, match=r"Node ids with dtype .* are being cast to uint"):
-            write_dicts(store, node_data, [], [], [])
+            write_dicts(store, node_data, [], [], [], meta)
 
             z = zarr.open(store)
             assert np.issubdtype(z[_path.NODE_IDS].dtype, np.unsignedinteger)
@@ -206,7 +206,8 @@ class Test_write_dicts:
     def test_node_int_to_uint(self):
         store = zarr.storage.MemoryStore()
         node_data = [(node, {}) for node in range(10)]
-        write_dicts(store, node_data, [], [], [])
+        meta = GeffMetadata(directed=False, node_props_metadata={}, edge_props_metadata={})
+        write_dicts(store, node_data, [], [], [], metadata=meta)
 
         z = zarr.open(store)
         assert np.issubdtype(z[_path.NODE_IDS].dtype, np.unsignedinteger)
@@ -214,5 +215,6 @@ class Test_write_dicts:
     def test_negative_ids(self):
         store = zarr.storage.MemoryStore()
         node_data = [(-node, {}) for node in range(10)]
+        meta = GeffMetadata(directed=False, node_props_metadata={}, edge_props_metadata={})
         with pytest.raises(ValueError, match="Cannot write a geff with node ids that are negative"):
-            write_dicts(store, node_data, [], [], [])
+            write_dicts(store, node_data, [], [], [], metadata=meta)
