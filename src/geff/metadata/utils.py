@@ -25,7 +25,7 @@ def update_metadata_axes(
     axis_units: list[str | None] | None = None,
     axis_types: list[Literal[AxisType] | None] | None = None,
 ) -> GeffMetadata:
-    """Update the axis names, units, and types in a geff metadat object.
+    """Update the axis names, units, and types in a geff metadata object.
     Overrides any existing axes.
 
     If axis lists are provided, they will override the graph properties and metadata.
