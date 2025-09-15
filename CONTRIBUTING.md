@@ -13,7 +13,7 @@ cd geff
 
 ```sh
 # <create and activate virtual environment>
-pip install --group dev
+pip install -e packages/geff -e packages/geff-spec --group dev
 ```
 
 ### Install with uv
