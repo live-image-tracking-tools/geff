@@ -51,7 +51,9 @@ def test_check_jsonc_markdown_blocks():
         "geff": { // geff is a required field
             "geff_version": "0.0.0", // version must be of the form major.minor.patch
             // directed must be a boolean value
-            "directed": true
+            "directed": true,
+            "node_props_metadata": { },
+            "edge_props_metadata": { }
         }
     }
     ```

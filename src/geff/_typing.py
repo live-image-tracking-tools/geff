@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
 
-from numpy.typing import NDArray
 from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
@@ -10,6 +9,7 @@ if TYPE_CHECKING:
 
     import numpy as np
     import zarr
+    from numpy.typing import NDArray
 
     from .metadata._schema import GeffMetadata
 
@@ -32,17 +32,22 @@ class PropDictNpArray(TypedDict):
     A prop dictionary which has the keys "values" and optionally "missing", stored as numpy arrays.
 
     "values" is a numpy array of any type, "missing" is a numpy array of bools.
+    Variable length properties should have object dtype for their values array
     """
 
     values: NDArray[Any]
     missing: NDArray[np.bool_] | None
 
 
-class VarLenPropDictNpArray(PropDictNpArray):
-    data: NDArray[Any]
+class PropDictSequence(TypedDict):
+    """
+    A prop dictionary which has the variable length "values", stored as list or tuple.
+    """
+
+    values: Sequence[NDArray[Any] | None]
 
 
-class PropDictZArray(TypedDict):
+class ZarrNormalProp(TypedDict):
     """
     A prop dictionary which has the keys "values" and optionally "missing", stored as zarr arrays.
     """
@@ -51,18 +56,13 @@ class PropDictZArray(TypedDict):
     missing: NotRequired[zarr.Array]
 
 
-class PropDictSequence(TypedDict):
-    """
-    A prop dictionary which has the keys "values" and optionally "missing", stored as list or tuple.
-    """
-
-    values: Sequence
+class ZarrVarLenProp(TypedDict):
+    values: zarr.Array
     missing: NotRequired[zarr.Array]
+    data: zarr.Array
 
 
-PropDict: TypeAlias = dict[
-    str, tuple[NDArray, NDArray | None] | tuple[NDArray, NDArray | None, NDArray]
-]
+ZarrProp: TypeAlias = ZarrNormalProp | ZarrVarLenProp
 
 
 # Intermediate dict format that can be constructed to different backend types
