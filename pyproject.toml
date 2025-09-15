@@ -108,6 +108,7 @@ extend-select = [
     "RUF",  # ruff-specific rules
     "TID",  # tidy imports
     "TC",   # type checking
+    "T201", # print statements
     "D102", # undocumented public method
     "D103", # undocumented public function
     "D300", # enforces triple double quotes on docstrings
@@ -122,6 +123,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = ["D", "ANN"]
 "scripts/*.py" = ["D"]
+"src/geff/_cli.py" = ["T201", ]  # allow print statements in CLI
 
 # https://docs.pytest.org/en/6.2.x/customize.html
 [tool.pytest.ini_options]

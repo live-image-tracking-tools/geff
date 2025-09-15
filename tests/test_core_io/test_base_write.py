@@ -177,7 +177,6 @@ class TestWriteArrays:
 )
 def test_dict_prop_to_arr(dict_data, data_type, expected) -> None:
     props_dict = dict_props_to_arr(dict_data, [data_type])
-    print(props_dict)
     values = props_dict[data_type]["values"]
     missing = props_dict[data_type]["missing"]
     ex_values, ex_missing = expected

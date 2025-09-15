@@ -261,7 +261,6 @@ def create_props_metadata(
                     "Object array containing variable length properties has two "
                     f"dtypes: {dtype, array.dtype}"
                 )
-    print(dtype)
     return PropMetadata(
         identifier=identifier,
         dtype=dtype,

@@ -268,7 +268,6 @@ class Test_check_equiv_geff:
         bad_mem["metadata"].node_props_metadata["new prop"] = PropMetadata(
             identifier="new prop", dtype="uint64"
         )
-        print(bad_mem["metadata"].node_props_metadata)
         bad_store = self._write_new_store(bad_mem)
         with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
             check_equiv_geff(self.store, bad_store)

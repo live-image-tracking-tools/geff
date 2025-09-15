@@ -103,6 +103,5 @@ def test_missing_pos_prop(tmp_path) -> None:
             NxBackend.write(graph, axis_names=["t", "y", "z"], store=zarr_path)
     # missing property
     del graph.nodes[1]["t"]
-    print(graph.nodes[1])
     with pytest.raises(ValueError, match=r"Spatiotemporal property 't' not found in : \[1\]"):
         NxBackend.write(graph, axis_names=["t", "y", "x"], store=zarr_path)
