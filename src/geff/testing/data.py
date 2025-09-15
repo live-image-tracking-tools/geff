@@ -65,8 +65,12 @@ import zarr
 import zarr.storage
 
 from geff.core_io import write_arrays
-from geff.metadata import Axis
-from geff.metadata.utils import create_or_update_metadata
+from geff.metadata import Axis, PropMetadata
+from geff.metadata.utils import (
+    add_or_update_props_metadata,
+    create_or_update_metadata,
+    create_props_metadata,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -121,6 +125,7 @@ def create_dummy_in_mem_geff(
     # Generate nodes with flexible count
     nodes = np.arange(num_nodes, dtype=node_id_dtype)
     node_props: dict[str, PropDictNpArray] = {}
+    node_prop_meta: list[PropMetadata] = []
 
     # Generate spatiotemporal coordinates with flexible dimensions
     def _add_axis(
@@ -128,17 +133,18 @@ def create_dummy_in_mem_geff(
         ax_type: Literal[AxisType],
         unit: str | Literal[SpaceUnits] | Literal[TimeUnits],
         values: np.ndarray,
-    ) -> None:
+    ) -> PropMetadata:
         node_props[name] = {"values": values, "missing": None}
         if num_nodes > 0:
             roimin, roimax = values.min(), values.max()
         else:
             roimin, roimax = None, None
         axes.append(Axis(name=name, type=ax_type, unit=unit, min=roimin, max=roimax))
+        return create_props_metadata(identifier=name, prop_data=node_props[name], unit=unit)
 
     axes: list[Axis] = []
     if include_t:
-        _add_axis(
+        meta = _add_axis(
             name="t",
             ax_type="time",
             unit="second",
@@ -147,27 +153,31 @@ def create_dummy_in_mem_geff(
                 dtype=node_axis_dtypes["time"],
             ),
         )
+        node_prop_meta.append(meta)
     if include_z:
-        _add_axis(
+        meta = _add_axis(
             name="z",
             ax_type="space",
             unit="nanometer",
             values=np.linspace(0.5, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
         )
+        node_prop_meta.append(meta)
     if include_y:
-        _add_axis(
+        meta = _add_axis(
             name="y",
             ax_type="space",
             unit="nanometer",
             values=np.linspace(100.0, 500.0, num_nodes, dtype=node_axis_dtypes["position"]),
         )
+        node_prop_meta.append(meta)
     if include_x:
-        _add_axis(
+        meta = _add_axis(
             name="x",
             ax_type="space",
             unit="nanometer",
             values=np.linspace(1.0, 0.1, num_nodes, dtype=node_axis_dtypes["position"]),
         )
+        node_prop_meta.append(meta)
 
     # Generate edges with flexible count (ensure we don't exceed possible edges)
     max_possible_edges = (
@@ -283,7 +293,9 @@ def create_dummy_in_mem_geff(
                     values = np.arange(num_nodes, dtype=prop_dtype)
                 else:  # float types
                     values = np.linspace(0.1, 1.0, num_nodes, dtype=prop_dtype)
-                node_props[prop_name] = {"values": values, "missing": None}
+                node_prop_dict: PropDictNpArray = {"values": values, "missing": None}
+                node_props[prop_name] = node_prop_dict
+                node_prop_meta.append(create_props_metadata(prop_name, node_prop_dict))
 
             elif isinstance(prop_value, np.ndarray):
                 # Use provided array directly
@@ -304,7 +316,7 @@ def create_dummy_in_mem_geff(
 
     # Generate edge properties
     edge_props_dict: dict[str, PropDictNpArray] = {}
-
+    edge_prop_meta: list[PropMetadata] = []
     # Generate edge properties from extra_edge_props
     if extra_edge_props is not None:
         # Validate input is a dict
@@ -340,7 +352,6 @@ def create_dummy_in_mem_geff(
                     values = np.linspace(0.1, 1.0, len(edges), dtype=prop_dtype)
 
                 edge_props_dict[prop_name] = {"values": values, "missing": None}
-
             elif isinstance(prop_value, np.ndarray):
                 # Use provided array directly
                 # Validate array length matches num_edges
@@ -358,7 +369,13 @@ def create_dummy_in_mem_geff(
                     f"got {type(prop_value)}"
                 )
 
+            edge_prop_meta.append(
+                create_props_metadata(identifier=prop_name, prop_data=edge_props_dict[prop_name])
+            )
+
     metadata = create_or_update_metadata(metadata=None, is_directed=directed, axes=axes)
+    add_or_update_props_metadata(metadata, node_prop_meta, "node")
+    add_or_update_props_metadata(metadata, edge_prop_meta, "edge")
 
     return {
         "metadata": metadata,

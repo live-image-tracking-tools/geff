@@ -6,19 +6,18 @@ import numpy as np
 import pydantic
 import pytest
 import zarr
+import zarr.storage
 
 import geff
 from geff.metadata import PropMetadata
 from geff.metadata._affine import Affine
 from geff.metadata._schema import (
     VERSION_PATTERN,
-    Axis,
     GeffMetadata,
     GeffSchema,
     _formatted_schema_json,
     _validate_key_identifier_equality,
 )
-from geff.testing.data import create_simple_2d_geff
 
 
 class TestMetadataModel:
@@ -44,9 +43,17 @@ class TestMetadataModel:
         for version in invalid_versions:
             assert not re.fullmatch(VERSION_PATTERN, version)
 
+    def test_invalid_version(self) -> None:
+        with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
+            GeffMetadata(
+                geff_version="aljkdf", directed=True, node_props_metadata={}, edge_props_metadata={}
+            )
+
     def test_valid_init(self) -> None:
         # Minimal required fields
-        model = GeffMetadata(geff_version="0.0.1", directed=True)
+        model = GeffMetadata(
+            geff_version="0.0.1", directed=True, node_props_metadata={}, edge_props_metadata={}
+        )
         assert model.geff_version == "0.0.1"
         assert model.axes is None
 
@@ -73,6 +80,8 @@ class TestMetadataModel:
         model = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[
                 {"name": "test"},
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
@@ -84,7 +93,11 @@ class TestMetadataModel:
         # duplicate names not allowed
         with pytest.raises(ValueError, match=r"Duplicate axes names found in"):
             GeffMetadata(
-                geff_version="0.0.1", directed=True, axes=[{"name": "test"}, {"name": "test"}]
+                geff_version="0.0.1",
+                directed=True,
+                node_props_metadata={},
+                edge_props_metadata={},
+                axes=[{"name": "test"}, {"name": "test"}],
             )
 
     def test_related_objects(self) -> None:
@@ -92,6 +105,8 @@ class TestMetadataModel:
         model = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             related_objects=[
                 {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
                 {"type": "image", "path": "raw/"},
@@ -106,6 +121,8 @@ class TestMetadataModel:
             GeffMetadata(
                 geff_version="0.0.1",
                 directed=True,
+                node_props_metadata={},
+                edge_props_metadata={},
                 related_objects=[{"type": "invalid_type", "path": "invalid/"}],
             )
 
@@ -116,12 +133,10 @@ class TestMetadataModel:
             GeffMetadata(
                 geff_version="0.0.1",
                 directed=True,
+                node_props_metadata={},
+                edge_props_metadata={},
                 related_objects=[{"type": "image", "path": "raw/", "label_prop": "seg_id"}],
             )
-
-    def test_invalid_version(self) -> None:
-        with pytest.raises(pydantic.ValidationError, match="String should match pattern"):
-            GeffMetadata(geff_version="aljkdf", directed=True)
 
     def test_props_metadata(self) -> None:
         # Valid props metadata
@@ -149,6 +164,7 @@ class TestMetadataModel:
                 node_props_metadata={
                     "prop1": PropMetadata(identifier="prop2", name="Property 1", dtype="int32")
                 },
+                edge_props_metadata={},
             )
 
         # Missing mandatory props metadata
@@ -159,11 +175,13 @@ class TestMetadataModel:
                 node_props_metadata={
                     "": PropMetadata(identifier="", name="Empty Property", dtype="int32")
                 },
+                edge_props_metadata={},
             )
         with pytest.raises(pydantic.ValidationError):
             GeffMetadata(
                 geff_version="0.0.1",
                 directed=True,
+                node_props_metadata={},
                 edge_props_metadata={
                     "prop4": PropMetadata(identifier="prop4", name="Empty Dtype", dtype="")
                 },
@@ -174,6 +192,8 @@ class TestMetadataModel:
         GeffMetadata(
             geff_version="0.0.1",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[
                 {"name": "test"},
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
@@ -185,6 +205,8 @@ class TestMetadataModel:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[
                 {"name": "test"},
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
@@ -206,14 +228,13 @@ class TestMetadataModel:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[{"name": "test"}],
         )
 
         # Create a Zarr group
-        store, _ = create_simple_2d_geff()
-        # geff_path = tmp_path / "test.geff"
-
-        group = zarr.open_group(store=store)
+        group = zarr.open_group(store=zarr.storage.MemoryStore())
 
         # Assert that a TypeError is raised when meta.write is called with a Group
         with pytest.raises(
@@ -232,6 +253,8 @@ class TestMetadataModel:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[
                 {"name": "test"},
                 {"name": "complete", "type": "space", "unit": "micrometer", "min": 0, "max": 10},
@@ -247,6 +270,8 @@ class TestMetadataModel:
         meta = GeffMetadata(
             geff_version="0.0.1",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             extra={"foo": "bar", "bar": {"baz": "qux"}},
         )
         zpath = tmp_path / "test.zarr"
@@ -263,6 +288,8 @@ class TestMetadataModel:
         meta = {
             "geff_version": "0.0.1",
             "directed": True,
+            "node_props_metadata": {},
+            "edge_props_metadata": {},
             "axes": [
                 {"name": "x"},
                 {"name": "y"},
@@ -309,96 +336,6 @@ class TestMetadataModel:
             )
 
 
-class TestAxis:
-    def test_valid(self) -> None:
-        # minimal fields
-        Axis(name="property")
-
-        # All fields
-        Axis(name="property", type="space", unit="micrometer", min=0, max=10)
-
-    def test_no_name(self) -> None:
-        # name is the only required field
-        with pytest.raises(pydantic.ValidationError):
-            Axis(type="space")
-
-    def test_type(self) -> None:
-        # Bad type
-        with pytest.raises(
-            pydantic.ValidationError, match=r"Input should be 'space', 'time' or 'channel'"
-        ):
-            Axis(name="test", type="other")
-
-        # None is allowed
-        Axis(name="test", type=None)
-
-    def test_invalid_units(self) -> None:
-        # Spatial
-        with pytest.warns(UserWarning, match=r"Spatial unit .* not in valid"):
-            Axis(name="test", type="space", unit="bad unit")
-
-        # Temporal
-        with pytest.warns(UserWarning, match=r"Temporal unit .* not in valid"):
-            Axis(name="test", type="time", unit="bad unit")
-
-        # Don't check units if we don't specify type
-        Axis(name="test", unit="not checked")
-
-    def test_min_max(self) -> None:
-        # Min no max
-        with pytest.raises(ValueError, match=r"Min and max must both be None or neither"):
-            Axis(name="test", min=0)
-
-        # Max no min
-        with pytest.raises(ValueError, match=r"Min and max must both be None or neither"):
-            Axis(name="test", max=0)
-
-        # Min > max
-        with pytest.raises(ValueError, match=r"Min .* is greater than max .*"):
-            Axis(name="test", min=0, max=-10)
-
-
-class TestPropMetadata:
-    def test_valid(self) -> None:
-        # Minimal valid metadata
-        PropMetadata(identifier="prop_1", name="property", dtype="int32")
-
-        # All fields
-        PropMetadata(
-            identifier="prop_2",
-            dtype="float64",
-            unit="micrometer",
-            name="property 2",
-            description="A property with all fields set.",
-        )
-
-    def test_invalid_identifier(self) -> None:
-        # identifier must be a string
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier=123, name="property", dtype="int16")
-
-        # identifier must be a non-empty string
-        with pytest.raises(ValueError, match="String should have at least 1 character"):
-            PropMetadata(identifier="", dtype="int16")
-
-    def test_invalid_dtype(self) -> None:
-        # dtype must be a string
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier="prop", dtype=123)
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier="prop", dtype=None)
-
-        # dtype must be a non-empty string
-        with pytest.raises(ValueError, match="String should have at least 1 character"):
-            PropMetadata(identifier="prop", dtype="")
-
-        # dtype must be in allowed data types
-        with pytest.warns(
-            UserWarning, match=r"Data type .* cannot be matched to a valid data type"
-        ):
-            PropMetadata(identifier="prop", dtype="nope")
-
-
 def test__validate_key_identifier_equality() -> None:
     # Matching key / identifier
     props_md = {
@@ -442,6 +379,8 @@ class TestAffineTransformation:
         metadata = GeffMetadata(
             geff_version="0.1.0",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[
                 {"name": "x", "type": "space", "unit": "micrometer"},
                 {"name": "y", "type": "space", "unit": "micrometer"},
@@ -465,6 +404,8 @@ class TestAffineTransformation:
             GeffMetadata(
                 geff_version="0.1.0",
                 directed=True,
+                node_props_metadata={},
+                edge_props_metadata={},
                 axes=[
                     {"name": "x", "type": "space", "unit": "micrometer"},
                     {"name": "y", "type": "space", "unit": "micrometer"},
@@ -485,6 +426,8 @@ class TestAffineTransformation:
         original_metadata = GeffMetadata(
             geff_version="0.1.0",
             directed=False,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[
                 {"name": "x", "type": "space", "unit": "micrometer"},
                 {"name": "y", "type": "space", "unit": "micrometer"},
@@ -514,6 +457,8 @@ def test_schema_and_round_trip() -> None:
         geff=GeffMetadata(
             geff_version="0.1.0",
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
             axes=[
                 {"name": "x", "type": "space", "unit": "micrometer"},
                 {"name": "y", "type": "space", "unit": "micrometer"},

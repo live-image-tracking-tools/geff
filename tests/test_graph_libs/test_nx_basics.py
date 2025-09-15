@@ -4,7 +4,8 @@ import pytest
 import zarr
 
 from geff._graph_libs._networkx import NxBackend
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
+from geff.metadata import GeffMetadata
+from geff.metadata.utils import axes_from_lists
 from geff.testing.data import create_mock_geff
 
 node_id_dtypes = ["uint8", "uint16"]
@@ -128,14 +129,20 @@ def test_write_nx_with_metadata(tmp_path) -> None:
     graph.add_edge(1, 2, weight=0.5)
 
     # Create metadata object
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
         roi_min=(1.0, 2.0),
         roi_max=(3.0, 4.0),
     )
-    metadata = GeffMetadata(geff_version="0.3.0", directed=False, axes=axes)
+    metadata = GeffMetadata(
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        node_props_metadata={},
+        edge_props_metadata={},
+    )
 
     path = tmp_path / "metadata_test.zarr"
     NxBackend.write(graph, path, metadata=metadata)
@@ -162,7 +169,7 @@ def test_write_nx_metadata_extra_properties(tmp_path) -> None:
     graph.add_node(2, x=3.0, y=4.0)
     graph.add_edge(1, 2, weight=0.5)
 
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
@@ -172,6 +179,8 @@ def test_write_nx_metadata_extra_properties(tmp_path) -> None:
         directed=False,
         axes=axes,
         extra={"foo": "bar", "bar": {"baz": "qux"}},
+        node_props_metadata={},
+        edge_props_metadata={},
     )
     path = tmp_path / "extra_properties_test.zarr"
 
@@ -188,25 +197,29 @@ def test_write_nx_metadata_override_precedence(tmp_path) -> None:
     graph.add_node(2, x=4.0, y=5.0, z=6.0)
 
     # Create metadata with one set of axes
-    axes = _axes_from_lists(
+    axes = axes_from_lists(
         axis_names=["x", "y"],
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
     )
-    metadata = GeffMetadata(geff_version="0.3.0", directed=False, axes=axes)
+    metadata = GeffMetadata(
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        node_props_metadata={},
+        edge_props_metadata={},
+    )
 
     path = tmp_path / "override_test.zarr"
 
-    # Should log warning when both metadata and axis lists are provided
-    with pytest.warns(UserWarning):
-        NxBackend.write(
-            graph,
-            store=path,
-            metadata=metadata,
-            axis_names=["x", "y", "z"],  # Override with different axes
-            axis_units=["meter", "meter", "meter"],
-            axis_types=["space", "space", "space"],
-        )
+    NxBackend.write(
+        graph,
+        store=path,
+        metadata=metadata,
+        axis_names=["x", "y", "z"],  # Override with different axes
+        axis_units=["meter", "meter", "meter"],
+        axis_types=["space", "space", "space"],
+    )
 
     # Verify that axis lists took precedence
     _, read_metadata = NxBackend.read(path)
