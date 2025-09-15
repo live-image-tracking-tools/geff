@@ -35,7 +35,7 @@ class PropDictNpArray(TypedDict):
     """
 
     values: NDArray[Any]
-    missing: NotRequired[NDArray[np.bool_]]
+    missing: NDArray[np.bool_] | None
 
 
 class VarLenPropDictNpArray(PropDictNpArray):

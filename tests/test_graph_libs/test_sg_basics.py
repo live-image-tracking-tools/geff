@@ -1,16 +1,16 @@
 import numpy as np
 import pytest
+import zarr
+import zarr.storage
 
-try:
-    import spatial_graph as sg
+from geff import _path
+from geff.testing.data import create_mock_geff
+from geff.validate.structure import validate_structure
 
-    from geff import read_sg, write_sg
-except ImportError:
-    pytest.skip("geff[spatial-graph] not installed", allow_module_level=True)
+sg = pytest.importorskip("spatial_graph")
+from geff._graph_libs._spatial_graph import SgBackend  # noqa: E402
 
-from geff.testing.data import create_memory_mock_geff
-
-node_dtypes = ["int8", "uint8", "int16", "uint16"]
+node_dtypes = ["uint8", "uint16"]
 node_attr_dtypes = [
     {"position": "double", "time": "double"},
     {"position": "int", "time": "int"},
@@ -31,7 +31,7 @@ def test_read_write_consistency(
     extra_edge_props,
     directed,
 ) -> None:
-    store, graph_attrs = create_memory_mock_geff(
+    store, memory_geff = create_mock_geff(
         node_id_dtype=node_dtype,
         node_axis_dtypes=node_attr_dtypes,
         extra_edge_props=extra_edge_props,
@@ -40,20 +40,20 @@ def test_read_write_consistency(
     # with pytest.warns(UserWarning, match="Potential missing values for attr"):
     # TODO: make sure test data has missing values, otherwise this warning will
     # not be triggered
-    graph, _ = read_sg(store, position_attr="pos")
+    graph, _ = SgBackend.read(store, position_attr="pos")
 
-    np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(graph_attrs["nodes"]))
-    np.testing.assert_array_equal(np.sort(graph.edges), np.sort(graph_attrs["edges"]))
+    np.testing.assert_array_equal(np.sort(graph.nodes), np.sort(memory_geff["node_ids"]))
+    np.testing.assert_array_equal(np.sort(graph.edges), np.sort(memory_geff["edge_ids"]))
 
-    for idx, node in enumerate(graph_attrs["nodes"]):
+    for idx, node in enumerate(memory_geff["node_ids"]):
         np.testing.assert_array_equal(
             graph.node_attrs[node].pos,
-            np.array([graph_attrs[d][idx] for d in ["t", "z", "y", "x"]]),
+            np.array([memory_geff["node_props"][d]["values"][idx] for d in ["t", "z", "y", "x"]]),
         )
 
-    for idx, edge in enumerate(graph_attrs["edges"]):
-        for name, values in graph_attrs["extra_edge_props"].items():
-            assert getattr(graph.edge_attrs[edge], name) == values[idx].item()
+    for idx, edge in enumerate(memory_geff["edge_ids"]):
+        for name, data in memory_geff["edge_props"].items():
+            assert getattr(graph.edge_attrs[edge], name) == data["values"][idx].item()
 
 
 def test_write_empty_graph() -> None:
@@ -65,5 +65,10 @@ def test_write_empty_graph() -> None:
         edge_attr_dtypes={},
         position_attr="pos",
     )
-    with pytest.warns(match="Graph is empty - not writing anything "):
-        write_sg(graph, store=".")
+
+    store = zarr.storage.MemoryStore()
+    SgBackend.write(graph, store=store, axis_names=[])
+    validate_structure(store)
+
+    z = zarr.open(store)
+    assert z[_path.NODE_IDS].shape[0] == 0

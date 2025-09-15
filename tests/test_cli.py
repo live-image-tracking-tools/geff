@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 import pytest
 from typer.testing import CliRunner
 
-import geff
 from geff import GeffMetadata
 from geff._cli import app
+from geff.core_io._base_write import write_arrays
 from geff.testing.data import create_simple_temporal_geff
-from tests.test_interops.test_ctc import create_mock_data
+from tests.test_convert.test_ctc import create_mock_data
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -20,9 +20,8 @@ runner = CliRunner()
 @pytest.fixture
 def example_geff_path(tmp_path: Path) -> str:
     file_path = str(tmp_path / "test.geff")
-    store, graph_props = create_simple_temporal_geff()
-    graph, metadata = geff.read_nx(store)
-    geff.write_nx(graph, file_path, metadata=metadata)
+    store, memory_geff = create_simple_temporal_geff()
+    write_arrays(file_path, **memory_geff)
     return file_path
 
 
@@ -90,3 +89,9 @@ def test_convert_trackmate_xml(tmp_path: Path, other_arg: str | None) -> None:
     assert result.exit_code == 0, (
         f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
     )
+
+
+def test_convert_to_csv(example_geff_path, tmp_path):
+    out_path = tmp_path / "dataframe"
+    result = CliRunner().invoke(app, ["convert-to-csv", str(example_geff_path), str(out_path)])
+    assert result.exit_code == 0

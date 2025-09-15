@@ -44,12 +44,13 @@ ctc = [
     "tifffile>=2024.10",
 ]
 rx = ["rustworkx>=0.16.0"]
+pandas = ["pandas>=2","pandas>=2.3; python_version >= '3.12'"]
 
 [dependency-groups]
 test = ["pytest>=8.3.4", "pytest-cov>=6.2"]
 test-third-party = [
     { include-group = "test" },
-    "geff[spatial-graph,ctc,rx]",
+    "geff[spatial-graph,ctc,rx,pandas]",
     "lxml>=6.0.0",
 ]
 dev = [
@@ -63,15 +64,17 @@ dev = [
     "types-pyyaml>=6.0.12.20250516",
 ]
 docs = [
-    "json-schema-for-humans>=1.4.1",
     "mike>=2.1.3",
     "mkdocs-api-autonav>=0.3.0",
     "mkdocs-include-markdown-plugin>=7.1.6",
     "mkdocs-material>=9.6.16",
     "mkdocstrings-python>=1.16.12",
     "mkdocs-typer>=0.0.3",
+    "typer>=0.14.0,<0.17.0",
     "ruff>=0.12.5",
     "typing-extensions>=4.14.1",
+    "mkdocs-autorefs>=1",
+    "griffe-fieldz",
 ]
 bench = [
     { include-group = "test" },
@@ -131,6 +134,7 @@ filterwarnings = [
     # if needed, add global ignores here, for example:
     # "ignore:Some message:SomeCategory",
     "ignore:.*skipping conversion test:ImportWarning:networkx",
+    "ignore:In the future `np.bool` will be defined as the corresponding NumPy scalar."
 ]
 
 
@@ -160,6 +164,7 @@ exclude_lines = [
     "except ImportError",
     "raise NotImplementedError()",
     "pass",
+    '^\s*\.\.\.\s*$', # regex for lines with ONLY ellipses with any amount of whitespace either side.
 ]
 [tool.coverage.run]
 source = ["src/geff"]

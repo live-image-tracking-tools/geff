@@ -6,8 +6,9 @@ import numpy as np
 import zarr
 
 from geff import _path
-from geff.core_io import _utils
+from geff.core_io._utils import expect_array, expect_group, open_storelike, remove_tilde
 from geff.metadata._schema import GeffMetadata
+from geff.validate.data import ValidationConfig, validate_data
 from geff.validate.structure import validate_structure
 
 if TYPE_CHECKING:
@@ -59,11 +60,11 @@ class GeffReader:
                 geff file before loading into memory. If set to False and there are
                 format issues, will likely fail with a cryptic error. Defaults to True.
         """
-        source = _utils.remove_tilde(source)
+        source = remove_tilde(source)
 
         if validate:
             validate_structure(source)
-        self.group = zarr.open_group(source, mode="r")
+        self.group = open_storelike(source)
         self.metadata = GeffMetadata.read(source)
         self.nodes = zarr.open_array(source, path=_path.NODE_IDS, mode="r")
         self.edges = zarr.open_array(source, path=_path.EDGE_IDS, mode="r")
@@ -71,7 +72,7 @@ class GeffReader:
         self.edge_props: dict[str, PropDictZArray | PropDictSequence] = {}
 
         # get node properties names
-        nodes_group = _utils.expect_group(self.group, _path.NODES)
+        nodes_group = expect_group(self.group, _path.NODES)
         if _path.PROPS in nodes_group.keys():
             node_props_group = zarr.open_group(self.group.store, path=_path.NODE_PROPS, mode="r")
             self.node_prop_names: list[str] = [*node_props_group.group_keys()]
@@ -79,7 +80,7 @@ class GeffReader:
             self.node_prop_names = []
 
         # get edge property names
-        edges_group = _utils.expect_group(self.group, _path.EDGES)
+        edges_group = expect_group(self.group, _path.EDGES)
         if _path.PROPS in edges_group.keys():
             edge_props_group = zarr.open_group(self.group.store, path=_path.EDGE_PROPS, mode="r")
             self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
@@ -105,10 +106,10 @@ class GeffReader:
             prop_group = zarr.open_group(
                 self.group.store, path=f"{_path.NODE_PROPS}/{name}", mode="r"
             )
-            values = _utils.expect_array(prop_group, _path.VALUES, "node")
+            values = expect_array(prop_group, _path.VALUES, "node")
             prop_dict: PropDictZArray = {"values": values}
             if _path.MISSING in prop_group.keys():
-                missing = _utils.expect_array(prop_group, _path.MISSING, "node")
+                missing = expect_array(prop_group, _path.MISSING, "node")
                 prop_dict[_path.MISSING] = missing
             self.node_props[name] = prop_dict
 
@@ -131,10 +132,10 @@ class GeffReader:
             prop_group = zarr.open_group(
                 self.group.store, path=f"{_path.EDGE_PROPS}/{name}", mode="r"
             )
-            values = _utils.expect_array(prop_group, _path.VALUES, "edge")
+            values = expect_array(prop_group, _path.VALUES, "edge")
             prop_dict: PropDictZArray = {"values": values}
             if _path.MISSING in prop_group.keys():
-                missing = _utils.expect_array(prop_group, _path.MISSING, "edge")
+                missing = expect_array(prop_group, _path.MISSING, "edge")
                 prop_dict[_path.MISSING] = missing
             self.edge_props[name] = prop_dict
 
@@ -161,16 +162,19 @@ class GeffReader:
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray | PropDictSequence] = {}
         for name, props in self.node_props.items():
-            node_props[name] = {
-                _path.VALUES: np.array(
-                    props[_path.VALUES][node_mask.tolist() if node_mask is not None else ...]
-                )
-            }
             if _path.MISSING in props:
-                node_props[name][_path.MISSING] = np.array(
+                missing = np.array(
                     props[_path.MISSING][node_mask.tolist() if node_mask is not None else ...],
                     dtype=bool,
                 )
+            else:
+                missing = None
+            node_props[name] = {
+                "values": np.array(
+                    props[_path.VALUES][node_mask.tolist() if node_mask is not None else ...]
+                ),
+                "missing": missing,
+            }
 
         # remove edges if any of it's nodes has been masked
         edges = np.array(self.edges[:])
@@ -184,16 +188,19 @@ class GeffReader:
 
         edge_props: dict[str, PropDictNpArray | PropDictSequence] = {}
         for name, props in self.edge_props.items():
-            edge_props[name] = {
-                _path.VALUES: np.array(
-                    props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...]
-                )
-            }
             if _path.MISSING in props:
-                edge_props[name][_path.MISSING] = np.array(
-                    props["missing"][edge_mask.tolist() if edge_mask is not None else ...],
+                missing = np.array(
+                    props[_path.MISSING][edge_mask.tolist() if edge_mask is not None else ...],
                     dtype=bool,
                 )
+            else:
+                missing = None
+            edge_props[name] = {
+                "values": np.array(
+                    props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...]
+                ),
+                "missing": missing,
+            }
 
         return {
             "metadata": self.metadata,
@@ -208,9 +215,10 @@ class GeffReader:
 #   added to this function to select between them.
 def read_to_memory(
     source: StoreLike,
-    validate: bool = True,
+    structure_validation: bool = True,
     node_props: Iterable[str] | None = None,
     edge_props: Iterable[str] | None = None,
+    data_validation: ValidationConfig | None = None,
 ) -> InMemoryGeff:
     """
     Read a GEFF zarr file to into memory as a series of numpy arrays in a dictionary.
@@ -221,9 +229,11 @@ def read_to_memory(
     Args:
         source (str | Path | zarr store): Either a path to the root of the geff zarr
             (where the .attrs contains the geff metadata), or a zarr store object
-        validate (bool, optional): Flag indicating whether to perform validation on the
-            geff file before loading into memory. If set to False and there are
-            format issues, will likely fail with a cryptic error. Defaults to True.
+        structure_validation (bool, optional): Flag indicating whether to perform metadata/structure
+            validation on the geff file before loading into memory. If set to False and
+            there are format issues, will likely fail with a cryptic error. Defaults to True.
+        data_validation (ValidationConfig, optional): Optional configuration for which
+            optional types of data to validate. Each option defaults to False.
         node_props (iterable of str, optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
         edge_props (iterable of str, optional): The names of the edge properties to load,
@@ -234,9 +244,13 @@ def read_to_memory(
         (metadata, node_ids, edge_ids, node_props, edge_props)
     """
 
-    file_reader = GeffReader(source, validate)
+    file_reader = GeffReader(source, structure_validation)
 
     file_reader.read_node_props(node_props)
     file_reader.read_edge_props(edge_props)
     in_memory_geff = file_reader.build()
+
+    if data_validation is not None:
+        validate_data(config=data_validation, memory_geff=in_memory_geff)
+
     return in_memory_geff

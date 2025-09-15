@@ -8,13 +8,13 @@ import pytest
 import zarr
 
 import geff
+from geff.metadata import PropMetadata
 from geff.metadata._affine import Affine
 from geff.metadata._schema import (
     VERSION_PATTERN,
     Axis,
     GeffMetadata,
     GeffSchema,
-    PropMetadata,
     _formatted_schema_json,
     _validate_key_identifier_equality,
 )
@@ -322,9 +322,15 @@ class TestAxis:
         with pytest.raises(pydantic.ValidationError):
             Axis(type="space")
 
-    def test_bad_type(self) -> None:
-        with pytest.warns(UserWarning, match=r"Type .* not in valid types"):
+    def test_type(self) -> None:
+        # Bad type
+        with pytest.raises(
+            pydantic.ValidationError, match=r"Input should be 'space', 'time' or 'channel'"
+        ):
             Axis(name="test", type="other")
+
+        # None is allowed
+        Axis(name="test", type=None)
 
     def test_invalid_units(self) -> None:
         # Spatial
@@ -361,7 +367,6 @@ class TestPropMetadata:
         PropMetadata(
             identifier="prop_2",
             dtype="float64",
-            encoding="utf-8",
             unit="micrometer",
             name="property 2",
             description="A property with all fields set.",
@@ -392,15 +397,6 @@ class TestPropMetadata:
             UserWarning, match=r"Data type .* cannot be matched to a valid data type"
         ):
             PropMetadata(identifier="prop", dtype="nope")
-
-    def test_invalid_encoding(self) -> None:
-        # encoding must be a string
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier="prop", dtype="int16", encoding=123)
-
-        # encoding must be a valid string encoding
-        with pytest.warns(UserWarning, match=r"Encoding .* not in valid encodings"):
-            PropMetadata(identifier="prop", dtype="float", encoding="invalid_encoding")
 
 
 def test__validate_key_identifier_equality() -> None:

@@ -80,6 +80,8 @@ def convert_ctc(
         bool,
         typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
+    # because of Typer not supporting Literal types
 ) -> None:
     """
     Convert a CTC data directory to a GEFF file.
@@ -97,6 +99,7 @@ def convert_ctc(
         segmentation_store=segm_path,
         tczyx=tczyx,
         overwrite=overwrite,
+        zarr_format=cast("Literal[2, 3]", zarr_format),
     )
 
     if input_image_dir is not None:
@@ -105,6 +108,7 @@ def convert_ctc(
             output_store=output_image_path,
             ctzyx=tczyx,
             overwrite=overwrite,
+            zarr_format=cast("Literal[2, 3]", zarr_format),
         )
 
 
@@ -150,6 +154,22 @@ def convert_trackmate_xml(
         overwrite=overwrite,
         zarr_format=cast("Literal[2, 3]", zarr_format),
     )
+
+
+@app.command()
+def convert_to_csv(
+    store: Annotated[Path, typer.Argument(help="Path to geff group to convert")],
+    outpath: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to save output csvs. Any file extension will"
+            " be stripped and replaced with '-nodes.csv' and '-edges.csv'"
+        ),
+    ],
+) -> None:
+    from geff.convert import geff_to_csv
+
+    geff_to_csv(store=store, outpath=outpath)
 
 
 if __name__ == "__main__":

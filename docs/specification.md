@@ -1,6 +1,6 @@
 # Geff specification
 
-The graph exchange file format is `zarr` based. A graph is stored in a zarr group, which can have any name. This allows storing multiple `geff` graphs inside the same zarr root directory. A `geff` group is identified by the presence of a `geff` key in the `.zattrs`. Other `geff` metadata is also stored in the `.zattrs` file of the `geff` group, nested under the `geff` key. The `geff` group must contain a `nodes` group and an `edges` group (albeit both can be empty). `geff` graphs have the option to provide properties for `nodes` and `edges`.
+The graph exchange file format is `zarr` based. A graph is stored in a zarr group, which can have any name. However the name of the group can include the `.geff` suffix to indicate that the group contains `geff` data. This allows storing multiple `geff` graphs inside the same zarr root directory. A `geff` group is identified by the presence of a `geff` key in the `.zattrs`. Other `geff` metadata is also stored in the `.zattrs` file of the `geff` group, nested under the `geff` key. The `geff` group must contain a `nodes` group and an `edges` group (albeit both can be empty). `geff` graphs have the option to provide properties for `nodes` and `edges`.
 
 `geff` graphs have the option to provide time and spatial dimensions as special attributes. These attributes are specified in the `axes` section of the metadata, inspired by the OME-zarr `axes` specification. 
 
@@ -8,33 +8,20 @@ The graph exchange file format is `zarr` based. A graph is stored in a zarr grou
 
 Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html). However, `geff` will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.
 
-## Geff metadata
-
-<!-- GEFF-SCHEMA -->
-
-!!! note
-
-    The axes list is modeled after the [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md) specifications and is used to identify spatio-temporal properties on the graph nodes. If the same names are used in the axes metadata of the related image or segmentation data, applications can use this information to align graph node locations with image data. 
-
-    The order of the axes in the list is meaningful. For one, any downstream properties that are an array of values with one value per (spatial) axis will be in the order of the axis list (filtering to only the spatial axes by the `type` field if needed). Secondly, if associated image or segmentation data does not have axes metadata, the order of the spatiotemporal axes is a good default guess for aligning the graph and the image data, although there is no way to denote the channel dimension in the graph spec. If you are writing out a geff with an associated segmentation and/or image dataset, we highly recommend providing the axis names for your segmentation/image using the OME-zarr spec, including channel dimensions if needed.
-
-    ::: geff.metadata._valid_values.VALID_AXIS_TYPES
-
-    ::: geff.metadata._valid_values.VALID_SPACE_UNITS
-
-    ::: geff.metadata._valid_values.VALID_TIME_UNITS
-
-### Affine transformations
-The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) × (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`.
-
-### Extra attributes 
-
-The optional `extra` object is a free-form dictionary that can hold any additional, application-specific metadata that is **not** covered by the core geff schema. Users may place arbitrary keys and values inside `extra` without fear of clashing with future reserved fields. Although the core `geff` reader makes these attributes available, their meaning and use are left entirely to downstream applications. 
+::: geff.GeffMetadata
+    options:
+        heading_level: 2
+        filters:
+            - "!read"
+            - "!write"
+        docstring_section_style: list
+        show_symbol_type_heading: false
+        show_symbol_type_toc: false
 
 ## The `nodes` group
 The nodes group will contain an `ids` array and optionally a `props` group. 
 ### The `ids` array
-The `nodes\ids` array is a 1D array of node IDs of length `N` >= 0, where `N` is the number of nodes in the graph. Node ids must be unique. Node IDs can have any type supported by zarr (except floats), but we recommend integer dtypes. For large graphs, `uint64` might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the `ids` array will be present but empty. 
+The `nodes\ids` array is a 1D array of node IDs of length `N` >= 0, where `N` is the number of nodes in the graph. Node ids must be unique. Node IDs must have an unsigned integer dtype. For large graphs, `uint64` might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the `ids` array will be present but empty. 
 
 
 ### The `props` group and `node property` groups
@@ -86,7 +73,7 @@ The `edges/props` is optional. If you do not have any edge properties, the `edge
 Here is a schematic of the expected file structure.
 ``` python
 /path/to.zarr
-    /tracking_graph
+    /tracking_graph.geff
 	    .zattrs  # graph metadata with `geff_version`
 	    nodes/
             ids  # shape: (N,)  dtype: uint64

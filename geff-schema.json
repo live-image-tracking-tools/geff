@@ -1,7 +1,7 @@
 {
   "$defs": {
     "Affine": {
-      "description": "Affine transformation matrix following scipy conventions.\n\nInternally stores transformations as homogeneous coordinate matrices (N+1, N+1).\nThe transformation matrix follows scipy.ndimage.affine_transform convention\nwhere the matrix maps output coordinates to input coordinates (inverse/pull transformation).\n\nFor a point p_out in output space, the corresponding input point p_in is computed as:\np_in_homo = matrix @ p_out_homo\nwhere p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]\n\nAttributes:\n    matrix (np.ndarray) : square, homogeneous transformation matrix (ndim+1, ndim+1)",
+      "description": "Affine transformation matrix following scipy conventions.\n\nInternally stores transformations as homogeneous coordinate matrices (N+1, N+1).\nThe transformation matrix follows `scipy.ndimage.affine_transform` convention\nwhere the matrix maps output coordinates to input coordinates (inverse/pull transformation).\n\nFor a point `p_out` in output space, the corresponding input point `p_in` is computed as:\n`p_in_homo = matrix @ p_out_homo`\nwhere `p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]`\n\nAttributes:\n    matrix (np.ndarray) : square, homogeneous transformation matrix (ndim+1, ndim+1)",
       "properties": {
         "matrix": {
           "description": "Homogeneous transformation matrix (ndim+1, ndim+1)",
@@ -22,15 +22,21 @@
       "type": "object"
     },
     "Axis": {
-      "description": "TODO docstring",
+      "description": "The axes list is modeled after the\n[OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)\nspecifications and is used to identify spatio-temporal properties on the\ngraph nodes. If the same names are used in the axes metadata of the\nrelated image or segmentation data, applications can use this information\nto align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. For one, any downstream\nproperties that are an array of values with one value per (spatial) axis\nwill be in the order of the axis list (filtering to only the spatial axes by\nthe `type` field if needed). Secondly, if associated image or segmentation\ndata does not have axes metadata, the order of the spatiotemporal axes is a\ngood default guess for aligning the graph and the image data, although there\nis no way to denote the channel dimension in the graph spec. If you are\nwriting out a geff with an associated segmentation and/or image dataset, we\nhighly recommend providing the axis names for your segmentation/image using\nthe OME-zarr spec, including channel dimensions if needed.",
       "properties": {
         "name": {
+          "description": "Name of the corresponding node property",
           "title": "Name",
           "type": "string"
         },
         "type": {
           "anyOf": [
             {
+              "enum": [
+                "space",
+                "time",
+                "channel"
+              ],
               "type": "string"
             },
             {
@@ -38,6 +44,7 @@
             }
           ],
           "default": null,
+          "description": "The type of data encoded in this axis, one of ('space', 'time', 'channel') or None",
           "title": "Type"
         },
         "unit": {
@@ -46,10 +53,70 @@
               "type": "string"
             },
             {
+              "enum": [
+                "angstrom",
+                "attometer",
+                "centimeter",
+                "decimeter",
+                "exameter",
+                "femtometer",
+                "foot",
+                "gigameter",
+                "hectometer",
+                "inch",
+                "kilometer",
+                "megameter",
+                "meter",
+                "micrometer",
+                "mile",
+                "millimeter",
+                "nanometer",
+                "parsec",
+                "petameter",
+                "picometer",
+                "terameter",
+                "yard",
+                "yoctometer",
+                "yottameter",
+                "zeptometer",
+                "zettameter"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "attosecond",
+                "centisecond",
+                "day",
+                "decisecond",
+                "exasecond",
+                "femtosecond",
+                "gigasecond",
+                "hectosecond",
+                "hour",
+                "kilosecond",
+                "megasecond",
+                "microsecond",
+                "millisecond",
+                "minute",
+                "nanosecond",
+                "petasecond",
+                "picosecond",
+                "second",
+                "terasecond",
+                "yoctosecond",
+                "yottasecond",
+                "zeptosecond",
+                "zettasecond"
+              ],
+              "type": "string"
+            },
+            {
               "type": "null"
             }
           ],
           "default": null,
+          "description": "Optional, the unit for this axis. If the type is 'space' or 'time', we recommend utilizing the OME-NGFF spatial or temporal units respectively.",
           "title": "Unit"
         },
         "min": {
@@ -62,6 +129,7 @@
             }
           ],
           "default": null,
+          "description": "Optional, the minimum value for this axis.",
           "title": "Min"
         },
         "max": {
@@ -74,6 +142,7 @@
             }
           ],
           "default": null,
+          "description": "Optional, the minimum value for this axis.",
           "title": "Max"
         }
       },
@@ -157,7 +226,7 @@
             }
           ],
           "default": null,
-          "description": "Optional list of Axis objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` keymust be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the validOME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+          "description": "Optional list of `Axis` objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` key must be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the valid OME-Zarr units, and `min` and `max` keys to define the range of the axis. See [`Axis`][geff.metadata._schema.Axis] for more information.",
           "title": "Axes"
         },
         "node_props_metadata": {
@@ -202,7 +271,7 @@
             }
           ],
           "default": null,
-          "description": "\n            Name of the optional `sphere` property.\n\n            A sphere is defined by\n            - a center point, already given by the `space` type properties\n            - a radius scalar, stored in this property\n            ",
+          "description": "\n            Name of the optional `sphere` property.\n\n            A sphere is defined by\n\n            - a center point, already given by the `space` type properties\n            - a radius scalar, stored in this property\n            ",
           "title": "Node property: Detections as spheres"
         },
         "ellipsoid": {
@@ -215,7 +284,7 @@
             }
           ],
           "default": null,
-          "description": "\n            Name of the `ellipsoid` property.\n\n            An ellipsoid is assumed to be in the same coordinate system as the `space` type\n            properties.\n\n            It is defined by\n            - a center point :math:`c`, already given by the `space` type properties\n            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this\n              property as a `2x2`/`3x3` array.\n\n            To plot the ellipsoid:\n            - Compute the eigendecomposition of the covariance matrix\n            :math:`\\Sigma = Q \\Lambda Q^{\\top}`\n            - Sample points :math:`z` on the unit sphere\n            - Transform the points to the ellipsoid by\n            :math:`x = c + Q \\Lambda^{(1/2)} z`.\n            ",
+          "description": "\n            Name of the `ellipsoid` property.\n\n            An ellipsoid is assumed to be in the same coordinate system as the `space` type\n            properties.\n\n            It is defined by\n\n            - a center point $c$, already given by the `space` type properties\n            - a covariance matrix $\\Sigma$, symmetric and positive-definite, stored in this\n              property as a `2x2`/`3x3` array.\n\n            To plot the ellipsoid:\n\n            - Compute the eigendecomposition of the covariance matrix\n            $\\Sigma = Q \\Lambda Q^{\\top}$\n            - Sample points $z$ on the unit sphere\n            - Transform the points to the ellipsoid by\n            $x = c + Q \\Lambda^{(1/2)} z$.\n            ",
           "title": "Node property: Detections as ellipsoids"
         },
         "track_node_props": {
@@ -237,7 +306,7 @@
             }
           ],
           "default": null,
-          "description": "Node properties denoting tracklet and/or lineage IDs.\nA tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1,and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.\nA lineage is defined as a weakly connected component on the graph.\nThe dictionary can store one or both of 'tracklet' or 'lineage' keys.",
+          "description": "Node properties denoting tracklet and/or lineage IDs.\nA tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1, and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.\nA lineage is defined as a weakly connected component on the graph.\nThe dictionary can store one or both of 'tracklet' or 'lineage' keys.",
           "title": "Track Node Props"
         },
         "related_objects": {
@@ -266,7 +335,7 @@
             }
           ],
           "default": null,
-          "description": "Affine transformation matrix to transform the graph coordinates to the physical coordinates. The matrix must have the same number of dimensions as the number of axes in the graph."
+          "description": "The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) x (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`."
         },
         "display_hints": {
           "anyOf": [
@@ -282,7 +351,7 @@
         },
         "extra": {
           "additionalProperties": true,
-          "description": "Extra metadata that is not part of the schema",
+          "description": "The optional `extra` object is a free-form dictionary that can hold any additional, application-specific metadata that is **not** covered by the core geff schema. Users may place arbitrary keys and values inside `extra` without fear of clashing with future reserved fields. Although the core `geff` reader makes these attributes available, their meaning and use are left entirely to downstream applications. ",
           "title": "Extra",
           "type": "object"
         }
@@ -295,7 +364,7 @@
       "type": "object"
     },
     "PropMetadata": {
-      "description": "Metadata describing a property in the geff graph.",
+      "description": "Each property must have a string identifier (the group name for the\nproperty) and a dtype. The dtype can be any string\nthat can be coerced into a numpy dtype, or the special `varlength` dtype\nindicating this is a variable length property (coming soon). String properties\nshould have dtype `str`, not `varlength`, even though they are stored using the\nsame variable length mechanism.",
       "properties": {
         "identifier": {
           "description": "Identifier of the property. Must be unique within its own component subgroup (nodes or edges). Must be a non-empty string.",
@@ -304,23 +373,10 @@
           "type": "string"
         },
         "dtype": {
-          "description": "Data type of the property. Must be a non-empty string. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
+          "description": "Data type of the property. Must be a non-empty string that can be parsed into a numpy dtype, or the special value 'varlength' to indicate a variable length property. Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
           "minLength": 1,
           "title": "Dtype",
           "type": "string"
-        },
-        "encoding": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional encoding when the property is stored as a string. For example, but not limited to, 'utf-8' or 'ascii'.",
-          "title": "Encoding"
         },
         "unit": {
           "anyOf": [
@@ -370,7 +426,7 @@
       "type": "object"
     },
     "RelatedObject": {
-      "description": "TODO docstring",
+      "description": "A set of metadata for data that is associated with the graph. The types\n'labels' and 'image' should be used for label and image objects, respectively.\nOther types are also allowed.",
       "properties": {
         "type": {
           "description": "Type of the related object. 'labels' for label objects, 'image' for image objects. Other types are also allowed, but may not be recognized by reader applications. ",
