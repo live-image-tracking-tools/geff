@@ -14,6 +14,8 @@ from ._prop_metadata import PropMetadata  # noqa: TC001
 from ._schema import Axis, GeffMetadata
 
 if TYPE_CHECKING:
+    from ._valid_values import AxisType
+
     T = TypeVar("T")
 
 
@@ -21,8 +23,8 @@ def get_graph_existing_metadata(
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
-) -> tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
+    axis_types: list[Literal[AxisType] | None] | None = None,
+) -> tuple[list[str] | None, list[str | None] | None, list[Literal[AxisType] | None] | None]:
     """Get the existing metadata from a graph.
 
     If axis lists are provided, they will override the graph properties and metadata.

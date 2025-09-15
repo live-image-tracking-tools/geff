@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-    from geff_spec import GeffMetadata
+    from geff_spec import AxisType, GeffMetadata
 
 from geff.core_io import write_arrays
 from geff.core_io._utils import remove_tilde
@@ -120,14 +120,10 @@ class SgBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[str | None] | None = None,
+        axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
         store = remove_tilde(store)
-
-        if len(graph) == 0:
-            warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
-            return
 
         if (axis_names is None) and (metadata is not None) and (metadata.axes is not None):
             axis_names = [axis.name for axis in metadata.axes]

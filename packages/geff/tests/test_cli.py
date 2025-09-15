@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 
 from geff import GeffMetadata
 from geff._cli import app
-from geff._graph_libs._networkx import NxBackend
+from geff.core_io._base_write import write_arrays
 from geff.testing.data import create_simple_temporal_geff
 from tests.test_convert.test_ctc import create_mock_data
 
@@ -18,9 +18,8 @@ TEST_DATA = Path(__file__).parent / "data"
 @pytest.fixture
 def example_geff_path(tmp_path: Path) -> str:
     file_path = str(tmp_path / "test.geff")
-    store, graph_props = create_simple_temporal_geff()
-    graph, metadata = NxBackend.read(store)
-    NxBackend.write(graph, file_path, metadata=metadata)
+    store, memory_geff = create_simple_temporal_geff()
+    write_arrays(file_path, **memory_geff)
     return file_path
 
 
@@ -88,3 +87,9 @@ def test_convert_trackmate_xml(tmp_path: Path, other_arg: str | None) -> None:
     assert result.exit_code == 0, (
         f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
     )
+
+
+def test_convert_to_csv(example_geff_path, tmp_path):
+    out_path = tmp_path / "dataframe"
+    result = CliRunner().invoke(app, ["convert-to-csv", str(example_geff_path), str(out_path)])
+    assert result.exit_code == 0

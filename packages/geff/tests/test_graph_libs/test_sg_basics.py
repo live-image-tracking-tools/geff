@@ -1,7 +1,11 @@
 import numpy as np
 import pytest
+import zarr
+import zarr.storage
 
+from geff import _path
 from geff.testing.data import create_mock_geff
+from geff.validate.structure import validate_structure
 
 sg = pytest.importorskip("spatial_graph")
 from geff._graph_libs._spatial_graph import SgBackend  # noqa: E402
@@ -61,5 +65,10 @@ def test_write_empty_graph() -> None:
         edge_attr_dtypes={},
         position_attr="pos",
     )
-    with pytest.warns(match="Graph is empty - not writing anything "):
-        SgBackend.write(graph, store=".")
+
+    store = zarr.storage.MemoryStore()
+    SgBackend.write(graph, store=store, axis_names=[])
+    validate_structure(store)
+
+    z = zarr.open(store)
+    assert z[_path.NODE_IDS].shape[0] == 0

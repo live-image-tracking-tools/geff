@@ -318,9 +318,15 @@ class TestAxis:
         with pytest.raises(pydantic.ValidationError):
             Axis(type="space")
 
-    def test_bad_type(self) -> None:
-        with pytest.warns(UserWarning, match=r"Type .* not in valid types"):
+    def test_type(self) -> None:
+        # Bad type
+        with pytest.raises(
+            pydantic.ValidationError, match=r"Input should be 'space', 'time' or 'channel'"
+        ):
             Axis(name="test", type="other")
+
+        # None is allowed
+        Axis(name="test", type=None)
 
     def test_invalid_units(self) -> None:
         # Spatial

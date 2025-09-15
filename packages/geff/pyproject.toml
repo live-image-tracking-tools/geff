@@ -45,6 +45,7 @@ ctc = [
     "tifffile>=2024.10",
 ]
 rx = ["rustworkx>=0.16.0"]
+pandas = ["pandas>=2","pandas>=2.3; python_version >= '3.12'"]
 
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"

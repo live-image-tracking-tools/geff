@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-    from geff_spec import GeffMetadata
+    from geff_spec import AxisType, GeffMetadata
 
 import logging
 
@@ -111,7 +111,7 @@ class NxBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[str | None] | None = None,
+        axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
         axis_names, axis_units, axis_types = get_graph_existing_metadata(

@@ -6,7 +6,7 @@ from zarr.storage import StoreLike
 from geff._typing import PropDictNpArray
 from geff.core_io._base_read import read_to_memory
 from geff.validate.data import ValidationConfig
-from geff_spec import GeffMetadata
+from geff_spec import AxisType, GeffMetadata
 
 from ._graph_adapter import GraphAdapter
 
@@ -56,7 +56,7 @@ class Backend(Protocol[T]):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[str | None] | None = None,
+        axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
         *args: Any,
         **kwargs: Any,
