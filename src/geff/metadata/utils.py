@@ -41,6 +41,15 @@ def update_metadata_axes(
     Returns:
         GeffMetadata: A new metadata object with updated axes.
     """
+    if axis_units is not None and len(axis_units) != len(axis_names):
+        raise ValueError(
+            f"Axis units {axis_units} does not have same length as axis names {axis_names}"
+        )
+    if axis_types is not None and len(axis_types) != len(axis_names):
+        raise ValueError(
+            f"Axis types {axis_types} does not have same length as axis names {axis_names}"
+        )
+
     new_meta = metadata.model_copy()
     axes = []
 

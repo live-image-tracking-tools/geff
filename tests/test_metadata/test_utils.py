@@ -6,6 +6,7 @@ from geff.metadata.utils import (
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
     create_props_metadata,
+    update_metadata_axes,
 )
 
 
@@ -260,6 +261,39 @@ class TestCreatePropMetadata:
         assert result.unit == "boolean"
         assert result.name == "Boolean Flag"
         assert result.description == "A test boolean property"
+
+
+class TestUpdateMetadataAxes:
+    def test_valid(self):
+        metadata = GeffMetadata(directed=True, node_props_metadata={}, edge_props_metadata={})
+        axis_names = ["x", "y"]
+        axis_units = ["meter", None]
+        axis_types = [None, "space"]
+        new_meta = update_metadata_axes(metadata, axis_names, axis_units, axis_types)
+        axes = new_meta.axes
+        assert axes is not None
+        assert len(axes) == 2
+        assert axes[0].name == "x"
+        assert axes[0].unit == "meter"
+        assert axes[0].type is None
+
+    def test_invalid_units(self):
+        metadata = GeffMetadata(directed=True, node_props_metadata={}, edge_props_metadata={})
+        axis_names = ["x", "y"]
+        axis_units: list[str | None] = ["meter"]
+        with pytest.raises(
+            ValueError, match="Axis units .* does not have same length as axis names .*"
+        ):
+            update_metadata_axes(metadata, axis_names, axis_units)
+
+    def test_invalid_types(self):
+        metadata = GeffMetadata(directed=True, node_props_metadata={}, edge_props_metadata={})
+        axis_names = ["x", "y"]
+        axis_types = ["space", None, None]
+        with pytest.raises(
+            ValueError, match="Axis types .* does not have same length as axis names .*"
+        ):
+            update_metadata_axes(metadata, axis_names, axis_types=axis_types)
 
 
 class TestComputeAndAddAxisMinMax:
