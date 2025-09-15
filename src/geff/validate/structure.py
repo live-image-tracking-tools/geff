@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import numpy as np
 import zarr
@@ -101,7 +101,7 @@ def _validate_props_group(
             raise ValueError(
                 f"{parent_key} property group {prop_name!r} must have a {_path.VALUES!r} array"
             )
-        val_arr = cast("zarr.Array", prop_group[_path.VALUES])
+        val_arr = expect_array(prop_group, _path.VALUES)
 
         # check value dtype against metadata dtype
         if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
@@ -119,7 +119,7 @@ def _validate_props_group(
             )
 
         if _path.MISSING in arrays:
-            missing_arr = cast("zarr.Array", prop_group[_path.MISSING])
+            missing_arr = expect_array(prop_group, _path.MISSING)
             miss_len = missing_arr.shape[0]
             if miss_len != expected_len:
                 raise ValueError(
