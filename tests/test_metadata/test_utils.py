@@ -284,7 +284,7 @@ class TestComputeAndAddAxisMinMax:
         )
         x_prop = {
             "values": np.array([0, 1, 2, 3], dtype=np.uint32),
-            "missing": np.array([0, 0, 1, 1], dtype=np.bool),
+            "missing": np.array([0, 0, 1, 1], dtype=np.bool_),
         }
         node_props = {"x": x_prop}
         new_meta = compute_and_add_axis_min_max(metadata, node_props)
