@@ -162,7 +162,7 @@ class Test_validate_props_group:
 
     def test_node_prop_shape_mismatch(self, node_group, meta):
         # Property shape mismatch
-        key = "badshape"
+        key = "x"
         node_group[f"{_path.PROPS}/{key}/{_path.VALUES}"] = np.zeros(1)
         id_len = node_group[_path.IDS].shape[0]
         with pytest.raises(

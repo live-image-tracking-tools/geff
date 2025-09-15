@@ -3,14 +3,11 @@ from __future__ import annotations
 import os
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, TypeVar
+from typing import TYPE_CHECKING, Literal, TypeVar
 
-import numpy as np
 import zarr
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping
-
     from zarr.storage import StoreLike
 
     T = TypeVar("T")
@@ -175,42 +172,3 @@ def setup_zarr_group(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> zarr.G
         return zarr.open_group(store, mode="a", zarr_format=zarr_format)
     else:
         return zarr.open_group(store, mode="a")
-
-
-def calculate_roi_from_nodes(
-    nodes_iter: Iterable[T],
-    axis_names: list[str],
-    node_accessor_func: Callable[[T], Mapping[str, Any]],
-) -> tuple[tuple[float, ...], tuple[float, ...]]:
-    """Calculate ROI (region of interest) from graph nodes.
-
-    Args:
-        nodes_iter: Iterator over graph nodes
-        axis_names: Names of the spatial axes
-        node_accessor_func: Function to extract node data from each node
-
-    Returns:
-        tuple[tuple[float, ...], tuple[float, ...]]: Min and max values for each axis
-    """
-    _min = None
-    _max = None
-    for node in nodes_iter:
-        node_data = node_accessor_func(node)
-
-        try:
-            pos = np.array([node_data[name] for name in axis_names])
-        except KeyError as e:
-            missing_names = {name for name in axis_names if name not in node_data}
-            raise ValueError(f"Spatiotemporal properties {missing_names} not found in node") from e
-
-        if _min is None or _max is None:
-            _min = pos
-            _max = pos
-        else:
-            _min = np.min([_min, pos], axis=0)
-            _max = np.max([_max, pos], axis=0)
-
-    if _min is None or _max is None:
-        raise ValueError("No nodes found to calculate ROI")
-
-    return tuple(_min.tolist()), tuple(_max.tolist())

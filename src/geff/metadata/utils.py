@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import warnings
 from collections.abc import Sequence  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
@@ -20,52 +19,79 @@ if TYPE_CHECKING:
     from geff._typing import PropDictNpArray
 
 
-def get_graph_existing_metadata(
-    metadata: GeffMetadata | None = None,
-    axis_names: list[str] | None = None,
+def update_metadata_axes(
+    metadata: GeffMetadata,
+    axis_names: list[str],
     axis_units: list[str | None] | None = None,
     axis_types: list[Literal[AxisType] | None] | None = None,
-) -> tuple[list[str] | None, list[str | None] | None, list[Literal[AxisType] | None] | None]:
-    """Get the existing metadata from a graph.
+) -> GeffMetadata:
+    """Update the axis names, units, and types in a geff metadat object.
+    Overrides any existing axes.
 
     If axis lists are provided, they will override the graph properties and metadata.
     If metadata is provided, it will override the graph properties.
     If neither are provided, the graph properties will be used.
 
     Args:
-        metadata: The metadata of the graph. Defaults to None.
-        axis_names: The names of the spatial dims. Defaults to None.
+        metadata: The metadata of the graph.
+        axis_names: The names of the spatial dims.
         axis_units: The units of the spatial dims. Defaults to None.
         axis_types: The types of the spatial dims. Defaults to None.
 
     Returns:
-        tuple[list[str] | None, list[str | None] | None, list[str | None] | None]:
-            A tuple with the names of the spatial dims, the units of the spatial dims,
-            and the types of the spatial dims. None if not provided.
+        GeffMetadata: A new metadata object with updated axes.
     """
-    lists_provided = any(x is not None for x in [axis_names, axis_units, axis_types])
-    metadata_provided = metadata is not None
+    new_meta = metadata.model_copy()
+    axes = []
 
-    if lists_provided and metadata_provided:
-        warnings.warn(
-            "Both axis lists and metadata provided. Overriding metadata with axis lists.",
-            stacklevel=2,
-        )
+    for i in range(len(axis_names)):
+        axis = Axis(name=axis_names[i])
+        if axis_units is not None:
+            axis.unit = axis_units[i]
+        if axis_types is not None:
+            axis.type = axis_types[i]
+        axes.append(axis)
+    new_meta.axes = axes
+    return new_meta
 
-    # If any axis lists is not provided, fallback to metadata if provided
-    if metadata is not None and metadata.axes is not None:
-        # the x = x or y is a python idiom for setting x to y if x is None, otherwise x
-        axis_names = axis_names or [axis.name for axis in metadata.axes]
-        axis_units = axis_units or [axis.unit for axis in metadata.axes]
-        axis_types = axis_types or [axis.type for axis in metadata.axes]
 
-    return axis_names, axis_units, axis_types
+def compute_and_add_axis_min_max(
+    metadata: GeffMetadata, node_props: dict[str, PropDictNpArray]
+) -> GeffMetadata:
+    """Create a new metadata object with the min and max values for each axis added.
+
+    Args:
+        metadata (GeffMetadata): The metadata to update with the min and max axis values.
+        node_props (dict[str, PropDictNpArray]): The node props to compute the min and
+            max from
+
+    Returns:
+        GeffMetadata: A new metadata object with the min and max updated.
+    """
+    new_meta = metadata.model_copy()
+    if new_meta.axes is None:
+        return new_meta
+    new_axes = []
+    for axis in new_meta.axes:
+        prop = node_props[axis.name]
+        values = prop["values"]
+        if len(values) == 0:
+            new_axes.append(axis)
+            continue
+        missing = prop["missing"]
+        if missing is not None:
+            values = values[np.logical_not(missing)]
+        axis.min = np.min(values).item()
+        axis.max = np.max(values).item()
+        new_axes.append(axis)
+    new_meta.axes = new_axes
+    return new_meta
 
 
 def create_or_update_metadata(
     metadata: GeffMetadata | None,
     is_directed: bool,
-    axes: Any,
+    axes: Any = None,
 ) -> GeffMetadata:
     """Create new metadata or update existing metadata with axes, version, and directedness.
 
@@ -81,7 +107,8 @@ def create_or_update_metadata(
         metadata = copy.deepcopy(metadata)
         metadata.geff_version = geff.__version__
         metadata.directed = is_directed
-        metadata.axes = axes
+        if axes is not None:
+            metadata.axes = axes
     else:
         metadata = GeffMetadata(
             geff_version=geff.__version__,
@@ -212,12 +239,12 @@ def create_props_metadata(
     if not np.issubdtype(values.dtype, np.object_):
         # normal property case
         varlength = False
-        dtype = values.dtype
+        dtype = "str" if np.issubdtype(values.dtype, np.str_) else values.dtype.name
 
     else:
         # variable length property case
         varlength = True
-        dtype = values[0].dtype
+        dtype = values[0].dtype.name
         # check that all arrays have the same dtype while we are here
         for array in values:
             if array.dtype != dtype:
@@ -225,10 +252,10 @@ def create_props_metadata(
                     "Object array containing variable length properties has two "
                     f"dtypes: {dtype, array.dtype}"
                 )
-
+    print(dtype)
     return PropMetadata(
         identifier=identifier,
-        dtype=str(dtype),
+        dtype=dtype,
         varlength=varlength,
         unit=unit,
         name=name,

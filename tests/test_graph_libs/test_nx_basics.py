@@ -212,16 +212,14 @@ def test_write_nx_metadata_override_precedence(tmp_path) -> None:
 
     path = tmp_path / "override_test.zarr"
 
-    # Should log warning when both metadata and axis lists are provided
-    with pytest.warns(UserWarning):
-        NxBackend.write(
-            graph,
-            store=path,
-            metadata=metadata,
-            axis_names=["x", "y", "z"],  # Override with different axes
-            axis_units=["meter", "meter", "meter"],
-            axis_types=["space", "space", "space"],
-        )
+    NxBackend.write(
+        graph,
+        store=path,
+        metadata=metadata,
+        axis_names=["x", "y", "z"],  # Override with different axes
+        axis_units=["meter", "meter", "meter"],
+        axis_types=["space", "space", "space"],
+    )
 
     # Verify that axis lists took precedence
     _, read_metadata = NxBackend.read(path)

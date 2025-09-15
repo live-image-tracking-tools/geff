@@ -8,7 +8,11 @@ import numpy as np
 from geff import _path
 from geff.core_io._utils import remove_tilde, setup_zarr_group
 from geff.metadata._valid_values import validate_data_type
-from geff.metadata.utils import add_or_update_props_metadata, create_props_metadata
+from geff.metadata.utils import (
+    add_or_update_props_metadata,
+    compute_and_add_axis_min_max,
+    create_props_metadata,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -25,6 +29,7 @@ def write_dicts(
     edge_data: Iterable[tuple[Any, dict[str, Any]]],
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
+    metadata: GeffMetadata,
     axis_names: Sequence[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
@@ -41,8 +46,10 @@ def write_dicts(
             to any values.
         node_prop_names (Sequence[str]): A list of node properties to include in the
             geff
-        edge_prop_names (Sequence[str]): a list of edge properties to include in the
+        edge_prop_names (Sequence[str]): A list of edge properties to include in the
             geff
+        metadata (GeffMetadata): The core metadata to write. Node/edge properties and
+            axis min and maxes will be overwritten.
         axis_names (Sequence[str] | None): The name of the spatiotemporal properties, if
             any. Defaults to None
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
@@ -77,8 +84,6 @@ def write_dicts(
     else:
         edges_arr = np.empty((0, 2), dtype=nodes_arr.dtype)
 
-    write_id_arrays(geff_store, nodes_arr, edges_arr, zarr_format=zarr_format)
-
     if axis_names is not None:
         node_prop_names = list(node_prop_names)
         for axis in axis_names:
@@ -94,10 +99,17 @@ def write_dicts(
                     f"Spatiotemporal property '{axis}' not found in : "
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
-    write_props_arrays(geff_store, _path.NODES, node_props_dict, zarr_format=zarr_format)
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
-    write_props_arrays(geff_store, _path.EDGES, edge_props_dict, zarr_format=zarr_format)
+    write_arrays(
+        geff_store,
+        nodes_arr,
+        node_props_dict,
+        edges_arr,
+        edge_props_dict,
+        metadata,
+        zarr_format=zarr_format,
+    )
 
 
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
@@ -240,6 +252,8 @@ def write_arrays(
 
     metadata = add_or_update_props_metadata(metadata, node_meta, "node")
     metadata = add_or_update_props_metadata(metadata, edge_meta, "edge")
+    if node_props is not None:
+        metadata = compute_and_add_axis_min_max(metadata, node_props)
     metadata.write(geff_store)
 
 
