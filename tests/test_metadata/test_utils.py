@@ -1,8 +1,12 @@
 import numpy as np
 import pytest
 
-from geff.metadata._schema import GeffMetadata, PropMetadata
-from geff.metadata.utils import add_or_update_props_metadata, create_props_metadata
+from geff.metadata import Axis, GeffMetadata, PropMetadata
+from geff.metadata.utils import (
+    add_or_update_props_metadata,
+    compute_and_add_axis_min_max,
+    create_props_metadata,
+)
 
 
 class TestCreateOrUpdatePropsMetadata:
@@ -256,3 +260,32 @@ class TestCreatePropMetadata:
         assert result.unit == "boolean"
         assert result.name == "Boolean Flag"
         assert result.description == "A test boolean property"
+
+
+class TestComputeAndAddAxisMinMax:
+    def test_no_missing(self):
+        metadata = GeffMetadata(
+            directed=True,
+            axes=[Axis(name="x", type="space")],
+            node_props_metadata={},
+            edge_props_metadata={},
+        )
+        x_prop = {"values": np.array([0, 1, 2, 3], dtype=np.uint32), "missing": None}
+        node_props = {"x": x_prop}
+        new_meta = compute_and_add_axis_min_max(metadata, node_props)
+        assert new_meta.axes[0].max == 3
+
+    def test_with_missing(self):
+        metadata = GeffMetadata(
+            directed=True,
+            axes=[Axis(name="x", type="space")],
+            node_props_metadata={},
+            edge_props_metadata={},
+        )
+        x_prop = {
+            "values": np.array([0, 1, 2, 3], dtype=np.uint32),
+            "missing": np.array([0, 0, 1, 1], dtype=np.bool),
+        }
+        node_props = {"x": x_prop}
+        new_meta = compute_and_add_axis_min_max(metadata, node_props)
+        assert new_meta.axes[0].max == 1
