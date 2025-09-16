@@ -76,4 +76,5 @@ plugins:
 - api-autonav:
     modules: ['packages/geff/src/geff', 'packages/geff-spec/src/geff_spec']
     nav_section_title: "Python API"
-- autorefs
+- autorefs:
+    resolve_closest: true
