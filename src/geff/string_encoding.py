@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from geff._typing import PropDictNpArray
 
 
-def encode_string_data(data: PropDictNpArray) -> VarLenPropDictNpArray:
+def encode_string_data(data: PropDictNpArray) -> tuple[NDArray, NDArray | None, NDArray]:
     """Encode a string array into a data array, values array, and missing array
 
     Args:
@@ -22,23 +22,19 @@ def encode_string_data(data: PropDictNpArray) -> VarLenPropDictNpArray:
         TypeError: If the input values are not a string array
 
     Returns:
-        VarLenPropDictNpArray: new data, values, and missing array to write to the props group
+        tuple[NDArray, NDArray | None, NDArray]: new values, missing, and data arrays
+            to write to the props group
     """
     str_values = data["values"]
     missing = data["missing"]
     if not str_values.dtype.kind == "U":
         raise TypeError("Cannot encode non-string array")
-    # TODO: Warn here or outside? Or no warn because it's now expected?
-    # warnings.warn(
-    #     f"Property '{data}' is a string array. Automatically casting it to bytes",
-    #     stacklevel=2,
-    # )
 
     encoded_data = np.array("".join([str(row) for row in str_values]).encode("utf-8"))
     shapes = np.asarray(tuple(len(s) for s in str_values), dtype=np.int64)
     offsets = np.concatenate(([0], np.cumsum(shapes[:-1])))
     new_values = np.vstack((offsets, shapes)).T
-    return {"values": new_values, "missing": missing, "data": encoded_data}
+    return new_values, missing, encoded_data
 
 
 def decode_string_data(
@@ -47,9 +43,13 @@ def decode_string_data(
     """Turns encoded string values back into a native python string array of values
 
     Args:
-        data (VarLenPropDictNpArray): The values, data, and missing arrays read from disk
-            containing encoded string values of varying lengths
-
+        values (NDArray): The values array containing the offset indices and shapes of
+            each property. (e.g., [[offset, shape_dim0,], ...]).
+            expected shape is (N, 2) where N is the number of nodes or edges.
+        missing (NDArray[np.bool_] | None): The 1D array indicating missing values, or
+            None if no values are missing.
+        data (NDArray): The 1D byte array containing the serialized property data.
+            expected shape is (total_data_length,).
     Raises:
         TypeError: If the data array is not a byte array
 

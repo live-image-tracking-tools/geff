@@ -1,3 +1,4 @@
+import warnings
 from collections.abc import Sequence
 
 import numpy as np
@@ -6,37 +7,85 @@ from numpy.typing import ArrayLike, NDArray
 from geff._typing import PropDictNpArray
 
 
-def serialize_vlen_property_data_as_dict(
-    prop_data: Sequence[ArrayLike | None],
-    dtype: type = np.float32,
-) -> dict[str, NDArray | None]:
-    """
-    Serialize a sequence of vlen property data into a structured format as a dictionary.
+def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype, int]:
+    ndim = None
+    dtype = None
+
+    for arr in arr_seq:
+        if arr is None:
+            continue
+        element = np.asarray(arr)
+        if ndim is None:
+            ndim = element.ndim
+            dtype = element.dtype
+        else:
+            ndim = max(element.ndim, ndim)
+            if np.can_cast(dtype, element.dtype):
+                dtype = np.promote_types(dtype, element.dtype)
+            else:
+                raise ValueError(
+                    "All elements must have compatible dtypes. Cannot"
+                    f"cast {dtype} and {element.dtype}."
+                )
+
+    if dtype is None or ndim is None:
+        warnings.warn(
+            "Variable length property sequence does not have any valid elements - "
+            "using ndim=1 and dtype=int64",
+            stacklevel=2,
+        )
+        dtype = np.dtype("int64")
+        ndim = 1
+    return dtype, ndim
+
+
+def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpArray:
+    """Converts a sequence of array like and None objects into a geff._typing.PropDictNpArray
+
+    Creates a missing array with the indices of the None objects. Converts each element of
+    the sequence into a numpy array. Prepends dummy dimensions to each element to ensure
+    all elements have the same number of dimensions. Casts all arrays into a common dtype
+    (if there is one). Turns the sequence into a numpy array with dtype object.
+
     Args:
-        prop_data (Sequence[ArrayLike | None]): A sequence of property data, where each element
-            can be a numpy array or None.
-        dtype (type): The data type to use for the values array. Default is np.float32.
+        arr_seq (Sequence[ArrayLike | None]): A sequence of properties, with one entry
+            per node or edge. Missing values are indicated by None entries.
+
     Returns:
-        dict[str, NDArray]: A dictionary with keys 'values', 'missing', and 'data'.
+        PropDictNpArray: A standardized version of the input properties where all entries
+        are numpy arrays contained in an object array.
     """
-    values, missing, data = serialize_vlen_property_data(prop_data, dtype=dtype)
-    return {
-        "values": values,
-        "missing": missing,
-        "data": data,
-    }
+    values_arr = np.empty(shape=(len(arr_seq),), dtype=np.object_)
+    missing_arr = np.zeros(shape=(len(arr_seq),), dtype=np.bool_)
+
+    dtype, ndim = _get_common_type_dims(arr_seq)
+
+    for i, arr in enumerate(arr_seq):
+        if arr is None:
+            missing_arr[i] = 1
+            empty_shape = tuple(0 for _ in range(ndim))
+            default_val = np.empty(shape=empty_shape, dtype=dtype)
+            values_arr[i] = default_val
+        else:
+            element = np.asarray(arr, dtype=dtype)
+            # prepend dummy axes if needed
+            while element.ndim < ndim:
+                element = np.expand_dims(element, axis=0)
+            values_arr[i] = element
+    return {"values": values_arr, "missing": missing_arr if missing_arr.any() else None}
 
 
 def serialize_vlen_property_data(
-    prop_data: Sequence[ArrayLike | None],
-    dtype: type = np.float32,
+    prop_dict: PropDictNpArray,
 ) -> tuple[NDArray, NDArray | None, NDArray]:
     """
     Serialize a sequence of property data into a structured format.
     Args:
-        prop_data (Sequence[ArrayLike | None]): A sequence of property data, where each element can
-            be an ArrayLike object or None.
-        dtype (type): The data type to use for the values array. Default is np.float32.
+        prop_dict (PropDictNpArray): Variable length properties to be serialized. The values
+            array must have dtype np.object_, and each numpy array inside the object array
+            should have the same ndim and dtype. You can use `construct_var_len_props` to
+            convert properties into this standardized format.
+
     Returns:
         tuple[NDArray, NDArray | None, NDArray]: A tuple containing:
             - 'values': a NDArray of data indicating the offset indices and shapes of each property
@@ -45,46 +94,52 @@ def serialize_vlen_property_data(
             - 'data': a 1D NDArray of data that contains the serialized property data.
             The return value will be a tuple of (values, missing, data).
     """
-    values = []
-    missing = []
+    values = prop_dict["values"]
+    missing = prop_dict["missing"]
+    encoded_values = []
     data = []
     offset = 0
+
+    dtype = None
     ndim = None
 
-    # Determine the number of dimensions
-    for element in prop_data:
-        if element is not None:
-            element = np.asarray(element, dtype=dtype)
-            if ndim is None:
-                ndim = element.ndim
-            elif element.ndim != ndim:
-                raise ValueError(
-                    "All elements must have the same number of dimensions: "
-                    f"expected {ndim}, got {element.ndim}."
-                )
-
-    # Convert elements to arrays and build the values, missing, and data arrays
-    for element in prop_data:
-        if element is None:
-            values.append((offset,) + (0,) * ndim if ndim is not None else ())
-            missing.append(True)
-        else:
-            element = np.asarray(element, dtype=dtype)
-            values.append((offset, *element.shape))
-            missing.append(False)
-            data.append(element)
-            offset += np.asarray(element.shape).prod()
+    # Elements should already be numpy arrays of numpy arrays with dtypes
+    for element in values:
+        if not isinstance(element, np.ndarray):
+            raise ValueError(
+                "For variable length properties, each node/edge property must be a "
+                f"numpy array, got {type(element)}. Try using `construct_var_len_props` "
+                "helper function to standardize the properties."
+            )
+        if ndim is None:
+            ndim = element.ndim
+        elif element.ndim != ndim:
+            raise ValueError(
+                "For variable length properties, each node/edge property must have the "
+                "same number of dimensions. Try using `construct_var_len_props` helper "
+                "function to standardize the properties."
+            )
+        if dtype is None:
+            dtype = element.dtype
+        elif element.dtype != dtype:
+            raise ValueError(
+                "For variable length properties, each node/edge property must have the "
+                "same number of dtype. Try using `construct_var_len_props` helper function "
+                "to standardize the properties."
+            )
+        encoded_values.append((offset, *element.shape))
+        data.append(element)
+        offset += np.asarray(element.shape).prod()
 
     return (
-        np.asarray(values, dtype=np.int64),
-        np.array(missing, dtype=bool) if missing else None,
-        np.concatenate([d.ravel() for d in data]) if data else np.array([], dtype=dtype),
+        np.asarray(encoded_values, dtype=np.uint64),
+        missing,
+        np.concatenate([d.ravel() for d in data]) if data else np.array([], dtype="int64"),
     )
 
 
 def _deserialize_vlen_array(
     values: NDArray,
-    missing: NDArray[np.bool_] | None,
     data: NDArray,
     index: int,
 ) -> NDArray:
@@ -95,7 +150,6 @@ def _deserialize_vlen_array(
         values (NDArray): The AND array containing the offset indices and shapes of
             each property. (e.g., [[offset, shape_dim0, shape_dim1], ...]).
             expected shape is (N, ndim + 1) where N is the number of nodes or edges.
-        missing (NDArray): The 1D array indicating missing values. expected shape is (N,).
         data (NDArray): The 1D array containing the serialized property data.
             expected shape is (total_data_length,).
         index (int): The index of the property to deserialize.
@@ -105,8 +159,8 @@ def _deserialize_vlen_array(
     """
     if index < 0 or index >= values.shape[0]:
         raise IndexError(f"Index {index} out of bounds for property data.")
-    if missing is not None and missing[index]:
-        return np.zeros(shape=(0,), dtype=values.dtype)
+    # TODO: we could use the missing values to make an empty array, but it messes
+    # up consistency if you had an array before writing
     offset = values[index][0]
     shape = values[index][1:]
     return data[offset : offset + np.prod(shape)].reshape(shape)
@@ -118,18 +172,22 @@ def deserialize_vlen_property_data(
     data: NDArray,
 ) -> PropDictNpArray:
     """
-    Get deserialized vlen property data for a specific property name.
+    Deserialize variable length property data, turning it into a normal in-memory property.
 
     Args:
-        vlen_props (Group | dict[str, NDArray]): The Zarr group or dictionary containing the
-            serialized data.
-        index (int | None): The index of the property to retrieve. If None, returns all properties.
+        values (NDArray): The values array containing the offset indices and shapes of
+            each property. (e.g., [[offset, shape_dim0, shape_dim1], ...]).
+            expected shape is (N, ndim + 1) where N is the number of nodes or edges.
+        missing (NDArray[np.bool_] | None): The 1D array indicating missing values, or
+            None if no values are missing.
+        data (NDArray): The 1D array containing the serialized property data.
+            expected shape is (total_data_length,).
 
     Returns:
-        NDArray | Sequence[NDArray | None] | None: The deserialized vlen property data, or None if
-            the indexed item is missing.
+        PropDictNpArray: The deserialized property data, where values is a numpy
+            array of type object containing other numpy arrays.
     """
-    decoded_values = [
-        _deserialize_vlen_array(values, missing, data, i) for i in range(values.shape[0])
-    ]
+    decoded_values = np.empty(shape=(len(values),), dtype=np.object_)
+    for i in range(values.shape[0]):
+        decoded_values[i] = _deserialize_vlen_array(values, data, i)
     return {"values": decoded_values, "missing": missing}

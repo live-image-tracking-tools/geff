@@ -13,6 +13,8 @@ from geff.metadata.utils import (
     compute_and_add_axis_min_max,
     create_props_metadata,
 )
+from geff.serialization import serialize_vlen_property_data
+from geff.string_encoding import encode_string_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -335,7 +337,10 @@ def write_props_arrays(
         for name, replace_names in props_unsquish.items():
             values = props[name]["values"]
             missing = props[name]["missing"]
-            assert len(values.shape) == 2, "Can only unsquish 2D arrays."
+            if (not len(values.shape) == 2) or np.issubdtype(values.dtype, np.object_):
+                raise ValueError(
+                    "Can only unsquish 2D array properties that are not variable length."
+                )
 
             replace_arrays: dict[str, PropDictNpArray]
             for i, replace_name in enumerate(replace_names):
@@ -354,13 +359,27 @@ def write_props_arrays(
     for prop, prop_dict in props.items():
         prop_metadata = create_props_metadata(prop, prop_dict)
         metadata.append(prop_metadata)
+
+        if prop_metadata.varlength:
+            values, missing, data = serialize_vlen_property_data(prop_dict)
+        elif np.issubdtype(np.dtype(prop_metadata.dtype), np.str_):
+            values, missing, data = encode_string_data(prop_dict)
+        else:
+            values = prop_dict["values"]
+            missing = prop_dict["missing"]
+            data = None
+
         # data-type validation - ensure this property can round-trip through
         # Java Zarr readers before any data get written to disk.
-        values = prop_dict["values"]
-        missing = prop_dict["missing"]
         if not validate_data_type(values.dtype):
             warnings.warn(
-                f"Data type {values.dtype} for property '{prop}' is not supported "
+                f"Values type {values.dtype} for property '{prop}' is not supported "
+                "by Java Zarr implementations. Proceeding anyway.",
+                stacklevel=2,
+            )
+        if data is not None and (not validate_data_type(data.dtype)):
+            warnings.warn(
+                f"Data type {data.dtype} for property '{prop}' is not supported "
                 "by Java Zarr implementations. Proceeding anyway.",
                 stacklevel=2,
             )
@@ -369,5 +388,7 @@ def write_props_arrays(
         prop_group[_path.VALUES] = values
         if missing is not None:
             prop_group[_path.MISSING] = missing
+        if data is not None:
+            prop_group[_path.DATA] = data
 
     return metadata

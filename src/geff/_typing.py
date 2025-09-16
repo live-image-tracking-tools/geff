@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING, Any, TypedDict
 from typing_extensions import NotRequired
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     import numpy as np
     import zarr
     from numpy.typing import NDArray
@@ -33,10 +31,9 @@ class PropDictNpArray(TypedDict):
 
     "values" is a numpy array of any type, "missing" is a numpy array of bools.
     Variable length properties should have object dtype for their values array
-    Variable length properties should have object dtype for their values array
     """
 
-    values: NDArray[Any] | Sequence[NDArray[Any]]
+    values: NDArray[Any]
     missing: NDArray[np.bool_] | None
 
 
@@ -48,6 +45,7 @@ class ZarrPropDict(TypedDict):
 
     values: zarr.Array
     missing: NotRequired[zarr.Array]
+    data: NotRequired[zarr.Array]
 
 
 # Intermediate dict format that can be constructed to different backend types
