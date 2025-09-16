@@ -33,6 +33,7 @@ class PropDictNpArray(TypedDict):
 
     "values" is a numpy array of any type, "missing" is a numpy array of bools.
     Variable length properties should have object dtype for their values array
+    Variable length properties should have object dtype for their values array
     """
 
     values: NDArray[Any] | Sequence[NDArray[Any]]
@@ -41,12 +42,12 @@ class PropDictNpArray(TypedDict):
 
 class ZarrPropDict(TypedDict):
     """
-    A prop dictionary which has the keys "values" and optionally "missing", stored as zarr arrays.
+    A prop dictionary which has the keys "values" and optionally "missing" and "data",
+    stored as zarr arrays.
     """
 
     values: zarr.Array
     missing: NotRequired[zarr.Array]
-    data: NotRequired[zarr.Array]
 
 
 # Intermediate dict format that can be constructed to different backend types

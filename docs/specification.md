@@ -65,6 +65,7 @@ Each row represents an edge between two nodes. For directed graphs, the first co
 Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.
 
 ### The `props` group and `edge property` groups
+
 The `edges\props` group will contain zero or more `edge property` groups, each with a `values` array and an optional `missing` array. Variable length edge properties operate the same as variable length node properties, with an additional `data` array that the `values` array refers to.
 
 - `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the `edges\ids` array, such that each row of the property `values` array stores the property for the edge at that index in the ids array.
@@ -99,10 +100,6 @@ Here is a schematic of the expected file structure.
                     missing # shape: (N,) dtype: bool
                 color/
                     values # shape: (N, 4) dtype: float32
-                    missing # shape: (N,) dtype: bool
-                polygon/
-                    data # shape: (V, 2) dtype: any
-                    values # shape: (N, 2) dtype: int64
                     missing # shape: (N,) dtype: bool
                 polygon/
                     data # shape: (V, 2) dtype: any
