@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import numpy as np
 import zarr
@@ -10,6 +10,8 @@ from geff.core_io._utils import expect_array, expect_group, open_storelike
 
 if TYPE_CHECKING:
     from zarr.storage import StoreLike
+
+    from geff_spec import PropMetadata
 
 
 from geff_spec import GeffMetadata
@@ -71,9 +73,22 @@ def _validate_props_group(
     props_group: zarr.Group,
     expected_len: int,
     parent_key: str,
+    props_metadata: dict[str, PropMetadata],
 ) -> None:
     """Validate every property subgroup under `props_group`."""
+    # check that all properties in the metadata are in the group
+    for prop_name in props_metadata:
+        if prop_name not in props_group.keys():
+            raise ValueError(
+                f"Property {prop_name} is in the metadata but missing from the property group"
+            )
+
     for prop_name in props_group.keys():
+        # check that all properties in the group are in the metadata
+        if prop_name not in props_metadata:
+            raise ValueError(f"Property {prop_name} is missing from the property metadata")
+        prop_metadata = props_metadata[prop_name]
+
         prop_group = props_group[prop_name]
         if not isinstance(prop_group, zarr.Group):
             raise ValueError(
@@ -86,8 +101,17 @@ def _validate_props_group(
             raise ValueError(
                 f"{parent_key} property group {prop_name!r} must have a {_path.VALUES!r} array"
             )
+        val_arr = expect_array(prop_group, _path.VALUES)
 
-        val_len = cast("zarr.Array", prop_group[_path.VALUES]).shape[0]
+        # check value dtype against metadata dtype
+        if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
+            raise ValueError(
+                f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
+                f"dtype {val_arr.dtype}"
+            )
+
+        # check values length
+        val_len = val_arr.shape[0]
         if val_len != expected_len:
             raise ValueError(
                 f"{parent_key} property {prop_name!r} {_path.VALUES} has length {val_len}, "
@@ -95,7 +119,7 @@ def _validate_props_group(
             )
 
         if _path.MISSING in arrays:
-            missing_arr = cast("zarr.Array", prop_group[_path.MISSING])
+            missing_arr = expect_array(prop_group, _path.MISSING)
             miss_len = missing_arr.shape[0]
             if miss_len != expected_len:
                 raise ValueError(
@@ -113,14 +137,13 @@ def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> No
     """Validate the structure of a nodes group in a GEFF zarr store."""
     node_ids = expect_array(nodes_group, _path.IDS, _path.NODES)
 
-    # Node ids must be int dtype
-    # TODO: enforce uint
+    # Node ids must be uint dtype
     if not np.issubdtype(np.dtype(node_ids.dtype), np.unsignedinteger):
         raise ValueError("Node ids must have an unsigned integer dtype")
 
     id_len = node_ids.shape[0]
     node_props = expect_group(nodes_group, _path.PROPS, _path.NODES)
-    _validate_props_group(node_props, id_len, "Node")
+    _validate_props_group(node_props, id_len, "Node", metadata.node_props_metadata)
 
 
 def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> None:
@@ -143,4 +166,4 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
         raise ValueError(
             f"{_path.EDGES!r} group must contain a {_path.PROPS!r} group. Got {type(edge_props)}"
         )
-    _validate_props_group(edge_props, edge_id_len, "Edge")
+    _validate_props_group(edge_props, edge_id_len, "Edge", metadata.edge_props_metadata)

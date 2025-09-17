@@ -15,8 +15,7 @@ except ImportError as e:
 
 
 from geff.core_io import write_dicts
-from geff.core_io._utils import calculate_roi_from_nodes
-from geff_spec.utils import axes_from_lists, create_or_update_metadata, get_graph_existing_metadata
+from geff_spec.utils import create_or_update_metadata, update_metadata_axes
 
 from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
@@ -29,26 +28,6 @@ if TYPE_CHECKING:
 
     from geff._typing import PropDictNpArray
     from geff_spec import AxisType, GeffMetadata
-
-
-def get_roi_rx(
-    graph: rx.PyGraph | rx.PyDiGraph, axis_names: list[str]
-) -> tuple[tuple[float, ...], tuple[float, ...]]:
-    """Get the roi of a rustworkx graph.
-
-    Args:
-        graph: A non-empty rustworkx graph
-        axis_names: All nodes on graph have these property holding their position
-
-    Returns:
-        tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
-            spatial dim, and a tuple with the max values in each spatial dim
-    """
-    return calculate_roi_from_nodes(
-        graph.nodes(),
-        axis_names,
-        lambda node_data: node_data,  # node_data is already the dict for rustworkx
-    )
 
 
 # NOTE: see _api_wrapper.py read/write/construct for docs
@@ -139,9 +118,10 @@ class RxBackend(Backend):
         zarr_format: Literal[2, 3] = 2,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:
-        axis_names, axis_units, axis_types = get_graph_existing_metadata(
-            metadata, axis_names, axis_units, axis_types
-        )
+        directed = isinstance(graph, rx.PyDiGraph)
+        metadata = create_or_update_metadata(metadata=metadata, is_directed=directed)
+        if axis_names is not None:
+            metadata = update_metadata_axes(metadata, axis_names, axis_units, axis_types)
 
         if graph.num_nodes() == 0:
             # Handle empty graph case - still need to write empty structure
@@ -182,32 +162,10 @@ class RxBackend(Backend):
             edge_data=edge_data,
             node_prop_names=node_props,
             edge_prop_names=edge_props,
+            metadata=metadata,
             axis_names=axis_names,
             zarr_format=zarr_format,
         )
-
-        # write metadata
-        roi_min: tuple[float, ...] | None
-        roi_max: tuple[float, ...] | None
-        if axis_names is not None and graph.num_nodes() > 0:
-            roi_min, roi_max = get_roi_rx(graph, axis_names)
-        else:
-            roi_min, roi_max = None, None
-
-        axes = axes_from_lists(
-            axis_names,
-            axis_units=axis_units,
-            axis_types=axis_types,
-            roi_min=roi_min,
-            roi_max=roi_max,
-        )
-
-        metadata = create_or_update_metadata(
-            metadata,
-            isinstance(graph, rx.PyDiGraph),
-            axes,
-        )
-        metadata.write(store)
 
     @staticmethod
     def graph_adapter(graph: rx.PyGraph | rx.PyDiGraph) -> RxGraphAdapter:

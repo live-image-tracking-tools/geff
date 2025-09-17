@@ -29,4 +29,4 @@ release version:
 
 # update schema
 update-schema:
-    uv run pytest packages/geff-spec/tests/test_metadata_schema.py::test_schema_file_updated --update-schema
+    uv run pytest packages/geff-spec/tests/test_schema.py::test_schema_file_updated --update-schema

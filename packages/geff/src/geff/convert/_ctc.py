@@ -209,6 +209,8 @@ def from_ctc_to_geff(
             geff_version=geff.__version__,
             axes=axis_names,
             directed=True,
+            node_props_metadata={},
+            edge_props_metadata={},
         ),
         zarr_format=zarr_format,
     )

@@ -229,11 +229,16 @@ def test_write_rx_with_metadata(tmp_path) -> None:
         roi_min=(1.0, 2.0),
         roi_max=(3.0, 4.0),
     )
-    metadata = GeffMetadata(geff_version="0.3.0", directed=False, axes=axes)
+    metadata = GeffMetadata(
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        node_props_metadata={},
+        edge_props_metadata={},
+    )
 
     path = tmp_path / "metadata_test.zarr"
-    with pytest.warns(UserWarning, match="Both axis lists and metadata provided"):
-        RxBackend.write(graph, path, metadata=metadata, axis_names=["x", "y"])
+    RxBackend.write(graph, path, metadata=metadata, axis_names=["x", "y"])
 
     # Read it back and verify metadata is preserved
     _, read_metadata = RxBackend.read(path)
@@ -242,8 +247,8 @@ def test_write_rx_with_metadata(tmp_path) -> None:
     assert len(read_metadata.axes) == 2
     assert read_metadata.axes[0].name == "x"
     assert read_metadata.axes[1].name == "y"
-    assert read_metadata.axes[0].unit == "micrometer"
-    assert read_metadata.axes[1].unit == "micrometer"
+    # old units are overwritten
+    assert read_metadata.axes[0].unit is None
 
 
 def test_write_rx_metadata_extra_properties(tmp_path) -> None:
@@ -261,11 +266,12 @@ def test_write_rx_metadata_extra_properties(tmp_path) -> None:
         directed=False,
         axes=axes,
         extra={"foo": "bar", "bar": {"baz": "qux"}},
+        node_props_metadata={},
+        edge_props_metadata={},
     )
     path = tmp_path / "extra_properties_test.zarr"
 
-    with pytest.warns(UserWarning, match="Both axis lists and metadata provided"):
-        RxBackend.write(graph, path, metadata=metadata, axis_names=["x", "y"])
+    RxBackend.write(graph, path, metadata=metadata, axis_names=["x", "y"])
     _, read_metadata = RxBackend.read(path)
     assert read_metadata.extra["foo"] == "bar"
     assert read_metadata.extra["bar"]["baz"] == "qux"
@@ -282,20 +288,24 @@ def test_write_rx_metadata_override_precedence(tmp_path) -> None:
         axis_units=["micrometer", "micrometer"],
         axis_types=["space", "space"],
     )
-    metadata = GeffMetadata(geff_version="0.3.0", directed=False, axes=axes)
+    metadata = GeffMetadata(
+        geff_version="0.3.0",
+        directed=False,
+        axes=axes,
+        node_props_metadata={},
+        edge_props_metadata={},
+    )
 
     path = tmp_path / "override_test.zarr"
 
-    # Should log warning when both metadata and axis lists are provided
-    with pytest.warns(UserWarning):
-        RxBackend.write(
-            graph,
-            store=path,
-            metadata=metadata,
-            axis_names=["t", "y", "x", "z"],  # Override with different axes
-            axis_units=["second", "meter", "meter", "meter"],
-            axis_types=["time", "space", "space", "space"],
-        )
+    RxBackend.write(
+        graph,
+        store=path,
+        metadata=metadata,
+        axis_names=["t", "y", "x", "z"],  # Override with different axes
+        axis_units=["second", "meter", "meter", "meter"],
+        axis_types=["time", "space", "space", "space"],
+    )
 
     # Verify that axis lists took precedence
     _, read_metadata = RxBackend.read(path)

@@ -8,6 +8,11 @@ import numpy as np
 from geff import _path
 from geff.core_io._utils import remove_tilde, setup_zarr_group
 from geff_spec import validate_data_type
+from geff_spec.utils import (
+    add_or_update_props_metadata,
+    compute_and_add_axis_min_max,
+    create_props_metadata,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -15,7 +20,7 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
-    from geff_spec import GeffMetadata
+    from geff_spec import GeffMetadata, PropMetadata
 
 
 def write_dicts(
@@ -24,6 +29,7 @@ def write_dicts(
     edge_data: Iterable[tuple[Any, dict[str, Any]]],
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
+    metadata: GeffMetadata,
     axis_names: Sequence[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
@@ -40,8 +46,10 @@ def write_dicts(
             to any values.
         node_prop_names (Sequence[str]): A list of node properties to include in the
             geff
-        edge_prop_names (Sequence[str]): a list of edge properties to include in the
+        edge_prop_names (Sequence[str]): A list of edge properties to include in the
             geff
+        metadata (GeffMetadata): The core metadata to write. Node/edge properties and
+            axis min and maxes will be overwritten.
         axis_names (Sequence[str] | None): The name of the spatiotemporal properties, if
             any. Defaults to None
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
@@ -76,8 +84,6 @@ def write_dicts(
     else:
         edges_arr = np.empty((0, 2), dtype=nodes_arr.dtype)
 
-    write_id_arrays(geff_store, nodes_arr, edges_arr, zarr_format=zarr_format)
-
     if axis_names is not None:
         node_prop_names = list(node_prop_names)
         for axis in axis_names:
@@ -93,10 +99,17 @@ def write_dicts(
                     f"Spatiotemporal property '{axis}' not found in : "
                     f"{nodes_arr[missing_arr].tolist()}"
                 )
-    write_props_arrays(geff_store, _path.NODES, node_props_dict, zarr_format=zarr_format)
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
-    write_props_arrays(geff_store, _path.EDGES, edge_props_dict, zarr_format=zarr_format)
+    write_arrays(
+        geff_store,
+        nodes_arr,
+        node_props_dict,
+        edges_arr,
+        edge_props_dict,
+        metadata,
+        zarr_format=zarr_format,
+    )
 
 
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
@@ -194,6 +207,7 @@ def write_arrays(
 
     Currently does not do any validation that the arrays are valid, but could be added
     as an optional flag.
+    Adds the PropMetadata for the nodes and edges, if not provided.
 
     Args:
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
@@ -224,13 +238,22 @@ def write_arrays(
 
     write_id_arrays(geff_store, node_ids, edge_ids, zarr_format=zarr_format)
     if node_props is not None:
-        write_props_arrays(
+        node_meta = write_props_arrays(
             geff_store, _path.NODES, node_props, node_props_unsquish, zarr_format=zarr_format
         )
+    else:
+        node_meta = []
     if edge_props is not None:
-        write_props_arrays(
+        edge_meta = write_props_arrays(
             geff_store, _path.EDGES, edge_props, edge_props_unsquish, zarr_format=zarr_format
         )
+    else:
+        edge_meta = []
+
+    metadata = add_or_update_props_metadata(metadata, node_meta, "node")
+    metadata = add_or_update_props_metadata(metadata, edge_meta, "edge")
+    if node_props is not None:
+        metadata = compute_and_add_axis_min_max(metadata, node_props)
     metadata.write(geff_store)
 
 
@@ -278,7 +301,7 @@ def write_props_arrays(
     props: dict[str, PropDictNpArray],
     props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
-) -> None:
+) -> Sequence[PropMetadata]:
     """Writes a set of properties to a geff nodes or edges group.
 
     Can be used to add new properties if they don't already exist.
@@ -295,6 +318,9 @@ def write_props_arrays(
             three individual properties called "z", "y", and "x".
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
+
+    Returns:
+        PropMetadata: The property metadata for each of the property arrays
     Raises:
         ValueError: If the group is not a 'nodes' or 'edges' group.
     TODO: validate attrs length based on group ids shape?
@@ -324,7 +350,10 @@ def write_props_arrays(
 
     geff_root = setup_zarr_group(geff_store, zarr_format)
     props_group = geff_root.require_group(f"{group}/{_path.PROPS}")
+    metadata = []
     for prop, prop_dict in props.items():
+        prop_metadata = create_props_metadata(prop, prop_dict)
+        metadata.append(prop_metadata)
         # data-type validation - ensure this property can round-trip through
         # Java Zarr readers before any data get written to disk.
         values = prop_dict["values"]
@@ -340,3 +369,5 @@ def write_props_arrays(
         prop_group[_path.VALUES] = values
         if missing is not None:
             prop_group[_path.MISSING] = missing
+
+    return metadata

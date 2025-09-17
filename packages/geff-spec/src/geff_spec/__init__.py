@@ -6,8 +6,9 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "uninstalled"
 
 from ._affine import Affine
+from ._axis import Axis
 from ._prop_metadata import PropMetadata
-from ._schema import Axis, DisplayHint, GeffMetadata, GeffSchema, RelatedObject
+from ._schema import DisplayHint, GeffMetadata, GeffSchema, RelatedObject
 from ._valid_values import (
     AxisType,
     SpaceUnits,
