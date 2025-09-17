@@ -74,6 +74,7 @@ plugins:
           - griffe_fieldz
 - include-markdown
 - api-autonav:
+    modules: ['packages/geff/src/geff', 'packages/geff-spec/src/geff_spec']
     nav_section_title: "Python API"
-    modules: ['src/geff']
-- autorefs
+- autorefs:
+    resolve_closest: true
