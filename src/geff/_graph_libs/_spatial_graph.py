@@ -20,11 +20,12 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
+    from geff.metadata import GeffMetadata
+    from geff.metadata._valid_values import AxisType
 
 from geff.core_io import write_arrays
 from geff.core_io._utils import remove_tilde
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
-from geff.metadata.utils import create_or_update_metadata
+from geff.metadata.utils import axes_from_lists, create_or_update_metadata
 
 from ._backend_protocol import Backend
 from ._graph_adapter import GraphAdapter
@@ -120,14 +121,10 @@ class SgBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[str | None] | None = None,
+        axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
         store = remove_tilde(store)
-
-        if len(graph) == 0:
-            warnings.warn(f"Graph is empty - not writing anything to {store}", stacklevel=2)
-            return
 
         if (axis_names is None) and (metadata is not None) and (metadata.axes is not None):
             axis_names = [axis.name for axis in metadata.axes]
@@ -141,7 +138,7 @@ class SgBackend(Backend):
 
         # create or update metadata
         roi_min, roi_max = graph.roi
-        axes = _axes_from_lists(
+        axes = axes_from_lists(
             axis_names,
             axis_units=axis_units,
             axis_types=axis_types,

@@ -66,12 +66,12 @@ class Affine(BaseModel):
     """Affine transformation matrix following scipy conventions.
 
     Internally stores transformations as homogeneous coordinate matrices (N+1, N+1).
-    The transformation matrix follows scipy.ndimage.affine_transform convention
+    The transformation matrix follows `scipy.ndimage.affine_transform` convention
     where the matrix maps output coordinates to input coordinates (inverse/pull transformation).
 
-    For a point p_out in output space, the corresponding input point p_in is computed as:
-    p_in_homo = matrix @ p_out_homo
-    where p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]
+    For a point `p_out` in output space, the corresponding input point `p_in` is computed as:
+    `p_in_homo = matrix @ p_out_homo`
+    where `p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]`
 
     Attributes:
         matrix (np.ndarray) : square, homogeneous transformation matrix (ndim+1, ndim+1)

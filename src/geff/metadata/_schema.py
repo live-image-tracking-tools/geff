@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import warnings
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Literal
 
 import zarr
@@ -12,122 +12,16 @@ from zarr.storage import StoreLike
 
 import geff
 
-# The next two imports are needed at runtime for Pydantic validation
+# The next imports are needed at runtime for Pydantic validation
 from ._affine import Affine  # noqa: TC001
+from ._axis import Axis  # noqa: TC001
 from ._prop_metadata import PropMetadata  # noqa: TC001
-from ._valid_values import (
-    VALID_AXIS_TYPES,
-    VALID_SPACE_UNITS,
-    VALID_TIME_UNITS,
-    validate_axis_type,
-    validate_space_unit,
-    validate_time_unit,
-)
 
 if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
 
 VERSION_PATTERN = r"^\d+\.\d+(?:\.\d+)?(?:\.dev\d+)?(?:\+[a-zA-Z0-9]+)?"
-
-
-class Axis(BaseModel):
-    """TODO docstring"""
-
-    name: str
-    type: str | None = None
-    unit: str | None = None
-    min: float | None = None
-    max: float | None = None
-
-    @model_validator(mode="after")
-    def _validate_model(self) -> Axis:
-        if (self.min is None) != (self.max is None):
-            raise ValueError(
-                f"Min and max must both be None or neither: got min {self.min} and max {self.max}"
-            )
-        if self.min is not None and self.max is not None and self.min > self.max:
-            raise ValueError(f"Min {self.min} is greater than max {self.max}")
-
-        if self.type is not None and not validate_axis_type(self.type):
-            warnings.warn(
-                f"Type {self.type} not in valid types {VALID_AXIS_TYPES}. "
-                "Reader applications may not know what to do with this information.",
-                stacklevel=2,
-            )
-
-        if self.unit:
-            if self.type == "space" and not validate_space_unit(self.unit):
-                warnings.warn(
-                    f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
-                    "Reader applications may not know what to do with this information.",
-                    stacklevel=2,
-                )
-            elif self.type == "time" and not validate_time_unit(self.unit):
-                warnings.warn(
-                    f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
-                    "Reader applications may not know what to do with this information.",
-                    stacklevel=2,
-                )
-
-        return self
-
-
-def _axes_from_lists(
-    axis_names: Sequence[str] | None = None,
-    axis_units: Sequence[str | None] | None = None,
-    axis_types: Sequence[str | None] | None = None,
-    roi_min: Sequence[float | None] | None = None,
-    roi_max: Sequence[float | None] | None = None,
-) -> list[Axis]:
-    """Create a list of Axes objects from lists of axis names, units, types, mins,
-    and maxes. If axis_names is None, there are no spatial axes and the list will
-    be empty. Nones for all other arguments will omit them from the axes.
-
-    All provided arguments must have the same length. If an argument should not be specified
-    for a single property, use None.
-
-    Args:
-        axis_names (list[str] | None, optional): Names of properties for spatiotemporal
-            axes. Defaults to None.
-        axis_units (list[str | None] | None, optional): Units corresponding to named properties.
-            Defaults to None.
-        axis_types (list[str | None] | None, optional): Axis type for each property.
-            Choose from "space", "time", "channel". Defaults to None.
-        roi_min (list[float | None] | None, optional): Minimum value for each property.
-            Defaults to None.
-        roi_max (list[float | None] | None, optional): Maximum value for each property.
-            Defaults to None.
-
-    Returns:
-        list[Axis]:
-    """
-    axes: list[Axis] = []
-    if axis_names is None:
-        return axes
-
-    dims = len(axis_names)
-    if axis_types is not None:
-        assert len(axis_types) == dims, (
-            "The number of axis types has to match the number of axis names"
-        )
-
-    if axis_units is not None:
-        assert len(axis_units) == dims, (
-            "The number of axis types has to match the number of axis names"
-        )
-
-    for i in range(len(axis_names)):
-        axes.append(
-            Axis(
-                name=axis_names[i],
-                type=axis_types[i] if axis_types is not None else None,
-                unit=axis_units[i] if axis_units is not None else None,
-                min=roi_min[i] if roi_min is not None else None,
-                max=roi_max[i] if roi_max is not None else None,
-            )
-        )
-    return axes
 
 
 class DisplayHint(BaseModel):
@@ -177,7 +71,10 @@ def _validate_key_identifier_equality(
 
 
 class RelatedObject(BaseModel):
-    """TODO docstring"""
+    """A set of metadata for data that is associated with the graph. The types
+    'labels' and 'image' should be used for label and image objects, respectively.
+    Other types are also allowed.
+    """
 
     type: str = Field(
         ...,
@@ -248,25 +145,26 @@ class GeffMetadata(BaseModel):
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: list[Axis] | None = Field(
         default=None,
-        description="Optional list of Axis objects defining the axes of each node in the graph.\n"
-        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key"
+        description="Optional list of `Axis` objects defining the axes of each node in the graph.\n"
+        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key "
         "must be one of `space`, `time` or `channel`, though readers may not use this information. "
-        "Each axis can additionally optionally define a `unit` key, which should match the valid"
-        "OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+        "Each axis can additionally optionally define a `unit` key, which should match the valid "
+        "OME-Zarr units, and `min` and `max` keys to define the range of the axis. See "
+        "[`Axis`][geff.metadata._schema.Axis] for more information.",
     )
 
-    node_props_metadata: dict[str, PropMetadata] | None = Field(
-        default=None,
+    node_props_metadata: dict[str, PropMetadata] = Field(
         description=(
             "Metadata for node properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
+            "There must be one entry for each node property."
         ),
     )
-    edge_props_metadata: dict[str, PropMetadata] | None = Field(
-        default=None,
+    edge_props_metadata: dict[str, PropMetadata] = Field(
         description=(
             "Metadata for edge properties. The keys are the property identifiers, "
             "and the values are PropMetadata objects describing the properties."
+            "There must be one entry for each edge property."
         ),
     )
 
@@ -278,6 +176,7 @@ class GeffMetadata(BaseModel):
             Name of the optional `sphere` property.
 
             A sphere is defined by
+
             - a center point, already given by the `space` type properties
             - a radius scalar, stored in this property
             """
@@ -294,16 +193,18 @@ class GeffMetadata(BaseModel):
             properties.
 
             It is defined by
-            - a center point :math:`c`, already given by the `space` type properties
-            - a covariance matrix :math:`\\Sigma`, symmetric and positive-definite, stored in this
+
+            - a center point $c$, already given by the `space` type properties
+            - a covariance matrix $\\Sigma$, symmetric and positive-definite, stored in this
               property as a `2x2`/`3x3` array.
 
             To plot the ellipsoid:
+
             - Compute the eigendecomposition of the covariance matrix
-            :math:`\\Sigma = Q \\Lambda Q^{\\top}`
-            - Sample points :math:`z` on the unit sphere
+            $\\Sigma = Q \\Lambda Q^{\\top}$
+            - Sample points $z$ on the unit sphere
             - Transform the points to the ellipsoid by
-            :math:`x = c + Q \\Lambda^{(1/2)} z`.
+            $x = c + Q \\Lambda^{(1/2)} z$.
             """
         ),
     )
@@ -312,7 +213,7 @@ class GeffMetadata(BaseModel):
         description=(
             "Node properties denoting tracklet and/or lineage IDs.\n"
             "A tracklet is defined as a simple path of connected nodes "
-            "where the initiating node has any incoming degree and outgoing degree at most 1,"
+            "where the initiating node has any incoming degree and outgoing degree at most 1, "
             "and the terminating node has incoming degree at most 1 and any outgoing degree, "
             "and other nodes along the path have in/out degree of 1. Each tracklet must contain "
             "the maximal set of connected nodes that match this definition - no sub-tracklets.\n"
@@ -336,9 +237,11 @@ class GeffMetadata(BaseModel):
     )
     affine: Affine | None = Field(
         default=None,
-        description="Affine transformation matrix to transform the graph coordinates to the "
-        "physical coordinates. The matrix must have the same number of dimensions as the number of "
-        "axes in the graph.",
+        description="The optional `affine` field allows specifying a global affine transformation "
+        "that maps the graph coordinates stored in the node properties to a physical coordinate "
+        "system. The value **matrix** is stored as a `(N + 1) x (N + 1)` homogeneous matrix "
+        "following the `scipy.ndimage.affine_transform` convention, where **N** equals the "
+        "number of spatio-temporal axes declared in `axes`.",
     )
     display_hints: DisplayHint | None = Field(
         default=None,
@@ -346,7 +249,12 @@ class GeffMetadata(BaseModel):
     )
     extra: dict[str, Any] = Field(
         default_factory=dict,
-        description="Extra metadata that is not part of the schema",
+        description="The optional `extra` object is a free-form dictionary that can hold any "
+        "additional, application-specific metadata that is **not** covered by the core geff "
+        "schema. Users may place arbitrary keys and values inside `extra` without fear of "
+        "clashing with future reserved fields. Although the core `geff` reader makes these "
+        "attributes available, their meaning and use are left entirely to downstream "
+        "applications. ",
     )
 
     @model_validator(mode="after")

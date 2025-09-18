@@ -3,8 +3,9 @@ from __future__ import annotations
 import warnings
 from typing import Annotated
 
+import numpy as np
 from annotated_types import MinLen
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ._valid_values import (
     ALLOWED_NUMPY_DTYPES,
@@ -13,7 +14,13 @@ from ._valid_values import (
 
 
 class PropMetadata(BaseModel):
-    """Metadata describing a property in the geff graph."""
+    """Each property must have a string identifier (the group name for the
+    property) and a dtype. The dtype can be any string
+    that can be coerced into a numpy dtype, or the special `varlength` dtype
+    indicating this is a variable length property (coming soon). String properties
+    should have dtype `str`, not `varlength`, even though they are stored using the
+    same variable length mechanism.
+    """
 
     identifier: Annotated[str, MinLen(1)] = Field(
         ...,
@@ -26,11 +33,16 @@ class PropMetadata(BaseModel):
         ...,
         description=(
             "Data type of the property. Must be a non-empty string that can be "
-            "parsed into a numpy dtype, or the special value 'varlength' to indicate "
-            "a variable length property. "
+            "parsed into a numpy dtype."
             "Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. "
             "Examples of invalid values: 'integer', 'np.int16', 'number', 'string'."
         ),
+    )
+    varlength: bool = Field(
+        default=False,
+        description="True if the property contains variable length arrays. Variable length "
+        "arrays cannot be of dtype string (e.g. you cannot have a property where each "
+        "node has an array of strings)",
     )
     unit: str | None = Field(
         default=None,
@@ -51,8 +63,14 @@ class PropMetadata(BaseModel):
         if not validate_data_type(value):
             # TODO: error?
             warnings.warn(
-                f"Data type {value} cannot be matched to a valid data type {ALLOWED_NUMPY_DTYPES}"
-                "or `varlength`. Reader applications may not know what to do with this dtype.",
+                f"Data type {value} cannot be matched to a valid data type {ALLOWED_NUMPY_DTYPES}."
+                "Reader applications may not know what to do with this dtype.",
                 stacklevel=2,
             )
         return value
+
+    @model_validator(mode="after")
+    def _no_varlength_strings(self) -> PropMetadata:
+        if self.varlength and np.dtype(self.dtype) == np.str_:
+            raise ValueError("Cannot have a variable length property with type str")
+        return self

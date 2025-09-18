@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from geff._typing import PropDictNpArray
     from geff.metadata._schema import GeffMetadata
+    from geff.metadata._valid_values import AxisType
     from geff.validate.data import ValidationConfig
 
     from ._backend_protocol import Backend
@@ -216,7 +217,7 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[str | None] | None = ...,
+    axis_types: list[Literal[AxisType] | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
     node_id_dict: dict[int, int] | None = ...,
 ) -> None:
@@ -235,7 +236,7 @@ def write(
         axis_units (list[str | None], optional): The units of the spatial dims
             represented in position property. Defaults to None. Will override value
             both value in graph properties and metadata if provided.
-        axis_types (list[str | None], optional): The types of the spatial dims
+        axis_types (list[Literal[AxisType] | None], optional): The types of the spatial dims
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
@@ -255,7 +256,7 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[str | None] | None = ...,
+    axis_types: list[Literal[AxisType] | None] | None = ...,
     zarr_format: Literal[2, 3] = 2,
     *args: Any,
     **kwargs: Any,
@@ -266,7 +267,7 @@ def write(
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
-    axis_types: list[str | None] | None = None,
+    axis_types: list[Literal[AxisType] | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
     *args: Any,
     **kwargs: Any,
@@ -285,7 +286,7 @@ def write(
         axis_units (list[str | None], optional): The units of the spatial dims
             represented in position property. Defaults to None. Will override value
             both value in graph properties and metadata if provided.
-        axis_types (list[str | None], optional): The types of the spatial dims
+        axis_types (list[Literal[AxisType] | None], optional): The types of the spatial dims
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.

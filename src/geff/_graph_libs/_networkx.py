@@ -6,11 +6,9 @@ import networkx as nx
 import numpy as np
 
 from geff.core_io import write_dicts
-from geff.core_io._utils import calculate_roi_from_nodes
-from geff.metadata._schema import GeffMetadata, _axes_from_lists
 from geff.metadata.utils import (
     create_or_update_metadata,
-    get_graph_existing_metadata,
+    update_metadata_axes,
 )
 
 from ._backend_protocol import Backend
@@ -23,28 +21,12 @@ if TYPE_CHECKING:
     from zarr.storage import StoreLike
 
     from geff._typing import PropDictNpArray
+    from geff.metadata import GeffMetadata
+    from geff.metadata._valid_values import AxisType
 
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def get_roi(graph: nx.Graph, axis_names: list[str]) -> tuple[tuple[float, ...], tuple[float, ...]]:
-    """Get the roi of a networkx graph.
-
-    Args:
-        graph (nx.Graph): A non-empty networkx graph
-        axis_names (str): All nodes on graph have these property holding their position
-
-    Returns:
-        tuple[tuple[float, ...], tuple[float, ...]]: A tuple with the min values in each
-            spatial dim, and a tuple with the max values in each spatial dim
-    """
-    return calculate_roi_from_nodes(
-        graph.nodes(data=True),
-        axis_names,
-        lambda node_tuple: node_tuple[1],  # Extract data from (node_id, data) tuple
-    )
 
 
 def _set_property_values(
@@ -114,13 +96,13 @@ class NxBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[str | None] | None = None,
+        axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
-        axis_names, axis_units, axis_types = get_graph_existing_metadata(
-            metadata, axis_names, axis_units, axis_types
-        )
-
+        directed = isinstance(graph, nx.DiGraph)
+        metadata = create_or_update_metadata(metadata=metadata, is_directed=directed)
+        if axis_names is not None:
+            metadata = update_metadata_axes(metadata, axis_names, axis_units, axis_types)
         node_props = list({k for _, data in graph.nodes(data=True) for k in data})
 
         edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
@@ -131,32 +113,10 @@ class NxBackend(Backend):
             edge_data,
             node_props,
             edge_props,
+            metadata,
             axis_names,
             zarr_format=zarr_format,
         )
-
-        # write metadata
-        roi_min: tuple[float, ...] | None
-        roi_max: tuple[float, ...] | None
-        if axis_names is not None and graph.number_of_nodes() > 0:
-            roi_min, roi_max = get_roi(graph, axis_names)
-        else:
-            roi_min, roi_max = None, None
-
-        axes = _axes_from_lists(
-            axis_names,
-            axis_units=axis_units,
-            axis_types=axis_types,
-            roi_min=roi_min,
-            roi_max=roi_max,
-        )
-
-        metadata = create_or_update_metadata(
-            metadata,
-            isinstance(graph, nx.DiGraph),
-            axes,
-        )
-        metadata.write(store)
 
     @staticmethod
     def graph_adapter(graph: Any) -> NxGraphAdapter:

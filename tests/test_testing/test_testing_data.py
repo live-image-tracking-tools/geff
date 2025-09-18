@@ -9,6 +9,7 @@ from geff.testing.data import (
     create_simple_3d_geff,
     create_simple_temporal_geff,
 )
+from geff.validate.structure import validate_structure
 
 
 class Test_create_simple_2d_geff:
@@ -17,6 +18,7 @@ class Test_create_simple_2d_geff:
 
         # Test with defaults
         store, _ = create_simple_2d_geff()
+        validate_structure(store)
 
         # Verify it creates a valid geff store
         graph, metadata = NxBackend.read(store)
