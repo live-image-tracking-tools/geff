@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from geff.serialization import (
+from geff.core_io import construct_var_len_props
+from geff.core_io._serialization import (
     _deserialize_vlen_array,
-    construct_var_len_props,
     deserialize_vlen_property_data,
     serialize_vlen_property_data,
 )
