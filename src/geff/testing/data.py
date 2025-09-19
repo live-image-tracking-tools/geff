@@ -103,6 +103,7 @@ def create_dummy_in_mem_geff(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
+    include_varlength: bool = False,
 ) -> InMemoryGeff:
     """Create dummy graph properties for testing.
 
@@ -118,6 +119,9 @@ def create_dummy_in_mem_geff(
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
         include_x: Whether to include x dimension
+        include_varlength: Whether to include a variable length property. If true, will
+            make a property on nodes called "var_length" that has 2d np arrays of various
+            shapes
 
     Returns:
         InMemoryGeff containing all graph properties
@@ -314,6 +318,26 @@ def create_dummy_in_mem_geff(
                     f"got {type(prop_value)}"
                 )
 
+    if include_varlength:
+        prop_name = "var_length"
+        ndim = 3
+        _dtype = np.uint64
+        values_list = []
+        for node in range(num_nodes):
+            shape = [
+                node,
+            ] * ndim
+            arr = np.ones(shape=shape, dtype=_dtype) * node
+            values_list.append(arr)
+
+        values = np.array(values_list, dtype=np.object_)
+        missing = np.zeros(shape=(num_nodes,), dtype=np.bool_)
+        if num_nodes > 0:
+            missing[0] = 1
+        node_prop_dict = {"values": values, "missing": missing}
+        node_props[prop_name] = node_prop_dict
+        node_prop_meta.append(create_props_metadata(prop_name, node_prop_dict))
+
     # Generate edge properties
     edge_props_dict: dict[str, PropDictNpArray] = {}
     edge_prop_meta: list[PropMetadata] = []
@@ -374,8 +398,8 @@ def create_dummy_in_mem_geff(
             )
 
     metadata = create_or_update_metadata(metadata=None, is_directed=directed, axes=axes)
-    add_or_update_props_metadata(metadata, node_prop_meta, "node")
-    add_or_update_props_metadata(metadata, edge_prop_meta, "edge")
+    metadata = add_or_update_props_metadata(metadata, node_prop_meta, "node")
+    metadata = add_or_update_props_metadata(metadata, edge_prop_meta, "edge")
 
     return {
         "metadata": metadata,
@@ -398,6 +422,7 @@ def create_mock_geff(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
+    include_varlength: bool = False,
 ) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
     """Create a mock geff in memory and return the zarr store and the in memory geff.
 
@@ -413,6 +438,9 @@ def create_mock_geff(
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
         include_x: Whether to include x dimension
+        include_varlength: Whether to include a variable length property. If true, will
+            make a property on nodes called "var_length" that has 2d np arrays of various
+            shapes
 
     Returns:
         Tuple of (zarr store in memory, InMemoryGeff)
@@ -429,6 +457,7 @@ def create_mock_geff(
         include_z=include_z,
         include_y=include_y,
         include_x=include_x,
+        include_varlength=include_varlength,
     )
 
     # Create memory store and write graph to it

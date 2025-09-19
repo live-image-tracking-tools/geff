@@ -49,18 +49,22 @@ def _set_property_values(
         nodes (bool, optional): If True, extract and set node properties.  If False,
             extract and set edge properties. Defaults to True.
     """
+    values = prop_dict["values"]
+    varlength = np.issubdtype(values.dtype, np.object_)
     for idx in range(len(ids)):
         _id = ids[idx]
         val = prop_dict["values"][idx]
         # If property is sparse and missing for this node, skip setting property
         ignore = prop_dict["missing"][idx] if prop_dict["missing"] is not None else False
         if not ignore:
+            # if varlength, store numpy arrays on graph. Otherwise,
             # Get either individual item or list instead of setting with np.array
+            value = val if varlength else val.tolist()
             if nodes:
-                graph.nodes[_id.item()][name] = val.tolist()
+                graph.nodes[_id.item()][name] = value
             else:
                 source, target = _id.tolist()
-                graph.edges[source, target][name] = val.tolist()
+                graph.edges[source, target][name] = value
 
 
 # NOTE: see _api_wrapper.py read/write/construct for docs
@@ -133,20 +137,24 @@ class NxGraphAdapter(GraphAdapter):
     def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
         return list(self.graph.edges)
 
+    def has_node_prop(self, name: str, node: int, metadata: GeffMetadata) -> bool:
+        return name in self.graph.nodes[node]
+
     def get_node_prop(
         self,
         name: str,
-        nodes: Sequence[Any],
+        node: int,
         metadata: GeffMetadata,
-    ) -> NDArray[Any]:
-        prop = [self.graph.nodes[node][name] for node in nodes]
-        return np.array(prop)
+    ) -> Any:
+        return self.graph.nodes[node][name]
+
+    def has_edge_prop(self, name: str, edge: tuple[Any, Any], metadata: GeffMetadata) -> bool:
+        return name in self.graph.edges[edge]
 
     def get_edge_prop(
         self,
         name: str,
-        edges: Sequence[tuple[Any, Any]],
+        edge: tuple[Any, Any],
         metadata: GeffMetadata,
-    ) -> NDArray[Any]:
-        prop = [self.graph.edges[edge][name] for edge in edges]
-        return np.array(prop)
+    ) -> Any:
+        return self.graph.edges[edge][name]
