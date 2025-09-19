@@ -347,7 +347,7 @@ def write_props_arrays(
                 replace_arrays = {
                     replace_name: {
                         "values": values[:, i],
-                        "missing": None if missing is None else missing[i],
+                        "missing": None if missing is None else missing,
                     }
                 }
                 props.update(replace_arrays)
