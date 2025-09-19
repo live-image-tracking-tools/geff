@@ -10,7 +10,6 @@ from geff import _path
 from geff.core_io._utils import expect_array, expect_group, open_storelike, remove_tilde
 from geff.metadata import GeffMetadata, PropMetadata
 from geff.serialization import deserialize_vlen_property_data
-from geff.string_encoding import decode_string_data
 from geff.validate.data import ValidationConfig, validate_data
 from geff.validate.structure import validate_structure
 
@@ -167,12 +166,7 @@ class GeffReader:
             data = None
 
         in_memory_dict: PropDictNpArray
-        if np.issubdtype(dtype, np.str_):
-            if data is None:
-                # TODO: more informative error?
-                raise ValueError("Dtype is string but no encoded data was found")
-            in_memory_dict = decode_string_data(values, missing, data)
-        elif prop_metadata.varlength:
+        if prop_metadata.varlength:
             if data is None:
                 # TODO: more informative error?
                 raise ValueError("Property is varlength but no encoded data was found")

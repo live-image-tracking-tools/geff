@@ -30,7 +30,8 @@ The `nodes\ids` array is a 1D array of node IDs of length `N` >= 0, where `N` is
 
 The `nodes\props` group is optional and will contain one or more `node property` groups, each with a `values` array and an optional `missing` array.
 
-- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the node `ids` array, such that each row of the property `values` array stores the property for the node at that index in the ids array.
+- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the node `ids` array, such that each row of the property `values` array stores the property for the node at that index in the ids array. String  values will be stored according to the [zarr-extensions string specification](https://github.com/zarr-developers/zarr-extensions/tree/main/data-types/string) - as variable length UTF8 strings.
+
 - The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all nodes. A `1` at an index in the `missing` array indicates that the `value` of that property for the node at that index is None, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all nodes have values for the property.
 
 - Geff provides special support for spatio-temporal properties, although they are not required. When `axes` are specified in the `geff` metadata, each axis name identifies a spatio-temporal property. Spatio-temporal properties are not allowed to have missing arrays. Otherwise, they are identical to other properties from a storage specification perspective.
@@ -46,13 +47,11 @@ The `nodes\props` group is optional and will contain one or more `node property`
 
 
 #### Variable length properties
-While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have a property of a variable length. This is useful for properties that are not fixed-length, such as polygons or other complex shapes, as well as string properties. 
+While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have an array property of a variable shape. This is useful for properties such as polygons, meshes, or crops of bounding boxes. 
 
-Variable length properties will have a `data` array in addition to the `values` and `missing` arrays. In addition, the "shape" value in the property metadata will contain the string literal "variable". For variable length properties, the `data` array will contain a 1D flattened array of the actual values for all the nodes. The `values` array will contain the offset and shape of the relevant section of data in the `data` array. String `data` contains the bytes encoded with `utf-8`, and the offset and shape contained in the `values` array refer to the un-encoded string characters.
+Variable length properties will have a `data` array in addition to the `values` and `missing` arrays. For variable length properties, the `data` array will contain a 1D flattened array of the actual values for all the nodes. The `values` array will contain the offset and shape of the relevant section of data in the `data` array.
 
 ![vlen properties overview](./assets/vlen_props.png)
-
-Note: The current specification does not support lists/arrays of strings stored as a single property.
 
 ## The `edges` group
 

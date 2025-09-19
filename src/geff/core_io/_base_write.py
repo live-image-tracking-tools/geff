@@ -14,7 +14,6 @@ from geff.metadata.utils import (
     create_props_metadata,
 )
 from geff.serialization import serialize_vlen_property_data
-from geff.string_encoding import encode_string_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -362,8 +361,6 @@ def write_props_arrays(
 
         if prop_metadata.varlength:
             values, missing, data = serialize_vlen_property_data(prop_dict)
-        elif np.issubdtype(np.dtype(prop_metadata.dtype), np.str_):
-            values, missing, data = encode_string_data(prop_dict)
         else:
             values = prop_dict["values"]
             missing = prop_dict["missing"]
