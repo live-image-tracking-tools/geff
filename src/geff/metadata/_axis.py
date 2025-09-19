@@ -21,20 +21,16 @@ class Axis(BaseModel):
     """The axes list is modeled after the
     [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)
     specifications and is used to identify spatio-temporal properties on the
-    graph nodes. If the same names are used in the axes metadata of the
-    related image or segmentation data, applications can use this information
-    to align graph node locations with image data.
+    graph nodes.
 
-    The order of the axes in the list is meaningful. For one, any downstream
-    properties that are an array of values with one value per (spatial) axis
-    will be in the order of the axis list (filtering to only the spatial axes by
-    the `type` field if needed). Secondly, if associated image or segmentation
-    data does not have axes metadata, the order of the spatiotemporal axes is a
-    good default guess for aligning the graph and the image data, although there
-    is no way to denote the channel dimension in the graph spec. If you are
-    writing out a geff with an associated segmentation and/or image dataset, we
-    highly recommend providing the axis names for your segmentation/image using
-    the OME-zarr spec, including channel dimensions if needed.
+    The `name` must be an existing attribute on the nodes. The optional `type` key
+    must be one of `space`, `time` or `channel`, though readers may not use this information.
+    An optional `unit` key should match the valid OME-Zarr units and `min` and `max` keys
+    define the range of the axis
+
+    The optional `scale` field can be used to store a scaling factor such as converting
+    the data from pixel space into real world units. The associated, optional `scaled_unit`
+    field specifies the output unit after applying `scale` to the data.
     """
 
     name: str = Field(..., description="Name of the corresponding node property")
@@ -53,6 +49,14 @@ class Axis(BaseModel):
     max: float | None = Field(
         default=None, description="Optional, the minimum value for this axis."
     )
+    scale: float | None = Field(
+        default=None, description="Optional, a scaling factor that can be applied to the data"
+    )
+    scaled_unit: str | Literal[SpaceUnits] | Literal[TimeUnits] | None = Field(
+        default=None,
+        description="Optional, the unit after applying the `scale` value to the data. "
+        "If `scaled_unit` is set, a `scale` value must also be provided.",
+    )
 
     @model_validator(mode="after")
     def _validate_model(self) -> Axis:
@@ -64,17 +68,25 @@ class Axis(BaseModel):
             raise ValueError(f"Min {self.min} is greater than max {self.max}")
 
         if self.unit:
-            if self.type == "space" and not validate_space_unit(self.unit):
-                warnings.warn(
-                    f"Spatial unit {self.unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
-                    "Reader applications may not know what to do with this information.",
-                    stacklevel=2,
-                )
-            elif self.type == "time" and not validate_time_unit(self.unit):
-                warnings.warn(
-                    f"Temporal unit {self.unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
-                    "Reader applications may not know what to do with this information.",
-                    stacklevel=2,
-                )
+            self._check_units(self.unit, "unit")
+
+        if self.scaled_unit:
+            if self.scale is None:
+                raise ValueError("`scaled_unit` specified without setting a `scale` value")
+            self._check_units(self.scaled_unit, "scaled_unit")
 
         return self
+
+    def _check_units(self, unit: str, field: str) -> None:
+        if self.type == "space" and not validate_space_unit(unit):
+            warnings.warn(
+                f"Spatial {field} {unit} not in valid OME-Zarr units {VALID_SPACE_UNITS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )
+        elif self.type == "time" and not validate_time_unit(unit):
+            warnings.warn(
+                f"Temporal {field} {unit} not in valid OME-Zarr units {VALID_TIME_UNITS}. "
+                "Reader applications may not know what to do with this information.",
+                stacklevel=2,
+            )

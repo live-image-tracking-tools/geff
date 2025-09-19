@@ -51,3 +51,21 @@ class TestAxis:
         # Min > max
         with pytest.raises(ValueError, match=r"Min .* is greater than max .*"):
             Axis(name="test", min=0, max=-10)
+
+    def test_invalid_scaled_units(self) -> None:
+        # Scaled unit without scale
+        with pytest.raises(
+            ValueError, match="`scaled_unit` specified without setting a `scale` value"
+        ):
+            Axis(name="test", type="space", scaled_unit="unit")
+
+        # Spatial
+        with pytest.warns(UserWarning, match=r"Spatial scaled_unit .* not in valid"):
+            Axis(name="test", type="space", scale=1, scaled_unit="bad unit")
+
+        # Temporal
+        with pytest.warns(UserWarning, match=r"Temporal scaled_unit .* not in valid"):
+            Axis(name="test", type="time", scale=1, scaled_unit="bad unit")
+
+        # Don't check units if we don't specify type
+        Axis(name="test", scale=1, scaled_unit="not checked")
