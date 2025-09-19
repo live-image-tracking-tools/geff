@@ -8,10 +8,9 @@ import zarr
 import zarr.storage
 
 from geff import _path
-from geff.core_io import write_arrays
+from geff.core_io import construct_var_len_props, write_arrays
 from geff.core_io._base_read import read_to_memory
 from geff.metadata._schema import GeffMetadata
-from geff.serialization import construct_var_len_props
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
     create_simple_2d_geff,
