@@ -685,7 +685,7 @@ class Test_create_dummy_in_mem_geff:
         assert [ax.unit for ax in memory_geff["metadata"].axes] == ["second", "nanometer"]
         assert [ax.type for ax in memory_geff["metadata"].axes] == ["time", "space"]
 
-    def test_var_length(self):
+    def test_varlength(self):
         memory_geff = create_dummy_in_mem_geff(
             node_id_dtype="int",
             node_axis_dtypes={"position": "float64", "time": "float64"},
@@ -696,7 +696,7 @@ class Test_create_dummy_in_mem_geff:
             include_z=False,  # No z dimension
             include_y=False,  # No y dimension
             include_x=False,  # No x dimension
-            include_var_len=True,
+            include_varlength=True,
         )
 
         prop_name = "var_length"
