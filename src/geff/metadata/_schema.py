@@ -144,12 +144,24 @@ class GeffMetadata(BaseModel):
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: list[Axis] | None = Field(
         default=None,
-        description="Optional list of `Axis` objects defining the axes of each node in the graph.\n"
-        "Each object's `name` must be an existing attribute on the nodes. The optional `type` key "
-        "must be one of `space`, `time` or `channel`, though readers may not use this information. "
-        "Each axis can additionally optionally define a `unit` key, which should match the valid "
-        "OME-Zarr units, and `min` and `max` keys to define the range of the axis. See "
-        "[`Axis`][geff.metadata._schema.Axis] for more information.",
+        description="""Optional list of `Axis` objects defining the axes of each node
+            in the graph. The axes list is modeled after the
+            [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)
+            specifications and is used to identify spatio-temporal properties on the
+            graph nodes. If the same names are used in the axes metadata of the
+            related image or segmentation data, applications can use this information
+            to align graph node locations with image data.
+
+            The order of the axes in the list is meaningful. For one, any downstream
+            properties that are an array of values with one value per (spatial) axis
+            will be in the order of the axis list (filtering to only the spatial axes by
+            the `type` field if needed). Secondly, if associated image or segmentation
+            data does not have axes metadata, the order of the spatiotemporal axes is a
+            good default guess for aligning the graph and the image data, although there
+            is no way to denote the channel dimension in the graph spec. If you are
+            writing out a geff with an associated segmentation and/or image dataset, we
+            highly recommend providing the axis names for your segmentation/image using
+            the OME-zarr spec, including channel dimensions if needed.""",
     )
 
     node_props_metadata: dict[str, PropMetadata] = Field(
