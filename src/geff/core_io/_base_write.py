@@ -13,7 +13,8 @@ from geff.metadata.utils import (
     compute_and_add_axis_min_max,
     create_props_metadata,
 )
-from geff.serialization import serialize_vlen_property_data
+
+from ._serialization import serialize_vlen_property_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence

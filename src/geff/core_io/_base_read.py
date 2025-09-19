@@ -9,9 +9,10 @@ import zarr
 from geff import _path
 from geff.core_io._utils import expect_array, expect_group, open_storelike, remove_tilde
 from geff.metadata import GeffMetadata, PropMetadata
-from geff.serialization import deserialize_vlen_property_data
 from geff.validate.data import ValidationConfig, validate_data
 from geff.validate.structure import validate_structure
+
+from ._serialization import deserialize_vlen_property_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
