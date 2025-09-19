@@ -151,7 +151,6 @@ class GeffMetadata(BaseModel):
             graph nodes. If the same names are used in the axes metadata of the
             related image or segmentation data, applications can use this information
             to align graph node locations with image data.
-
             The order of the axes in the list is meaningful. For one, any downstream
             properties that are an array of values with one value per (spatial) axis
             will be in the order of the axis list (filtering to only the spatial axes by
