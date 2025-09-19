@@ -13,7 +13,6 @@ from zarr.storage import StoreLike
 import geff
 
 # The next imports are needed at runtime for Pydantic validation
-from ._affine import Affine  # noqa: TC001
 from ._axis import Axis  # noqa: TC001
 from ._prop_metadata import PropMetadata  # noqa: TC001
 
@@ -235,14 +234,6 @@ class GeffMetadata(BaseModel):
             "that will be used to identify the labels in the related object. "
         ),
     )
-    affine: Affine | None = Field(
-        default=None,
-        description="The optional `affine` field allows specifying a global affine transformation "
-        "that maps the graph coordinates stored in the node properties to a physical coordinate "
-        "system. The value **matrix** is stored as a `(N + 1) x (N + 1)` homogeneous matrix "
-        "following the `scipy.ndimage.affine_transform` convention, where **N** equals the "
-        "number of spatio-temporal axes declared in `axes`.",
-    )
     display_hints: DisplayHint | None = Field(
         default=None,
         description="Metadata indicating how spatiotemporal axes are displayed by a viewer",
@@ -264,13 +255,6 @@ class GeffMetadata(BaseModel):
             names = [ax.name for ax in self.axes]
             if len(names) != len(set(names)):
                 raise ValueError(f"Duplicate axes names found in {names}")
-
-            if self.affine is not None:
-                if self.affine.ndim != len(self.axes):
-                    raise ValueError(
-                        f"Affine transformation matrix must have {len(self.axes)} dimensions, "
-                        f"got {self.affine.ndim}"
-                    )
 
         # Display hint axes match names in axes
         if self.axes is not None and self.display_hints is not None:
