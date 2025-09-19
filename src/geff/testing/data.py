@@ -103,7 +103,7 @@ def create_dummy_in_mem_geff(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
-    include_var_len: bool = False,
+    include_varlength: bool = False,
 ) -> InMemoryGeff:
     """Create dummy graph properties for testing.
 
@@ -119,7 +119,7 @@ def create_dummy_in_mem_geff(
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
         include_x: Whether to include x dimension
-        include_var_len: Whether to include a variable length property. If true, will
+        include_varlength: Whether to include a variable length property. If true, will
             make a property on nodes called "var_length" that has 2d np arrays of various
             shapes
 
@@ -318,7 +318,7 @@ def create_dummy_in_mem_geff(
                     f"got {type(prop_value)}"
                 )
 
-    if include_var_len:
+    if include_varlength:
         prop_name = "var_length"
         ndim = 3
         _dtype = np.uint64
@@ -422,6 +422,7 @@ def create_mock_geff(
     include_z: bool = True,
     include_y: bool = True,
     include_x: bool = True,
+    include_varlength: bool = False,
 ) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
     """Create a mock geff in memory and return the zarr store and the in memory geff.
 
@@ -437,6 +438,9 @@ def create_mock_geff(
         include_z: Whether to include z dimension
         include_y: Whether to include y dimension
         include_x: Whether to include x dimension
+        include_varlength: Whether to include a variable length property. If true, will
+            make a property on nodes called "var_length" that has 2d np arrays of various
+            shapes
 
     Returns:
         Tuple of (zarr store in memory, InMemoryGeff)
@@ -453,6 +457,7 @@ def create_mock_geff(
         include_z=include_z,
         include_y=include_y,
         include_x=include_x,
+        include_varlength=include_varlength,
     )
 
     # Create memory store and write graph to it

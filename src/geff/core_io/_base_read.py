@@ -145,7 +145,7 @@ class GeffReader:
         self, zarr_prop: ZarrPropDict, mask: NDArray[np.bool_] | None, prop_metadata: PropMetadata
     ) -> PropDictNpArray:
         dtype = np.dtype(prop_metadata.dtype)
-        values_dtype = dtype if not np.issubdtype(dtype, np.str_) else "S"
+        values_dtype = dtype
         values = np.array(
             zarr_prop[_path.VALUES][mask.tolist() if mask is not None else ...],
             dtype=values_dtype,
