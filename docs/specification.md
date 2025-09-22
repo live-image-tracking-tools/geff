@@ -101,8 +101,8 @@ Here is a schematic of the expected file structure.
                     values # shape: (N, 4) dtype: float32
                     missing # shape: (N,) dtype: bool
                 polygon/
-                    data # shape: (V, 2) dtype: any
-                    values # shape: (N, 2) dtype: int64
+                    data # shape: (V,) dtype: any, V is the length of all the flattened entries
+                    values # shape: (N, ndim + 1) dtype: int64, ndim is number of dimensions in each entry array
                     missing # shape: (N,) dtype: bool
 	    edges/
             ids  # shape: (E, 2) dtype: uint64
