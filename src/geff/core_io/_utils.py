@@ -181,6 +181,22 @@ def setup_zarr_group(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> zarr.G
 
 
 def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype, int]:
+    """Get a common dtype and number of dimensions that will work for all elements.
+
+    Will use native numpy casting to unify all the dtypes, and will take the maximum
+    number of dimensions of the elements. Nones are ignored.
+
+    Args:
+        arr_seq (Sequence[ArrayLike | None]): A sequence of array-like elements and Nones
+            to infer the dtype and number of dimensions for.
+
+    Raises:
+        ValueError: If the elements do not have any shared dtype that can be cast to safely.
+
+    Returns:
+        tuple[np.dtype, int]: A dtype that all non-None elements can be cast to, and the
+            maximum number of dimensions of any non-None element
+    """
     ndim = None
     dtype = None
 
@@ -203,7 +219,7 @@ def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype
 
     if dtype is None or ndim is None:
         warnings.warn(
-            "Variable length property sequence does not have any valid elements - "
+            "Variable length property sequence does not have any non-None elements - "
             "using ndim=1 and dtype=int64",
             stacklevel=2,
         )
@@ -226,7 +242,7 @@ def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpAr
 
     Returns:
         PropDictNpArray: A standardized version of the input properties where all entries
-        are numpy arrays contained in an object array.
+            are numpy arrays contained in an object array.
     """
     values_arr = np.empty(shape=(len(arr_seq),), dtype=np.object_)
     missing_arr = np.zeros(shape=(len(arr_seq),), dtype=np.bool_)
