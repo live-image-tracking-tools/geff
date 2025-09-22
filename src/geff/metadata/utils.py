@@ -248,12 +248,11 @@ def create_props_metadata(
     if not np.issubdtype(values.dtype, np.object_):
         # normal property case
         varlength = False
-        dtype = "str" if np.issubdtype(values.dtype, np.str_) else values.dtype.name
-
+        dtype = values.dtype
     else:
         # variable length property case
         varlength = True
-        dtype = values[0].dtype.name
+        dtype = values[0].dtype
         # check that all arrays have the same dtype while we are here
         for array in values:
             if array.dtype != dtype:

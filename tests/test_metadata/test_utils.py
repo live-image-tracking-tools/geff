@@ -127,7 +127,7 @@ class TestCreateOrUpdatePropsMetadata:
         assert "newprop1" in result.edge_props_metadata
         assert "newprop2" in result.edge_props_metadata
         assert "newprop3" in result.edge_props_metadata
-        assert result.edge_props_metadata["newprop"].dtype == "int"
+        assert result.edge_props_metadata["newprop"].dtype == "int64"
         assert result.edge_props_metadata["newprop1"].dtype == "float64"
         assert result.edge_props_metadata["newprop2"].dtype == "str"
         assert result.edge_props_metadata["newprop3"].dtype == "bool"

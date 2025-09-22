@@ -7,7 +7,6 @@ import numpy as np
 
 from geff import _path
 from geff.core_io._utils import construct_var_len_props, remove_tilde, setup_zarr_group
-from geff.metadata._valid_values import validate_data_type
 from geff.metadata.utils import (
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
@@ -290,13 +289,9 @@ def write_id_arrays(
         raise TypeError(
             f"Node ids and edge ids must have same dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
         )
-
-    # Disallow data types that cannot be consumed by Java-based Zarr readers
-    if not validate_data_type(node_ids.dtype):
-        warnings.warn(
-            "Java Zarr implementations do not support dtype "
-            f"{node_ids.dtype}. Please use a supported type.",
-            stacklevel=2,
+    if not np.issubdtype(node_ids.dtype, np.integer):
+        raise TypeError(
+            f"Node ids and edge ids must have int dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
         )
 
     geff_root = setup_zarr_group(geff_store, zarr_format)
@@ -373,21 +368,6 @@ def write_props_arrays(
             values = prop_dict["values"]
             missing = prop_dict["missing"]
             data = None
-
-        # data-type validation - ensure this property can round-trip through
-        # Java Zarr readers before any data get written to disk.
-        if not validate_data_type(values.dtype):
-            warnings.warn(
-                f"Values type {values.dtype} for property '{prop}' is not supported "
-                "by Java Zarr implementations. Proceeding anyway.",
-                stacklevel=2,
-            )
-        if data is not None and (not validate_data_type(data.dtype)):
-            warnings.warn(
-                f"Data type {data.dtype} for property '{prop}' is not supported "
-                "by Java Zarr implementations. Proceeding anyway.",
-                stacklevel=2,
-            )
 
         prop_group = props_group.create_group(prop)
         prop_group[_path.VALUES] = values

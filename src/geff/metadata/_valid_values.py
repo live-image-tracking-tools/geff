@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from typing import Any, Literal, TypeAlias, TypeGuard, get_args
 
-import numpy as np
-import numpy.typing as npt
-
 # -----------------------------------------------------------------------------
 # Unit validation
 # -----------------------------------------------------------------------------
@@ -75,9 +72,38 @@ AxisType: TypeAlias = Literal[
     "channel",
 ]
 
+# -----------------------------------------------------------------------------
+# Data-type validation
+# -----------------------------------------------------------------------------
+# The Java reference implementations for Zarr (e.g. JZarr, zarr-java) currently
+# do not support some of the more exotic NumPy types such as float16 ("half")
+# or the various complex dtypes.  In order to guarantee that a written geff
+# file can be consumed by those libraries we provide a small helper that can
+# be used throughout the codebase to disallow them at write-time.
+
+# References:
+#   https://github.com/zarr-developers/zarr-java/blob/e758d5465d4ff8bb0ccaf2e632c8096b02a9d51c/src/main/java/dev/zarr/zarrjava/v3/DataType.java#L41
+#   https://numpy.org/doc/stable/reference/arrays.dtypes.html
+DTypes: TypeAlias = Literal[
+    "bool",
+    "int8",
+    "int16",
+    "int32",
+    "int64",
+    "uint8",
+    "uint16",
+    "uint32",
+    "uint64",
+    "float32",
+    "float64",
+    "bytes",
+    "str",
+]
+
 VALID_SPACE_UNITS: tuple[SpaceUnits, ...] = get_args(SpaceUnits)
 VALID_TIME_UNITS: tuple[TimeUnits, ...] = get_args(TimeUnits)
 VALID_AXIS_TYPES: tuple[AxisType, ...] = get_args(AxisType)
+VALID_DTYPES: tuple[DTypes, ...] = get_args(DTypes)
 
 
 def validate_axis_type(axis_type: Any) -> TypeGuard[AxisType]:
@@ -116,60 +142,3 @@ def validate_time_unit(unit_name: Any) -> TypeGuard[TimeUnits]:
         False if the unit is not known. The unit may be valid.
     """
     return unit_name in VALID_TIME_UNITS
-
-
-# -----------------------------------------------------------------------------
-# Data-type validation
-# -----------------------------------------------------------------------------
-# The Java reference implementations for Zarr (e.g. JZarr, zarr-java) currently
-# do not support some of the more exotic NumPy types such as float16 ("half")
-# or the various complex dtypes.  In order to guarantee that a written geff
-# file can be consumed by those libraries we provide a small helper that can
-# be used throughout the codebase to disallow them at write-time.
-
-# References:
-#   https://github.com/zarr-developers/zarr-java/blob/e758d5465d4ff8bb0ccaf2e632c8096b02a9d51c/src/main/java/dev/zarr/zarrjava/v3/DataType.java#L41
-#   https://numpy.org/doc/stable/reference/arrays.dtypes.html
-
-ALLOWED_NUMPY_DTYPES: set[npt.DTypeLike] = {
-    np.bool_,
-    np.int8,
-    np.int16,
-    np.int32,
-    np.int64,
-    np.uint8,
-    np.uint16,
-    np.uint32,
-    np.uint64,
-    np.float32,
-    np.float64,
-    np.bytes_,
-    np.str_,
-}
-
-
-def validate_data_type(data_type: Any) -> bool:
-    """Return *True* when *data_type* is allowed in the GEFF schema
-
-    The function is intentionally *permissive* in what it accepts - any object
-    that can be interpreted as a NumPy dtype (including a dtype object itself
-    or a string like ``"int16"``) is valid input.  Internally we normalise the
-    value to the canonical dtype and compare it against a allow-list.
-
-    A data type of "varlength" indicates that the property is a variable length property.
-
-    Float 16 is excluded for compatibility with java zarr.
-
-    Examples
-    --------
-    >>> validate_data_type("int32")
-    True
-    >>> validate_data_type(">i4")
-    True
-    >>> validate_data_type(_np.float16)
-    False
-    """
-    try:
-        return np.dtype(data_type).type in ALLOWED_NUMPY_DTYPES
-    except TypeError:
-        return False

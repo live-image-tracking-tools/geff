@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
+import pydantic
 import pytest
 import zarr
 import zarr.storage
@@ -107,11 +108,11 @@ class TestWriteArrays:
         """write_arrays must fail fast for node/edge ids with unsupported dtype."""
         geff_path = tmp_path / "invalid_ids.geff"
 
-        # float16 is currently not allowed by Java Zarr
+        # float16 is currently not allowed by GEFF Spec
         node_ids = np.array([1, 2, 3], dtype=np.float16)
         edge_ids = np.array([[1, 2], [2, 3]], dtype=np.float16)
 
-        with pytest.warns(UserWarning):
+        with pytest.raises(TypeError, match="Node ids and edge ids must have int dtype"):
             write_arrays(
                 geff_store=geff_path,
                 node_ids=node_ids,
@@ -135,7 +136,7 @@ class TestWriteArrays:
             "score": {"values": bad_prop_values, "missing": None}
         }
 
-        with pytest.warns(UserWarning):
+        with pytest.raises(pydantic.ValidationError):
             write_arrays(
                 geff_store=geff_path,
                 node_ids=node_ids,
