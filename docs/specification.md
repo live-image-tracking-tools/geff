@@ -51,7 +51,7 @@ While most properties can be represented as normal arrays, where each node has a
 
 Variable length properties will have a `data` array in addition to the `values` and `missing` arrays. For variable length properties, the `data` array will contain a 1D flattened array of the actual values for all the nodes. The `values` array will contain the offset and shape of the relevant section of data in the `data` array.
 
-![vlen properties overview](./assets/vlen_props.png)
+![vlen properties overview](./images/vlen_props.png)
 
 ## The `edges` group
 
