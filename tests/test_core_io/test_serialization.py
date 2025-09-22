@@ -3,7 +3,7 @@ import pytest
 
 from geff.core_io import construct_var_len_props
 from geff.core_io._serialization import (
-    _deserialize_vlen_array,
+    _deserialize_vlen_value,
     deserialize_vlen_property_data,
     serialize_vlen_property_data,
 )
@@ -316,4 +316,4 @@ class TestDeserializeVlenPropertyData:
         """Test deserialization with out of bounds index."""
         _, ser_dict = basic_1d_data()
         with pytest.raises(IndexError, match="Index 5 out of bounds"):
-            _deserialize_vlen_array(values=ser_dict["values"], data=ser_dict["data"], index=5)
+            _deserialize_vlen_value(values=ser_dict["values"], data=ser_dict["data"], index=5)
