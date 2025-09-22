@@ -58,7 +58,8 @@
                 "yoctometer",
                 "yottameter",
                 "zeptometer",
-                "zettameter"
+                "zettameter",
+                "pixel"
               ],
               "type": "string"
             },
@@ -86,7 +87,8 @@
                 "yoctosecond",
                 "yottasecond",
                 "zeptosecond",
-                "zettasecond"
+                "zettasecond",
+                "frame"
               ],
               "type": "string"
             },
@@ -169,7 +171,8 @@
                 "yoctometer",
                 "yottameter",
                 "zeptometer",
-                "zettameter"
+                "zettameter",
+                "pixel"
               ],
               "type": "string"
             },
@@ -197,7 +200,8 @@
                 "yoctosecond",
                 "yottasecond",
                 "zeptosecond",
-                "zettasecond"
+                "zettasecond",
+                "frame"
               ],
               "type": "string"
             },
