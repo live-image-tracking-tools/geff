@@ -180,10 +180,10 @@ class RxGraphAdapter(GraphAdapter):
     def __init__(self, graph: rx.PyGraph | rx.PyDiGraph) -> None:
         self.graph = graph
 
-    def get_node_ids(self) -> Sequence[Any]:
+    def get_node_ids(self) -> Sequence[int]:
         return list(self.graph.node_indices())
 
-    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+    def get_edge_ids(self) -> Sequence[tuple[int, int]]:
         return list(self.graph.edge_list())
 
     def has_node_prop(self, name: str, node: int, metadata: GeffMetadata) -> bool:
@@ -203,7 +203,7 @@ class RxGraphAdapter(GraphAdapter):
     def get_edge_prop(
         self,
         name: str,
-        edge: tuple[Any, Any],
+        edge: tuple[int, int],
         metadata: GeffMetadata,
     ) -> Any:
         return self.graph.get_edge_data(*edge)[name]

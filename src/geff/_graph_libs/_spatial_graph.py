@@ -174,10 +174,10 @@ class SgGraphAdapter(GraphAdapter):
     def __init__(self, graph: sg.SpatialGraph | sg.SpatialDiGraph) -> None:
         self.graph = graph
 
-    def get_node_ids(self) -> Sequence[Any]:
+    def get_node_ids(self) -> Sequence[int]:
         return list(self.graph.nodes)
 
-    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+    def get_edge_ids(self) -> Sequence[tuple[int, int]]:
         return [tuple(edge.tolist()) for edge in self.graph.edges]
 
     def has_node_prop(self, name: str, node: int, metadata: GeffMetadata) -> bool:
@@ -223,8 +223,7 @@ class SgGraphAdapter(GraphAdapter):
     def get_edge_prop(
         self,
         name: str,
-        edge: tuple[Any, Any],
+        edge: tuple[int, int],
         metadata: GeffMetadata,
     ) -> Any:
-        # TODO: is this the best way to access edge attributes? Have to cast
-        return cast("NDArray[Any]", getattr(self.graph.edge_attrs[edge], name))
+        return getattr(self.graph.edge_attrs[edge], name)

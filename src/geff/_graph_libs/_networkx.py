@@ -131,10 +131,10 @@ class NxGraphAdapter(GraphAdapter):
     def __init__(self, graph: nx.Graph | nx.DiGraph) -> None:
         self.graph = graph
 
-    def get_node_ids(self) -> Sequence[Any]:
+    def get_node_ids(self) -> Sequence[int]:
         return list(self.graph.nodes)
 
-    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+    def get_edge_ids(self) -> Sequence[tuple[int, int]]:
         return list(self.graph.edges)
 
     def has_node_prop(self, name: str, node: int, metadata: GeffMetadata) -> bool:
@@ -148,13 +148,13 @@ class NxGraphAdapter(GraphAdapter):
     ) -> Any:
         return self.graph.nodes[node][name]
 
-    def has_edge_prop(self, name: str, edge: tuple[Any, Any], metadata: GeffMetadata) -> bool:
+    def has_edge_prop(self, name: str, edge: tuple[int, int], metadata: GeffMetadata) -> bool:
         return name in self.graph.edges[edge]
 
     def get_edge_prop(
         self,
         name: str,
-        edge: tuple[Any, Any],
+        edge: tuple[int, int],
         metadata: GeffMetadata,
     ) -> Any:
         return self.graph.edges[edge][name]

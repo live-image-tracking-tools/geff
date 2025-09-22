@@ -9,21 +9,21 @@ T = TypeVar("T", covariant=True)
 class GraphAdapter(Protocol[T]):
     def __init__(self, graph: T) -> None: ...
 
-    def get_node_ids(self) -> Sequence[Any]:
+    def get_node_ids(self) -> Sequence[int]:
         """
         Get the node ids of the graph.
 
         Returns:
-            node_ids (Sequence[Any]): The node ids.
+            node_ids (Sequence[int]): The node ids.
         """
         ...
 
-    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+    def get_edge_ids(self) -> Sequence[tuple[int, int]]:
         """
         Get the edges of the graph.
 
         Returns:
-            edge_ids (Sequence[tuple[Any, Any]]): Pairs of node ids that represent edges..
+            edge_ids (Sequence[tuple[int, int]]): Pairs of node ids that represent edges.
         """
         ...
 
@@ -57,7 +57,7 @@ class GraphAdapter(Protocol[T]):
     def has_edge_prop(
         self,
         name: str,
-        edge: tuple[Any, Any],
+        edge: tuple[int, int],
         metadata: GeffMetadata,
     ) -> bool:
         """
@@ -65,8 +65,7 @@ class GraphAdapter(Protocol[T]):
 
         Args:
             name (str): The name of the edge property.
-            edge (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
-                determines the order of the property array.
+            edge (tuple[int,int]): A tuple of node ids representing an edge.
             metadata (GeffMetadata): The GEFF metadata.
 
         Returns:
@@ -77,7 +76,7 @@ class GraphAdapter(Protocol[T]):
     def get_edge_prop(
         self,
         name: str,
-        edge: tuple[Any, Any],
+        edge: tuple[int, int],
         metadata: GeffMetadata,
     ) -> Any:
         """
@@ -85,8 +84,7 @@ class GraphAdapter(Protocol[T]):
 
         Args:
             name (str): The name of the edge property.
-            edge (Sequence[Any]): A sequence of tuples of node ids, representing the edges; this
-                determines the order of the property array.
+            edge (tuple[int, int]): A tuple of node ids representing an edge
             metadata (GeffMetadata): The GEFF metadata.
 
         Returns:
