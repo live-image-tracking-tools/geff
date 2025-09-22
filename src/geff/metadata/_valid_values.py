@@ -38,6 +38,7 @@ SpaceUnits: TypeAlias = Literal[
     "yottameter",
     "zeptometer",
     "zettameter",
+    "pixel",
 ]
 
 TimeUnits: TypeAlias = Literal[
@@ -64,6 +65,7 @@ TimeUnits: TypeAlias = Literal[
     "yottasecond",
     "zeptosecond",
     "zettasecond",
+    "frame",
 ]
 
 

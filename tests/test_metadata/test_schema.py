@@ -2,7 +2,6 @@ import re
 import warnings
 from pathlib import Path
 
-import numpy as np
 import pydantic
 import pytest
 import zarr
@@ -10,7 +9,6 @@ import zarr.storage
 
 import geff
 from geff.metadata import PropMetadata
-from geff.metadata._affine import Affine
 from geff.metadata._schema import (
     VERSION_PATTERN,
     GeffMetadata,
@@ -367,87 +365,6 @@ def test__validate_key_identifier_equality() -> None:
         _validate_key_identifier_equality(props_md, "nodeeeee")
 
 
-class TestAffineTransformation:
-    """Comprehensive tests for Affine transformation functionality with metadata."""
-
-    def test_affine_integration_with_metadata(self) -> None:
-        """Test integration of Affine with GeffMetadata."""
-        # Create a simple affine transformation
-        affine = Affine.from_matrix_offset([[1.5, 0.0], [0.0, 1.5]], [10.0, 20.0])
-
-        # Create metadata with affine transformation
-        metadata = GeffMetadata(
-            geff_version="0.1.0",
-            directed=True,
-            node_props_metadata={},
-            edge_props_metadata={},
-            axes=[
-                {"name": "x", "type": "space", "unit": "micrometer"},
-                {"name": "y", "type": "space", "unit": "micrometer"},
-            ],
-            affine=affine,
-        )
-
-        # Verify the affine is properly stored
-        assert metadata.affine is not None
-        assert metadata.affine.ndim == 2
-        np.testing.assert_array_almost_equal(
-            metadata.affine.linear_matrix, [[1.5, 0.0], [0.0, 1.5]]
-        )
-        np.testing.assert_array_almost_equal(metadata.affine.offset, [10.0, 20.0])
-
-    def test_unmatched_ndim(self) -> None:
-        """Test that an error is raised if the affine matrix and axes have different dimensions."""
-        with pytest.raises(
-            ValueError, match="Affine transformation matrix must have 3 dimensions, got 2"
-        ):
-            GeffMetadata(
-                geff_version="0.1.0",
-                directed=True,
-                node_props_metadata={},
-                edge_props_metadata={},
-                axes=[
-                    {"name": "x", "type": "space", "unit": "micrometer"},
-                    {"name": "y", "type": "space", "unit": "micrometer"},
-                    {"name": "z", "type": "space", "unit": "micrometer"},
-                ],
-                # Homogeneous matrix of a 2D affine transformation
-                affine=np.eye(3),
-            )
-
-    def test_affine_serialization_with_metadata(self, tmp_path: Path) -> None:
-        """Test that Affine transformations can be serialized and deserialized with metadata."""
-        # Create metadata with affine transformation
-        affine = Affine.from_matrix_offset(
-            [[2.0, 0.5], [-0.5, 2.0]],  # Scaling with rotation/shear
-            [100.0, -50.0],
-        )
-
-        original_metadata = GeffMetadata(
-            geff_version="0.1.0",
-            directed=False,
-            node_props_metadata={},
-            edge_props_metadata={},
-            axes=[
-                {"name": "x", "type": "space", "unit": "micrometer"},
-                {"name": "y", "type": "space", "unit": "micrometer"},
-            ],
-            affine=affine,
-        )
-
-        # Write and read back
-        zpath = tmp_path / "test_affine.zarr"
-        original_metadata.write(zpath)
-        loaded_metadata = GeffMetadata.read(zpath)
-
-        # Verify everything matches
-        assert loaded_metadata == original_metadata
-        assert loaded_metadata.affine is not None
-        np.testing.assert_array_almost_equal(
-            loaded_metadata.affine.matrix, original_metadata.affine.matrix
-        )
-
-
 def test_schema_and_round_trip() -> None:
     # Ensure it can be created without error
     assert GeffSchema.model_json_schema(mode="serialization")
@@ -463,7 +380,6 @@ def test_schema_and_round_trip() -> None:
                 {"name": "x", "type": "space", "unit": "micrometer"},
                 {"name": "y", "type": "space", "unit": "micrometer"},
             ],
-            affine=Affine.from_matrix_offset([[1.0, 0.0], [0.0, 1.0]], [0.0, 0.0]),
             related_objects=[
                 {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
                 {"type": "image", "path": "raw/"},
