@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
-import pydantic
 import pytest
 import zarr
 import zarr.storage
@@ -122,7 +121,7 @@ class TestWriteArrays:
                 metadata=_tmp_metadata(),
             )
 
-    def test_write_arrays_rejects_disallowed_property_dtype(self, tmp_path) -> None:
+    def test_write_arrays_upcasts_disallowed_property_dtype(self, tmp_path) -> None:
         """write_arrays must fail fast if any property array has an unsupported dtype."""
         geff_path = tmp_path / "invalid_prop.geff"
 
@@ -136,7 +135,9 @@ class TestWriteArrays:
             "score": {"values": bad_prop_values, "missing": None}
         }
 
-        with pytest.raises(pydantic.ValidationError):
+        with pytest.warns(
+            UserWarning, match="Dtype float16 is being upcast to float32 for Java compatibility"
+        ):
             write_arrays(
                 geff_store=geff_path,
                 node_ids=node_ids,
