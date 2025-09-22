@@ -270,7 +270,7 @@ def create_props_metadata(
                 )
     return PropMetadata(
         identifier=identifier,
-        dtype=dtype,
+        dtype=dtype,  # pyright: ignore
         varlength=varlength,
         unit=unit,
         name=name,
