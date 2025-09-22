@@ -57,26 +57,26 @@ def serialize_vlen_property_data(
                 "to standardize the properties."
             )
         encoded_values.append((offset, *element.shape))
-        data.append(element)
+        data.append(element.ravel())
         offset += np.asarray(element.shape).prod()
 
     return (
         np.asarray(encoded_values, dtype=np.uint64),
         missing,
-        np.concatenate([d.ravel() for d in data]) if data else np.array([], dtype="int64"),
+        np.concatenate(data) if len(data) > 0 else np.array([], dtype="int64"),
     )
 
 
-def _deserialize_vlen_array(
+def _deserialize_vlen_value(
     values: NDArray,
     data: NDArray,
     index: int,
 ) -> NDArray:
     """
-    Deserialize a variable-length array from the data and values arrays.
+    Deserialize one variable-length array value from the data and values arrays.
 
     Args:
-        values (NDArray): The AND array containing the offset indices and shapes of
+        values (NDArray): The NDArray containing the offset indices and shapes of
             each property. (e.g., [[offset, shape_dim0, shape_dim1], ...]).
             expected shape is (N, ndim + 1) where N is the number of nodes or edges.
         data (NDArray): The 1D array containing the serialized property data.
@@ -84,7 +84,7 @@ def _deserialize_vlen_array(
         index (int): The index of the property to deserialize.
 
     Returns:
-        NDArray: The deserialized variable-length array.
+        NDArray: The deserialized variable-length value.
     """
     if index < 0 or index >= values.shape[0]:
         raise IndexError(f"Index {index} out of bounds for property data.")
@@ -118,5 +118,5 @@ def deserialize_vlen_property_data(
     """
     decoded_values = np.empty(shape=(len(values),), dtype=np.object_)
     for i in range(values.shape[0]):
-        decoded_values[i] = _deserialize_vlen_array(values, data, i)
+        decoded_values[i] = _deserialize_vlen_value(values, data, i)
     return {"values": decoded_values, "missing": missing}
