@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from geff import _path
-from geff.core_io._utils import remove_tilde, setup_zarr_group
+from geff.core_io._utils import construct_var_len_props, remove_tilde, setup_zarr_group
 from geff.metadata._valid_values import validate_data_type
 from geff.metadata.utils import (
     add_or_update_props_metadata,
@@ -188,7 +188,10 @@ def dict_props_to_arr(
                 values.append(default_val)
                 missing.append(True)
                 missing_any = True
-        values_arr = np.asarray(values)
+        try:
+            values_arr = np.asarray(values)
+        except ValueError:
+            values_arr = construct_var_len_props(values)["values"]
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
         props_dict[name] = {"missing": missing_arr, "values": values_arr}
     return props_dict

@@ -115,7 +115,7 @@ def test_read(
     graph, metadata = read(store, backend=backend)
     graph_adapter = backend_module.graph_adapter(graph)
 
-    _assert_graph_equal_to_geff(graph_adapter, memory_geff, include_t, include_z)
+    _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
@@ -155,7 +155,7 @@ def test_construct(
     graph = construct(**in_memory_geff, backend=backend)
     graph_adapter = backend_module.graph_adapter(graph)
 
-    _assert_graph_equal_to_geff(graph_adapter, memory_geff, include_t, include_z)
+    _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
 
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
@@ -203,6 +203,6 @@ def test_write(
     graph, metadata = NxBackend.read(path_store)
     graph_adapter = NxBackend.graph_adapter(graph)
 
-    _assert_graph_equal_to_geff(graph_adapter, memory_geff, include_t, include_z)
+    _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
     # TODO: test metadata
