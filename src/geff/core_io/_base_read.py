@@ -127,7 +127,17 @@ class GeffReader:
         for name in names:
             self.edge_props[name] = self._read_prop(name, "edge")
 
-    def _read_prop(self, name: Iterable[str], prop_type: Literal["node", "edge"]) -> ZarrPropDict:
+    def _read_prop(self, name: str, prop_type: Literal["node", "edge"]) -> ZarrPropDict:
+        """Read a property into a zarr property dictionary
+
+        Args:
+            name (str): The name of the property to read
+            prop_type (Literal[&quot;node&quot;, &quot;edge&quot;]): Either `node` or `edge`
+
+        Returns:
+            ZarrPropDict: A dictionary with "values" "missing" and optionally "data" arrays
+                holding the zarr arrays for a property.
+        """
         group_path = (
             f"{_path.NODE_PROPS}/{name}" if prop_type == "node" else f"{_path.EDGE_PROPS}/{name}"
         )
@@ -145,8 +155,24 @@ class GeffReader:
     def _load_prop_to_memory(
         self, zarr_prop: ZarrPropDict, mask: NDArray[np.bool_] | None, prop_metadata: PropMetadata
     ) -> PropDictNpArray:
+        """Load a zarr property dictionary into memory, including deserialization.
+
+        Has option to only load a subset of the nodes or edges by providing a mask.
+
+        Args:
+            zarr_prop (ZarrPropDict): The zarr property dictionary to load and deserialize.
+            mask (NDArray[np.bool_] | None): A mask to use to only include a subset of the elements.
+                Can be None, which loads all the elements to memory.
+            prop_metadata (PropMetadata): The metadata of the given property.
+
+        Raises:
+            ValueError: If the property is varlength and no `data` array is provided.
+
+        Returns:
+            PropDictNpArray: The property loaded into memory as "values" and "missing" arrays.
+        """
         dtype = np.dtype(prop_metadata.dtype)
-        values_dtype = dtype
+        values_dtype = np.uint64 if prop_metadata.varlength else dtype
         values = np.array(
             zarr_prop[_path.VALUES][mask.tolist() if mask is not None else ...],
             dtype=values_dtype,
@@ -161,7 +187,7 @@ class GeffReader:
         if _path.DATA in zarr_prop:
             data = np.array(
                 zarr_prop[_path.DATA][mask.tolist() if mask is not None else ...],
-                # TODO: dtype?
+                dtype=dtype,
             )
         else:
             data = None
@@ -169,8 +195,10 @@ class GeffReader:
         in_memory_dict: PropDictNpArray
         if prop_metadata.varlength:
             if data is None:
-                # TODO: more informative error?
-                raise ValueError("Property is varlength but no encoded data was found")
+                raise ValueError(
+                    f"Property {prop_metadata.identifier} metadata is varlength but no "
+                    "serialized data was found in GEFF zarr"
+                )
             in_memory_dict = deserialize_vlen_property_data(values, missing, data)
         else:
             in_memory_dict = {
