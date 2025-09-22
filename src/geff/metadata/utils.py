@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import warnings
 from collections.abc import Sequence  # noqa: TC003
 from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
@@ -226,14 +227,14 @@ def create_props_metadata(
     """Create PropMetadata from property data.
 
     Automatically detects dtype and varlength from the provided data.
+    If dtype is float16, upcasts to float32 with warning.
 
     Args:
-        identifier: The property identifier/name
-        prop_data: Either InMemoryNormalProp (dict with values/missing) or
-                  InMemoryVarLenProp (sequence of arrays with None values)
-        unit: Optional unit for the property
-        name: Optional human-friendly name for the property
-        description: Optional description for the property
+        identifier(str): The property identifier/name
+        prop_data (PropDictNpArray): The property to generate metadata for
+        unit (str): Optional unit for the property
+        name (str): Optional human-friendly name for the property
+        description (str): Optional description for the property
 
     Returns:
         PropMetadata object with inferred dtype and varlength settings
@@ -245,6 +246,13 @@ def create_props_metadata(
     if not isinstance(prop_data, dict):
         raise ValueError(f"Expected dict of property data, got {prop_data}")
     values = prop_data["values"]
+    if np.issubdtype(values.dtype, np.float16):
+        warnings.warn(
+            "Dtype float16 is being upcast to float32 for Java compatibility", stacklevel=2
+        )
+        values = values.astype(np.float32)
+        prop_data["values"] = values
+
     if not np.issubdtype(values.dtype, np.object_):
         # normal property case
         varlength = False
