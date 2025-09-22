@@ -1113,19 +1113,14 @@
         <p>The axes list is modeled after the
 <a href="https://ngff.openmicroscopy.org/0.5/index.html#axes-md">OME-zarr</a>
 specifications and is used to identify spatio-temporal properties on the
-graph nodes. If the same names are used in the axes metadata of the
-related image or segmentation data, applications can use this information
-to align graph node locations with image data.</p>
-<p>The order of the axes in the list is meaningful. For one, any downstream
-properties that are an array of values with one value per (spatial) axis
-will be in the order of the axis list (filtering to only the spatial axes by
-the <code>type</code> field if needed). Secondly, if associated image or segmentation
-data does not have axes metadata, the order of the spatiotemporal axes is a
-good default guess for aligning the graph and the image data, although there
-is no way to denote the channel dimension in the graph spec. If you are
-writing out a geff with an associated segmentation and/or image dataset, we
-highly recommend providing the axis names for your segmentation/image using
-the OME-zarr spec, including channel dimensions if needed.</p>
+graph nodes.</p>
+<p>The <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> key
+must be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information.
+An optional <code>unit</code> key should match the valid OME-Zarr units and <code>min</code> and <code>max</code> keys
+define the range of the axis</p>
+<p>The optional <code>scale</code> field can be used to store a scaling factor such as converting
+the data from pixel space into real world units. The associated, optional <code>scaled_unit</code>
+field specifies the output unit after applying <code>scale</code> to the data.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1176,7 +1171,7 @@ the OME-zarr spec, including channel dimensions if needed.</p>
                 <code>unit</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | <a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;angstrom&#39;, &#39;attometer&#39;, &#39;centimeter&#39;, &#39;decimeter&#39;, &#39;exameter&#39;, &#39;femtometer&#39;, &#39;foot&#39;, &#39;gigameter&#39;, &#39;hectometer&#39;, &#39;inch&#39;, &#39;kilometer&#39;, &#39;megameter&#39;, &#39;meter&#39;, &#39;micrometer&#39;, &#39;mile&#39;, &#39;millimeter&#39;, &#39;nanometer&#39;, &#39;parsec&#39;, &#39;petameter&#39;, &#39;picometer&#39;, &#39;terameter&#39;, &#39;yard&#39;, &#39;yoctometer&#39;, &#39;yottameter&#39;, &#39;zeptometer&#39;, &#39;zettameter&#39;] | <a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;attosecond&#39;, &#39;centisecond&#39;, &#39;day&#39;, &#39;decisecond&#39;, &#39;exasecond&#39;, &#39;femtosecond&#39;, &#39;gigasecond&#39;, &#39;hectosecond&#39;, &#39;hour&#39;, &#39;kilosecond&#39;, &#39;megasecond&#39;, &#39;microsecond&#39;, &#39;millisecond&#39;, &#39;minute&#39;, &#39;nanosecond&#39;, &#39;petasecond&#39;, &#39;picosecond&#39;, &#39;second&#39;, &#39;terasecond&#39;, &#39;yoctosecond&#39;, &#39;yottasecond&#39;, &#39;zeptosecond&#39;, &#39;zettasecond&#39;] | None</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | <a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;angstrom&#39;, &#39;attometer&#39;, &#39;centimeter&#39;, &#39;decimeter&#39;, &#39;exameter&#39;, &#39;femtometer&#39;, &#39;foot&#39;, &#39;gigameter&#39;, &#39;hectometer&#39;, &#39;inch&#39;, &#39;kilometer&#39;, &#39;megameter&#39;, &#39;meter&#39;, &#39;micrometer&#39;, &#39;mile&#39;, &#39;millimeter&#39;, &#39;nanometer&#39;, &#39;parsec&#39;, &#39;petameter&#39;, &#39;picometer&#39;, &#39;terameter&#39;, &#39;yard&#39;, &#39;yoctometer&#39;, &#39;yottameter&#39;, &#39;zeptometer&#39;, &#39;zettameter&#39;, &#39;pixel&#39;] | <a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;attosecond&#39;, &#39;centisecond&#39;, &#39;day&#39;, &#39;decisecond&#39;, &#39;exasecond&#39;, &#39;femtosecond&#39;, &#39;gigasecond&#39;, &#39;hectosecond&#39;, &#39;hour&#39;, &#39;kilosecond&#39;, &#39;megasecond&#39;, &#39;microsecond&#39;, &#39;millisecond&#39;, &#39;minute&#39;, &#39;nanosecond&#39;, &#39;petasecond&#39;, &#39;picosecond&#39;, &#39;second&#39;, &#39;terasecond&#39;, &#39;yoctosecond&#39;, &#39;yottasecond&#39;, &#39;zeptosecond&#39;, &#39;zettasecond&#39;, &#39;frame&#39;] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1213,6 +1208,38 @@ the OME-zarr spec, including channel dimensions if needed.</p>
             <td>
               <div class="doc-md-description">
                 <p>Optional, the minimum value for this axis.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scale</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional, a scaling factor that can be applied to the data</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scaled_unit</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | <a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;angstrom&#39;, &#39;attometer&#39;, &#39;centimeter&#39;, &#39;decimeter&#39;, &#39;exameter&#39;, &#39;femtometer&#39;, &#39;foot&#39;, &#39;gigameter&#39;, &#39;hectometer&#39;, &#39;inch&#39;, &#39;kilometer&#39;, &#39;megameter&#39;, &#39;meter&#39;, &#39;micrometer&#39;, &#39;mile&#39;, &#39;millimeter&#39;, &#39;nanometer&#39;, &#39;parsec&#39;, &#39;petameter&#39;, &#39;picometer&#39;, &#39;terameter&#39;, &#39;yard&#39;, &#39;yoctometer&#39;, &#39;yottameter&#39;, &#39;zeptometer&#39;, &#39;zettameter&#39;, &#39;pixel&#39;] | <a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;attosecond&#39;, &#39;centisecond&#39;, &#39;day&#39;, &#39;decisecond&#39;, &#39;exasecond&#39;, &#39;femtosecond&#39;, &#39;gigasecond&#39;, &#39;hectosecond&#39;, &#39;hour&#39;, &#39;kilosecond&#39;, &#39;megasecond&#39;, &#39;microsecond&#39;, &#39;millisecond&#39;, &#39;minute&#39;, &#39;nanosecond&#39;, &#39;petasecond&#39;, &#39;picosecond&#39;, &#39;second&#39;, &#39;terasecond&#39;, &#39;yoctosecond&#39;, &#39;yottasecond&#39;, &#39;zeptosecond&#39;, &#39;zettasecond&#39;, &#39;frame&#39;] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional, the unit after applying the <code>scale</code> value to the data. If <code>scaled_unit</code> is set, a <code>scale</code> value must also be provided.</p>
               </div>
             </td>
             <td>
@@ -1449,8 +1476,23 @@ If not provided, the version will be set to the current geff package version.</p
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional list of <code>Axis</code> objects defining the axes of each node in the graph.
-Each object's <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> key must be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information. Each axis can additionally optionally define a <code>unit</code> key, which should match the valid OME-Zarr units, and <code>min</code> and <code>max</code> keys to define the range of the axis. See <a class="autorefs autorefs-internal" title="            Axis" href="#geff.metadata.Axis"><code>Axis</code></a> for more information.</p>
+                <p>Optional list of <code>Axis</code> objects defining the axes of each node
+            in the graph. The axes list is modeled after the
+            <a href="https://ngff.openmicroscopy.org/0.5/index.html#axes-md">OME-zarr</a>
+            specifications and is used to identify spatio-temporal properties on the
+            graph nodes. If the same names are used in the axes metadata of the
+            related image or segmentation data, applications can use this information
+            to align graph node locations with image data.
+            The order of the axes in the list is meaningful. For one, any downstream
+            properties that are an array of values with one value per (spatial) axis
+            will be in the order of the axis list (filtering to only the spatial axes by
+            the <code>type</code> field if needed). Secondly, if associated image or segmentation
+            data does not have axes metadata, the order of the spatiotemporal axes is a
+            good default guess for aligning the graph and the image data, although there
+            is no way to denote the channel dimension in the graph spec. If you are
+            writing out a geff with an associated segmentation and/or image dataset, we
+            highly recommend providing the axis names for your segmentation/image using
+            the OME-zarr spec, including channel dimensions if needed.</p>
               </div>
             </td>
             <td>
@@ -1571,22 +1613,6 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
             <td>
               <div class="doc-md-description">
                 <p>A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. The 'type' represents the data type. 'labels' and 'image' should be used for label and image objects, respectively. Other types are also allowed, The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The 'label_prop' is only valid for type 'labels' and specifies the node property that will be used to identify the labels in the related object.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>affine</code>
-            </td>
-            <td>
-                  <code><span title="geff.metadata._affine.Affine">Affine</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The optional <code>affine</code> field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value <strong>matrix</strong> is stored as a <code>(N + 1) x (N + 1)</code> homogeneous matrix following the <code>scipy.ndimage.affine_transform</code> convention, where <strong>N</strong> equals the number of spatio-temporal axes declared in <code>axes</code>.</p>
               </div>
             </td>
             <td>
