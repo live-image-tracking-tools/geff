@@ -188,9 +188,13 @@ def dict_props_to_arr(
                 values.append(default_val)
                 missing.append(True)
                 missing_any = True
+        # try casting the list of values to a numpy array
         try:
             values_arr = np.asarray(values)
+        # catch a value error which will happen if we have elements that are different shapes
         except ValueError:
+            # try to construct variable length properties - will raise an error if internal
+            # dtypes are not compatible (e.g. floats and strings)
             values_arr = construct_var_len_props(values)["values"]
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
         props_dict[name] = {"missing": missing_arr, "values": values_arr}
