@@ -132,7 +132,7 @@ class GeffReader:
 
         Args:
             name (str): The name of the property to read
-            prop_type (Literal[&quot;node&quot;, &quot;edge&quot;]): Either `node` or `edge`
+            prop_type (Literal["node", "edge"]): Either `node` or `edge`
 
         Returns:
             ZarrPropDict: A dictionary with "values" "missing" and optionally "data" arrays
