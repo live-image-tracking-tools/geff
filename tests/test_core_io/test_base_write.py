@@ -184,10 +184,6 @@ def test_dict_prop_to_arr(dict_data, data_type, expected) -> None:
     np.testing.assert_array_equal(values, ex_values)
 
 
-# TODO: test write_dicts (it is pretty solidly covered by networkx and write_array tests,
-# so I'm okay merging without, but we should do it when we have time)
-
-
 class Test_write_dicts:
     def test_node_ids_not_int(self):
         store = zarr.storage.MemoryStore()

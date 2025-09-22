@@ -72,7 +72,7 @@ TimeUnits: TypeAlias = Literal[
 AxisType: TypeAlias = Literal[
     "space",
     "time",
-    "channel",  # TODO: discuss
+    "channel",
 ]
 
 VALID_SPACE_UNITS: tuple[SpaceUnits, ...] = get_args(SpaceUnits)

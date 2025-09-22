@@ -197,7 +197,6 @@ class SgGraphAdapter(GraphAdapter):
         if name in axes_names:
             return self._get_node_spatial_props(name, node, axes_names)
         else:
-            # TODO: is this the best way to access node attributes?
             return getattr(self.graph.node_attrs[node], name)
 
     # This is not the most elegant solution but the idea is:
