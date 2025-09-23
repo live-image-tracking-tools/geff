@@ -10,15 +10,18 @@ from geff import _path
 from geff.core_io._utils import expect_array, expect_group, open_storelike, remove_tilde
 from geff.validate.data import ValidationConfig, validate_data
 from geff.validate.structure import validate_structure
-from geff_spec import GeffMetadata
+from geff_spec import GeffMetadata, PropMetadata
+
+from ._serialization import deserialize_vlen_property_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from typing import Literal
 
     from numpy.typing import NDArray
     from zarr.storage import StoreLike
 
-    from geff._typing import InMemoryGeff, PropDictNpArray, ZarrNormalProp
+    from geff._typing import InMemoryGeff, PropDictNpArray, ZarrPropDict
 
 
 class GeffReader:
@@ -69,8 +72,8 @@ class GeffReader:
         self.metadata = GeffMetadata.read(source)
         self.nodes = zarr.open_array(source, path=_path.NODE_IDS, mode="r")
         self.edges = zarr.open_array(source, path=_path.EDGE_IDS, mode="r")
-        self.node_props: dict[str, ZarrNormalProp] = {}
-        self.edge_props: dict[str, ZarrNormalProp] = {}
+        self.node_props: dict[str, ZarrPropDict] = {}
+        self.edge_props: dict[str, ZarrPropDict] = {}
 
         # get node properties names
         nodes_group = expect_group(self.group, _path.NODES)
@@ -104,15 +107,7 @@ class GeffReader:
             names = self.node_prop_names
 
         for name in names:
-            prop_group = zarr.open_group(
-                self.group.store, path=f"{_path.NODE_PROPS}/{name}", mode="r"
-            )
-            values = expect_array(prop_group, _path.VALUES, "node")
-            prop_dict: ZarrNormalProp = {"values": values}
-            if _path.MISSING in prop_group.keys():
-                missing = expect_array(prop_group, _path.MISSING, "node")
-                prop_dict[_path.MISSING] = missing
-            self.node_props[name] = prop_dict
+            self.node_props[name] = self._read_prop(name, "node")
 
     def read_edge_props(self, names: Iterable[str] | None = None) -> None:
         """
@@ -130,15 +125,87 @@ class GeffReader:
             names = self.edge_prop_names
 
         for name in names:
-            prop_group = zarr.open_group(
-                self.group.store, path=f"{_path.EDGE_PROPS}/{name}", mode="r"
+            self.edge_props[name] = self._read_prop(name, "edge")
+
+    def _read_prop(self, name: str, prop_type: Literal["node", "edge"]) -> ZarrPropDict:
+        """Read a property into a zarr property dictionary
+
+        Args:
+            name (str): The name of the property to read
+            prop_type (Literal["node", "edge"]): Either `node` or `edge`
+
+        Returns:
+            ZarrPropDict: A dictionary with "values" "missing" and optionally "data" arrays
+                holding the zarr arrays for a property.
+        """
+        group_path = (
+            f"{_path.NODE_PROPS}/{name}" if prop_type == "node" else f"{_path.EDGE_PROPS}/{name}"
+        )
+        prop_group = zarr.open_group(self.group.store, path=group_path, mode="r")
+        values = expect_array(prop_group, _path.VALUES, prop_type)
+        prop_dict: ZarrPropDict = {_path.VALUES: values}
+        if _path.MISSING in prop_group.keys():
+            missing = expect_array(prop_group, _path.MISSING, prop_type)
+            prop_dict[_path.MISSING] = missing
+
+        if _path.DATA in prop_group.keys():
+            prop_dict[_path.DATA] = expect_array(prop_group, _path.DATA, prop_type)
+        return prop_dict
+
+    def _load_prop_to_memory(
+        self, zarr_prop: ZarrPropDict, mask: NDArray[np.bool_] | None, prop_metadata: PropMetadata
+    ) -> PropDictNpArray:
+        """Load a zarr property dictionary into memory, including deserialization.
+
+        Has option to only load a subset of the nodes or edges by providing a mask.
+
+        Args:
+            zarr_prop (ZarrPropDict): The zarr property dictionary to load and deserialize.
+            mask (NDArray[np.bool_] | None): A mask to use to only include a subset of the elements.
+                Can be None, which loads all the elements to memory.
+            prop_metadata (PropMetadata): The metadata of the given property.
+
+        Raises:
+            ValueError: If the property is varlength and no `data` array is provided.
+
+        Returns:
+            PropDictNpArray: The property loaded into memory as "values" and "missing" arrays.
+        """
+        dtype = np.dtype(prop_metadata.dtype)
+        values_dtype = np.uint64 if prop_metadata.varlength else dtype
+        values = np.array(
+            zarr_prop[_path.VALUES][mask.tolist() if mask is not None else ...],
+            dtype=values_dtype,
+        )
+        if _path.MISSING in zarr_prop:
+            missing = np.array(
+                zarr_prop[_path.MISSING][mask.tolist() if mask is not None else ...],
+                dtype=bool,
             )
-            values = expect_array(prop_group, _path.VALUES, "edge")
-            prop_dict: ZarrNormalProp = {"values": values}
-            if _path.MISSING in prop_group.keys():
-                missing = expect_array(prop_group, _path.MISSING, "edge")
-                prop_dict[_path.MISSING] = missing
-            self.edge_props[name] = prop_dict
+        else:
+            missing = None
+        if _path.DATA in zarr_prop:
+            data = np.array(
+                zarr_prop[_path.DATA][mask.tolist() if mask is not None else ...],
+                dtype=dtype,
+            )
+        else:
+            data = None
+
+        in_memory_dict: PropDictNpArray
+        if prop_metadata.varlength:
+            if data is None:
+                raise ValueError(
+                    f"Property {prop_metadata.identifier} metadata is varlength but no "
+                    "serialized data was found in GEFF zarr"
+                )
+            in_memory_dict = deserialize_vlen_property_data(values, missing, data)
+        else:
+            in_memory_dict = {
+                "values": values,
+                "missing": missing,
+            }
+        return in_memory_dict
 
     def build(
         self,
@@ -163,19 +230,8 @@ class GeffReader:
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray] = {}
         for name, props in self.node_props.items():
-            if _path.MISSING in props:
-                missing = np.array(
-                    props[_path.MISSING][node_mask.tolist() if node_mask is not None else ...],
-                    dtype=bool,
-                )
-            else:
-                missing = None
-            node_props[name] = {
-                "values": np.array(
-                    props[_path.VALUES][node_mask.tolist() if node_mask is not None else ...]
-                ),
-                "missing": missing,
-            }
+            prop_metadata = self.metadata.node_props_metadata[name]
+            node_props[name] = self._load_prop_to_memory(props, node_mask, prop_metadata)
 
         # remove edges if any of it's nodes has been masked
         edges = np.array(self.edges[:])
@@ -189,19 +245,8 @@ class GeffReader:
 
         edge_props: dict[str, PropDictNpArray] = {}
         for name, props in self.edge_props.items():
-            if _path.MISSING in props:
-                missing = np.array(
-                    props[_path.MISSING][edge_mask.tolist() if edge_mask is not None else ...],
-                    dtype=bool,
-                )
-            else:
-                missing = None
-            edge_props[name] = {
-                "values": np.array(
-                    props[_path.VALUES][edge_mask.tolist() if edge_mask is not None else ...]
-                ),
-                "missing": missing,
-            }
+            prop_metadata = self.metadata.edge_props_metadata[name]
+            edge_props[name] = self._load_prop_to_memory(props, edge_mask, prop_metadata)
 
         # we have to remove the unused properties from the props_metadata
         output_metadata = copy.deepcopy(self.metadata)
@@ -262,7 +307,6 @@ def read_to_memory(
 
     file_reader.read_node_props(node_props)
     file_reader.read_edge_props(edge_props)
-
     in_memory_geff = file_reader.build()
 
     if data_validation is not None:

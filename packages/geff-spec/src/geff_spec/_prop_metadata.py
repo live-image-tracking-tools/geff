@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-import warnings
 from typing import Annotated
 
 import numpy as np
 from annotated_types import MinLen
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 from ._valid_values import (
-    ALLOWED_NUMPY_DTYPES,
-    validate_data_type,
+    VALID_DTYPES,
 )
 
 
@@ -31,12 +29,7 @@ class PropMetadata(BaseModel):
     )
     dtype: Annotated[str, MinLen(1)] = Field(
         ...,
-        description=(
-            "Data type of the property. Must be a non-empty string that can be "
-            "parsed into a numpy dtype."
-            "Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. "
-            "Examples of invalid values: 'integer', 'np.int16', 'number', 'string'."
-        ),
+        description=("Data type of the property. Must be one of the allowed string dtypes."),
     )
     varlength: bool = Field(
         default=False,
@@ -57,20 +50,25 @@ class PropMetadata(BaseModel):
         description=("Optional description of the property."),
     )
 
-    @field_validator("dtype", mode="after")
+    @field_validator("dtype", mode="before")
     @classmethod
-    def _validate_dtype(cls, value: str) -> str:
-        if not validate_data_type(value):
-            # TODO: error?
-            warnings.warn(
-                f"Data type {value} cannot be matched to a valid data type {ALLOWED_NUMPY_DTYPES}."
-                "Reader applications may not know what to do with this dtype.",
-                stacklevel=2,
-            )
-        return value
+    def _convert_dtype(cls, value: str | np.dtype) -> str:
+        if value is None:
+            raise ValueError("Provided dtype cannot be None")
+        try:
+            np_dtype = np.dtype(value)
+            if np.issubdtype(np_dtype, np.str_):
+                name = "str"
+            else:
+                name = np_dtype.name
+        except TypeError as err:
+            raise ValueError(
+                f"Provided dtype {value} cannot be parsed into any of the valid dtypes "
+                f"{VALID_DTYPES}"
+            ) from err
 
-    @model_validator(mode="after")
-    def _no_varlength_strings(self) -> PropMetadata:
-        if self.varlength and np.dtype(self.dtype) == np.str_:
-            raise ValueError("Cannot have a variable length property with type str")
-        return self
+        if name not in VALID_DTYPES:
+            raise ValueError(
+                f"Provided dtype name {name} is not one of the valid dtypes {VALID_DTYPES}"
+            )
+        return name

@@ -684,3 +684,41 @@ class Test_create_dummy_in_mem_geff:
         ]
         assert [ax.unit for ax in memory_geff["metadata"].axes] == ["second", "nanometer"]
         assert [ax.type for ax in memory_geff["metadata"].axes] == ["time", "space"]
+
+    def test_varlength(self):
+        memory_geff = create_dummy_in_mem_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=True,
+            extra_node_props=None,
+            extra_edge_props=None,
+            include_t=True,
+            include_z=False,  # No z dimension
+            include_y=False,  # No y dimension
+            include_x=False,  # No x dimension
+            include_varlength=True,
+        )
+
+        prop_name = "var_length"
+        _dtype = np.uint64
+        ndims = 3
+        # test data is present and as expected
+        assert prop_name in memory_geff["node_props"]
+        prop_data = memory_geff["node_props"][prop_name]
+        assert prop_data["values"].dtype == np.object_
+        first_elt = prop_data["values"][0]
+        second_elt = prop_data["values"][1]
+        assert first_elt.dtype == _dtype
+        assert first_elt.shape == tuple(0 for _ in range(ndims))
+        assert second_elt.shape == tuple(1 for _ in range(ndims))
+        assert second_elt[0, 0, 0] == 1
+        assert prop_data["missing"] is not None
+        first_missing = prop_data["missing"][0]
+        assert first_missing == 1
+
+        # test metadata is present and as expected
+        node_props_meta = memory_geff["metadata"].node_props_metadata
+        assert prop_name in node_props_meta
+        prop_meta = node_props_meta[prop_name]
+        assert prop_meta.varlength
+        assert np.issubdtype(prop_meta.dtype, _dtype)

@@ -103,12 +103,7 @@ class Test_validate_nodes_group:
 
     def test_ids_not_int(self, node_group, meta):
         node_group[_path.IDS] = node_group[_path.IDS][:].astype("float")
-        with pytest.raises(ValueError, match="Node ids must have an unsigned integer dtype"):
-            _validate_nodes_group(node_group, meta)
-
-        # Must be uint, not just int
-        node_group[_path.IDS] = node_group[_path.IDS][:].astype("int")
-        with pytest.raises(ValueError, match="Node ids must have an unsigned integer dtype"):
+        with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
             _validate_nodes_group(node_group, meta)
 
     # Other cases are caught in tests for _validate_props_group

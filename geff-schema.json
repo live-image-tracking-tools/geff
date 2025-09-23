@@ -1,28 +1,7 @@
 {
   "$defs": {
-    "Affine": {
-      "description": "Affine transformation matrix following scipy conventions.\n\nInternally stores transformations as homogeneous coordinate matrices (N+1, N+1).\nThe transformation matrix follows `scipy.ndimage.affine_transform` convention\nwhere the matrix maps output coordinates to input coordinates (inverse/pull transformation).\n\nFor a point `p_out` in output space, the corresponding input point `p_in` is computed as:\n`p_in_homo = matrix @ p_out_homo`\nwhere `p_out_homo = [p_out; 1] and p_in = p_in_homo[:-1]`\n\nAttributes:\n    matrix (np.ndarray) : square, homogeneous transformation matrix (ndim+1, ndim+1)",
-      "properties": {
-        "matrix": {
-          "description": "Homogeneous transformation matrix (ndim+1, ndim+1)",
-          "items": {
-            "items": {
-              "type": "number"
-            },
-            "type": "array"
-          },
-          "title": "Matrix",
-          "type": "array"
-        }
-      },
-      "required": [
-        "matrix"
-      ],
-      "title": "Affine",
-      "type": "object"
-    },
     "Axis": {
-      "description": "The axes list is modeled after the\n[OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)\nspecifications and is used to identify spatio-temporal properties on the\ngraph nodes. If the same names are used in the axes metadata of the\nrelated image or segmentation data, applications can use this information\nto align graph node locations with image data.\n\nThe order of the axes in the list is meaningful. For one, any downstream\nproperties that are an array of values with one value per (spatial) axis\nwill be in the order of the axis list (filtering to only the spatial axes by\nthe `type` field if needed). Secondly, if associated image or segmentation\ndata does not have axes metadata, the order of the spatiotemporal axes is a\ngood default guess for aligning the graph and the image data, although there\nis no way to denote the channel dimension in the graph spec. If you are\nwriting out a geff with an associated segmentation and/or image dataset, we\nhighly recommend providing the axis names for your segmentation/image using\nthe OME-zarr spec, including channel dimensions if needed.",
+      "description": "The axes list is modeled after the\n[OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)\nspecifications and is used to identify spatio-temporal properties on the\ngraph nodes.\n\nThe `name` must be an existing attribute on the nodes. The optional `type` key\nmust be one of `space`, `time` or `channel`, though readers may not use this information.\nAn optional `unit` key should match the valid OME-Zarr units and `min` and `max` keys\ndefine the range of the axis\n\nThe optional `scale` field can be used to store a scaling factor such as converting\nthe data from pixel space into real world units. The associated, optional `scaled_unit`\nfield specifies the output unit after applying `scale` to the data.",
       "properties": {
         "name": {
           "description": "Name of the corresponding node property",
@@ -79,7 +58,8 @@
                 "yoctometer",
                 "yottameter",
                 "zeptometer",
-                "zettameter"
+                "zettameter",
+                "pixel"
               ],
               "type": "string"
             },
@@ -107,7 +87,8 @@
                 "yoctosecond",
                 "yottasecond",
                 "zeptosecond",
-                "zettasecond"
+                "zettasecond",
+                "frame"
               ],
               "type": "string"
             },
@@ -144,6 +125,93 @@
           "default": null,
           "description": "Optional, the minimum value for this axis.",
           "title": "Max"
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, a scaling factor that can be applied to the data",
+          "title": "Scale"
+        },
+        "scaled_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "enum": [
+                "angstrom",
+                "attometer",
+                "centimeter",
+                "decimeter",
+                "exameter",
+                "femtometer",
+                "foot",
+                "gigameter",
+                "hectometer",
+                "inch",
+                "kilometer",
+                "megameter",
+                "meter",
+                "micrometer",
+                "mile",
+                "millimeter",
+                "nanometer",
+                "parsec",
+                "petameter",
+                "picometer",
+                "terameter",
+                "yard",
+                "yoctometer",
+                "yottameter",
+                "zeptometer",
+                "zettameter",
+                "pixel"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "attosecond",
+                "centisecond",
+                "day",
+                "decisecond",
+                "exasecond",
+                "femtosecond",
+                "gigasecond",
+                "hectosecond",
+                "hour",
+                "kilosecond",
+                "megasecond",
+                "microsecond",
+                "millisecond",
+                "minute",
+                "nanosecond",
+                "petasecond",
+                "picosecond",
+                "second",
+                "terasecond",
+                "yoctosecond",
+                "yottasecond",
+                "zeptosecond",
+                "zettasecond",
+                "frame"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, the unit after applying the `scale` value to the data. If `scaled_unit` is set, a `scale` value must also be provided.",
+          "title": "Scaled Unit"
         }
       },
       "required": [
@@ -226,7 +294,7 @@
             }
           ],
           "default": null,
-          "description": "Optional list of `Axis` objects defining the axes of each node in the graph.\nEach object's `name` must be an existing attribute on the nodes. The optional `type` key must be one of `space`, `time` or `channel`, though readers may not use this information. Each axis can additionally optionally define a `unit` key, which should match the valid OME-Zarr units, and `min` and `max` keys to define the range of the axis.",
+          "description": "Optional list of `Axis` objects defining the axes of each node\n            in the graph. The axes list is modeled after the\n            [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)\n            specifications and is used to identify spatio-temporal properties on the\n            graph nodes. If the same names are used in the axes metadata of the\n            related image or segmentation data, applications can use this information\n            to align graph node locations with image data.\n            The order of the axes in the list is meaningful. For one, any downstream\n            properties that are an array of values with one value per (spatial) axis\n            will be in the order of the axis list (filtering to only the spatial axes by\n            the `type` field if needed). Secondly, if associated image or segmentation\n            data does not have axes metadata, the order of the spatiotemporal axes is a\n            good default guess for aligning the graph and the image data, although there\n            is no way to denote the channel dimension in the graph spec. If you are\n            writing out a geff with an associated segmentation and/or image dataset, we\n            highly recommend providing the axis names for your segmentation/image using\n            the OME-zarr spec, including channel dimensions if needed.",
           "title": "Axes"
         },
         "node_props_metadata": {
@@ -309,18 +377,6 @@
           "description": "A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. The 'type' represents the data type. 'labels' and 'image' should be used for label and image objects, respectively. Other types are also allowed, The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The 'label_prop' is only valid for type 'labels' and specifies the node property that will be used to identify the labels in the related object. ",
           "title": "Related Objects"
         },
-        "affine": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Affine"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The optional `affine` field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value **matrix** is stored as a `(N + 1) x (N + 1)` homogeneous matrix following the `scipy.ndimage.affine_transform` convention, where **N** equals the number of spatio-temporal axes declared in `axes`."
-        },
         "display_hints": {
           "anyOf": [
             {
@@ -359,7 +415,7 @@
           "type": "string"
         },
         "dtype": {
-          "description": "Data type of the property. Must be a non-empty string that can be parsed into a numpy dtype.Examples of valid values: 'int', 'int16', 'float64', 'str', 'bool'. Examples of invalid values: 'integer', 'np.int16', 'number', 'string'.",
+          "description": "Data type of the property. Must be one of the allowed string dtypes.",
           "minLength": 1,
           "title": "Dtype",
           "type": "string"
