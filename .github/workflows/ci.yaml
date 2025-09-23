@@ -112,6 +112,8 @@ jobs:
         with:
           path: packages/geff-spec
           upload-name-suffix: geff-spec
+      - name: Clear dist output directory
+        run: rm -r /tmp/baipp/dist
       - uses: hynek/build-and-inspect-python-package@v2
         with:
           path: packages/geff
