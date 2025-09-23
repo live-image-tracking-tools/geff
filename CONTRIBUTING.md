@@ -89,6 +89,37 @@ pre-commit install
 
 On github pull requests, [pre-commit.ci](https://pre-commit.ci/), will always run and commit changes on any open PRs.
 
+## Versioning
+
+This repo contains two python libraries that are versioned independently.
+
+### geff-spec
+This library defines the specification. It has the pydantic models for the schema and the markdown of the written specification.
+
+It is versioned: vA.B.C
+
+change A = breaking spec change (e.g. field/type renaming/removal, change to on-disk requirements)
+change B = non-breaking spec change (e.g. field addition)
+change C = just a bump in the pydantic model or written specification (e.g. typos)
+
+Geff spec is just A.B.
+pydantic python geff-spec version is the full trio
+
+### geff (reference implementation)
+This library contains all the rest of the python code - validators, reference implementations, converters, cli tools. It depends on geff-spec.
+The version is vX.Y.Z.A.B where A.B is the highest supported spec version.
+
+Change X = major feature breaking change
+Change Y = non-breaking feature release
+Change Z = bug fix release
+
+change A = (same as above)
+change B = (same as above)
+
+bumping A necessitates a bump to minimally Y…
+would only bump X if is concomitant with a breaking geff-lib change
+bumping B probably requires bump to Y to support the new schema
+
 ## Releases
 
 The release process is slightly different for each package in the monorepo.
