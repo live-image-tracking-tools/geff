@@ -21,7 +21,6 @@ def validate(
 ) -> None:
     """Validate a GEFF file."""
     validate_structure(input_path)
-    print(f"{input_path} is valid")
 
 
 @app.command()
@@ -31,8 +30,7 @@ def info(
     ),
 ) -> None:
     """Display information about a GEFF file."""
-    metadata = GeffMetadata.read(input_path)
-    print(metadata.model_dump_json(indent=2))
+    GeffMetadata.read(input_path)
 
 
 @app.command()
