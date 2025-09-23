@@ -131,7 +131,7 @@ uv build --all-packages
 or to build a specific package, run:
 
 ```sh
-uv build packages/<package-name>
+uv build --package <package-name>
 ```
 
 ## Docs
