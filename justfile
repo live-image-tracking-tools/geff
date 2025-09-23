@@ -8,7 +8,7 @@ test-cov:
 
 # run benchmarks
 benchmark:
-    uv run --group bench pytest tests/test_bench.py
+    uv run --group bench pytest packages/geff/tests/test_bench.py
 
 # build wheel and sdist
 build:
@@ -29,4 +29,4 @@ release version:
 
 # update schema
 update-schema:
-    uv run pytest tests/test_metadata/test_schema.py::test_schema_file_updated --update-schema
+    uv run pytest packages/geff-spec/tests/test_schema.py::test_schema_file_updated --update-schema

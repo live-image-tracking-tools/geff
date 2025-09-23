@@ -13,7 +13,7 @@ cd geff
 
 ```sh
 # <create and activate virtual environment>
-pip install -e . --group dev
+pip install -e packages/geff -e packages/geff-spec --group dev
 ```
 
 ### Install with uv
@@ -89,17 +89,80 @@ pre-commit install
 
 On github pull requests, [pre-commit.ci](https://pre-commit.ci/), will always run and commit changes on any open PRs.
 
+## Versioning
+
+This repo contains two python libraries that are versioned independently.
+
+### geff-spec
+This library defines the specification. It has the pydantic models for the schema and the markdown of the written specification.
+
+It is versioned: vA.B.C
+
+change A = breaking spec change (e.g. field/type renaming/removal, change to on-disk requirements)
+change B = non-breaking spec change (e.g. field addition)
+change C = just a bump in the pydantic model or written specification (e.g. typos)
+
+Geff spec is just A.B.
+pydantic python geff-spec version is the full trio
+
+### geff (reference implementation)
+This library contains all the rest of the python code - validators, reference implementations, converters, cli tools. It depends on geff-spec.
+The version is vX.Y.Z.A.B where A.B is the highest supported spec version.
+
+Change X = major feature breaking change
+Change Y = non-breaking feature release
+Change Z = bug fix release
+
+change A = (same as above)
+change B = (same as above)
+
+bumping A necessitates a bump to minimally Y…
+would only bump X if is concomitant with a breaking geff-lib change
+bumping B probably requires bump to Y to support the new schema
+
 ## Releases
+
+The release process is slightly different for each package in the monorepo.
+
+### geff
 
 In order to deploy a new version, tag the commit with a version number and push
 it to github. This will trigger a github action that will build and deploy to
-PyPI. (see the "build-and-inspect-package" and "upload-to-pypi" steps in
+PyPI. (see the "build-and-inspect-package" and "upload-geff-to-pypi" steps in
 [workflows/ci.yaml](./.github/workflows/ci.yaml)). The version number is
-determined automatically based on the tag (using `setuptools-scm`)
+determined automatically based on the tag (using `setuptools-scm`). This workflow
+will only push `geff` not `geff-spec`. 
 
 ```sh
 git tag -a v0.1.0 -m v0.1.0
 git push --follow-tags
+```
+
+### geff-spec
+
+In order to deploy a new version, first update the version field in `packages/geff-spec/pyproject.toml`
+and merge that change into main. Next tag the commit with that version number prefixed with "spec", e.g.
+`spec-v0.1.0` and push it to github. This will trigger a github action that will build and deploy to
+PyPI. (see the "build-and-inspect-package" and "upload-geff-spec-to-pypi" steps in
+[workflows/ci.yaml](./.github/workflows/ci.yaml)).
+
+```sh
+git tag -a spec-v0.1.0 -m spec-v0.1.0
+git push --follow-tags
+```
+
+## Building
+
+To build all packages in the monorepo
+
+```sh
+uv build --all-packages
+```
+
+or to build a specific package, run:
+
+```sh
+uv build --package <package-name>
 ```
 
 ## Docs

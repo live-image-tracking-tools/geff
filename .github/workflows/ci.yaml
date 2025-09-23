@@ -97,8 +97,8 @@ jobs:
           python-version: "3.13"
       - uses: CodSpeedHQ/action@v4
         with:
+          run: uv run --group bench --no-dev pytest --codspeed -v packages/geff/tests/test_bench.py
           mode: instrumentation
-          run: uv run --group bench --no-dev pytest --codspeed -v tests/test_bench.py
 
   build-and-inspect-package:
     name: Build & inspect package.
@@ -109,9 +109,16 @@ jobs:
         with:
           fetch-depth: 0
       - uses: hynek/build-and-inspect-python-package@v2
+        with:
+          path: packages/geff-spec
+          upload-name-suffix: geff-spec
+      - uses: hynek/build-and-inspect-python-package@v2
+        with:
+          path: packages/geff
+          upload-name-suffix: geff
 
-  upload-to-pypi:
-    if: success() && startsWith(github.ref, 'refs/tags/') && github.event_name != 'schedule'
+  upload-geff-to-pypi:
+    if: success() && startsWith(github.ref, 'refs/tags/v') && github.event_name != 'schedule'
     name: Upload package to PyPI
     needs: build-and-inspect-package
     runs-on: ubuntu-latest
@@ -124,9 +131,59 @@ jobs:
         with:
           name: Packages
           path: dist
+          merge-multiple: true
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-      - uses: softprops/action-gh-release@v2
+      - name: Generate geff changelog
+        uses: mikepenz/release-changelog-builder-action@v5
         with:
-          generate_release_notes: true
-          files: "./dist/*"
+          includeOnlyPaths: |
+            docs/
+            packages/geff
+          configuration: changelog-config.json
+          configurationJson: | # Filter only geff tags
+            {
+              "tag_resolver": {
+                "method": "semver",
+                "filter": {
+                  "pattern": "^v"
+                }
+              }
+            }
+          toTag: github.ref
+          token: ${{ secrets.GITHUB_TOKEN }}
+  
+  upload-geff-spec-to-pypi:
+    if: success() && startsWith(github.ref, 'refs/tags/spec') && github.event_name != 'schedule'
+    name: Upload package to PyPI
+    needs: build-and-inspect-package
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # this permission is required for trusted publishing
+      contents: write # this permission is required for generate_release_notes
+    steps:
+      - name: Download built artifact to dist/
+        uses: actions/download-artifact@v5
+        with:
+          name: Packages
+          path: dist
+          merge-multiple: true
+      - name: 🚢 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Generate geff-spec changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        with:
+          includeOnlyPaths: |
+            packages/geff-spec
+          configuration: changelog-config.json
+          configurationJson: | # Filter only geff-spec tags
+            {
+              "tag_resolver": {
+                "method": "semver",
+                "filter": {
+                  "pattern": "^spec"
+                }
+              }
+            }
+          toTag: github.ref
+          token: ${{ secrets.GITHUB_TOKEN }}

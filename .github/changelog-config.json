@@ -1,0 +1,44 @@
+{
+    "categories": [
+      {
+        "title": "## ✨ Features",
+        "labels": [":star: feature"]
+      },
+      {
+        "title": "## 🐛 Fixes",
+        "labels": [":bug: bug"]
+      },
+      {
+        "title": "## :clipboard: Specification",
+        "labels": [
+            ":clipboard: specification",
+            ":label: metadata",
+            ":mag_right: validation"
+        ]
+      },
+      {
+        "title": "## :car: Implementation & Interoperability",
+        "labels": [
+            ":steam_locomotive: interoperability",
+            ":car: implementation"
+        ]
+      },
+      {
+        "title": "## 🚀 Performance",
+        "labels": [":rocket: performance"]
+      },
+      {
+        "title": "## 🧰 Maintenance",
+        "labels": [
+            ":wrench: maintenance",
+            "dependencies",
+            ":test_tube: test",
+            ":pushpin: dependencies"
+        ]
+      },
+      {
+        "title": "## 📚️ Documentation",
+        "labels": [":memo: docs"]
+      }
+    ]
+}

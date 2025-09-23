@@ -26,7 +26,7 @@ repos:
     rev: v1.17.1
     hooks:
       - id: mypy
-        files: "^src/"
+        files: "^packages/.*/src/.*\\.py$"
         # # you have to add the things you want to type check against here
         additional_dependencies:
           - types-pyyaml
@@ -44,4 +44,4 @@ repos:
         entry: uv run pyright
         language: system
         types: [python]
-        files: "^src/"
+        files: "^packages/.*/src/.*\\.py$"

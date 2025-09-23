@@ -38,3 +38,5 @@ uv.lock
 *.code-workspace
 site
 .codspeed
+
+*.geff
