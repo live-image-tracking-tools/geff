@@ -28,6 +28,8 @@ def update_metadata_axes(
     axis_names: list[str],
     axis_units: list[str | None] | None = None,
     axis_types: list[Literal[AxisType] | None] | None = None,
+    axis_scales: list[float | None] | None = None,
+    scaled_units: list[str | None] | None = None,
 ) -> GeffMetadata:
     """Update the axis names, units, and types in a geff metadata object.
     Overrides any existing axes.
@@ -41,29 +43,21 @@ def update_metadata_axes(
         axis_names: The names of the spatial dims.
         axis_units: The units of the spatial dims. Defaults to None.
         axis_types: The types of the spatial dims. Defaults to None.
+        axis_scales: The scale to apply to the spatial dims. Defaults to None.
+        scaled_units: The units of the spatial dims after scaling. Defaults to None.
 
     Returns:
         GeffMetadata: A new metadata object with updated axes.
     """
-    if axis_units is not None and len(axis_units) != len(axis_names):
-        raise ValueError(
-            f"Axis units {axis_units} does not have same length as axis names {axis_names}"
-        )
-    if axis_types is not None and len(axis_types) != len(axis_names):
-        raise ValueError(
-            f"Axis types {axis_types} does not have same length as axis names {axis_names}"
-        )
 
     new_meta = metadata.model_copy()
-    axes = []
-
-    for i in range(len(axis_names)):
-        axis = Axis(name=axis_names[i])
-        if axis_units is not None:
-            axis.unit = axis_units[i]
-        if axis_types is not None:
-            axis.type = axis_types[i]
-        axes.append(axis)
+    axes = axes_from_lists(
+        axis_names=axis_names,
+        axis_types=axis_types,
+        axis_units=axis_units,
+        axis_scales=axis_scales,
+        scaled_units=scaled_units,
+    )
     new_meta.axes = axes
     return new_meta
 
@@ -167,6 +161,8 @@ def axes_from_lists(
     axis_names: Sequence[str] | None = None,
     axis_units: Sequence[str | None] | None = None,
     axis_types: Sequence[Literal[AxisType] | None] | None = None,
+    axis_scales: Sequence[float | None] | None = None,
+    scaled_units: Sequence[str | None] | None = None,
     roi_min: Sequence[float | None] | None = None,
     roi_max: Sequence[float | None] | None = None,
 ) -> list[Axis]:
@@ -178,33 +174,43 @@ def axes_from_lists(
     for a single property, use None.
 
     Args:
-        axis_names (list[str] | None, optional): Names of properties for spatiotemporal
+        axis_names (Sequence[str] | None, optional): Names of properties for spatiotemporal
             axes. Defaults to None.
-        axis_units (list[str | None] | None, optional): Units corresponding to named properties.
+        axis_units (Sequence[str | None] | None, optional): Units corresponding to named properties.
             Defaults to None.
-        axis_types (list[Literal[AxisType] | None] | None, optional): Axis type for each property.
-            Choose from "space", "time", "channel". Defaults to None.
-        roi_min (list[float | None] | None, optional): Minimum value for each property.
+        axis_types (Sequence[Literal[AxisType] | None] | None, optional): Axis type for each
+            property. Choose from "space", "time", "channel". Defaults to None.
+        axis_scales((Sequence[float | None] | None, optional)): The scale to apply to the
+            spatial dims. Defaults to None.
+        scaled_units(Sequence[str | None] | None, optional): The units of the spatial dims
+            after scaling. Defaults to None.
+        roi_min (Sequence[float | None] | None, optional): Minimum value for each property.
             Defaults to None.
-        roi_max (list[float | None] | None, optional): Maximum value for each property.
+        roi_max (Sequence[float | None] | None, optional): Maximum value for each property.
             Defaults to None.
 
     Returns:
-        list[Axis]:
+        list[Axis]: A list of axes objects, one per entry in axis_names
     """
     axes: list[Axis] = []
     if axis_names is None:
         return axes
 
-    dims = len(axis_names)
-    if axis_types is not None:
-        assert len(axis_types) == dims, (
-            "The number of axis types has to match the number of axis names"
+    if axis_units is not None and len(axis_units) != len(axis_names):
+        raise ValueError(
+            f"Axis units {axis_units} does not have same length as axis names {axis_names}"
         )
-
-    if axis_units is not None:
-        assert len(axis_units) == dims, (
-            "The number of axis types has to match the number of axis names"
+    if axis_types is not None and len(axis_types) != len(axis_names):
+        raise ValueError(
+            f"Axis types {axis_types} does not have same length as axis names {axis_names}"
+        )
+    if axis_scales is not None and len(axis_scales) != len(axis_names):
+        raise ValueError(
+            f"Axis scales {axis_scales} does not have same length as axis names {axis_names}"
+        )
+    if scaled_units is not None and len(scaled_units) != len(axis_names):
+        raise ValueError(
+            f"Scaled units {scaled_units} does not have same length as axis names {axis_names}"
         )
 
     for i in range(len(axis_names)):
@@ -213,6 +219,8 @@ def axes_from_lists(
                 name=axis_names[i],
                 type=axis_types[i] if axis_types is not None else None,
                 unit=axis_units[i] if axis_units is not None else None,
+                scale=axis_scales[i] if axis_scales is not None else None,
+                scaled_unit=scaled_units[i] if scaled_units is not None else None,
                 min=roi_min[i] if roi_min is not None else None,
                 max=roi_max[i] if roi_max is not None else None,
             )
