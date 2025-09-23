@@ -30,7 +30,8 @@ def info(
     ),
 ) -> None:
     """Display information about a GEFF file."""
-    GeffMetadata.read(input_path)
+    metadata = GeffMetadata.read(input_path)
+    print(metadata.model_dump_json(indent=2))  # noqa
 
 
 @app.command()

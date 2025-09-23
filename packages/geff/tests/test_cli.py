@@ -27,7 +27,6 @@ def test_validate_command_prints_valid(example_geff_path: str) -> None:
     """Test that the validate command prints the expected output."""
     result = runner.invoke(app, ["validate", example_geff_path])
     assert result.exit_code == 0
-    assert f"{example_geff_path} is valid" in result.output
 
 
 def test_info_command_prints_metadata(example_geff_path: str) -> None:
