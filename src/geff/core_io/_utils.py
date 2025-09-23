@@ -5,10 +5,16 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TypeVar
 
+import numpy as np
 import zarr
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from numpy.typing import ArrayLike
     from zarr.storage import StoreLike
+
+    from geff._typing import PropDictNpArray
 
     T = TypeVar("T")
 
@@ -172,3 +178,87 @@ def setup_zarr_group(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> zarr.G
         return zarr.open_group(store, mode="a", zarr_format=zarr_format)
     else:
         return zarr.open_group(store, mode="a")
+
+
+def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype, int]:
+    """Get a common dtype and number of dimensions that will work for all elements.
+
+    Will use native numpy casting to unify all the dtypes, and will take the maximum
+    number of dimensions of the elements. Nones are ignored.
+
+    Args:
+        arr_seq (Sequence[ArrayLike | None]): A sequence of array-like elements and Nones
+            to infer the dtype and number of dimensions for.
+
+    Raises:
+        ValueError: If the elements do not have any shared dtype that can be cast to safely.
+
+    Returns:
+        tuple[np.dtype, int]: A dtype that all non-None elements can be cast to, and the
+            maximum number of dimensions of any non-None element
+    """
+    ndim = None
+    dtype = None
+
+    for arr in arr_seq:
+        if arr is None:
+            continue
+        element = np.asarray(arr)
+        if ndim is None:
+            ndim = element.ndim
+            dtype = element.dtype
+        else:
+            ndim = max(element.ndim, ndim)
+            if np.can_cast(dtype, element.dtype):
+                dtype = np.promote_types(dtype, element.dtype)
+            else:
+                raise ValueError(
+                    "All elements must have compatible dtypes. Cannot"
+                    f"cast {dtype} and {element.dtype}."
+                )
+
+    if dtype is None or ndim is None:
+        warnings.warn(
+            "Variable length property sequence does not have any non-None elements - "
+            "using ndim=1 and dtype=int64",
+            stacklevel=2,
+        )
+        dtype = np.dtype("int64")
+        ndim = 1
+    return dtype, ndim
+
+
+def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpArray:
+    """Converts a sequence of array like and None objects into a geff._typing.PropDictNpArray
+
+    Creates a missing array with the indices of the None objects. Converts each element of
+    the sequence into a numpy array. Prepends dummy dimensions to each element to ensure
+    all elements have the same number of dimensions. Casts all arrays into a common dtype
+    (if there is one). Turns the sequence into a numpy array with dtype object.
+
+    Args:
+        arr_seq (Sequence[ArrayLike | None]): A sequence of properties, with one entry
+            per node or edge. Missing values are indicated by None entries.
+
+    Returns:
+        PropDictNpArray: A standardized version of the input properties where all entries
+            are numpy arrays contained in an object array.
+    """
+    values_arr = np.empty(shape=(len(arr_seq),), dtype=np.object_)
+    missing_arr = np.zeros(shape=(len(arr_seq),), dtype=np.bool_)
+
+    dtype, ndim = _get_common_type_dims(arr_seq)
+
+    for i, arr in enumerate(arr_seq):
+        if arr is None:
+            missing_arr[i] = 1
+            empty_shape = tuple(0 for _ in range(ndim))
+            default_val = np.empty(shape=empty_shape, dtype=dtype)
+            values_arr[i] = default_val
+        else:
+            element = np.asarray(arr, dtype=dtype)
+            # prepend dummy axes if needed
+            while element.ndim < ndim:
+                element = np.expand_dims(element, axis=0)
+            values_arr[i] = element
+    return {"values": values_arr, "missing": missing_arr if missing_arr.any() else None}

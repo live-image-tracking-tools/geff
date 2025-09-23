@@ -180,24 +180,30 @@ class RxGraphAdapter(GraphAdapter):
     def __init__(self, graph: rx.PyGraph | rx.PyDiGraph) -> None:
         self.graph = graph
 
-    def get_node_ids(self) -> Sequence[Any]:
+    def get_node_ids(self) -> Sequence[int]:
         return list(self.graph.node_indices())
 
-    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+    def get_edge_ids(self) -> Sequence[tuple[int, int]]:
         return list(self.graph.edge_list())
+
+    def has_node_prop(self, name: str, node: int, metadata: GeffMetadata) -> bool:
+        return name in self.graph[node]
 
     def get_node_prop(
         self,
         name: str,
-        nodes: Sequence[Any],
+        node: int,
         metadata: GeffMetadata,
-    ) -> NDArray[Any]:
-        return np.array([self.graph[node][name] for node in nodes])
+    ) -> Any:
+        return self.graph[node][name]
+
+    def has_edge_prop(self, name: str, edge: tuple[int, int], metadata: GeffMetadata) -> bool:
+        return name in self.graph.get_edge_data(*edge)
 
     def get_edge_prop(
         self,
         name: str,
-        edges: Sequence[tuple[Any, Any]],
+        edge: tuple[int, int],
         metadata: GeffMetadata,
-    ) -> NDArray[Any]:
-        return np.array([self.graph.get_edge_data(*edge)[name] for edge in edges])
+    ) -> Any:
+        return self.graph.get_edge_data(*edge)[name]

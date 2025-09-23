@@ -30,7 +30,8 @@ The `nodes\ids` array is a 1D array of node IDs of length `N` >= 0, where `N` is
 
 The `nodes\props` group is optional and will contain one or more `node property` groups, each with a `values` array and an optional `missing` array.
 
-- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the node `ids` array, such that each row of the property `values` array stores the property for the node at that index in the ids array.
+- `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the node `ids` array, such that each row of the property `values` array stores the property for the node at that index in the ids array. String  values will be stored according to the [zarr-extensions string specification](https://github.com/zarr-developers/zarr-extensions/tree/main/data-types/string) - as variable length UTF8 strings.
+
 - The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all nodes. A `1` at an index in the `missing` array indicates that the `value` of that property for the node at that index is None, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all nodes have values for the property.
 
 - Geff provides special support for spatio-temporal properties, although they are not required. When `axes` are specified in the `geff` metadata, each axis name identifies a spatio-temporal property. Spatio-temporal properties are not allowed to have missing arrays. Otherwise, they are identical to other properties from a storage specification perspective.
@@ -44,6 +45,14 @@ The `nodes\props` group is optional and will contain one or more `node property`
 
     When writing a graph with missing properties to the geff format, you must fill in a dummy value in the `values` array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.
 
+
+#### Variable length properties
+While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have an array property of a variable shape. This is useful for properties such as polygons, meshes, or crops of bounding boxes. 
+
+Variable length properties will have a `data` array in addition to the `values` and `missing` arrays. For variable length properties, the `data` array will contain a 1D flattened array of the actual values for all the nodes. The `values` array will contain the offset and shape of the relevant section of data in the `data` array.
+
+![vlen properties overview](./images/vlen_props.png)
+
 ## The `edges` group
 
 Similar to the `nodes` group, the `edges` group will contain an `ids` array and an optional `props` group.
@@ -56,7 +65,7 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
 
 ### The `props` group and `edge property` groups
 
-The `edges\props` group will contain zero or more `edge property` groups, each with a `values` array and an optional `missing` array.
+The `edges\props` group will contain zero or more `edge property` groups, each with a `values` array and an optional `missing` array. Variable length edge properties operate the same as variable length node properties, with an additional `data` array that the `values` array refers to.
 
 - `values` arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the `values` array must have the same length as the `edges\ids` array, such that each row of the property `values` array stores the property for the edge at that index in the ids array.
 - The `missing` array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A `1` at an index in the `missing` array indicates that the `value` of that property for the edge at that index is missing, and the value in the `values` array at that index should be ignored. If the `missing` array is not present, that means that all edges have values for the property.
@@ -90,6 +99,10 @@ Here is a schematic of the expected file structure.
                     missing # shape: (N,) dtype: bool
                 color/
                     values # shape: (N, 4) dtype: float32
+                    missing # shape: (N,) dtype: bool
+                polygon/
+                    data # shape: (V,) dtype: any, V is the length of all the flattened entries
+                    values # shape: (N, ndim + 1) dtype: int64, ndim is number of dimensions in each entry array
                     missing # shape: (N,) dtype: bool
 	    edges/
             ids  # shape: (E, 2) dtype: uint64

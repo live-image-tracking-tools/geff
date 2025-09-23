@@ -53,6 +53,47 @@ def test_build_w_masked_nodes(
     _ = NxBackend.construct(**in_memory_geff)
 
 
+def test_load_prop_into_memory() -> None:
+    store, memory_geff = create_mock_geff(
+        node_id_dtype="uint8",
+        node_axis_dtypes={"position": "double", "time": "uint8"},
+        extra_edge_props={"score": "float64", "color": "str"},
+        directed=True,
+        include_varlength=True,
+    )
+
+    reader = GeffReader(store)
+    for node_prop in ["z", "t", "var_length"]:
+        zarr_prop = reader._read_prop(node_prop, prop_type="node")
+        loaded_prop = reader._load_prop_to_memory(
+            zarr_prop, mask=None, prop_metadata=reader.metadata.node_props_metadata[node_prop]
+        )
+        actual_values = loaded_prop["values"]
+        actual_missing = loaded_prop["missing"]
+
+        expected_values = memory_geff["node_props"][node_prop]["values"]
+        expected_missing = memory_geff["node_props"][node_prop]["missing"]
+        if node_prop == "var_length":
+            for expected, actual in zip(expected_values, actual_values, strict=True):
+                np.testing.assert_array_equal(expected, actual)
+        else:
+            np.testing.assert_array_equal(expected_values, actual_values)
+        np.testing.assert_array_equal(expected_missing, actual_missing)
+
+    for edge_prop in ["score", "color"]:
+        zarr_prop = reader._read_prop(edge_prop, prop_type="edge")
+        loaded_prop = reader._load_prop_to_memory(
+            zarr_prop, mask=None, prop_metadata=reader.metadata.edge_props_metadata[edge_prop]
+        )
+        actual_values = loaded_prop["values"]
+        actual_missing = loaded_prop["missing"]
+
+        expected_values = memory_geff["edge_props"][edge_prop]["values"]
+        expected_missing = memory_geff["edge_props"][edge_prop]["missing"]
+        np.testing.assert_array_equal(expected_values, actual_values)
+        np.testing.assert_array_equal(expected_missing, actual_missing)
+
+
 @pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
 @pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
 @pytest.mark.parametrize("extra_edge_props", extra_edge_props)
@@ -133,6 +174,7 @@ def test_read_node_props() -> None:
         node_axis_dtypes={"position": "double", "time": "double"},
         extra_edge_props={"score": "float64", "color": "uint8"},
         directed=True,
+        include_varlength=True,
     )
 
     file_reader = GeffReader(store)

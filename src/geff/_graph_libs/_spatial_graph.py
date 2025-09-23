@@ -174,28 +174,30 @@ class SgGraphAdapter(GraphAdapter):
     def __init__(self, graph: sg.SpatialGraph | sg.SpatialDiGraph) -> None:
         self.graph = graph
 
-    def get_node_ids(self) -> Sequence[Any]:
+    def get_node_ids(self) -> Sequence[int]:
         return list(self.graph.nodes)
 
-    def get_edge_ids(self) -> Sequence[tuple[Any, Any]]:
+    def get_edge_ids(self) -> Sequence[tuple[int, int]]:
         return [tuple(edge.tolist()) for edge in self.graph.edges]
+
+    def has_node_prop(self, name: str, node: int, metadata: GeffMetadata) -> bool:
+        # doesn't support missing node properties
+        return True
 
     def get_node_prop(
         self,
         name: str,
-        nodes: Sequence[Any],
+        node: int,
         metadata: GeffMetadata,
-    ) -> NDArray[Any]:
+    ) -> Any:
         axes = metadata.axes
         if axes is None:
             raise ValueError("No axes found for spatial props")
         axes_names = [ax.name for ax in axes]
         if name in axes_names:
-            return self._get_node_spatial_props(name, nodes, axes_names)
+            return self._get_node_spatial_props(name, node, axes_names)
         else:
-            # TODO: is this the best way to access node attributes? Have to cast
-            self.graph.node_attrs[nodes]
-            return cast("NDArray[Any]", getattr(self.graph.node_attrs[nodes], name))
+            return getattr(self.graph.node_attrs[node], name)
 
     # This is not the most elegant solution but the idea is:
     #   spatial-graph combines the spatial properties into a single position attr
@@ -203,21 +205,24 @@ class SgGraphAdapter(GraphAdapter):
     def _get_node_spatial_props(
         self,
         name: str,
-        nodes: Sequence[Any],
+        node: int,
         axes_names: list[str],
-    ) -> NDArray[Any]:
+    ) -> Any:
         if name not in axes_names:
             raise ValueError(f"Node property '{name}' not found in axes names {axes_names}")
         idx = axes_names.index(name)
-        position = getattr(self.graph.node_attrs[nodes], self.graph.position_attr)
+        position = getattr(self.graph.node_attrs[node], self.graph.position_attr)
         position = cast("NDArray[Any]", position)  # cast because getattr call
-        return position[:, idx]
+        return position[idx]
+
+    def has_edge_prop(self, name: str, edge: tuple[int, int], metadata: GeffMetadata) -> bool:
+        # doesn't support missing edge properties
+        return True
 
     def get_edge_prop(
         self,
         name: str,
-        edges: Sequence[tuple[Any, Any]],
+        edge: tuple[int, int],
         metadata: GeffMetadata,
-    ) -> NDArray[Any]:
-        # TODO: is this the best way to access edge attributes? Have to cast
-        return cast("NDArray[Any]", getattr(self.graph.edge_attrs[edges], name))
+    ) -> Any:
+        return getattr(self.graph.edge_attrs[edge], name)

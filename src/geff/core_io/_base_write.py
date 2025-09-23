@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from geff import _path
-from geff.core_io._utils import remove_tilde, setup_zarr_group
-from geff.metadata._valid_values import validate_data_type
+from geff.core_io._utils import construct_var_len_props, remove_tilde, setup_zarr_group
 from geff.metadata.utils import (
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
     create_props_metadata,
 )
+
+from ._serialization import serialize_vlen_property_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -186,7 +187,14 @@ def dict_props_to_arr(
                 values.append(default_val)
                 missing.append(True)
                 missing_any = True
-        values_arr = np.asarray(values)
+        # try casting the list of values to a numpy array
+        try:
+            values_arr = np.asarray(values)
+        # catch a value error which will happen if we have elements that are different shapes
+        except ValueError:
+            # try to construct variable length properties - will raise an error if internal
+            # dtypes are not compatible (e.g. floats and strings)
+            values_arr = construct_var_len_props(values)["values"]
         missing_arr = np.asarray(missing, dtype=bool) if missing_any else None
         props_dict[name] = {"missing": missing_arr, "values": values_arr}
     return props_dict
@@ -281,13 +289,9 @@ def write_id_arrays(
         raise TypeError(
             f"Node ids and edge ids must have same dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
         )
-
-    # Disallow data types that cannot be consumed by Java-based Zarr readers
-    if not validate_data_type(node_ids.dtype):
-        warnings.warn(
-            "Java Zarr implementations do not support dtype "
-            f"{node_ids.dtype}. Please use a supported type.",
-            stacklevel=2,
+    if not np.issubdtype(node_ids.dtype, np.integer):
+        raise TypeError(
+            f"Node ids and edge ids must have int dtype: {node_ids.dtype=}, {edge_ids.dtype=}"
         )
 
     geff_root = setup_zarr_group(geff_store, zarr_format)
@@ -335,14 +339,17 @@ def write_props_arrays(
         for name, replace_names in props_unsquish.items():
             values = props[name]["values"]
             missing = props[name]["missing"]
-            assert len(values.shape) == 2, "Can only unsquish 2D arrays."
+            if (not len(values.shape) == 2) or np.issubdtype(values.dtype, np.object_):
+                raise ValueError(
+                    "Can only unsquish 2D array properties that are not variable length."
+                )
 
             replace_arrays: dict[str, PropDictNpArray]
             for i, replace_name in enumerate(replace_names):
                 replace_arrays = {
                     replace_name: {
                         "values": values[:, i],
-                        "missing": None if missing is None else missing[i],
+                        "missing": None if missing is None else missing,
                     }
                 }
                 props.update(replace_arrays)
@@ -354,20 +361,19 @@ def write_props_arrays(
     for prop, prop_dict in props.items():
         prop_metadata = create_props_metadata(prop, prop_dict)
         metadata.append(prop_metadata)
-        # data-type validation - ensure this property can round-trip through
-        # Java Zarr readers before any data get written to disk.
-        values = prop_dict["values"]
-        missing = prop_dict["missing"]
-        if not validate_data_type(values.dtype):
-            warnings.warn(
-                f"Data type {values.dtype} for property '{prop}' is not supported "
-                "by Java Zarr implementations. Proceeding anyway.",
-                stacklevel=2,
-            )
+
+        if prop_metadata.varlength:
+            values, missing, data = serialize_vlen_property_data(prop_dict)
+        else:
+            values = prop_dict["values"]
+            missing = prop_dict["missing"]
+            data = None
 
         prop_group = props_group.create_group(prop)
         prop_group[_path.VALUES] = values
         if missing is not None:
             prop_group[_path.MISSING] = missing
+        if data is not None:
+            prop_group[_path.DATA] = data
 
     return metadata

@@ -3,7 +3,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from geff.metadata._valid_values import validate_data_type
+from geff.metadata._prop_metadata import PropMetadata
 
 
 # -----------------------------------------------------------------------------
@@ -22,8 +22,8 @@ from geff.metadata._valid_values import validate_data_type
     ],
 )
 def test_validate_data_type_allowed(dtype_in: Any) -> None:
-    """All allowed dtypes should return *True*."""
-    assert validate_data_type(dtype_in) is True
+    """All allowed dtypes should work fine"""
+    PropMetadata._convert_dtype(dtype_in)
 
 
 @pytest.mark.parametrize(
@@ -31,5 +31,6 @@ def test_validate_data_type_allowed(dtype_in: Any) -> None:
     ["float16", np.float16, "complex64", np.dtype("complex128"), ">f2", "varlength"],
 )
 def test_validate_data_type_disallowed(dtype_in) -> None:
-    """All disallowed dtypes should return *False*."""
-    assert validate_data_type(dtype_in) is False
+    """All disallowed dtypes should raise error"""
+    with pytest.raises(ValueError, match="Provided dtype "):
+        PropMetadata._convert_dtype(dtype_in)

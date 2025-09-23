@@ -1,3 +1,4 @@
+import numpy as np
 import pydantic
 import pytest
 
@@ -28,24 +29,57 @@ class TestPropMetadata:
             PropMetadata(identifier="", dtype="int16")
 
     def test_invalid_dtype(self) -> None:
-        # dtype must be a string
-        with pytest.raises(pydantic.ValidationError):
+        # dtype must be parsable into a numpy dtype
+        with pytest.raises(
+            ValueError, match="Provided dtype .* cannot be parsed into any of the valid dtypes"
+        ):
             PropMetadata(identifier="prop", dtype=123)
-        with pytest.raises(pydantic.ValidationError):
-            PropMetadata(identifier="prop", dtype=None)
+        # parsed dtype must be valid
+        with pytest.raises(
+            ValueError, match="Provided dtype name .* is not one of the valid dtypes "
+        ):
+            PropMetadata(identifier="prop", dtype=np.float16)
 
         # dtype must be a non-empty string
-        with pytest.raises(ValueError, match="String should have at least 1 character"):
+        with pytest.raises(
+            pydantic.ValidationError,
+            match="Provided dtype .* cannot be parsed into any of the valid dtypes",
+        ):
             PropMetadata(identifier="prop", dtype="")
+        with pytest.raises(pydantic.ValidationError, match="Provided dtype cannot be None"):
+            PropMetadata(identifier="prop", dtype=None)
 
-        # dtype must be in allowed data types
-        with pytest.warns(
-            UserWarning, match=r"Data type .* cannot be matched to a valid data type"
+        # dtype MUST be in allowed data types
+        with pytest.raises(
+            pydantic.ValidationError,
+            match=r"Provided dtype .* cannot be parsed into any of the valid dtypes",
         ):
             PropMetadata(identifier="prop", dtype="nope")
 
-        # variable length string metadata
-        with pytest.raises(
-            ValueError, match="Cannot have a variable length property with type str"
-        ):
-            PropMetadata(identifier="test", dtype="str", varlength=True)
+    @pytest.mark.parametrize(
+        "dtype",
+        [
+            np.bool_,
+            np.int8,
+            np.int16,
+            np.int32,
+            np.int64,
+            np.uint8,
+            np.uint16,
+            np.uint32,
+            np.uint64,
+            np.float32,
+            np.float64,
+            np.bytes_,
+            np.str_,
+        ],
+    )
+    def test_numpy_dtypes(self, dtype) -> None:
+        PropMetadata(identifier="prop", dtype=dtype)
+
+    def test_string(self) -> None:
+        string_arr = np.array(["test", "strings"])
+        PropMetadata(identifier="prop", dtype=string_arr.dtype)
+
+        string_arr = np.array(["test", "st"], dtype="<U7")
+        PropMetadata(identifier="prop", dtype=string_arr.dtype)

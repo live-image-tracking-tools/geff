@@ -127,7 +127,7 @@ class TestCreateOrUpdatePropsMetadata:
         assert "newprop1" in result.edge_props_metadata
         assert "newprop2" in result.edge_props_metadata
         assert "newprop3" in result.edge_props_metadata
-        assert result.edge_props_metadata["newprop"].dtype == "int"
+        assert result.edge_props_metadata["newprop"].dtype == "int64"
         assert result.edge_props_metadata["newprop1"].dtype == "float64"
         assert result.edge_props_metadata["newprop2"].dtype == "str"
         assert result.edge_props_metadata["newprop3"].dtype == "bool"
@@ -261,6 +261,16 @@ class TestCreatePropMetadata:
         assert result.unit == "boolean"
         assert result.name == "Boolean Flag"
         assert result.description == "A test boolean property"
+
+    def test_cast_to_float(self):
+        values = np.array([0.1, 0.2, 0.3], dtype=np.float16)
+        prop_data = {"values": values, "missing": None}
+        with pytest.warns(
+            UserWarning, match="Dtype float16 is being upcast to float32 for Java compatibility"
+        ):
+            result = create_props_metadata(identifier="float16_test", prop_data=prop_data)
+        assert result.dtype == "float32"
+        assert np.issubdtype(prop_data["values"].dtype, np.float32)
 
 
 class TestUpdateMetadataAxes:
