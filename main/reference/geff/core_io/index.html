@@ -586,6 +586,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#geff.core_io.construct_var_len_props" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;construct_var_len_props
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#geff.core_io.read_to_memory" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_to_memory
@@ -1046,6 +1055,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#geff.core_io.construct_var_len_props" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;construct_var_len_props
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#geff.core_io.read_to_memory" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;read_to_memory
@@ -1119,6 +1137,88 @@
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="geff.core_io.construct_var_len_props" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">construct_var_len_props</span>
+
+
+</h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">construct_var_len_props</span><span class="p">(</span>
+    <span class="n">arr_seq</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropDictNpArray</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Converts a sequence of array like and None objects into a geff._typing.PropDictNpArray</p>
+<p>Creates a missing array with the indices of the None objects. Converts each element of
+the sequence into a numpy array. Prepends dummy dimensions to each element to ensure
+all elements have the same number of dimensions. Casts all arrays into a common dtype
+(if there is one). Turns the sequence into a numpy array with dtype object.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>arr_seq</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Sequence" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence">Sequence</a>[<span title="numpy.typing.ArrayLike">ArrayLike</span> | None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A sequence of properties, with one entry
+per node or edge. Missing values are indicated by None entries.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>PropDictNpArray</code></td>            <td>
+                  <code><span title="geff._typing.PropDictNpArray">PropDictNpArray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A standardized version of the input properties where all entries
+are numpy arrays contained in an object array.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 

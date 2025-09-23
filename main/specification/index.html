@@ -365,6 +365,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The props group and node property groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variable length properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1151,6 +1166,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The props group and node property groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variable length properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1428,7 +1458,9 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 <h3 id="the-props-group-and-node-property-groups">The <code>props</code> group and <code>node property</code> groups</h3>
 <p>The <code>nodes\props</code> group is optional and will contain one or more <code>node property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
 <ul>
-<li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the node <code>ids</code> array, such that each row of the property <code>values</code> array stores the property for the node at that index in the ids array.</li>
+<li>
+<p><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the node <code>ids</code> array, such that each row of the property <code>values</code> array stores the property for the node at that index in the ids array. String  values will be stored according to the <a href="https://github.com/zarr-developers/zarr-extensions/tree/main/data-types/string">zarr-extensions string specification</a> - as variable length UTF8 strings.</p>
+</li>
 <li>
 <p>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all nodes. A <code>1</code> at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the node at that index is None, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all nodes have values for the property.</p>
 </li>
@@ -1448,6 +1480,10 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 <p class="admonition-title">Note</p>
 <p>When writing a graph with missing properties to the geff format, you must fill in a dummy value in the <code>values</code> array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.</p>
 </div>
+<h4 id="variable-length-properties">Variable length properties</h4>
+<p>While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have an array property of a variable shape. This is useful for properties such as polygons, meshes, or crops of bounding boxes. </p>
+<p>Variable length properties will have a <code>data</code> array in addition to the <code>values</code> and <code>missing</code> arrays. For variable length properties, the <code>data</code> array will contain a 1D flattened array of the actual values for all the nodes. The <code>values</code> array will contain the offset and shape of the relevant section of data in the <code>data</code> array.</p>
+<p><img alt="vlen properties overview" src="../images/vlen_props.png" /></p>
 <h2 id="the-edges-group">The <code>edges</code> group</h2>
 <p>Similar to the <code>nodes</code> group, the <code>edges</code> group will contain an <code>ids</code> array and an optional <code>props</code> group.</p>
 <h3 id="the-ids-array_1">The <code>ids</code> array</h3>
@@ -1455,7 +1491,7 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 Each row represents an edge between two nodes. For directed graphs, the first column is the source nodes and the second column holds the target nodes. For undirected graphs, the order is arbitrary.
 Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.</p>
 <h3 id="the-props-group-and-edge-property-groups">The <code>props</code> group and <code>edge property</code> groups</h3>
-<p>The <code>edges\props</code> group will contain zero or more <code>edge property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
+<p>The <code>edges\props</code> group will contain zero or more <code>edge property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array. Variable length edge properties operate the same as variable length node properties, with an additional <code>data</code> array that the <code>values</code> array refers to.</p>
 <ul>
 <li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the <code>edges\ids</code> array, such that each row of the property <code>values</code> array stores the property for the edge at that index in the ids array.</li>
 <li>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A <code>1</code> at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the edge at that index is missing, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all edges have values for the property.</li>
@@ -1485,6 +1521,10 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
                 <span class="n">color</span><span class="o">/</span>
                     <span class="n">values</span> <span class="c1"># shape: (N, 4) dtype: float32</span>
+                    <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
+                <span class="n">polygon</span><span class="o">/</span>
+                    <span class="n">data</span> <span class="c1"># shape: (V,) dtype: any, V is the length of all the flattened entries</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, ndim + 1) dtype: int64, ndim is number of dimensions in each entry array</span>
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
         <span class="n">edges</span><span class="o">/</span>
             <span class="n">ids</span>  <span class="c1"># shape: (E, 2) dtype: uint64</span>
