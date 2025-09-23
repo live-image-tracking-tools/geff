@@ -1020,6 +1020,24 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#geff.GeffReader._load_prop_to_memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;_load_prop_to_memory
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geff.GeffReader._read_prop" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;_read_prop
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#geff.GeffReader.build" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;build
@@ -1197,8 +1215,23 @@ If not provided, the version will be set to the current geff package version.</p
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Optional list of <code>Axis</code> objects defining the axes of each node in the graph.
-Each object's <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> key must be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information. Each axis can additionally optionally define a <code>unit</code> key, which should match the valid OME-Zarr units, and <code>min</code> and <code>max</code> keys to define the range of the axis.</p>
+                <p>Optional list of <code>Axis</code> objects defining the axes of each node
+            in the graph. The axes list is modeled after the
+            <a href="https://ngff.openmicroscopy.org/0.5/index.html#axes-md">OME-zarr</a>
+            specifications and is used to identify spatio-temporal properties on the
+            graph nodes. If the same names are used in the axes metadata of the
+            related image or segmentation data, applications can use this information
+            to align graph node locations with image data.
+            The order of the axes in the list is meaningful. For one, any downstream
+            properties that are an array of values with one value per (spatial) axis
+            will be in the order of the axis list (filtering to only the spatial axes by
+            the <code>type</code> field if needed). Secondly, if associated image or segmentation
+            data does not have axes metadata, the order of the spatiotemporal axes is a
+            good default guess for aligning the graph and the image data, although there
+            is no way to denote the channel dimension in the graph spec. If you are
+            writing out a geff with an associated segmentation and/or image dataset, we
+            highly recommend providing the axis names for your segmentation/image using
+            the OME-zarr spec, including channel dimensions if needed.</p>
               </div>
             </td>
             <td>
@@ -1319,22 +1352,6 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
             <td>
               <div class="doc-md-description">
                 <p>A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. The 'type' represents the data type. 'labels' and 'image' should be used for label and image objects, respectively. Other types are also allowed, The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The 'label_prop' is only valid for type 'labels' and specifies the node property that will be used to identify the labels in the related object.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>affine</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="            Affine (geff_spec._affine.Affine)" href="../geff_spec/#geff_spec.Affine">Affine</a> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The optional <code>affine</code> field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value <strong>matrix</strong> is stored as a <code>(N + 1) x (N + 1)</code> homogeneous matrix following the <code>scipy.ndimage.affine_transform</code> convention, where <strong>N</strong> equals the number of spatio-temporal axes declared in <code>axes</code>.</p>
               </div>
             </td>
             <td>
@@ -1642,6 +1659,234 @@ format issues, will likely fail with a cryptic error. Defaults to True.</p>
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="geff.GeffReader._load_prop_to_memory" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">_load_prop_to_memory</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">_load_prop_to_memory</span><span class="p">(</span>
+    <span class="n">zarr_prop</span><span class="p">:</span> <span class="n">ZarrPropDict</span><span class="p">,</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">bool_</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prop_metadata</span><span class="p">:</span> <span class="n">PropMetadata</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropDictNpArray</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Load a zarr property dictionary into memory, including deserialization.</p>
+<p>Has option to only load a subset of the nodes or edges by providing a mask.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>zarr_prop</code>
+            </td>
+            <td>
+                  <code><span title="geff._typing.ZarrPropDict">ZarrPropDict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The zarr property dictionary to load and deserialize.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>mask</code>
+            </td>
+            <td>
+                  <code><span title="numpy.typing.NDArray">NDArray</span>[<span title="numpy.bool_">bool_</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A mask to use to only include a subset of the elements.
+Can be None, which loads all the elements to memory.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>prop_metadata</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="            PropMetadata (geff_spec.PropMetadata)" href="../geff_spec/#geff_spec.PropMetadata">PropMetadata</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The metadata of the given property.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the property is varlength and no <code>data</code> array is provided.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>PropDictNpArray</code></td>            <td>
+                  <code><span title="geff._typing.PropDictNpArray">PropDictNpArray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The property loaded into memory as "values" and "missing" arrays.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="geff.GeffReader._read_prop" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">_read_prop</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">_read_prop</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZarrPropDict</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Read a property into a zarr property dictionary</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the property to read</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>prop_type</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;node&#39;, &#39;edge&#39;]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Either <code>node</code> or <code>edge</code></p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>ZarrPropDict</code></td>            <td>
+                  <code><span title="geff._typing.ZarrPropDict">ZarrPropDict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary with "values" "missing" and optionally "data" arrays
+holding the zarr arrays for a property.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 

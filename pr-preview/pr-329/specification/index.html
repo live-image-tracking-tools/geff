@@ -365,6 +365,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The props group and node property groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variable length properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1151,6 +1166,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The props group and node property groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variable length properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1273,8 +1303,23 @@ If not provided, the version will be set to the current geff package version.</p
 )
           –
           <div class="doc-md-description">
-            <p>Optional list of <code>Axis</code> objects defining the axes of each node in the graph.
-Each object's <code>name</code> must be an existing attribute on the nodes. The optional <code>type</code> key must be one of <code>space</code>, <code>time</code> or <code>channel</code>, though readers may not use this information. Each axis can additionally optionally define a <code>unit</code> key, which should match the valid OME-Zarr units, and <code>min</code> and <code>max</code> keys to define the range of the axis.</p>
+            <p>Optional list of <code>Axis</code> objects defining the axes of each node
+            in the graph. The axes list is modeled after the
+            <a href="https://ngff.openmicroscopy.org/0.5/index.html#axes-md">OME-zarr</a>
+            specifications and is used to identify spatio-temporal properties on the
+            graph nodes. If the same names are used in the axes metadata of the
+            related image or segmentation data, applications can use this information
+            to align graph node locations with image data.
+            The order of the axes in the list is meaningful. For one, any downstream
+            properties that are an array of values with one value per (spatial) axis
+            will be in the order of the axis list (filtering to only the spatial axes by
+            the <code>type</code> field if needed). Secondly, if associated image or segmentation
+            data does not have axes metadata, the order of the spatiotemporal axes is a
+            good default guess for aligning the graph and the image data, although there
+            is no way to denote the channel dimension in the graph spec. If you are
+            writing out a geff with an associated segmentation and/or image dataset, we
+            highly recommend providing the axis names for your segmentation/image using
+            the OME-zarr spec, including channel dimensions if needed.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -1358,16 +1403,6 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
-            <b><code>affine</code></b>
-              (<code><a class="autorefs autorefs-internal" title="            Affine (geff_spec._affine.Affine)" href="../reference/geff_spec/#geff_spec.Affine">Affine</a> | None</code>, default:
-                  <code>None</code>
-)
-          –
-          <div class="doc-md-description">
-            <p>The optional <code>affine</code> field allows specifying a global affine transformation that maps the graph coordinates stored in the node properties to a physical coordinate system. The value <strong>matrix</strong> is stored as a <code>(N + 1) x (N + 1)</code> homogeneous matrix following the <code>scipy.ndimage.affine_transform</code> convention, where <strong>N</strong> equals the number of spatio-temporal axes declared in <code>axes</code>.</p>
-          </div>
-        </li>
-        <li class="doc-section-item field-body">
             <b><code>display_hints</code></b>
               (<code><a class="autorefs autorefs-internal" title="            DisplayHint (geff_spec._schema.DisplayHint)" href="../reference/geff_spec/#geff_spec.DisplayHint">DisplayHint</a> | None</code>, default:
                   <code>None</code>
@@ -1419,11 +1454,13 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 </div><h2 id="the-nodes-group">The <code>nodes</code> group</h2>
 <p>The nodes group will contain an <code>ids</code> array and optionally a <code>props</code> group.</p>
 <h3 id="the-ids-array">The <code>ids</code> array</h3>
-<p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt;= 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs must have an unsigned integer dtype. For large graphs, <code>uint64</code> might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the <code>ids</code> array will be present but empty.</p>
+<p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt;= 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs must have an integer dtype. For large graphs, <code>int64</code> might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the <code>ids</code> array will be present but empty.</p>
 <h3 id="the-props-group-and-node-property-groups">The <code>props</code> group and <code>node property</code> groups</h3>
 <p>The <code>nodes\props</code> group is optional and will contain one or more <code>node property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
 <ul>
-<li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the node <code>ids</code> array, such that each row of the property <code>values</code> array stores the property for the node at that index in the ids array.</li>
+<li>
+<p><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the node <code>ids</code> array, such that each row of the property <code>values</code> array stores the property for the node at that index in the ids array. String  values will be stored according to the <a href="https://github.com/zarr-developers/zarr-extensions/tree/main/data-types/string">zarr-extensions string specification</a> - as variable length UTF8 strings.</p>
+</li>
 <li>
 <p>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all nodes. A <code>1</code> at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the node at that index is None, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all nodes have values for the property.</p>
 </li>
@@ -1443,6 +1480,10 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 <p class="admonition-title">Note</p>
 <p>When writing a graph with missing properties to the geff format, you must fill in a dummy value in the <code>values</code> array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.</p>
 </div>
+<h4 id="variable-length-properties">Variable length properties</h4>
+<p>While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have an array property of a variable shape. This is useful for properties such as polygons, meshes, or crops of bounding boxes. </p>
+<p>Variable length properties will have a <code>data</code> array in addition to the <code>values</code> and <code>missing</code> arrays. For variable length properties, the <code>data</code> array will contain a 1D flattened array of the actual values for all the nodes. The <code>values</code> array will contain the offset and shape of the relevant section of data in the <code>data</code> array.</p>
+<p><img alt="vlen properties overview" src="../images/vlen_props.png" /></p>
 <h2 id="the-edges-group">The <code>edges</code> group</h2>
 <p>Similar to the <code>nodes</code> group, the <code>edges</code> group will contain an <code>ids</code> array and an optional <code>props</code> group.</p>
 <h3 id="the-ids-array_1">The <code>ids</code> array</h3>
@@ -1450,7 +1491,7 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 Each row represents an edge between two nodes. For directed graphs, the first column is the source nodes and the second column holds the target nodes. For undirected graphs, the order is arbitrary.
 Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.</p>
 <h3 id="the-props-group-and-edge-property-groups">The <code>props</code> group and <code>edge property</code> groups</h3>
-<p>The <code>edges\props</code> group will contain zero or more <code>edge property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
+<p>The <code>edges\props</code> group will contain zero or more <code>edge property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array. Variable length edge properties operate the same as variable length node properties, with an additional <code>data</code> array that the <code>values</code> array refers to.</p>
 <ul>
 <li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the <code>edges\ids</code> array, such that each row of the property <code>values</code> array stores the property for the edge at that index in the ids array.</li>
 <li>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A <code>1</code> at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the edge at that index is missing, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all edges have values for the property.</li>
@@ -1480,6 +1521,10 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
                 <span class="n">color</span><span class="o">/</span>
                     <span class="n">values</span> <span class="c1"># shape: (N, 4) dtype: float32</span>
+                    <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
+                <span class="n">polygon</span><span class="o">/</span>
+                    <span class="n">data</span> <span class="c1"># shape: (V,) dtype: any, V is the length of all the flattened entries</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, ndim + 1) dtype: int64, ndim is number of dimensions in each entry array</span>
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
         <span class="n">edges</span><span class="o">/</span>
             <span class="n">ids</span>  <span class="c1"># shape: (E, 2) dtype: uint64</span>

@@ -1665,7 +1665,8 @@ max from</p>
     <div class="doc doc-contents ">
 
         <p>Create PropMetadata from property data.</p>
-<p>Automatically detects dtype and varlength from the provided data.</p>
+<p>Automatically detects dtype and varlength from the provided data.
+If dtype is float16, upcasts to float32 with warning.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1704,8 +1705,7 @@ max from</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Either InMemoryNormalProp (dict with values/missing) or
-      InMemoryVarLenProp (sequence of arrays with None values)</p>
+                <p>The property to generate metadata for</p>
               </div>
             </td>
             <td>
@@ -1717,7 +1717,7 @@ max from</p>
                 <code>unit</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1733,7 +1733,7 @@ max from</p>
                 <code>name</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1749,7 +1749,7 @@ max from</p>
                 <code>description</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
