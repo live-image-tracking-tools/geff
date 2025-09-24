@@ -2,90 +2,90 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/command-line-tools/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/compatibility/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/convert/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/specification/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/tips-and-tricks/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/tracking/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/what-is-geff/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/convert/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/core_io/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/testing/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/testing/data/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/validate/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/validate/data/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/validate/graph/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/validate/segmentation/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/validate/shapes/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/validate/structure/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff/validate/tracks/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff_spec/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
     <url>
          <loc>https://live-image-tracking-tools.github.io/geff/spec-v1.0.0/reference/geff_spec/utils/</loc>
-         <lastmod>2025-09-23</lastmod>
+         <lastmod>2025-09-24</lastmod>
     </url>
 </urlset>
