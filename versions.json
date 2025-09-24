@@ -2,15 +2,20 @@
   {
     "version": "spec-v1.0.0",
     "title": "spec-v1.0.0",
-    "aliases": [
-      "latest"
-    ]
+    "aliases": []
   },
   {
     "version": "main",
     "title": "main",
     "aliases": [
       "dev"
+    ]
+  },
+  {
+    "version": "v1.0.0.1.0",
+    "title": "v1.0.0.1.0",
+    "aliases": [
+      "latest"
     ]
   },
   {
