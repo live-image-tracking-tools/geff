@@ -133,7 +133,7 @@ jobs:
       - name: Download built artifact to dist/
         uses: actions/download-artifact@v5
         with:
-          name: Packages
+          name: Packagesgeff
           path: dist
           merge-multiple: true
       - name: 🚢 Publish to PyPI
@@ -169,7 +169,7 @@ jobs:
       - name: Download built artifact to dist/
         uses: actions/download-artifact@v5
         with:
-          name: Packages
+          name: Packagesgeff-spec
           path: dist
           merge-multiple: true
       - name: 🚢 Publish to PyPI
