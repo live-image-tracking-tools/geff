@@ -154,7 +154,7 @@ jobs:
                 }
               }
             }
-          toTag: github.ref
+          toTag: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   upload-geff-spec-to-pypi:
@@ -189,5 +189,5 @@ jobs:
                 }
               }
             }
-          toTag: github.ref
+          toTag: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
