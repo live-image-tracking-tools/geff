@@ -6,7 +6,7 @@ import numpy as np
 import zarr
 
 from geff import _path
-from geff._typing import InMemoryGeff
+from geff._typing import InMemoryGeff, PropDictNpArray
 from geff.core_io._utils import expect_array, expect_group, open_storelike
 
 if TYPE_CHECKING:
@@ -216,4 +216,99 @@ class StoreValidator:
 
 ########## validate on memory geff #################
 
-# def validate_structure_mem_geff(memory_geff: InMemoryGeff) -> None:
+
+class MemoryGeffValidator:
+    @classmethod
+    def validate_structure(cls, memory_geff: InMemoryGeff) -> None:
+        # Check nodes group
+
+        # Check edges group
+
+        # Metadata based validation
+        if memory_geff["metadata"] is not None:
+            cls._validate_axes_structure(memory_geff["node_props"], memory_geff["metadata"])
+
+    @staticmethod
+    def _validate_axes_structure(
+        node_props: dict[str, PropDictNpArray], meta: GeffMetadata
+    ) -> None:
+        """Verify that any metadata regarding axes is actually present in the data
+
+        - Property exists with name matching Axis name
+        - Data is 1D
+        - Missing values not allowed
+
+        Args:
+            node_props (dict[str, PropDictNpArray]): Dictionary of node properties
+            meta (GeffMetadata): Metadata from geff
+        """
+        if meta.axes is not None:
+            for ax in meta.axes:
+                prop = node_props.get(ax.name)
+                if prop is None:
+                    raise ValueError(f"Axis {ax.name} is not present in node properties")
+                # values array required in PropDictNpArray so don't need to check that it's present
+                # No missing values
+                if prop["missing"] is not None:
+                    raise ValueError(f"Axis {ax.name} has missing values which are not allowed")
+                ndim = prop["values"].ndim
+                if ndim != 1:
+                    raise ValueError(f"Axis property {ax.name} has {ndim} dimensions, must be 1D")
+
+    @staticmethod
+    def _validate_props_group(
+        props_group: dict[str, PropDictNpArray],
+        expected_len: int,
+        parent_key: str,
+        props_metadata: dict[str, PropMetadata],
+    ) -> None:
+        """Validate every property subgroup under `props_group`."""
+        # check that all properties in the metadata are in the group
+        for prop_name in props_metadata:
+            if prop_name not in props_group.keys():
+                raise ValueError(
+                    f"Property {prop_name} is in the metadata but missing from the property group"
+                )
+
+        for prop_name in props_group.keys():
+            # check that all properties in the group are in the metadata
+            if prop_name not in props_metadata:
+                raise ValueError(f"Property {prop_name} is missing from the property metadata")
+            prop_metadata = props_metadata[prop_name]
+
+            prop_dict = props_group[prop_name]
+            val_arr = prop_dict["values"]
+            # check value dtype against metadata dtype
+            if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
+                raise ValueError(
+                    f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
+                    f"dtype {val_arr.dtype}"
+                )
+
+            # check values length
+            val_len = val_arr.shape[0]
+            if val_len != expected_len:
+                raise ValueError(
+                    f"{parent_key} property {prop_name!r} {_path.VALUES} has length {val_len}, "
+                    f"which does not match id length {expected_len}"
+                )
+
+            if prop_dict["missing"] is not None:
+                missing_arr = prop_dict["missing"]
+                miss_len = missing_arr.shape[0]
+                if miss_len != expected_len:
+                    raise ValueError(
+                        f"{parent_key} property {prop_name!r} {_path.MISSING} mask has length "
+                        f"{miss_len}, which does not match id length {expected_len}"
+                    )
+
+                if not np.issubdtype(missing_arr.dtype, np.bool_):
+                    raise ValueError(
+                        f"{parent_key} property {prop_name!r} {_path.MISSING} must be boolean"
+                    )
+
+    @classmethod
+    def _validate_nodes_group(cls) -> None: ...
+
+    @classmethod
+    def _validate_edges_group(cls) -> None: ...

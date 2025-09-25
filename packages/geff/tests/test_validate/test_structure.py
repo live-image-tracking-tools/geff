@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -15,8 +16,11 @@ from geff.testing.data import (
     create_mock_geff,
     create_simple_2d_geff,
 )
-from geff.validate.structure import StoreValidator
+from geff.validate.structure import MemoryGeffValidator, StoreValidator
 from geff_spec import GeffMetadata, PropMetadata
+
+if TYPE_CHECKING:
+    from geff._typing import InMemoryGeff
 
 
 @pytest.fixture
@@ -51,6 +55,25 @@ def node_group(z) -> zarr.Group:
 @pytest.fixture
 def edge_group(z) -> zarr.Group:
     return expect_group(z, _path.EDGES)
+
+
+@pytest.fixture
+def memory_geff() -> InMemoryGeff:
+    _, mem_geff = create_mock_geff(
+        node_id_dtype="uint",
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        directed=False,
+        num_nodes=10,
+        num_edges=15,
+        extra_node_props={"score": "float64"},
+        extra_edge_props={"score": "float64", "color": "int"},
+        include_t=True,
+        include_z=True,  # 3D includes z
+        include_y=True,
+        include_x=True,
+        include_varlength=True,
+    )
+    return mem_geff
 
 
 class Test_validate_structure_store:
@@ -359,3 +382,26 @@ class Test_validate_axes_structure_store:
         z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
         with pytest.raises(ValueError, match="Axis x has missing values which are not allowed"):
             StoreValidator._validate_axes_structure(z, meta)
+
+
+class Test_validate_axes_structure_mem:
+    def test_missing_prop(self, memory_geff: InMemoryGeff):
+        del memory_geff["node_props"]["x"]
+        with pytest.raises(ValueError, match="Axis x is not present in node properties"):
+            MemoryGeffValidator._validate_axes_structure(
+                memory_geff["node_props"], memory_geff["metadata"]
+            )
+
+    def test_missing_values(self, memory_geff: InMemoryGeff):
+        memory_geff["node_props"]["x"]["missing"] = np.ones(10, dtype="bool")
+        with pytest.raises(ValueError, match="Axis x has missing values which are not allowed"):
+            MemoryGeffValidator._validate_axes_structure(
+                memory_geff["node_props"], memory_geff["metadata"]
+            )
+
+    def test_not_1d(self, memory_geff: InMemoryGeff):
+        memory_geff["node_props"]["x"]["values"] = np.zeros((10, 2))
+        with pytest.raises(ValueError, match="Axis property x has 2 dimensions, must be 1D"):
+            MemoryGeffValidator._validate_axes_structure(
+                memory_geff["node_props"], memory_geff["metadata"]
+            )
