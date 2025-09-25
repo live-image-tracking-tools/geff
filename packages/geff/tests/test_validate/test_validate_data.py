@@ -46,7 +46,7 @@ class Test_validate_data:
         # Invalid spheres are tested in test_shapes
         # Only need to test a valid case
         _, memory_geff = create_mock_geff(
-            node_id_dtype="int",
+            node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
             num_nodes=10,
@@ -66,7 +66,7 @@ class Test_validate_data:
         # Invalid ellipsoids are tested in test_shapes
         # Only need to test a valid case
         _, memory_geff = create_mock_geff(
-            node_id_dtype="int",
+            node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
             num_nodes=10,
@@ -91,7 +91,7 @@ class Test_validate_data:
         # validate_tracklets is tested in test_graph
         # Just need to trigger the value error
         _, memory_geff = create_mock_geff(
-            node_id_dtype="int",
+            node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
             num_nodes=10,
@@ -115,7 +115,7 @@ class Test_validate_data:
         # validate_lineages is tested in test_graph
         # Just need to trigger the value error
         _, memory_geff = create_mock_geff(
-            node_id_dtype="int",
+            node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=True,
             num_nodes=10,

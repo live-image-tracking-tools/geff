@@ -15,12 +15,7 @@ from geff.testing.data import (
     create_mock_geff,
     create_simple_2d_geff,
 )
-from geff.validate.structure import (
-    _validate_axes_structure,
-    _validate_edges_group,
-    _validate_nodes_group,
-    _validate_props_group,
-)
+from geff.validate.structure import StoreValidator
 from geff_spec import GeffMetadata, PropMetadata
 
 
@@ -58,7 +53,7 @@ def edge_group(z) -> zarr.Group:
     return expect_group(z, _path.EDGES)
 
 
-class TestValidateStructure:
+class Test_validate_structure_store:
     def test_valid_geff(self, z):
         validate_structure(z.store)
 
@@ -86,13 +81,13 @@ class TestValidateStructure:
     # other cases are tested in validate_nodes_group and validate_edges_group
 
 
-class Test_validate_nodes_group:
+class Test_validate_nodes_group_store:
     def test_no_node_ids(self, node_group, meta):
         del node_group[_path.IDS]
         with pytest.raises(
             ValueError, match=f"'{_path.NODES}' group must contain an '{_path.IDS}' array"
         ):
-            _validate_nodes_group(node_group, meta)
+            StoreValidator._validate_nodes_group(node_group, meta)
 
     def test_no_node_props_group(self, node_group, meta):
         del node_group[_path.PROPS]
@@ -100,23 +95,23 @@ class Test_validate_nodes_group:
         with pytest.raises(
             ValueError, match=f"'{_path.NODES}' group must contain a group named '{_path.PROPS}'"
         ):
-            _validate_nodes_group(node_group, meta)
+            StoreValidator._validate_nodes_group(node_group, meta)
 
     def test_ids_not_int(self, node_group, meta):
         node_group[_path.IDS] = node_group[_path.IDS][:].astype("float")
         with pytest.raises(ValueError, match="Node ids must have an integer dtype"):
-            _validate_nodes_group(node_group, meta)
+            StoreValidator._validate_nodes_group(node_group, meta)
 
     # Other cases are caught in tests for _validate_props_group
 
 
-class Test_validate_edges_group:
+class Test_validate_edges_group_store:
     def test_no_edge_ids(self, edge_group, meta):
         del edge_group[_path.IDS]
         with pytest.raises(
             ValueError, match=f"'{_path.EDGES}' group must contain an '{_path.IDS}' array"
         ):
-            _validate_edges_group(edge_group, meta)
+            StoreValidator._validate_edges_group(edge_group, meta)
 
     def test_edge_ids_bad_second_dim(self, edge_group, meta):
         edge_group[_path.IDS] = np.zeros((3, 3))
@@ -124,7 +119,7 @@ class Test_validate_edges_group:
             ValueError,
             match="edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
-            _validate_edges_group(edge_group, meta)
+            StoreValidator._validate_edges_group(edge_group, meta)
 
     def test_edge_ids_wrong_ndim(self, edge_group, meta):
         edge_group[_path.IDS] = np.zeros((3, 1))
@@ -132,7 +127,7 @@ class Test_validate_edges_group:
             ValueError,
             match="edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
-            _validate_edges_group(edge_group, meta)
+            StoreValidator._validate_edges_group(edge_group, meta)
 
     def test_edge_ids_not_uint(self, edge_group, meta):
         edge_group[_path.IDS] = edge_group[_path.IDS][:].astype("float")
@@ -140,12 +135,12 @@ class Test_validate_edges_group:
             ValueError,
             match="Edge ids must have an unsigned integer dtype",
         ):
-            _validate_edges_group(edge_group, meta)
+            StoreValidator._validate_edges_group(edge_group, meta)
 
     # Other cases are caught in tests for _validate_props_group
 
 
-class Test_validate_props_group:
+class Test_validate_props_group_store:
     def test_node_prop_no_values(self, node_group, meta):
         # Subgroups in props must have values
         key = "t"
@@ -154,7 +149,9 @@ class Test_validate_props_group:
         with pytest.raises(
             ValueError, match=f"Node property group '{key}' must have a '{_path.VALUES}' array"
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_node_prop_shape_mismatch(self, node_group, meta):
         # Property shape mismatch
@@ -167,7 +164,9 @@ class Test_validate_props_group:
                 f"Node property '{key}' values has length {1}, which does not match id length .*"
             ),
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_node_prop_missing_mismatch(self, node_group, meta):
         # Property missing shape mismatch
@@ -181,7 +180,9 @@ class Test_validate_props_group:
                 "which does not match id length .*"
             ),
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_missing_dtype(self, node_group, meta):
         # missing arrays must be boolean
@@ -192,12 +193,14 @@ class Test_validate_props_group:
         id_len = node_group[_path.IDS].shape[0]
 
         with pytest.raises(ValueError, match=f"Node property '{key}' missing must be boolean"):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_missing_prop_metadata(self, node_group):
         id_len = node_group[_path.IDS].shape[0]
         with pytest.raises(ValueError, match="Property .* is missing from the property metadata"):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", {})
+            StoreValidator._validate_props_group(node_group[_path.PROPS], id_len, "Node", {})
 
     def test_extra_prop_metadata(self, node_group, meta):
         meta.node_props_metadata["extra"] = PropMetadata(identifier="extra", dtype="int")
@@ -205,7 +208,9 @@ class Test_validate_props_group:
         with pytest.raises(
             ValueError, match="Property .* is in the metadata but missing from the property group"
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_mismatched_dtype_prop_metadata(self, node_group, meta):
         id_len = node_group[_path.IDS].shape[0]
@@ -214,7 +219,9 @@ class Test_validate_props_group:
         meta.node_props_metadata["x"] = x_meta
 
         with pytest.raises(ValueError, match="Property .* has stated dtype .* but actual dtype .*"):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_varlen_value_dtype(self, node_group, meta):
         id_len = node_group[_path.IDS].shape[0]
@@ -223,7 +230,9 @@ class Test_validate_props_group:
         meta.node_props_metadata["var_length"] = x_meta
 
         with pytest.raises(ValueError, match="Property .* has stated dtype .* but actual dtype .*"):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_varlen_data_dtype(self, node_group, meta):
         id_len = node_group[_path.IDS].shape[0]
@@ -234,7 +243,9 @@ class Test_validate_props_group:
         with pytest.raises(
             ValueError, match="Varlength property .* values array does not have type uint64"
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
     def test_data_wo_varlen(self, node_group, meta):
         id_len = node_group[_path.IDS].shape[0]
@@ -243,7 +254,9 @@ class Test_validate_props_group:
         with pytest.raises(
             ValueError, match="Found data array for property .* which is not a varlength property"
         ):
-            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+            StoreValidator._validate_props_group(
+                node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata
+            )
 
 
 def test_open_storelike(tmp_path):
@@ -328,21 +341,21 @@ class Test_check_equiv_geff:
             check_equiv_geff(self.store, bad_store)
 
 
-class Test_validate_axes_structure:
+class Test_validate_axes_structure_store:
     def test_missing_axes_prop(self, z, meta):
         key = "x"
         del z[_path.NODE_PROPS][key]
         del meta.node_props_metadata["x"]
         with pytest.raises(ValueError, match=f"Axis {key} data is missing"):
-            _validate_axes_structure(z, meta)
+            StoreValidator._validate_axes_structure(z, meta)
 
     def test_must_be_1d(self, z, meta):
         z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10, 2))
         with pytest.raises(ValueError, match="Axis property x has 2 dimensions, must be 1D"):
-            _validate_axes_structure(z, meta)
+            StoreValidator._validate_axes_structure(z, meta)
 
     def test_no_missing_values(self, z, meta):
         z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10,))
         z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
         with pytest.raises(ValueError, match="Axis x has missing values which are not allowed"):
-            _validate_axes_structure(z, meta)
+            StoreValidator._validate_axes_structure(z, meta)
