@@ -104,12 +104,30 @@ def _validate_props_group(
             )
         val_arr = expect_array(prop_group, _path.VALUES)
 
-        # check value dtype against metadata dtype
-        if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
-            raise ValueError(
-                f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
-                f"dtype {val_arr.dtype}"
-            )
+        # Check varlength cases
+        if prop_metadata.varlength:
+            data_arr = expect_array(prop_group, _path.DATA)
+            if not np.issubdtype(val_arr.dtype, np.uint64):
+                raise ValueError(
+                    f"Varlength property {prop_name} values array does not have type uint64"
+                )
+            # data array dtype should match metadata dtype
+            if not np.issubdtype(data_arr.dtype, np.dtype(prop_metadata.dtype)):
+                raise ValueError(
+                    f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
+                    f"dtype {val_arr.dtype}"
+                )
+        else:
+            # check value dtype against metadata dtype
+            if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
+                raise ValueError(
+                    f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
+                    f"dtype {val_arr.dtype}"
+                )
+            if _path.DATA in arrays:
+                raise ValueError(
+                    f"Found data array for property {prop_name} which is not a varlength property"
+                )
 
         # check values length
         val_len = val_arr.shape[0]
