@@ -303,16 +303,16 @@ class Test_validate_axes_structure:
         key = "x"
         del z[_path.NODE_PROPS][key]
         del meta.node_props_metadata["x"]
-        with pytest.raises(AssertionError, match=f"Axis {key} data is missing"):
+        with pytest.raises(ValueError, match=f"Axis {key} data is missing"):
             _validate_axes_structure(z, meta)
 
     def test_must_be_1d(self, z, meta):
         z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10, 2))
-        with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
+        with pytest.raises(ValueError, match="Axis property x has 2 dimensions, must be 1D"):
             _validate_axes_structure(z, meta)
 
     def test_no_missing_values(self, z, meta):
         z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10,))
         z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
-        with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
+        with pytest.raises(ValueError, match="Axis x has missing values which are not allowed"):
             _validate_axes_structure(z, meta)
