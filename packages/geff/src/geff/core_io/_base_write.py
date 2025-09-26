@@ -278,9 +278,8 @@ def write_arrays(
         try:
             validate_structure(geff_store)
         except ValueError as e:
-            e.add_note("Cannot write invalid geff.")
             _delete_invalid_geff(geff_store)
-            raise e
+            raise ValueError(e.args[0] + "\nCannot write invalid geff.") from e
 
 
 def write_id_arrays(
@@ -414,7 +413,7 @@ def _delete_invalid_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> No
     del root[_path.EDGES]
 
     # If the root is empty, try to delete the root zarr
-    if len(list(root.members())) == 0:
+    if len(list(root.keys())) == 0:
         # Handle Path or str storelike
         if isinstance(store, Path) or isinstance(store, str):
             shutil.rmtree(store)
