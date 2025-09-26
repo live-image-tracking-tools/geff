@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from geff import _path
+from geff import _path, validate_structure
 from geff.core_io._utils import (
     construct_var_len_props,
     remove_tilde,
@@ -217,6 +217,7 @@ def write_arrays(
     node_props_unsquish: dict[str, list[str]] | None = None,
     edge_props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
+    structure_validation: bool = True,
 ) -> None:
     """Write a geff file from already constructed arrays of node and edge ids and props
 
@@ -248,6 +249,8 @@ def write_arrays(
             indicication how to "unsquish" a property into individual scalars
             (e.g.: `{"pos": ["z", "y", "x"]}` will store the position property
             as three individual properties called "z", "y", and "x".
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
     """
     geff_store = remove_tilde(geff_store)
 
@@ -270,6 +273,14 @@ def write_arrays(
     if node_props is not None:
         metadata = compute_and_add_axis_min_max(metadata, node_props)
     metadata.write(geff_store)
+
+    if structure_validation:
+        try:
+            validate_structure(geff_store)
+        except ValueError as e:
+            e.add_note("Cannot write invalid geff.")
+            _delete_invalid_geff(geff_store)
+            raise e
 
 
 def write_id_arrays(

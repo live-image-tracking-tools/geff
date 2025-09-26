@@ -170,6 +170,19 @@ class TestWriteArrays:
             write_arrays(path, **memory_geff, zarr_format=zarr_format)
             check_equiv_geff(store, path)
 
+    def test_invalid_geff(self, tmp_path):
+        _, memory_geff = create_simple_2d_geff()
+        path = tmp_path / "test.geff"
+        # Add array with wrong size
+        memory_geff["node_props"]["bad_size"] = {"values": np.zeros((2, 10)), "missing": None}
+
+        with pytest.raises(
+            ValueError,
+            match="Node property 'bad_size' values has length 2, which "
+            "does not match id length 10\nCannot write invalid geff.",
+        ):
+            write_arrays(path, **memory_geff)
+
 
 @pytest.mark.parametrize(
     ("data_type", "expected"),
