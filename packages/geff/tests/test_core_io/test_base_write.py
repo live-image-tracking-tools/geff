@@ -477,7 +477,8 @@ class Test_delete_invalid_geff:
         write_arrays(path, **mem_geff, zarr_format=2)
         assert os.path.exists(path)
         # Test with extra data
-        zarr.create_array(path, name="other_data", shape=(10, 10), dtype="float", zarr_format=2)
+        root = zarr.open(path, mode="a")
+        root["other_data"] = np.zeros(shape=(10, 10))
 
         with pytest.raises(
             UserWarning, match="Found non-geff members in zarr. Exiting without deleting root zarr."
