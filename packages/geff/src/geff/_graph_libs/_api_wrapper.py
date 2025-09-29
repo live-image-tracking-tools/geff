@@ -217,6 +217,8 @@ def write(
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
     axis_types: list[Literal[AxisType] | None] | None = ...,
+    axis_scales: list[float | None] | None = None,
+    scaled_units: list[str | None] | None = None,
     zarr_format: Literal[2, 3] = ...,
     node_id_dict: dict[int, int] | None = ...,
 ) -> None:
@@ -239,6 +241,10 @@ def write(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
         node_id_dict (dict[int, int], optional): A dictionary mapping rx node indices to
@@ -256,6 +262,8 @@ def write(
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
     axis_types: list[Literal[AxisType] | None] | None = ...,
+    axis_scales: list[float | None] | None = None,
+    scaled_units: list[str | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
     *args: Any,
     **kwargs: Any,
@@ -267,6 +275,8 @@ def write(
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
     axis_types: list[Literal[AxisType] | None] | None = None,
+    axis_scales: list[float | None] | None = None,
+    scaled_units: list[str | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
     *args: Any,
     **kwargs: Any,
@@ -289,6 +299,10 @@ def write(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
         *args (Any): Additional args that may be accepted by the backend when writing from a
@@ -304,6 +318,8 @@ def write(
         axis_names,
         axis_units,
         axis_types,
+        axis_scales,
+        scaled_units,
         zarr_format,
         *args,
         **kwargs,
