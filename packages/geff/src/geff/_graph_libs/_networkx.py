@@ -114,7 +114,6 @@ class NxBackend(Backend):
             node_props,
             edge_props,
             metadata,
-            axis_names,
             zarr_format=zarr_format,
         )
 

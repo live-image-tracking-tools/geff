@@ -163,7 +163,6 @@ class RxBackend(Backend):
             node_prop_names=node_props,
             edge_prop_names=edge_props,
             metadata=metadata,
-            axis_names=axis_names,
             zarr_format=zarr_format,
         )
 

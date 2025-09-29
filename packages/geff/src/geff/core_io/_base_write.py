@@ -31,7 +31,6 @@ def write_dicts(
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
     metadata: GeffMetadata,
-    axis_names: Sequence[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """Write a dict-like graph representation to geff
@@ -51,8 +50,6 @@ def write_dicts(
             geff
         metadata (GeffMetadata): The core metadata to write. Node/edge properties and
             axis min and maxes will be overwritten.
-        axis_names (Sequence[str] | None): The name of the spatiotemporal properties, if
-            any. Defaults to None
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
 
@@ -85,21 +82,7 @@ def write_dicts(
     else:
         edges_arr = np.empty((0, 2), dtype=nodes_arr.dtype)
 
-    if axis_names is not None:
-        node_prop_names = list(node_prop_names)
-        for axis in axis_names:
-            if axis not in node_prop_names:
-                node_prop_names.append(axis)
-
     node_props_dict = dict_props_to_arr(node_data, node_prop_names)
-    if axis_names is not None:
-        for axis in axis_names:
-            missing_arr = node_props_dict[axis]["missing"]
-            if missing_arr is not None:
-                raise ValueError(
-                    f"Spatiotemporal property '{axis}' not found in : "
-                    f"{nodes_arr[missing_arr].tolist()}"
-                )
 
     edge_props_dict = dict_props_to_arr(edge_data, edge_prop_names)
     write_arrays(
