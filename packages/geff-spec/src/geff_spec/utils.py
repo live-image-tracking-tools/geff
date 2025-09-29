@@ -83,6 +83,11 @@ def compute_and_add_axis_min_max(
         return new_meta
     new_axes = []
     for axis in new_meta.axes:
+        if axis.name not in node_props:
+            raise ValueError(
+                f"Spatiotemporal property '{axis.name}' not found in node properties:"
+                f"\n{node_props.keys()}"
+            )
         prop = node_props[axis.name]
         values = prop["values"]
         if len(values) == 0:
