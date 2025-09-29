@@ -116,6 +116,7 @@ class RxBackend(Backend):
         axis_units: list[str | None] | None = None,
         axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:
         directed = isinstance(graph, rx.PyDiGraph)
@@ -165,6 +166,7 @@ class RxBackend(Backend):
             metadata=metadata,
             axis_names=axis_names,
             zarr_format=zarr_format,
+            structure_validation=structure_validation,
         )
 
     @staticmethod

@@ -40,6 +40,7 @@ def write_dicts(
     metadata: GeffMetadata,
     axis_names: Sequence[str] | None = None,
     zarr_format: Literal[2, 3] = 2,
+    structure_validation: bool = True,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -62,6 +63,8 @@ def write_dicts(
             any. Defaults to None
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -117,6 +120,7 @@ def write_dicts(
         edge_props_dict,
         metadata,
         zarr_format=zarr_format,
+        structure_validation=structure_validation,
     )
 
 

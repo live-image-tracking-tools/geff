@@ -98,6 +98,7 @@ class NxBackend(Backend):
         axis_units: list[str | None] | None = None,
         axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
     ) -> None:
         directed = isinstance(graph, nx.DiGraph)
         metadata = create_or_update_metadata(metadata=metadata, is_directed=directed)
@@ -116,6 +117,7 @@ class NxBackend(Backend):
             metadata,
             axis_names,
             zarr_format=zarr_format,
+            structure_validation=structure_validation,
         )
 
     @staticmethod

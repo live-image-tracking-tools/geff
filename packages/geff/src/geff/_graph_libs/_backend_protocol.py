@@ -58,6 +58,7 @@ class Backend(Protocol[T]):
         axis_units: list[str | None] | None = None,
         axis_types: list[Literal[AxisType] | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
         *args: Any,
         **kwargs: Any,
     ) -> None: ...
