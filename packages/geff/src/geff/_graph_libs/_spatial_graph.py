@@ -121,6 +121,8 @@ class SgBackend(Backend):
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
         axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_scales: list[float | None] | None = None,
+        scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
@@ -142,6 +144,8 @@ class SgBackend(Backend):
             axis_names,
             axis_units=axis_units,
             axis_types=axis_types,
+            axis_scales=axis_scales,
+            scaled_units=scaled_units,
             roi_min=roi_min,
             roi_max=roi_max,
             axis_offset=axis_offset,

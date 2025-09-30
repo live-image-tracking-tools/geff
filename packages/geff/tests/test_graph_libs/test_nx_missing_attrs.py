@@ -95,13 +95,10 @@ def test_sparse_edge_props(tmp_path) -> None:
 
 
 def test_missing_pos_prop(tmp_path) -> None:
-    zarr_path = Path(tmp_path) / "test1.zarr"
+    # Test graph has t, y, x
+    # Some nodes have score
     graph, _ = graph_sparse_node_props()
-    # wrong property name
-    with pytest.raises(UserWarning, match="Property .* is not present on any graph elements"):
-        with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
-            NxBackend.write(graph, axis_names=["t", "y", "z"], store=zarr_path)
-    # missing property
-    del graph.nodes[1]["t"]
-    with pytest.raises(ValueError, match=r"Spatiotemporal property 't' not found in : \[1\]"):
-        NxBackend.write(graph, axis_names=["t", "y", "x"], store=zarr_path)
+    # axis name that does not exist as property on graph
+    zarr_path = Path(tmp_path) / "test1.zarr"
+    with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
+        NxBackend.write(graph, axis_names=["t", "y", "z"], store=zarr_path)

@@ -208,7 +208,7 @@ def test_write_empty_graph_rx(tmp_path) -> None:
     path = tmp_path / "empty.zarr"
 
     with pytest.warns(UserWarning, match="Graph is empty - only writing metadata"):
-        RxBackend.write(graph, path, axis_names=["t", "y", "x"])
+        RxBackend.write(graph, path)
 
     # Should be able to read it back
     read_graph, metadata = RxBackend.read(path)
