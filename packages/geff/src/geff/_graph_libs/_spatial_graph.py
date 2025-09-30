@@ -121,6 +121,7 @@ class SgBackend(Backend):
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
         axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
     ) -> None:
         store = remove_tilde(store)
@@ -143,6 +144,7 @@ class SgBackend(Backend):
             axis_types=axis_types,
             roi_min=roi_min,
             roi_max=roi_max,
+            axis_offset=axis_offset,
         )
         metadata = create_or_update_metadata(metadata, graph.directed, axes)
 

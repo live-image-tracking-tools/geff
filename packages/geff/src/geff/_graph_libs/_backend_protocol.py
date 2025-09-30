@@ -57,6 +57,7 @@ class Backend(Protocol[T]):
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
         axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
         *args: Any,
         **kwargs: Any,
