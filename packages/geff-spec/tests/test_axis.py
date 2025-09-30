@@ -10,7 +10,16 @@ class TestAxis:
         Axis(name="property")
 
         # All fields
-        Axis(name="property", type="space", unit="micrometer", min=0, max=10)
+        Axis(
+            name="property",
+            type="space",
+            unit="micrometer",
+            min=0,
+            max=10,
+            scale=10,
+            scaled_units="millimeter",
+            offset=1,
+        )
 
     def test_no_name(self) -> None:
         # name is the only required field

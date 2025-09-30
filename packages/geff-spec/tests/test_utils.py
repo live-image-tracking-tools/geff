@@ -281,8 +281,9 @@ class TestUpdateMetadataAxes:
         axis_types = [None, "space"]
         axis_scales = [0.5, 2]
         scaled_units = ["pixel", None]
+        axis_offset = [1.0, 10.0]
         new_meta = update_metadata_axes(
-            metadata, axis_names, axis_units, axis_types, axis_scales, scaled_units
+            metadata, axis_names, axis_units, axis_types, axis_scales, scaled_units, axis_offset
         )
         axes = new_meta.axes
         assert axes is not None
@@ -292,6 +293,7 @@ class TestUpdateMetadataAxes:
         assert axes[0].type is None
         assert axes[0].scale == 0.5
         assert axes[0].scaled_unit == "pixel"
+        assert axes[0].offset == 1
 
     def test_invalid_units(self):
         metadata = GeffMetadata(directed=True, node_props_metadata={}, edge_props_metadata={})
