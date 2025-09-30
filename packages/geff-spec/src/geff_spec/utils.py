@@ -39,12 +39,15 @@ def update_metadata_axes(
     If neither are provided, the graph properties will be used.
 
     Args:
-        metadata: The metadata of the graph.
-        axis_names: The names of the spatial dims.
-        axis_units: The units of the spatial dims. Defaults to None.
-        axis_types: The types of the spatial dims. Defaults to None.
-        axis_scales: The scale to apply to the spatial dims. Defaults to None.
-        scaled_units: The units of the spatial dims after scaling. Defaults to None.
+        metadata (GeffMetadata): The metadata of the graph.
+        axis_names (list[str]): The names of the spatial dims.
+        axis_units (list[str | None] | None): The units of the spatial dims. Defaults to None.
+        axis_types (list[Literal[AxisType] | None] | None): The types of the spatial dims.
+            Defaults to None.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
 
     Returns:
         GeffMetadata: A new metadata object with updated axes.
@@ -80,6 +83,11 @@ def compute_and_add_axis_min_max(
         return new_meta
     new_axes = []
     for axis in new_meta.axes:
+        if axis.name not in node_props:
+            raise ValueError(
+                f"Spatiotemporal property '{axis.name}' not found in node properties:"
+                f"\n{node_props.keys()}"
+            )
         prop = node_props[axis.name]
         values = prop["values"]
         if len(values) == 0:

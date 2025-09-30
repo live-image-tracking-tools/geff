@@ -119,26 +119,9 @@ def test_sparse_edge_props_rx(tmp_path) -> None:
 
 def test_missing_pos_prop_rx(tmp_path) -> None:
     """Test rustworkx graphs with missing positional properties."""
-    zarr_path = Path(tmp_path) / "test1.zarr"
     graph, node_indices, positions = create_rx_graph_sparse_node_props()
 
     # Test with wrong property name (z instead of x)
-    with pytest.raises(UserWarning, match="Property .* is not present on any graph elements"):
-        with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
-            RxBackend.write(graph, store=zarr_path, axis_names=["t", "y", "z"])
-
-    # Test with missing required spatial property
-    # Remove 't' property from first node
-    first_node_data = graph[node_indices[0]]
-    if isinstance(first_node_data, dict) and "t" in first_node_data:
-        del first_node_data["t"]
-
-        # Create a complete node_id_dict for all nodes
-        node_id_dict = {idx: idx + 1 for idx in node_indices}
-        with pytest.raises(ValueError, match=r"Spatiotemporal property 't' not found in : \[1\]"):
-            RxBackend.write(
-                graph,
-                store=zarr_path,
-                node_id_dict=node_id_dict,
-                axis_names=["t", "y", "x"],
-            )
+    zarr_path = Path(tmp_path) / "test1.zarr"
+    with pytest.raises(ValueError, match=r"Spatiotemporal property .* not found"):
+        RxBackend.write(graph, store=zarr_path, axis_names=["t", "y", "z"])

@@ -115,13 +115,17 @@ class RxBackend(Backend):
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
         axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_scales: list[float | None] | None = None,
+        scaled_units: list[str | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:
         directed = isinstance(graph, rx.PyDiGraph)
         metadata = create_or_update_metadata(metadata=metadata, is_directed=directed)
         if axis_names is not None:
-            metadata = update_metadata_axes(metadata, axis_names, axis_units, axis_types)
+            metadata = update_metadata_axes(
+                metadata, axis_names, axis_units, axis_types, axis_scales, scaled_units
+            )
 
         if graph.num_nodes() == 0:
             # Handle empty graph case - still need to write empty structure
@@ -163,7 +167,6 @@ class RxBackend(Backend):
             node_prop_names=node_props,
             edge_prop_names=edge_props,
             metadata=metadata,
-            axis_names=axis_names,
             zarr_format=zarr_format,
         )
 
