@@ -68,51 +68,43 @@ def _assert_graph_equal_to_geff(
                     assert expected_val == actual_val
 
 
-@pytest.mark.parametrize("node_id_dtype", ["uint8", "uint16"])
-@pytest.mark.parametrize(
-    "node_axis_dtypes",
-    [
-        {"position": "double", "time": "double"},
-        {"position": "int", "time": "int"},
-    ],
-)
-@pytest.mark.parametrize(
-    "extra_edge_props",
-    [
-        {"score": "float64", "color": "uint8"},
-        {"score": "float32", "color": "int16"},
-        {},
-    ],
-)
-@pytest.mark.parametrize("directed", [True, False])
-@pytest.mark.parametrize("include_t", [True, False])
-@pytest.mark.parametrize("include_z", [True, False])
+PROP_DTYPES = ["float64", "uint8", "float32", "int16"]
+ID_DTYPES = ["int8", "uint16"]
+AXIS_DTYPES = {"position": "double", "time": "int"}
+
+
+@pytest.mark.parametrize("node_id_dtype", ID_DTYPES, ids=["nid_" + dtype for dtype in ID_DTYPES])
+@pytest.mark.parametrize("directed", [True, False], ids=["direct", "!direct"])
+@pytest.mark.parametrize("include_t", [True, False], ids=["t", "!t"])
+@pytest.mark.parametrize("include_spatial", [True, False], ids=["xyz", "!xyz"])
 @pytest.mark.parametrize("backend", get_args(SupportedBackend))
 class Test_api_wrapper:
     def test_read(
         self,
         node_id_dtype,
-        node_axis_dtypes,
-        extra_edge_props,
         directed,
         include_t,
-        include_z,
+        include_spatial,
         backend,
     ) -> None:
+        if include_spatial is False and backend == "spatial-graph":
+            pytest.skip("Non-spatial graphs not supported by spatial-graph")
         backend_module: Backend = get_backend(backend)
+
+        extra_props = {dtype: dtype for dtype in PROP_DTYPES}
+        if backend != "spatial-graph":
+            extra_props["str"] = "str"
 
         store, memory_geff = create_mock_geff(
             node_id_dtype,
-            node_axis_dtypes,
-            extra_node_props={
-                "label": "str" if backend != "spatial-graph" else "int",
-                "score": "float32",
-                "sub_id": "int",
-            },
-            extra_edge_props=extra_edge_props,
+            AXIS_DTYPES,
+            extra_node_props=extra_props,
+            extra_edge_props=extra_props,
             directed=directed,
             include_t=include_t,
-            include_z=include_z,
+            include_x=include_spatial,
+            include_y=include_spatial,
+            include_z=include_spatial,
             include_varlength=backend != "spatial-graph",
         )
 
@@ -124,27 +116,29 @@ class Test_api_wrapper:
     def test_construct(
         self,
         node_id_dtype,
-        node_axis_dtypes,
-        extra_edge_props,
         directed,
         include_t,
-        include_z,
+        include_spatial,
         backend,
     ) -> None:
+        if include_spatial is False and backend == "spatial-graph":
+            pytest.skip("Non-spatial graphs not supported by spatial-graph")
         backend_module: Backend = get_backend(backend)
+
+        extra_props = {dtype: dtype for dtype in PROP_DTYPES}
+        if backend != "spatial-graph":
+            extra_props["str"] = "str"
 
         store, memory_geff = create_mock_geff(
             node_id_dtype,
-            node_axis_dtypes,
-            extra_node_props={
-                "label": "str" if backend != "spatial-graph" else "int",
-                "score": "float32",
-                "sub_id": "int",
-            },
-            extra_edge_props=extra_edge_props,
+            AXIS_DTYPES,
+            extra_node_props=extra_props,
+            extra_edge_props=extra_props,
             directed=directed,
             include_t=include_t,
-            include_z=include_z,
+            include_x=include_spatial,
+            include_y=include_spatial,
+            include_z=include_spatial,
             include_varlength=backend != "spatial-graph",
         )
 
@@ -158,27 +152,29 @@ class Test_api_wrapper:
         self,
         tmp_path,
         node_id_dtype,
-        node_axis_dtypes,
-        extra_edge_props,
         directed,
         include_t,
-        include_z,
+        include_spatial,
         backend,
     ) -> None:
+        if include_spatial is False and backend == "spatial-graph":
+            pytest.skip("Non-spatial graphs not supported by spatial-graph")
         backend_module: Backend = get_backend(backend)
+
+        extra_props = {dtype: dtype for dtype in PROP_DTYPES}
+        if backend != "spatial-graph":
+            extra_props["str"] = "str"
 
         store, memory_geff = create_mock_geff(
             node_id_dtype,
-            node_axis_dtypes,
-            extra_node_props={
-                "label": "str" if backend != "spatial-graph" else "int",
-                "score": "float32",
-                "sub_id": "int",
-            },
-            extra_edge_props=extra_edge_props,
+            AXIS_DTYPES,
+            extra_node_props=extra_props,
+            extra_edge_props=extra_props,
             directed=directed,
             include_t=include_t,
-            include_z=include_z,
+            include_x=include_spatial,
+            include_y=include_spatial,
+            include_z=include_spatial,
             include_varlength=backend != "spatial-graph",
         )
 
