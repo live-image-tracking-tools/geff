@@ -20,8 +20,6 @@ sg = pytest.importorskip("spatial_graph")
 
 
 # TODO: missing test cases
-# - empty graph
-# - missing properties
 # - different store types
 
 
@@ -112,6 +110,7 @@ class Test_api_wrapper:
             include_y=include_spatial,
             include_z=include_spatial,
             include_varlength=backend != "spatial-graph",
+            include_missing=backend != "spatial-graph",
         )
 
         graph, metadata = read(store, backend=backend)
@@ -146,6 +145,7 @@ class Test_api_wrapper:
             include_y=include_spatial,
             include_z=include_spatial,
             include_varlength=backend != "spatial-graph",
+            include_missing=backend != "spatial-graph",
         )
 
         in_memory_geff = read_to_memory(store)
@@ -182,6 +182,7 @@ class Test_api_wrapper:
             include_y=include_spatial,
             include_z=include_spatial,
             include_varlength=backend != "spatial-graph",
+            include_missing=backend != "spatial-graph",
         )
 
         # this will create a graph instance of the backend type
