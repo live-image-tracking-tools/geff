@@ -19,6 +19,12 @@ rx = pytest.importorskip("rustworkx")
 sg = pytest.importorskip("spatial_graph")
 
 
+# TODO: missing test cases
+# - empty graph
+# - missing properties
+# - different store types
+
+
 # assert that all the data in the graph are equal to those in the memory geff it was created from
 def _assert_graph_equal_to_geff(
     graph_adapter: GraphAdapter,
@@ -192,3 +198,51 @@ class Test_api_wrapper:
         _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
         # TODO: test metadata
+
+
+@pytest.mark.parametrize("backend", get_args(SupportedBackend))
+class Test_empty_graph:
+    def test_read(self, backend):
+        backend_module: Backend = get_backend(backend)
+
+        store, memory_geff = create_mock_geff(
+            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
+        )
+
+        graph, metadata = read(store, backend=backend)
+        graph_adapter = backend_module.graph_adapter(graph)
+
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+
+    def test_construct(self, backend):
+        backend_module: Backend = get_backend(backend)
+
+        store, memory_geff = create_mock_geff(
+            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
+        )
+
+        in_memory_geff = read_to_memory(store)
+        graph = construct(**in_memory_geff, backend=backend)
+        graph_adapter = backend_module.graph_adapter(graph)
+
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+
+    def test_write(self, tmp_path, backend):
+        backend_module: Backend = get_backend(backend)
+
+        store, memory_geff = create_mock_geff(
+            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
+        )
+
+        # this will create a graph instance of the backend type
+        original_graph = backend_module.construct(**memory_geff)
+
+        # write with unified write function
+        path_store = tmp_path / "test_path.zarr"
+        write(original_graph, path_store, memory_geff["metadata"])
+
+        # read with the NxBackend to see if the graph is the same
+        graph, metadata = NxBackend.read(path_store)
+        graph_adapter = NxBackend.graph_adapter(graph)
+
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
