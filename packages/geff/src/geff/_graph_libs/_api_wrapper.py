@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     RxGraph: TypeAlias = rx.PyGraph | rx.PyDiGraph
     SgGraph: TypeAlias = sg.SpatialGraph | sg.SpatialDiGraph
     SupportedGraphType: TypeAlias = NxGraph | RxGraph | SgGraph
+    T = TypeVar("T", bound=SupportedGraphType)
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
 
@@ -76,8 +77,6 @@ def get_backend(backend: SupportedBackend) -> Backend:
 
 
 _import_available_backends()
-
-T = TypeVar("T", bound=SupportedGraphType)
 
 
 # Used in the write function wrapper, where the backend should be determined from the graph type
