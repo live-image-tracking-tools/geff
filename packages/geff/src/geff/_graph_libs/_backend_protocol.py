@@ -61,6 +61,7 @@ class Backend(Protocol[T]):
         scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
         *args: Any,
         **kwargs: Any,
     ) -> None: ...

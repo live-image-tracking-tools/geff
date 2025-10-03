@@ -223,6 +223,7 @@ def write(
     scaled_units: list[str | None] | None = ...,
     axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
+    structure_validation: bool = True,
     node_id_dict: dict[int, int] | None = ...,
 ) -> None:
     # TODO: what is best practice for overload docstrings, want to document node_id_dict
@@ -252,6 +253,8 @@ def write(
             scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
         node_id_dict (dict[int, int], optional): A dictionary mapping rx node indices to
             arbitrary indices. This allows custom node identifiers to be used in the geff file
             instead of rustworkx's internal indices. If None, uses rx indices directly.
@@ -271,6 +274,7 @@ def write(
     scaled_units: list[str | None] | None = ...,
     axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
+    structure_validation: bool = True,
     *args: Any,
     **kwargs: Any,
 ) -> None: ...
@@ -285,6 +289,7 @@ def write(
     scaled_units: list[str | None] | None = None,
     axis_offset: list[float | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
+    structure_validation: bool = True,
     *args: Any,
     **kwargs: Any,
 ) -> None:
@@ -314,6 +319,8 @@ def write(
             scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
         *args (Any): Additional args that may be accepted by the backend when writing from a
             specific type of graph.
         **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from a
@@ -331,6 +338,7 @@ def write(
         scaled_units,
         axis_offset,
         zarr_format,
+        structure_validation,
         *args,
         **kwargs,
     )

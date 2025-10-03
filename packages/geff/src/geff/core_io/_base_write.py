@@ -1,12 +1,20 @@
 from __future__ import annotations
 
+import os
+import shutil
 import warnings
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 from geff import _path
-from geff.core_io._utils import construct_var_len_props, remove_tilde, setup_zarr_group
+from geff.core_io._utils import (
+    construct_var_len_props,
+    remove_tilde,
+    setup_zarr_group,
+)
+from geff.validate.structure import validate_structure
 from geff_spec.utils import (
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
@@ -32,6 +40,7 @@ def write_dicts(
     edge_prop_names: Sequence[str],
     metadata: GeffMetadata,
     zarr_format: Literal[2, 3] = 2,
+    structure_validation: bool = True,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -52,6 +61,8 @@ def write_dicts(
             axis min and maxes will be overwritten.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -93,6 +104,7 @@ def write_dicts(
         edge_props_dict,
         metadata,
         zarr_format=zarr_format,
+        structure_validation=structure_validation,
     )
 
 
@@ -193,6 +205,7 @@ def write_arrays(
     node_props_unsquish: dict[str, list[str]] | None = None,
     edge_props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
+    structure_validation: bool = True,
 ) -> None:
     """Write a geff file from already constructed arrays of node and edge ids and props
 
@@ -224,6 +237,8 @@ def write_arrays(
             indicication how to "unsquish" a property into individual scalars
             (e.g.: `{"pos": ["z", "y", "x"]}` will store the position property
             as three individual properties called "z", "y", and "x".
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
     """
     geff_store = remove_tilde(geff_store)
 
@@ -246,6 +261,13 @@ def write_arrays(
     if node_props is not None:
         metadata = compute_and_add_axis_min_max(metadata, node_props)
     metadata.write(geff_store)
+
+    if structure_validation:
+        try:
+            validate_structure(geff_store)
+        except ValueError as e:
+            _delete_invalid_geff(geff_store)
+            raise ValueError(e.args[0] + "\nCannot write invalid geff.") from e
 
 
 def write_id_arrays(
@@ -360,3 +382,44 @@ def write_props_arrays(
             prop_group[_path.DATA] = data
 
     return metadata
+
+
+def _delete_invalid_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
+    """Delete an invalid geff after writing
+
+    Tries to handle multiple StoreLike inputs and avoids deleting non-geff contents
+    in the store
+
+    Args:
+        store (StoreLike): StoreLike geff that should be deleted
+        zarr_format (Literal[2, 3], optional): Zarr format used to write input store. Defaults to 2.
+    """
+    root = setup_zarr_group(store, zarr_format=zarr_format)
+
+    # Delete node and edge groups
+    del root[_path.NODES]
+    del root[_path.EDGES]
+
+    # If the root is empty, try to delete the root zarr
+    if len(list(root.keys())) == 0:
+        # Handle Path or str storelike
+        if isinstance(store, Path) or isinstance(store, str):
+            shutil.rmtree(store)
+        else:
+            # Try to get a valid path from the store
+            try:
+                path = store.path  # type: ignore
+                if os.path.exists(path):
+                    shutil.rmtree(path)
+            except AttributeError:
+                warnings.warn(
+                    "Cannot delete root zarr directory, but geff contents have been deleted",
+                    stacklevel=2,
+                )
+                del root.attrs["geff"]
+    else:
+        warnings.warn(
+            "Found non-geff members in zarr. Exiting without deleting root zarr.", stacklevel=2
+        )
+        # Delete geff metadata from attrs
+        del root.attrs["geff"]
