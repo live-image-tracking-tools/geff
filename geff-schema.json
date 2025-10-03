@@ -212,6 +212,19 @@
           "default": null,
           "description": "Optional, the unit after applying the `scale` value to the data. If `scaled_unit` is set, a `scale` value must also be provided.",
           "title": "Scaled Unit"
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional, the amount by which to offset this axis after applying the `scale` if specified.",
+          "title": "Offset"
         }
       },
       "required": [

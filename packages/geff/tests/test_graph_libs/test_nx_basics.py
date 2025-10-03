@@ -117,7 +117,7 @@ def test_read_write_no_spatial(
 
 def test_write_empty_graph(tmp_path) -> None:
     graph = nx.DiGraph()
-    NxBackend.write(graph, axis_names=["t", "y", "x"], store=tmp_path / "empty.zarr")
+    NxBackend.write(graph, store=tmp_path / "empty.zarr")
 
 
 def test_write_nx_with_metadata(tmp_path) -> None:

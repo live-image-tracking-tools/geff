@@ -96,14 +96,19 @@ class NxBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_types: list[AxisType | None] | None = None,
+        axis_scales: list[float | None] | None = None,
+        scaled_units: list[str | None] | None = None,
+        axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
         structure_validation: bool = True,
     ) -> None:
         directed = isinstance(graph, nx.DiGraph)
         metadata = create_or_update_metadata(metadata=metadata, is_directed=directed)
         if axis_names is not None:
-            metadata = update_metadata_axes(metadata, axis_names, axis_units, axis_types)
+            metadata = update_metadata_axes(
+                metadata, axis_names, axis_units, axis_types, axis_scales, scaled_units, axis_offset
+            )
         node_props = list({k for _, data in graph.nodes(data=True) for k in data})
 
         edge_data = [((u, v), data) for u, v, data in graph.edges(data=True)]
@@ -115,7 +120,6 @@ class NxBackend(Backend):
             node_props,
             edge_props,
             metadata,
-            axis_names,
             zarr_format=zarr_format,
             structure_validation=structure_validation,
         )

@@ -3,10 +3,12 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING, Any, Literal, cast
 
+from ._errors import MissingDependencyError
+
 try:
     import spatial_graph as sg
 except ImportError as e:
-    raise ImportError(
+    raise MissingDependencyError(
         "This module requires spatial-graph to be installed. "
         "Please install it with `pip install 'geff[spatial-graph]'`."
     ) from e
@@ -120,7 +122,10 @@ class SgBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_types: list[AxisType | None] | None = None,
+        axis_scales: list[float | None] | None = None,
+        scaled_units: list[str | None] | None = None,
+        axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
         structure_validation: bool = True,
     ) -> None:
@@ -142,8 +147,11 @@ class SgBackend(Backend):
             axis_names,
             axis_units=axis_units,
             axis_types=axis_types,
+            axis_scales=axis_scales,
+            scaled_units=scaled_units,
             roi_min=roi_min,
             roi_max=roi_max,
+            axis_offset=axis_offset,
         )
         metadata = create_or_update_metadata(metadata, graph.directed, axes)
 

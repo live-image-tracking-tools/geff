@@ -57,6 +57,11 @@ class Axis(BaseModel):
         description="Optional, the unit after applying the `scale` value to the data. "
         "If `scaled_unit` is set, a `scale` value must also be provided.",
     )
+    offset: float | None = Field(
+        default=None,
+        description="Optional, the amount by which to offset this axis after applying "
+        "the `scale` if specified.",
+    )
 
     @model_validator(mode="after")
     def _validate_model(self) -> Axis:

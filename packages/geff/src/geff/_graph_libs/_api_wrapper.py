@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, get_args, overload
 
+from ._errors import MissingDependencyError
+
 R = TypeVar("R", covariant=True)
 
 if TYPE_CHECKING:
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
 
     from ._backend_protocol import Backend
 
-    NxGraph: TypeAlias = nx.Graph | nx.DiGraph
+    NxGraph: TypeAlias = nx.Graph[Any] | nx.DiGraph[Any]
     RxGraph: TypeAlias = rx.PyGraph | rx.PyDiGraph
     SgGraph: TypeAlias = sg.SpatialGraph | sg.SpatialDiGraph
     SupportedGraphType: TypeAlias = NxGraph | RxGraph | SgGraph
@@ -34,7 +36,7 @@ def _import_available_backends() -> None:
     for backend in backends:
         try:
             AVAILABLE_BACKENDS.append(get_backend(backend))
-        except ImportError:
+        except MissingDependencyError:
             pass
 
 
@@ -77,7 +79,7 @@ _import_available_backends()
 
 
 # Used in the write function wrapper, where the backend should be determined from the graph type
-def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
+def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend[SupportedGraphType]:
     for backend_module in AVAILABLE_BACKENDS:
         if isinstance(graph, backend_module.GRAPH_TYPES):
             return backend_module
@@ -216,7 +218,10 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[Literal[AxisType] | None] | None = ...,
+    axis_types: list[AxisType | None] | None = ...,
+    axis_scales: list[float | None] | None = ...,
+    scaled_units: list[str | None] | None = ...,
+    axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
     structure_validation: bool = True,
     node_id_dict: dict[int, int] | None = ...,
@@ -240,6 +245,12 @@ def write(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
+        axis_offset (list[float | None] | None): Amount to offset an axis after applying
+            scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
         structure_validation (bool): If True, runs structural validation and does not write
@@ -258,8 +269,11 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[Literal[AxisType] | None] | None = ...,
-    zarr_format: Literal[2, 3] = 2,
+    axis_types: list[AxisType | None] | None = ...,
+    axis_scales: list[float | None] | None = ...,
+    scaled_units: list[str | None] | None = ...,
+    axis_offset: list[float | None] | None = ...,
+    zarr_format: Literal[2, 3] = ...,
     structure_validation: bool = True,
     *args: Any,
     **kwargs: Any,
@@ -270,7 +284,10 @@ def write(
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
-    axis_types: list[Literal[AxisType] | None] | None = None,
+    axis_types: list[AxisType | None] | None = None,
+    axis_scales: list[float | None] | None = None,
+    scaled_units: list[str | None] | None = None,
+    axis_offset: list[float | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
     structure_validation: bool = True,
     *args: Any,
@@ -294,6 +311,12 @@ def write(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
+        axis_offset (list[float | None] | None): Amount to offset an axis after applying
+            scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
         structure_validation (bool): If True, runs structural validation and does not write
@@ -311,6 +334,9 @@ def write(
         axis_names,
         axis_units,
         axis_types,
+        axis_scales,
+        scaled_units,
+        axis_offset,
         zarr_format,
         structure_validation,
         *args,

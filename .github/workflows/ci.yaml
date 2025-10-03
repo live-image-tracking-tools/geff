@@ -140,8 +140,9 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: Generate geff changelog
         uses: mikepenz/release-changelog-builder-action@v5
+        id: build_changelog
         with:
-          includeOnlyPaths: |
+          includeOnlyPaths: | # Should work after v6 release
             docs/
             packages/geff
           configuration: changelog-config.json
@@ -154,8 +155,12 @@ jobs:
                 }
               }
             }
-          toTag: github.ref
+          toTag: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          body: ${{steps.build_changelog.outputs.changelog}}
+          files: "./dist/*"
 
   upload-geff-spec-to-pypi:
     if: success() && startsWith(github.ref, 'refs/tags/spec') && github.event_name != 'schedule'
@@ -176,8 +181,9 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: Generate geff-spec changelog
         uses: mikepenz/release-changelog-builder-action@v5
+        id: build_changelog_spec
         with:
-          includeOnlyPaths: |
+          includeOnlyPaths: | # Should work after v6 release
             packages/geff-spec
           configuration: changelog-config.json
           configurationJson: | # Filter only geff-spec tags
@@ -189,5 +195,9 @@ jobs:
                 }
               }
             }
-          toTag: github.ref
+          toTag: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          body: ${{steps.build_changelog_spec.outputs.changelog}}
+          files: "./dist/*"

@@ -133,8 +133,11 @@ PyPI. (see the "build-and-inspect-package" and "upload-geff-to-pypi" steps in
 determined automatically based on the tag (using `setuptools-scm`). This workflow
 will only push `geff` not `geff-spec`. 
 
+> [!TIP]
+> If this `geff` release includes an update to `geff-spec` that will change the last two numbers of the version. Remember to change the upper pin on `geff-spec` in the `geff` dependencies.
+
 ```sh
-git tag -a v0.1.0 -m v0.1.0
+git tag -a v1.0.0.1.0 -m v1.0.0.1.0
 git push --follow-tags
 ```
 
