@@ -18,16 +18,9 @@ if TYPE_CHECKING:
 rx = pytest.importorskip("rustworkx")
 sg = pytest.importorskip("spatial_graph")
 
-node_id_dtypes = ["uint8", "uint16"]
-node_axis_dtypes = [
-    {"position": "double", "time": "double"},
-    {"position": "int", "time": "int"},
-]
-extra_edge_props = [
-    {"score": "float64", "color": "uint8"},
-    {"score": "float32", "color": "int16"},
-    {},
-]
+
+# TODO: missing test cases
+# - different store types
 
 
 # assert that all the data in the graph are equal to those in the memory geff it was created from
@@ -79,130 +72,178 @@ def _assert_graph_equal_to_geff(
                     assert expected_val == actual_val
 
 
-@pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
-@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
-@pytest.mark.parametrize("directed", [True, False])
-@pytest.mark.parametrize("include_t", [True, False])
-@pytest.mark.parametrize("include_z", [True, False])
+PROP_DTYPES = ["float64", "uint8", "float32", "int16"]
+ID_DTYPES = ["int8", "uint16"]
+AXIS_DTYPES = {"position": "double", "time": "int"}
+
+
+@pytest.mark.parametrize("node_id_dtype", ID_DTYPES, ids=["nid_" + dtype for dtype in ID_DTYPES])
+@pytest.mark.parametrize("directed", [True, False], ids=["direct", "!direct"])
+@pytest.mark.parametrize("include_t", [True, False], ids=["t", "!t"])
+@pytest.mark.parametrize("include_spatial", [True, False], ids=["xyz", "!xyz"])
 @pytest.mark.parametrize("backend", get_args(SupportedBackend))
-def test_read(
-    node_id_dtype,
-    node_axis_dtypes,
-    extra_edge_props,
-    directed,
-    include_t,
-    include_z,
-    backend,
-) -> None:
-    backend_module: Backend = get_backend(backend)
-
-    store, memory_geff = create_mock_geff(
+class Test_api_wrapper:
+    def test_read(
+        self,
         node_id_dtype,
-        node_axis_dtypes,
-        extra_node_props={
-            "label": "str" if backend != "spatial-graph" else "int",
-            "score": "float32",
-            "sub_id": "int",
-        },
-        extra_edge_props=extra_edge_props,
-        directed=directed,
-        include_t=include_t,
-        include_z=include_z,
-        include_varlength=backend != "spatial-graph",
-    )
+        directed,
+        include_t,
+        include_spatial,
+        backend,
+    ) -> None:
+        if include_spatial is False and backend == "spatial-graph":
+            pytest.skip("Non-spatial graphs not supported by spatial-graph")
+        backend_module: Backend = get_backend(backend)
 
-    graph, metadata = read(store, backend=backend)
-    graph_adapter = backend_module.graph_adapter(graph)
+        extra_props = {dtype: dtype for dtype in PROP_DTYPES}
+        if backend != "spatial-graph":
+            extra_props["str"] = "str"
 
-    _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+        store, memory_geff = create_mock_geff(
+            node_id_dtype,
+            AXIS_DTYPES,
+            extra_node_props=extra_props,
+            extra_edge_props=extra_props,
+            directed=directed,
+            include_t=include_t,
+            include_x=include_spatial,
+            include_y=include_spatial,
+            include_z=include_spatial,
+            include_varlength=backend != "spatial-graph",
+            include_missing=backend != "spatial-graph",
+        )
+
+        graph, metadata = read(store, backend=backend)
+        graph_adapter = backend_module.graph_adapter(graph)
+
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+
+    def test_construct(
+        self,
+        node_id_dtype,
+        directed,
+        include_t,
+        include_spatial,
+        backend,
+    ) -> None:
+        if include_spatial is False and backend == "spatial-graph":
+            pytest.skip("Non-spatial graphs not supported by spatial-graph")
+        backend_module: Backend = get_backend(backend)
+
+        extra_props = {dtype: dtype for dtype in PROP_DTYPES}
+        if backend != "spatial-graph":
+            extra_props["str"] = "str"
+
+        store, memory_geff = create_mock_geff(
+            node_id_dtype,
+            AXIS_DTYPES,
+            extra_node_props=extra_props,
+            extra_edge_props=extra_props,
+            directed=directed,
+            include_t=include_t,
+            include_x=include_spatial,
+            include_y=include_spatial,
+            include_z=include_spatial,
+            include_varlength=backend != "spatial-graph",
+            include_missing=backend != "spatial-graph",
+        )
+
+        in_memory_geff = read_to_memory(store)
+        graph = construct(**in_memory_geff, backend=backend)
+        graph_adapter = backend_module.graph_adapter(graph)
+
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+
+    def test_write(
+        self,
+        tmp_path,
+        node_id_dtype,
+        directed,
+        include_t,
+        include_spatial,
+        backend,
+    ) -> None:
+        if include_spatial is False and backend == "spatial-graph":
+            pytest.skip("Non-spatial graphs not supported by spatial-graph")
+        backend_module: Backend = get_backend(backend)
+
+        extra_props = {dtype: dtype for dtype in PROP_DTYPES}
+        if backend != "spatial-graph":
+            extra_props["str"] = "str"
+
+        store, memory_geff = create_mock_geff(
+            node_id_dtype,
+            AXIS_DTYPES,
+            extra_node_props=extra_props,
+            extra_edge_props=extra_props,
+            directed=directed,
+            include_t=include_t,
+            include_x=include_spatial,
+            include_y=include_spatial,
+            include_z=include_spatial,
+            include_varlength=backend != "spatial-graph",
+            include_missing=backend != "spatial-graph",
+        )
+
+        # this will create a graph instance of the backend type
+        original_graph = backend_module.construct(**memory_geff)
+
+        # write with unified write function
+        path_store = tmp_path / "test_path.zarr"
+        write(original_graph, path_store, memory_geff["metadata"])
+
+        # read with the NxBackend to see if the graph is the same
+        graph, metadata = NxBackend.read(path_store)
+        graph_adapter = NxBackend.graph_adapter(graph)
+
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+
+        # TODO: test metadata
 
 
-@pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
-@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
-@pytest.mark.parametrize("directed", [True, False])
-@pytest.mark.parametrize("include_t", [True, False])
-@pytest.mark.parametrize("include_z", [True, False])
 @pytest.mark.parametrize("backend", get_args(SupportedBackend))
-def test_construct(
-    node_id_dtype,
-    node_axis_dtypes,
-    extra_edge_props,
-    directed,
-    include_t,
-    include_z,
-    backend,
-) -> None:
-    backend_module: Backend = get_backend(backend)
+class Test_empty_graph:
+    def test_read(self, backend):
+        backend_module: Backend = get_backend(backend)
 
-    store, memory_geff = create_mock_geff(
-        node_id_dtype,
-        node_axis_dtypes,
-        extra_node_props={
-            "label": "str" if backend != "spatial-graph" else "int",
-            "score": "float32",
-            "sub_id": "int",
-        },
-        extra_edge_props=extra_edge_props,
-        directed=directed,
-        include_t=include_t,
-        include_z=include_z,
-        include_varlength=backend != "spatial-graph",
-    )
+        store, memory_geff = create_mock_geff(
+            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
+        )
 
-    in_memory_geff = read_to_memory(store)
-    graph = construct(**in_memory_geff, backend=backend)
-    graph_adapter = backend_module.graph_adapter(graph)
+        graph, metadata = read(store, backend=backend)
+        graph_adapter = backend_module.graph_adapter(graph)
 
-    _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
+    def test_construct(self, backend):
+        backend_module: Backend = get_backend(backend)
 
-@pytest.mark.parametrize("node_id_dtype", node_id_dtypes)
-@pytest.mark.parametrize("node_axis_dtypes", node_axis_dtypes)
-@pytest.mark.parametrize("extra_edge_props", extra_edge_props)
-@pytest.mark.parametrize("directed", [True, False])
-@pytest.mark.parametrize("include_t", [True, False])
-@pytest.mark.parametrize("include_z", [True, False])
-@pytest.mark.parametrize("backend", get_args(SupportedBackend))
-def test_write(
-    tmp_path,
-    node_id_dtype,
-    node_axis_dtypes,
-    extra_edge_props,
-    directed,
-    include_t,
-    include_z,
-    backend,
-) -> None:
-    backend_module: Backend = get_backend(backend)
+        store, memory_geff = create_mock_geff(
+            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
+        )
 
-    store, memory_geff = create_mock_geff(
-        node_id_dtype,
-        node_axis_dtypes,
-        extra_node_props={
-            "label": "str" if backend != "spatial-graph" else "int",
-            "score": "float32",
-            "sub_id": "int",
-        },
-        extra_edge_props=extra_edge_props,
-        directed=directed,
-        include_t=include_t,
-        include_z=include_z,
-        include_varlength=backend != "spatial-graph",
-    )
+        in_memory_geff = read_to_memory(store)
+        graph = construct(**in_memory_geff, backend=backend)
+        graph_adapter = backend_module.graph_adapter(graph)
 
-    # this will create a graph instance of the backend type
-    original_graph = backend_module.construct(**memory_geff)
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
-    # write with unified write function
-    path_store = tmp_path / "test_path.zarr"
-    write(original_graph, path_store, memory_geff["metadata"])
+    def test_write(self, tmp_path, backend):
+        backend_module: Backend = get_backend(backend)
 
-    # read with the NxBackend to see if the graph is the same
-    graph, metadata = NxBackend.read(path_store)
-    graph_adapter = NxBackend.graph_adapter(graph)
+        store, memory_geff = create_mock_geff(
+            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
+        )
 
-    _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+        # this will create a graph instance of the backend type
+        original_graph = backend_module.construct(**memory_geff)
 
-    # TODO: test metadata
+        # write with unified write function
+        path_store = tmp_path / "test_path.zarr"
+        write(original_graph, path_store, memory_geff["metadata"])
+
+        # read with the NxBackend to see if the graph is the same
+        graph, metadata = NxBackend.read(path_store)
+        graph_adapter = NxBackend.graph_adapter(graph)
+
+        _assert_graph_equal_to_geff(graph_adapter, memory_geff)

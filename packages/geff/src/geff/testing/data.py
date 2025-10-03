@@ -104,6 +104,7 @@ def create_dummy_in_mem_geff(
     include_y: bool = True,
     include_x: bool = True,
     include_varlength: bool = False,
+    include_missing: bool = False,
 ) -> InMemoryGeff:
     """Create dummy graph properties for testing.
 
@@ -122,6 +123,8 @@ def create_dummy_in_mem_geff(
         include_varlength: Whether to include a variable length property. If true, will
             make a property on nodes called "var_length" that has 2d np arrays of various
             shapes
+        include_missing: If true, creades a node prop called "sparse_prop" where every other
+            node has a missing value
 
     Returns:
         InMemoryGeff containing all graph properties
@@ -338,6 +341,16 @@ def create_dummy_in_mem_geff(
         node_props[prop_name] = node_prop_dict
         node_prop_meta.append(create_props_metadata(prop_name, node_prop_dict))
 
+    if include_missing:
+        prop_name = "sparse_prop"
+        values = np.arange(num_nodes, dtype="float64")
+        missing = np.zeros(num_nodes, dtype=np.bool_)
+        if num_nodes > 0:
+            missing[::2] = 1
+        node_prop_dict = {"values": values, "missing": missing}
+        node_props[prop_name] = node_prop_dict
+        node_prop_meta.append(create_props_metadata(prop_name, node_prop_dict))
+
     # Generate edge properties
     edge_props_dict: dict[str, PropDictNpArray] = {}
     edge_prop_meta: list[PropMetadata] = []
@@ -423,6 +436,7 @@ def create_mock_geff(
     include_y: bool = True,
     include_x: bool = True,
     include_varlength: bool = False,
+    include_missing: bool = False,
 ) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
     """Create a mock geff in memory and return the zarr store and the in memory geff.
 
@@ -441,6 +455,8 @@ def create_mock_geff(
         include_varlength: Whether to include a variable length property. If true, will
             make a property on nodes called "var_length" that has 2d np arrays of various
             shapes
+        include_missing: If true, creades a node prop called "sparse_prop" where every other
+            node has a missing value
 
     Returns:
         Tuple of (zarr store in memory, InMemoryGeff)
