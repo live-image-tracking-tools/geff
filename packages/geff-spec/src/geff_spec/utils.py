@@ -8,13 +8,11 @@ from typing import TYPE_CHECKING, Any, Literal, TypeVar
 import numpy as np
 from pydantic import validate_call
 
-import geff
-
 from ._axis import Axis
 
 # The next import is needed at runtime for Pydantic validation
 from ._prop_metadata import PropMetadata
-from ._schema import GeffMetadata
+from ._schema import GEFF_VERSION, GeffMetadata
 
 if TYPE_CHECKING:
     from ._valid_values import AxisType
@@ -124,13 +122,13 @@ def create_or_update_metadata(
     """
     if metadata is not None:
         metadata = copy.deepcopy(metadata)
-        metadata.geff_version = geff.__version__
+        metadata.geff_version = GEFF_VERSION
         metadata.directed = is_directed
         if axes is not None:
             metadata.axes = axes
     else:
         metadata = GeffMetadata(
-            geff_version=geff.__version__,
+            geff_version=GEFF_VERSION,
             directed=is_directed,
             axes=axes,
             node_props_metadata={},

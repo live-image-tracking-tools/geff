@@ -56,7 +56,7 @@ class Backend(Protocol[T]):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_types: list[AxisType | None] | None = None,
         axis_scales: list[float | None] | None = None,
         scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
