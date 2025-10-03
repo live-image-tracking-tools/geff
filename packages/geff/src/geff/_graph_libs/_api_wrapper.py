@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, get_args, overload
 
+from ._errors import MissingDependencyError
+
 R = TypeVar("R", covariant=True)
 
 if TYPE_CHECKING:
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
 
     from ._backend_protocol import Backend
 
-    NxGraph: TypeAlias = nx.Graph | nx.DiGraph
+    NxGraph: TypeAlias = nx.Graph[Any] | nx.DiGraph[Any]
     RxGraph: TypeAlias = rx.PyGraph | rx.PyDiGraph
     SgGraph: TypeAlias = sg.SpatialGraph | sg.SpatialDiGraph
     SupportedGraphType: TypeAlias = NxGraph | RxGraph | SgGraph
@@ -34,7 +36,7 @@ def _import_available_backends() -> None:
     for backend in backends:
         try:
             AVAILABLE_BACKENDS.append(get_backend(backend))
-        except ImportError:
+        except MissingDependencyError:
             pass
 
 
@@ -77,7 +79,7 @@ _import_available_backends()
 
 
 # Used in the write function wrapper, where the backend should be determined from the graph type
-def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
+def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend[SupportedGraphType]:
     for backend_module in AVAILABLE_BACKENDS:
         if isinstance(graph, backend_module.GRAPH_TYPES):
             return backend_module
@@ -216,10 +218,10 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[Literal[AxisType] | None] | None = ...,
-    axis_scales: list[float | None] | None = None,
-    scaled_units: list[str | None] | None = None,
-    axis_offset: list[float | None] | None = None,
+    axis_types: list[AxisType | None] | None = ...,
+    axis_scales: list[float | None] | None = ...,
+    scaled_units: list[str | None] | None = ...,
+    axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
     node_id_dict: dict[int, int] | None = ...,
 ) -> None:
@@ -264,11 +266,11 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[Literal[AxisType] | None] | None = ...,
-    axis_scales: list[float | None] | None = None,
-    scaled_units: list[str | None] | None = None,
-    axis_offset: list[float | None] | None = None,
-    zarr_format: Literal[2, 3] = 2,
+    axis_types: list[AxisType | None] | None = ...,
+    axis_scales: list[float | None] | None = ...,
+    scaled_units: list[str | None] | None = ...,
+    axis_offset: list[float | None] | None = ...,
+    zarr_format: Literal[2, 3] = ...,
     *args: Any,
     **kwargs: Any,
 ) -> None: ...
@@ -278,7 +280,7 @@ def write(
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
-    axis_types: list[Literal[AxisType] | None] | None = None,
+    axis_types: list[AxisType | None] | None = None,
     axis_scales: list[float | None] | None = None,
     scaled_units: list[str | None] | None = None,
     axis_offset: list[float | None] | None = None,

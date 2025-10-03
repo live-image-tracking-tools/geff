@@ -5,10 +5,12 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ._errors import MissingDependencyError
+
 try:
     import rustworkx as rx
 except ImportError as e:
-    raise ImportError(
+    raise MissingDependencyError(
         "This module requires rustworkx to be installed. "
         "Please install it with `pip install 'geff[rx]'`."
     ) from e
@@ -114,7 +116,7 @@ class RxBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_types: list[AxisType | None] | None = None,
         axis_scales: list[float | None] | None = None,
         scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
