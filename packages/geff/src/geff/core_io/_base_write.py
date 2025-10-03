@@ -8,12 +8,13 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from geff import _path, validate_structure
+from geff import _path
 from geff.core_io._utils import (
     construct_var_len_props,
     remove_tilde,
     setup_zarr_group,
 )
+from geff.validate.structure import validate_structure
 from geff_spec.utils import (
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
