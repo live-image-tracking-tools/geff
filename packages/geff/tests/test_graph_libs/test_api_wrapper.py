@@ -316,7 +316,7 @@ class Test_empty_graph:
             )
         else:
             raise NotImplementedError(
-                f"Backend {backend} not tested in Test_empgy_graph.test_write"
+                f"Backend {backend} not tested in Test_empty_graph.test_write"
             )
 
         # write with unified write function
