@@ -49,10 +49,18 @@ class SgBackend(Backend):
         edge_props: dict[str, PropDictNpArray],
         position_attr: str = "position",
     ) -> sg.SpatialGraph | sg.SpatialDiGraph:
-        if (metadata.axes is None or len(metadata.axes) == 0) and len(node_ids) != 0:
-            raise ValueError("Cannot construct a non-empty SpatialGraph from a geff without axes")
-
-        position_attrs = [axis.name for axis in metadata.axes]
+        # Cast empty list to None for consistency
+        if metadata.axes == []:
+            metadata.axes = None
+        if metadata.axes is None:
+            if len(node_ids) != 0:
+                raise ValueError(
+                    "Cannot construct a non-empty SpatialGraph from a geff without axes"
+                )
+            else:
+                position_attrs = []
+        else:
+            position_attrs = [axis.name for axis in metadata.axes]
         ndims = len(position_attrs)
 
         def get_dtype_str(dataset: np.ndarray) -> str:
@@ -91,6 +99,7 @@ class SgBackend(Backend):
         edge_attrs = {name: edge_props[name]["values"] for name in edge_props.keys()}
 
         # squish position attributes together into one position attribute
+        position: np.ndarray[tuple[int, ...], np.dtype[Any]]
         if len(node_ids) == 0:
             # Need to include a singleton spatial dimension in the shape to be
             # valid for spatial graph
