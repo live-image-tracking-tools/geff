@@ -21,10 +21,6 @@ rx = pytest.importorskip("rustworkx")
 sg = pytest.importorskip("spatial_graph")
 
 
-# TODO: missing test cases
-# - different store types
-
-
 # assert that all the data in the graph are equal to those in the memory geff it was created from
 def _assert_graph_equal_to_geff(
     graph_adapter: GraphAdapter,
@@ -128,8 +124,6 @@ class Test_api_wrapper:
         include_spatial,
         backend,
     ) -> None:
-        # if include_spatial is False and backend == "spatial-graph":
-        #     pytest.skip("Non-spatial graphs not supported by spatial-graph")
         backend_module: Backend = get_backend(backend)
 
         extra_props = {dtype: dtype for dtype in PROP_DTYPES}
@@ -228,22 +222,38 @@ class Test_api_wrapper_simple:  # tests that only need backend parametrization
         axis_names = ["x", "y"]
         axis_units = ["meter", "meter"]
         axis_types = ["space", "space"]
-        backend_module.write(
-            original_graph,
-            path_store,
-            metadata=memory_geff["metadata"],
-            axis_names=axis_names,
-            axis_units=axis_units,
-            axis_types=axis_types,
-        )
+        if backend == "spatial-graph":
+            # Cannot change the number of axes in sg graph without modifying position attribute
+            with pytest.raises(
+                ValueError,
+                match="Cannot write a SpatialGraph with ndims .* "
+                "and a different number of axes (.*)",
+            ):
+                backend_module.write(
+                    original_graph,
+                    path_store,
+                    metadata=memory_geff["metadata"],
+                    axis_names=axis_names,
+                    axis_units=axis_units,
+                    axis_types=axis_types,
+                )
+        else:
+            backend_module.write(
+                original_graph,
+                path_store,
+                metadata=memory_geff["metadata"],
+                axis_names=axis_names,
+                axis_units=axis_units,
+                axis_types=axis_types,
+            )
 
-        new_mem_geff = read_to_memory(path_store)
-        metadata = new_mem_geff["metadata"]
-        assert metadata.axes is not None
-        assert len(metadata.axes) == 2
-        assert axis_names == [axis.name for axis in metadata.axes]
-        assert axis_units == [axis.unit for axis in metadata.axes]
-        assert axis_types == [axis.type for axis in metadata.axes]
+            new_mem_geff = read_to_memory(path_store)
+            metadata = new_mem_geff["metadata"]
+            assert metadata.axes is not None
+            assert len(metadata.axes) == 2
+            assert axis_names == [axis.name for axis in metadata.axes]
+            assert axis_units == [axis.unit for axis in metadata.axes]
+            assert axis_types == [axis.type for axis in metadata.axes]
 
     def test_write_read_different_stores(self, tmp_path, backend):
         stores = [
