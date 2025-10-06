@@ -31,7 +31,7 @@ def create_rx_graph_sparse_node_props():
 
 def create_rx_graph_sparse_edge_props():
     """Create a rustworkx graph with sparse edge properties."""
-    graph, node_indices, positions = create_rx_graph_sparse_node_props()
+    graph, node_indices, _positions = create_rx_graph_sparse_node_props()
 
     # Add edges with some missing score properties
     edges = [
@@ -76,7 +76,7 @@ def test_sparse_node_props_rx(tmp_path) -> None:
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 0, 1, 1, 0]))
 
     # Read it back and verify consistency
-    read_graph, metadata = RxBackend.read(zarr_path)
+    read_graph, _metadata = RxBackend.read(zarr_path)
 
     # Check that we have the right number of nodes and structure
     assert read_graph.num_nodes() == graph.num_nodes()
@@ -110,7 +110,7 @@ def test_sparse_edge_props_rx(tmp_path) -> None:
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 1, 0]))
 
     # Read it back and verify consistency
-    read_graph, metadata = RxBackend.read(zarr_path)
+    read_graph, _metadata = RxBackend.read(zarr_path)
 
     # Check basic structure
     assert read_graph.num_nodes() == graph.num_nodes()
@@ -119,7 +119,7 @@ def test_sparse_edge_props_rx(tmp_path) -> None:
 
 def test_missing_pos_prop_rx(tmp_path) -> None:
     """Test rustworkx graphs with missing positional properties."""
-    graph, node_indices, positions = create_rx_graph_sparse_node_props()
+    graph, _node_indices, _positions = create_rx_graph_sparse_node_props()
 
     # Test with wrong property name (z instead of x)
     zarr_path = Path(tmp_path) / "test1.zarr"
