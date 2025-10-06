@@ -211,7 +211,7 @@ def test_write_empty_graph_rx(tmp_path) -> None:
         RxBackend.write(graph, path)
 
     # Should be able to read it back
-    read_graph, metadata = RxBackend.read(path)
+    read_graph, _metadata = RxBackend.read(path)
     assert read_graph.num_nodes() == 0
     assert read_graph.num_edges() == 0
 
@@ -219,7 +219,7 @@ def test_write_empty_graph_rx(tmp_path) -> None:
 def test_write_rx_with_metadata(tmp_path) -> None:
     """Test write_rx with explicit metadata parameter."""
 
-    graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
+    graph, _node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
     # Create metadata object
     axes = axes_from_lists(
@@ -254,7 +254,7 @@ def test_write_rx_with_metadata(tmp_path) -> None:
 def test_write_rx_metadata_extra_properties(tmp_path) -> None:
     """Test writing rustworkx graph with extra metadata properties."""
 
-    graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
+    graph, _node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
     axes = axes_from_lists(
         axis_names=["x", "y"],
@@ -280,7 +280,7 @@ def test_write_rx_metadata_extra_properties(tmp_path) -> None:
 def test_write_rx_metadata_override_precedence(tmp_path) -> None:
     """Test that explicit axis parameters override metadata for rustworkx."""
 
-    graph, node_indices = create_rustworkx_graph(directed=False, include_t=True, include_z=True)
+    graph, _node_indices = create_rustworkx_graph(directed=False, include_t=True, include_z=True)
 
     # Create metadata with one set of axes
     axes = axes_from_lists(
@@ -322,7 +322,7 @@ def test_write_rx_different_store_types(tmp_path) -> None:
     """Test write_rx with different store types: path, string, and zarr.store."""
 
     # Create a simple test graph
-    graph, node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
+    graph, _node_indices = create_rustworkx_graph(directed=False, include_t=False, include_z=False)
 
     # Test 1: Path object
     path_store = tmp_path / "test_path.zarr"

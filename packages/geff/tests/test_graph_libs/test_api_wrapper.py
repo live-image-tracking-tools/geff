@@ -112,7 +112,7 @@ def test_read(
         include_varlength=backend != "spatial-graph",
     )
 
-    graph, metadata = read(store, backend=backend)
+    graph, _metadata = read(store, backend=backend)
     graph_adapter = backend_module.graph_adapter(graph)
 
     _assert_graph_equal_to_geff(graph_adapter, memory_geff)
@@ -177,7 +177,7 @@ def test_write(
 ) -> None:
     backend_module: Backend = get_backend(backend)
 
-    store, memory_geff = create_mock_geff(
+    _store, memory_geff = create_mock_geff(
         node_id_dtype,
         node_axis_dtypes,
         extra_node_props={
@@ -200,7 +200,7 @@ def test_write(
     write(original_graph, path_store, memory_geff["metadata"])
 
     # read with the NxBackend to see if the graph is the same
-    graph, metadata = NxBackend.read(path_store)
+    graph, _metadata = NxBackend.read(path_store)
     graph_adapter = NxBackend.graph_adapter(graph)
 
     _assert_graph_equal_to_geff(graph_adapter, memory_geff)

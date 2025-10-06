@@ -46,7 +46,7 @@ class Test_geff_to_dataframes:
         n_nodes = 5
         special_prop = np.ones((n_nodes, 2))
         prop_name = "2d_prop"
-        store, memory_geff = create_mock_geff(
+        store, _memory_geff = create_mock_geff(
             num_nodes=n_nodes,
             node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
@@ -64,7 +64,7 @@ class Test_geff_to_dataframes:
         n_nodes = 5
         special_prop = np.ones((n_nodes, 2, 2))
         prop_name = "3d_prop"
-        store, memory_geff = create_mock_geff(
+        store, _memory_geff = create_mock_geff(
             num_nodes=n_nodes,
             node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
@@ -81,7 +81,7 @@ class Test_geff_to_dataframes:
             assert set(df.columns) == {"t", "z", "x", "y"}
 
     def test_no_nodes(self):
-        store, memory_geff = create_simple_3d_geff(num_nodes=0)
+        store, _memory_geff = create_simple_3d_geff(num_nodes=0)
         node_df, edge_df = geff_to_dataframes(store)
 
         assert isinstance(node_df, pd.DataFrame)
@@ -90,15 +90,15 @@ class Test_geff_to_dataframes:
         assert len(edge_df) == 0
 
     def test_no_edges(self):
-        store, memory_geff = create_simple_3d_geff(num_edges=0)
-        node_df, edge_df = geff_to_dataframes(store)
+        store, _memory_geff = create_simple_3d_geff(num_edges=0)
+        _node_df, edge_df = geff_to_dataframes(store)
 
         assert isinstance(edge_df, pd.DataFrame)
         assert len(edge_df) == 0
 
     def test_missing(self):
         num_edges = 10
-        store, memory_geff = create_simple_2d_geff(num_edges=num_edges)
+        store, _memory_geff = create_simple_2d_geff(num_edges=num_edges)
         z = zarr.open(store)
 
         # Missing array exists but is all False, e.g. nothing missing
@@ -112,7 +112,7 @@ class Test_geff_to_dataframes:
         n_missing = 4
         missing = np.array([True] * n_missing + [False] * (num_edges - n_missing))
         z[f"{_path.EDGE_PROPS}/score/{_path.MISSING}"] = missing  # pyright: ignore[reportArgumentType]
-        node_df, edge_df = geff_to_dataframes(store)
+        _node_df, edge_df = geff_to_dataframes(store)
         # Number of nans should match number missing
         assert np.count_nonzero(edge_df["score"].isna()) == n_missing
 
@@ -140,7 +140,7 @@ class Test_geff_to_csv:
         assert len(edge_df.columns) == 2 + len(memory_geff["edge_props"].keys())
 
     def test_outpath_with_suffix(self, tmp_path):
-        store, memory_geff = create_simple_3d_geff()
+        store, _memory_geff = create_simple_3d_geff()
         out_path = tmp_path / "dataframe.csv"
         geff_to_csv(store, out_path)
 

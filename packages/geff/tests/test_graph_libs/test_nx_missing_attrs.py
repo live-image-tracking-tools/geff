@@ -66,7 +66,7 @@ def test_sparse_node_props(tmp_path) -> None:
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 0, 1, 1, 0]))
 
     # read it back in and check for consistency
-    read_graph, metadata = NxBackend.read(zarr_path)
+    read_graph, _metadata = NxBackend.read(zarr_path)
     for node, data in graph.nodes(data=True):
         assert read_graph.nodes[node] == data
 
@@ -89,7 +89,7 @@ def test_sparse_edge_props(tmp_path) -> None:
     np.testing.assert_array_almost_equal(score_mask, np.array([0, 1, 0]))
 
     # read it back in and check for consistency
-    read_graph, metadata = NxBackend.read(zarr_path)
+    read_graph, _metadata = NxBackend.read(zarr_path)
     for u, v, data in graph.edges(data=True):
         assert read_graph.edges[u, v] == data
 
