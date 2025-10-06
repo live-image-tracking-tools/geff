@@ -128,8 +128,8 @@ class Test_api_wrapper:
         include_spatial,
         backend,
     ) -> None:
-        if include_spatial is False and backend == "spatial-graph":
-            pytest.skip("Non-spatial graphs not supported by spatial-graph")
+        # if include_spatial is False and backend == "spatial-graph":
+        #     pytest.skip("Non-spatial graphs not supported by spatial-graph")
         backend_module: Backend = get_backend(backend)
 
         extra_props = {dtype: dtype for dtype in PROP_DTYPES}
@@ -151,10 +151,17 @@ class Test_api_wrapper:
         )
 
         in_memory_geff = read_to_memory(store)
-        graph = construct(**in_memory_geff, backend=backend)
-        graph_adapter = backend_module.graph_adapter(graph)
+        if all([include_spatial is False, include_t is False, backend == "spatial-graph"]):
+            with pytest.raises(
+                ValueError,
+                match="Cannot construct a non-empty SpatialGraph from a geff without axes",
+            ):
+                graph = construct(**in_memory_geff, backend=backend)
+        else:
+            graph = construct(**in_memory_geff, backend=backend)
+            graph_adapter = backend_module.graph_adapter(graph)
 
-        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+            _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
     def test_write(
         self,
@@ -291,9 +298,9 @@ class Test_empty_graph:
         elif backend == "spatial-graph":
             create_graph = getattr(sg, "create_graph", sg.SpatialGraph)
             original_graph = create_graph(
-                ndims=3,
+                ndims=1,
                 node_dtype="uint64",
-                node_attr_dtypes={"pos": "float32[3]"},
+                node_attr_dtypes={"pos": "float32[1]"},
                 edge_attr_dtypes={},
                 position_attr="pos",
             )
