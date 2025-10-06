@@ -135,10 +135,14 @@ class SgBackend(Backend):
         elif axis_names is not None:
             pass
         else:
-            raise ValueError(
-                "Axis names must be specified either using the `axis_names` argument or within the "
-                "geff metadata."
-            )
+            # It's ok if there are no axes names if the graph is empty
+            if len(list(graph.nodes)) != 0:
+                raise ValueError(
+                    "Axis names must be specified either using the `axis_names` argument "
+                    "or within the geff metadata."
+                )
+            else:
+                axis_names = []
 
         # create or update metadata
         roi_min, roi_max = graph.roi
