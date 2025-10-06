@@ -1,4 +1,3 @@
-import os
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
 
 
 from geff.core_io._base_write import (
-    _delete_invalid_geff,
     dict_props_to_arr,
     write_dicts,
     write_props_arrays,
@@ -458,44 +456,3 @@ class TestWritePropsArrays:
             expected_missing,
             expected_data,
         )
-
-
-class Test_delete_invalid_geff:
-    def test_basic_path(self, tmp_path):
-        _, mem_geff = create_simple_2d_geff()
-        path = tmp_path / "test.geff"
-        write_arrays(path, **mem_geff)
-        assert os.path.exists(path)
-
-        _delete_invalid_geff(path)
-
-        assert not os.path.exists(path)
-
-    def test_extra_data(self, tmp_path):
-        _, mem_geff = create_simple_2d_geff()
-        path = tmp_path / "test.geff"
-        write_arrays(path, **mem_geff, zarr_format=2)
-        assert os.path.exists(path)
-        # Test with extra data
-        root = zarr.open(path, mode="a")
-        root["other_data"] = np.zeros(shape=(10, 10))
-
-        with pytest.raises(
-            UserWarning, match="Found non-geff members in zarr. Exiting without deleting root zarr."
-        ):
-            _delete_invalid_geff(path)
-            root = zarr.open(path)
-            assert _path.NODES not in root
-            assert _path.EDGES not in root
-            assert "geff" not in root.attrs
-
-    def test_mem_store(self):
-        store, _ = create_simple_2d_geff()
-
-        with pytest.raises(
-            UserWarning,
-            match="Cannot delete root zarr directory, but geff contents have been deleted",
-        ):
-            _delete_invalid_geff(store)
-            root = zarr.open(store)
-            assert "geff" not in root.attrs

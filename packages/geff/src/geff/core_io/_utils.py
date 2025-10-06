@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import os
+import shutil
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, TypeVar
 
 import numpy as np
 import zarr
+
+from geff import _path
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -262,3 +265,44 @@ def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpAr
                 element = np.expand_dims(element, axis=0)
             values_arr[i] = element
     return {"values": values_arr, "missing": missing_arr if missing_arr.any() else None}
+
+
+def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
+    """Delete an geff after writing
+
+    Tries to handle multiple StoreLike inputs and avoids deleting non-geff contents
+    in the store
+
+    Args:
+        store (StoreLike): StoreLike geff that should be deleted
+        zarr_format (Literal[2, 3], optional): Zarr format used to write input store. Defaults to 2.
+    """
+    root = setup_zarr_group(store, zarr_format=zarr_format)
+
+    # Delete node and edge groups
+    del root[_path.NODES]
+    del root[_path.EDGES]
+
+    # If the root is empty, try to delete the root zarr
+    if len(list(root.keys())) == 0:
+        # Handle Path or str storelike
+        if isinstance(store, Path) or isinstance(store, str):
+            shutil.rmtree(store)
+        else:
+            # Try to get a valid path from the store
+            try:
+                path = store.path  # type: ignore
+                if os.path.exists(path):
+                    shutil.rmtree(path)
+            except AttributeError:
+                warnings.warn(
+                    "Cannot delete root zarr directory, but geff contents have been deleted",
+                    stacklevel=2,
+                )
+                del root.attrs["geff"]
+    else:
+        warnings.warn(
+            "Found non-geff members in zarr. Exiting without deleting root zarr.", stacklevel=2
+        )
+        # Delete geff metadata from attrs
+        del root.attrs["geff"]
