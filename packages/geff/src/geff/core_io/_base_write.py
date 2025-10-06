@@ -259,8 +259,15 @@ def write_arrays(
         try:
             validate_structure(geff_store)
         except ValueError as e:
-            delete_geff(geff_store, zarr_format=zarr_format)
-            raise ValueError(e.args[0] + "\nCannot write invalid geff.") from e
+            message = "\nCannot write invalid geff."
+            try:
+                delete_geff(geff_store, zarr_format=zarr_format)
+            except:  # noqa: E722
+                message = (
+                    "\nWritten geff is invalid, but cannot be deleted automatically. "
+                    "Please delete manually."
+                )
+            raise ValueError(e.args[0] + message) from e
 
 
 def write_id_arrays(
