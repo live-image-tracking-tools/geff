@@ -175,10 +175,10 @@ class SgBackend(Backend):
         )
         metadata = create_or_update_metadata(metadata, graph.directed, axes)
 
-        if graph.ndims != len(axes):
+        if graph.ndims != len(axes) and len(list(graph.nodes)) != 0:
             raise ValueError(
                 f"Cannot write a SpatialGraph with ndims {graph.ndims} and "
-                "a different number of axes ({axis_names})"
+                f"a different number of axes ({axis_names})"
             )
 
         # write to geff
