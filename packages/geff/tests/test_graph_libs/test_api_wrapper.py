@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, get_args
 import networkx as nx
 import numpy as np
 import pytest
+import zarr
 
 from geff import construct, read, write
 from geff._graph_libs._api_wrapper import SupportedBackend, get_backend
@@ -10,7 +11,7 @@ from geff._graph_libs._backend_protocol import GraphAdapter
 from geff._graph_libs._networkx import NxBackend
 from geff._typing import InMemoryGeff
 from geff.core_io import read_to_memory
-from geff.testing.data import create_empty_geff, create_mock_geff
+from geff.testing.data import create_empty_geff, create_mock_geff, create_simple_3d_geff
 
 if TYPE_CHECKING:
     from geff._graph_libs._backend_protocol import Backend
@@ -189,6 +190,10 @@ class Test_api_wrapper:
         # this will create a graph instance of the backend type
         original_graph = backend_module.construct(**memory_geff)
 
+        # Add extra values to metadata
+        metadata = memory_geff["metadata"]
+        metadata.extra = {"foo": "bar", "bar": {"baz": "qux"}}
+
         # write with unified write function
         path_store = tmp_path / "test_path.zarr"
         write(original_graph, path_store, memory_geff["metadata"])
@@ -198,8 +203,61 @@ class Test_api_wrapper:
         graph_adapter = NxBackend.graph_adapter(graph)
 
         _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+        assert metadata.extra["foo"] == "bar"
+        assert metadata.extra["bar"]["baz"] == "qux"
 
-        # TODO: test metadata
+
+@pytest.mark.parametrize("backend", get_args(SupportedBackend))
+class Test_api_wrapper_simple:  # tests that only need backend parametrization
+    def test_write_axis_lists_override_metadata(self, tmp_path, backend):
+        backend_module: Backend = get_backend(backend)
+        store, memory_geff = create_simple_3d_geff()
+
+        # this will create a graph instance of the backend type
+        original_graph = backend_module.construct(**memory_geff)
+
+        # write with unified write function
+        path_store = tmp_path / "test_path.zarr"
+        axis_names = ["x", "y"]
+        axis_units = ["meter", "meter"]
+        axis_types = ["space", "space"]
+        backend_module.write(
+            original_graph,
+            path_store,
+            metadata=memory_geff["metadata"],
+            axis_names=axis_names,
+            axis_units=axis_units,
+            axis_types=axis_types,
+        )
+
+        new_mem_geff = read_to_memory(path_store)
+        metadata = new_mem_geff["metadata"]
+        assert metadata.axes is not None
+        assert len(metadata.axes) == 2
+        assert axis_names == [axis.name for axis in metadata.axes]
+        assert axis_units == [axis.unit for axis in metadata.axes]
+        assert axis_types == [axis.type for axis in metadata.axes]
+
+    def test_write_read_different_stores(self, tmp_path, backend):
+        stores = [
+            tmp_path / "test_path.zarr",  # Path object
+            str(tmp_path / "test_string.zarr"),  # string path
+            zarr.storage.MemoryStore(),
+        ]
+
+        backend_module: Backend = get_backend(backend)
+        _, memory_geff = create_simple_3d_geff()
+
+        # this will create a graph instance of the backend type
+        original_graph = backend_module.construct(**memory_geff)
+        adpt_og_graph = backend_module.graph_adapter(original_graph)
+
+        # Write to store type
+        for store in stores:
+            backend_module.write(original_graph, store, memory_geff["metadata"])
+            new_graph = backend_module.graph_adapter(backend_module.read(store)[0])
+            assert adpt_og_graph.get_node_ids() == new_graph.get_node_ids()
+            assert adpt_og_graph.get_edge_ids() == new_graph.get_edge_ids()
 
 
 @pytest.mark.parametrize("backend", get_args(SupportedBackend))
