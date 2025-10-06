@@ -123,8 +123,8 @@ def create_dummy_in_mem_geff(
         include_varlength: Whether to include a variable length property. If true, will
             make a property on nodes called "var_length" that has 2d np arrays of various
             shapes
-        include_missing: If true, creades a node prop called "sparse_prop" where every other
-            node has a missing value
+        include_missing: If true, creades a node and edge prop called "sparse_prop" where every
+            other node/edge has a missing value
 
     Returns:
         InMemoryGeff containing all graph properties
@@ -300,9 +300,9 @@ def create_dummy_in_mem_geff(
                     values = np.arange(num_nodes, dtype=prop_dtype)
                 else:  # float types
                     values = np.linspace(0.1, 1.0, num_nodes, dtype=prop_dtype)
-                node_prop_dict: PropDictNpArray = {"values": values, "missing": None}
-                node_props[prop_name] = node_prop_dict
-                node_prop_meta.append(create_props_metadata(prop_name, node_prop_dict))
+                prop_dict: PropDictNpArray = {"values": values, "missing": None}
+                node_props[prop_name] = prop_dict
+                node_prop_meta.append(create_props_metadata(prop_name, prop_dict))
 
             elif isinstance(prop_value, np.ndarray):
                 # Use provided array directly
@@ -320,36 +320,6 @@ def create_dummy_in_mem_geff(
                     f"extra_node_props[{prop_name}] must be a string dtype or numpy array, "
                     f"got {type(prop_value)}"
                 )
-
-    if include_varlength:
-        prop_name = "var_length"
-        ndim = 3
-        _dtype = np.uint64
-        values_list = []
-        for node in range(num_nodes):
-            shape = [
-                node,
-            ] * ndim
-            arr = np.ones(shape=shape, dtype=_dtype) * node
-            values_list.append(arr)
-
-        values = np.array(values_list, dtype=np.object_)
-        missing = np.zeros(shape=(num_nodes,), dtype=np.bool_)
-        if num_nodes > 0:
-            missing[0] = 1
-        node_prop_dict = {"values": values, "missing": missing}
-        node_props[prop_name] = node_prop_dict
-        node_prop_meta.append(create_props_metadata(prop_name, node_prop_dict))
-
-    if include_missing:
-        prop_name = "sparse_prop"
-        values = np.arange(num_nodes, dtype="float64")
-        missing = np.zeros(num_nodes, dtype=np.bool_)
-        if num_nodes > 0:
-            missing[::2] = 1
-        node_prop_dict = {"values": values, "missing": missing}
-        node_props[prop_name] = node_prop_dict
-        node_prop_meta.append(create_props_metadata(prop_name, node_prop_dict))
 
     # Generate edge properties
     edge_props_dict: dict[str, PropDictNpArray] = {}
@@ -409,6 +379,39 @@ def create_dummy_in_mem_geff(
             edge_prop_meta.append(
                 create_props_metadata(identifier=prop_name, prop_data=edge_props_dict[prop_name])
             )
+
+    if include_varlength:
+        prop_name = "var_length"
+        ndim = 3
+        _dtype = np.uint64
+        values_list = []
+        for node in range(num_nodes):
+            shape = [
+                node,
+            ] * ndim
+            arr = np.ones(shape=shape, dtype=_dtype) * node
+            values_list.append(arr)
+
+        values = np.array(values_list, dtype=np.object_)
+        missing = np.zeros(shape=(num_nodes,), dtype=np.bool_)
+        if num_nodes > 0:
+            missing[0] = 1
+        prop_dict = {"values": values, "missing": missing}
+        node_props[prop_name] = prop_dict
+        node_prop_meta.append(create_props_metadata(prop_name, prop_dict))
+
+    if include_missing:
+        prop_name = "sparse_prop"
+        values = np.arange(num_nodes, dtype="float64")
+        missing = np.zeros(num_nodes, dtype=np.bool_)
+        if num_nodes > 0:
+            missing[::2] = 1
+        prop_dict = {"values": values, "missing": missing}
+        prop_meta = create_props_metadata(prop_name, prop_dict)
+        node_props[prop_name] = prop_dict
+        node_prop_meta.append(prop_meta)
+        edge_props_dict[prop_name] = prop_dict
+        edge_prop_meta.append(prop_meta)
 
     metadata = create_or_update_metadata(metadata=None, is_directed=directed, axes=axes)
     metadata = add_or_update_props_metadata(metadata, node_prop_meta, "node")
