@@ -577,3 +577,25 @@ def create_simple_temporal_geff(
         include_y=False,  # No spatial dimensions
         include_x=False,  # No spatial dimensions
     )
+
+
+def create_empty_geff(directed: bool = False) -> tuple[zarr.storage.MemoryStore, InMemoryGeff]:
+    """Creates a geff without any nodes or edges
+
+    Args:
+        directed (bool, optional): Whether to create a directed graph. Defaults to False.
+
+    Returns:
+        tuple[zarr.storage.MemoryStore, InMemoryGeff]
+    """
+    return create_mock_geff(
+        node_id_dtype="uint",
+        node_axis_dtypes={"position": "float64", "time": "float64"},
+        directed=directed,
+        num_nodes=0,
+        num_edges=0,
+        include_t=False,  # No time
+        include_z=False,  # No spatial dimensions
+        include_y=False,  # No spatial dimensions
+        include_x=False,  # No spatial dimensions
+    )

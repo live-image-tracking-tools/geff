@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, get_args
 
+import networkx as nx
 import numpy as np
 import pytest
 
@@ -9,7 +10,7 @@ from geff._graph_libs._backend_protocol import GraphAdapter
 from geff._graph_libs._networkx import NxBackend
 from geff._typing import InMemoryGeff
 from geff.core_io import read_to_memory
-from geff.testing.data import create_mock_geff
+from geff.testing.data import create_empty_geff, create_mock_geff
 
 if TYPE_CHECKING:
     from geff._graph_libs._backend_protocol import Backend
@@ -206,9 +207,7 @@ class Test_empty_graph:
     def test_read(self, backend):
         backend_module: Backend = get_backend(backend)
 
-        store, memory_geff = create_mock_geff(
-            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
-        )
+        store, memory_geff = create_empty_geff()
 
         graph, metadata = read(store, backend=backend)
         graph_adapter = backend_module.graph_adapter(graph)
@@ -218,9 +217,7 @@ class Test_empty_graph:
     def test_construct(self, backend):
         backend_module: Backend = get_backend(backend)
 
-        store, memory_geff = create_mock_geff(
-            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
-        )
+        store, memory_geff = create_empty_geff()
 
         in_memory_geff = read_to_memory(store)
         graph = construct(**in_memory_geff, backend=backend)
@@ -229,21 +226,31 @@ class Test_empty_graph:
         _assert_graph_equal_to_geff(graph_adapter, memory_geff)
 
     def test_write(self, tmp_path, backend):
-        backend_module: Backend = get_backend(backend)
-
-        store, memory_geff = create_mock_geff(
-            "uint", AXIS_DTYPES, directed=False, num_nodes=0, num_edges=0
-        )
-
-        # this will create a graph instance of the backend type
-        original_graph = backend_module.construct(**memory_geff)
+        if backend == "networkx":
+            original_graph = nx.Graph()
+        elif backend == "rustworkx":
+            original_graph = rx.PyGraph()
+        elif backend == "spatial-graph":
+            create_graph = getattr(sg, "create_graph", sg.SpatialGraph)
+            original_graph = create_graph(
+                ndims=3,
+                node_dtype="uint64",
+                node_attr_dtypes={"pos": "float32[3]"},
+                edge_attr_dtypes={},
+                position_attr="pos",
+            )
+        else:
+            raise NotImplementedError(
+                f"Backend {backend} not tested in Test_empgy_graph.test_write"
+            )
 
         # write with unified write function
         path_store = tmp_path / "test_path.zarr"
-        write(original_graph, path_store, memory_geff["metadata"])
+        write(original_graph, path_store)
 
-        # read with the NxBackend to see if the graph is the same
-        graph, metadata = NxBackend.read(path_store)
-        graph_adapter = NxBackend.graph_adapter(graph)
-
-        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+        # check that graph is empty after loading to in memory geff
+        mem_geff = read_to_memory(path_store)
+        assert len(mem_geff["node_ids"]) == 0
+        assert len(mem_geff["edge_ids"]) == 0
+        assert mem_geff["node_props"] == {}
+        assert mem_geff["edge_props"] == {}
