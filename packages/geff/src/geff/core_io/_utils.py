@@ -268,7 +268,7 @@ def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpAr
 
 
 def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
-    """Delete an geff after writing
+    """Delete a geff after writing
 
     Tries to handle multiple StoreLike inputs and avoids deleting non-geff contents
     in the store
