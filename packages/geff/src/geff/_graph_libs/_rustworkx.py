@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -137,8 +136,6 @@ class RxBackend(Backend):
             edge_data: list[tuple[tuple[int, int], dict[str, Any]]] = []
             node_props: list[str] = []
             edge_props: list[str] = []
-
-            warnings.warn(f"Graph is empty - only writing metadata to {store}", stacklevel=2)
 
         else:
             # Prepare node data
