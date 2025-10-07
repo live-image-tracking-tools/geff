@@ -120,6 +120,7 @@ class RxBackend(Backend):
         scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:
         directed = isinstance(graph, rx.PyDiGraph)
@@ -168,6 +169,7 @@ class RxBackend(Backend):
             edge_prop_names=edge_props,
             metadata=metadata,
             zarr_format=zarr_format,
+            structure_validation=structure_validation,
         )
 
     @staticmethod

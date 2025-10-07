@@ -144,6 +144,7 @@ class SgBackend(Backend):
         scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
     ) -> None:
         store = remove_tilde(store)
 
@@ -197,6 +198,7 @@ class SgBackend(Backend):
             },
             metadata=metadata,
             zarr_format=zarr_format,
+            structure_validation=structure_validation,
         )
 
     @staticmethod
