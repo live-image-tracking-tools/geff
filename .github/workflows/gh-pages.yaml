@@ -62,7 +62,7 @@ jobs:
       # Post the comment manually
       - name: Post comment with gh-pages preview
         if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-        uses: peter-evans/commit-comment@v3
+        uses: peter-evans/commit-comment@v4
         with:
           body: |
             [PR Preview Action](https://github.com/rossjrw/pr-preview-action) ${{ steps.preview-step.outputs.action-version }}
