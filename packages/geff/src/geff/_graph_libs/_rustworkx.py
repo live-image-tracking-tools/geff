@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -121,6 +120,7 @@ class RxBackend(Backend):
         scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:
         directed = isinstance(graph, rx.PyDiGraph)
@@ -136,8 +136,6 @@ class RxBackend(Backend):
             edge_data: list[tuple[tuple[int, int], dict[str, Any]]] = []
             node_props: list[str] = []
             edge_props: list[str] = []
-
-            warnings.warn(f"Graph is empty - only writing metadata to {store}", stacklevel=2)
 
         else:
             # Prepare node data
@@ -171,6 +169,7 @@ class RxBackend(Backend):
             edge_prop_names=edge_props,
             metadata=metadata,
             zarr_format=zarr_format,
+            structure_validation=structure_validation,
         )
 
     @staticmethod

@@ -4,6 +4,7 @@ import pytest
 from geff._graph_libs._networkx import NxBackend
 from geff.testing.data import (
     create_dummy_in_mem_geff,
+    create_empty_geff,
     create_mock_geff,
     create_simple_2d_geff,
     create_simple_3d_geff,
@@ -722,3 +723,15 @@ class Test_create_dummy_in_mem_geff:
         prop_meta = node_props_meta[prop_name]
         assert prop_meta.varlength
         assert np.issubdtype(prop_meta.dtype, _dtype)
+
+
+def test_empty_geff():
+    store, memory_geff = create_empty_geff()
+    meta = memory_geff["metadata"]
+    assert len(memory_geff["node_ids"]) == 0
+    assert len(memory_geff["edge_ids"]) == 0
+    assert memory_geff["node_props"] == {}
+    assert memory_geff["edge_props"] == {}
+    assert meta.axes == []
+    assert meta.node_props_metadata == {}
+    assert meta.edge_props_metadata == {}
