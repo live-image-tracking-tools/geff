@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 from typing import Literal
@@ -22,7 +23,7 @@ from zarr.storage import StoreLike
 
 import geff
 from geff.core_io import write_arrays
-from geff_spec import Axis, GeffMetadata
+from geff_spec import Axis, GeffMetadata, RelatedObject
 
 
 def ctc_tiffs_to_zarr(
@@ -196,6 +197,25 @@ def from_ctc_to_geff(
 
     node_ids = np.asarray(node_props.pop("id"), dtype="uint")
 
+    rel_objs = None
+    if segmentation_store is not None:
+        # Record related object metadata for segmentation
+        seg_path = None
+        if isinstance(segmentation_store, Path) or isinstance(segmentation_store, str):
+            seg_path = segmentation_store
+        else:
+            try:
+                seg_path = segmentation_store.path  # type: ignore
+            except AttributeError:
+                warnings.warn(
+                    "Cannot determine path to segmentation_store for related objects metadata",
+                    stacklevel=2,
+                )
+
+        if seg_path is not None:
+            rel_path = os.path.relpath(seg_path, geff_path)
+            rel_objs = [RelatedObject(type="labels", path=rel_path, label_prop="tracklet_id")]
+
     write_arrays(
         geff_store=geff_path,
         node_ids=node_ids,
@@ -211,6 +231,8 @@ def from_ctc_to_geff(
             directed=True,
             node_props_metadata={},
             edge_props_metadata={},
+            track_node_props={"tracklet": "tracklet_id"},
+            related_objects=rel_objs,
         ),
         zarr_format=zarr_format,
     )

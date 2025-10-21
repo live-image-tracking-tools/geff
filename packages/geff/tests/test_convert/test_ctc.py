@@ -1,5 +1,7 @@
 import pytest
 
+from geff_spec import RelatedObject
+
 try:
     import tifffile
 
@@ -11,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 import zarr
+import zarr.storage
 
 from geff._graph_libs._networkx import NxBackend
 
@@ -63,47 +66,240 @@ def create_mock_data(
 
 @pytest.mark.parametrize("is_gt", [True, False])
 @pytest.mark.parametrize("tczyx", [True, False])
-def test_ctc_to_geff(
-    tmp_path: Path,
-    is_gt: bool,
-    tczyx: bool,
-) -> None:
-    ctc_path = create_mock_data(tmp_path, is_gt)
-    geff_path = ctc_path / "little.geff"
-    segm_path = ctc_path / "segm.zarr"
+class Test_ctc_to_geff:
+    def test_basic(
+        self,
+        tmp_path: Path,
+        is_gt: bool,
+        tczyx: bool,
+    ) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt)
+        geff_path = tmp_path / "little.geff"
 
-    from_ctc_to_geff(
-        ctc_path=ctc_path,
-        geff_path=geff_path,
-        segmentation_store=segm_path,
-        tczyx=True,
-    )
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=geff_path,
+            tczyx=tczyx,
+        )
 
-    assert geff_path.exists()
+        assert geff_path.exists()
 
-    graph, _ = NxBackend.read(geff_path)
+        # Check graph that was written to geff
+        graph, metadata = NxBackend.read(geff_path)
 
-    expected_nodes = {0, 1, 2, 3, 4, 5}
-    expected_edges = {(0, 2), (2, 3), (2, 4), (1, 5)}
+        expected_nodes = {0, 1, 2, 3, 4, 5}
+        expected_edges = {(0, 2), (2, 3), (2, 4), (1, 5)}
 
-    assert set(graph.nodes()) == expected_nodes
-    assert set(graph.edges()) == expected_edges
+        assert set(graph.nodes()) == expected_nodes
+        assert set(graph.edges()) == expected_edges
 
-    for _, data in graph.nodes(data=True):
-        for key in ["tracklet_id", "t", "y", "x"]:
-            assert key in data
+        for _, data in graph.nodes(data=True):
+            for key in ["tracklet_id", "t", "y", "x"]:
+                assert key in data
 
-    expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+        # Check metadata
+        assert metadata.track_node_props == {"tracklet": "tracklet_id"}
+        assert metadata.related_objects is None
 
-    segm = zarr.open_array(segm_path, mode="r")[...]
+    def orig_test(
+        self,
+        tmp_path: Path,
+        is_gt: bool,
+        tczyx: bool,
+    ):
+        ctc_path = create_mock_data(tmp_path, is_gt)
+        geff_path = tmp_path / "little.geff"
+        segm_path = tmp_path / "segm.zarr"
 
-    assert segm.shape[0] == expected_segm.shape[0]
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=geff_path,
+            segmentation_store=segm_path,
+            tczyx=True,
+        )
 
-    if tczyx:
-        assert segm.ndim == 5
+        assert geff_path.exists()
 
-    segm = np.squeeze(segm)
-    np.testing.assert_array_equal(segm, expected_segm)
+        # Check graph that was written to geff
+        graph, metadata = NxBackend.read(geff_path)
+
+        expected_nodes = {0, 1, 2, 3, 4, 5}
+        expected_edges = {(0, 2), (2, 3), (2, 4), (1, 5)}
+
+        assert set(graph.nodes()) == expected_nodes
+        assert set(graph.edges()) == expected_edges
+
+        for _, data in graph.nodes(data=True):
+            for key in ["tracklet_id", "t", "y", "x"]:
+                assert key in data
+
+        # Check segmentation that was written to zarr
+        expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+
+        segm = zarr.open_array(segm_path, mode="r")[...]
+
+        assert segm.shape[0] == expected_segm.shape[0]
+
+        if tczyx:
+            assert segm.ndim == 5
+
+        segm = np.squeeze(segm)
+        np.testing.assert_array_equal(segm, expected_segm)
+
+        # Check metadata
+        assert metadata.track_node_props == {"tracklet": "tracklet_id"}
+        assert metadata.related_objects is not None
+        assert metadata.related_objects[0] == RelatedObject(
+            type="labels", label_prop="tracklet_id", path="../segm.zarr"
+        )
+
+        # Test without exporting segmentation
+        geff_path = tmp_path / "noseg.geff"
+
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=geff_path,
+            tczyx=True,
+        )
+
+        assert geff_path.exists()
+        graph, metadata = NxBackend.read(geff_path)
+        # Check for no related objects
+        assert metadata.related_objects is None
+
+    def test_seg_to_path(
+        self,
+        tmp_path: Path,
+        is_gt: bool,
+        tczyx: bool,
+    ):
+        ctc_path = create_mock_data(tmp_path, is_gt)
+        geff_path = tmp_path / "little.geff"
+        segm_path = tmp_path / "segm.zarr"
+
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=geff_path,
+            segmentation_store=segm_path,
+            tczyx=tczyx,
+        )
+
+        assert geff_path.exists()
+
+        # Check graph that was written to geff
+        graph, metadata = NxBackend.read(geff_path)
+
+        # Check segmentation that was written to zarr
+        expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+
+        segm = zarr.open_array(segm_path, mode="r")[...]
+
+        assert segm.shape[0] == expected_segm.shape[0]
+
+        if tczyx:
+            assert segm.ndim == 5
+
+        segm = np.squeeze(segm)
+        np.testing.assert_array_equal(segm, expected_segm)
+
+        # Check metadata
+        assert metadata.track_node_props == {"tracklet": "tracklet_id"}
+        assert metadata.related_objects is not None
+        assert metadata.related_objects[0] == RelatedObject(
+            type="labels", label_prop="tracklet_id", path="../segm.zarr"
+        )
+
+    def test_seg_to_store(
+        self,
+        tmp_path: Path,
+        is_gt: bool,
+        tczyx: bool,
+    ):
+        ctc_path = create_mock_data(tmp_path, is_gt)
+        geff_path = tmp_path / "little.geff"
+        segm_path = tmp_path / "segm.zarr"
+
+        if zarr.__version__.startswith("2"):
+            store = zarr.storage.DirectoryStore(segm_path)
+        else:
+            store = zarr.storage.LocalStore(segm_path)
+
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=geff_path,
+            segmentation_store=store,
+            tczyx=tczyx,
+        )
+
+        assert geff_path.exists()
+
+        # Check graph that was written to geff
+        graph, metadata = NxBackend.read(geff_path)
+
+        # Check segmentation that was written to zarr
+        expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+
+        segm = zarr.open_array(segm_path, mode="r")[...]
+
+        assert segm.shape[0] == expected_segm.shape[0]
+
+        if tczyx:
+            assert segm.ndim == 5
+
+        segm = np.squeeze(segm)
+        np.testing.assert_array_equal(segm, expected_segm)
+
+        # Check metadata
+        assert metadata.track_node_props == {"tracklet": "tracklet_id"}
+        assert metadata.related_objects is not None
+        assert metadata.related_objects[0] == RelatedObject(
+            type="labels", label_prop="tracklet_id", path="../segm.zarr"
+        )
+
+    def test_seg_to_bad_store(
+        self,
+        tmp_path: Path,
+        is_gt: bool,
+        tczyx: bool,
+    ):
+        # Finding the relative path won't work with a memory store and should issue a warning
+
+        ctc_path = create_mock_data(tmp_path, is_gt)
+        geff_path = tmp_path / "little.geff"
+        store = zarr.storage.MemoryStore()
+
+        with pytest.raises(
+            UserWarning,
+            match="Cannot determine path to segmentation_store for related objects metadata",
+        ):
+            from_ctc_to_geff(
+                ctc_path=ctc_path,
+                geff_path=geff_path,
+                segmentation_store=store,
+                tczyx=tczyx,
+            )
+
+            assert geff_path.exists()
+
+            # Check graph that was written to geff
+            graph, metadata = NxBackend.read(geff_path)
+
+            # Check segmentation that was written to zarr
+            expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+
+            segm = zarr.open_array(store, mode="r")[...]
+
+            assert segm.shape[0] == expected_segm.shape[0]
+
+            if tczyx:
+                assert segm.ndim == 5
+
+            segm = np.squeeze(segm)
+            np.testing.assert_array_equal(segm, expected_segm)
+
+            # Check metadata
+            assert metadata.track_node_props == {"tracklet": "tracklet_id"}
+            assert metadata.related_objects is None
 
 
 @pytest.mark.parametrize("ctzyx", [True, False])
