@@ -181,6 +181,11 @@ class TestWriteArrays:
         ):
             write_arrays(path, **memory_geff)
 
+    def test_existing_geff(self):
+        store, memory_geff = create_simple_2d_geff()
+        with pytest.raises(ValueError, match=r"Found an existing geff present in `geff_store`."):
+            write_arrays(store, **memory_geff)
+
 
 @pytest.mark.parametrize(
     ("data_type", "expected"),

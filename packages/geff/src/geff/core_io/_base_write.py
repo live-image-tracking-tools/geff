@@ -6,7 +6,13 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from geff import _path
-from geff.core_io._utils import construct_var_len_props, delete_geff, remove_tilde, setup_zarr_group
+from geff.core_io._utils import (
+    check_for_geff,
+    construct_var_len_props,
+    delete_geff,
+    remove_tilde,
+    setup_zarr_group,
+)
 from geff.validate.structure import validate_structure
 from geff_spec.utils import (
     add_or_update_props_metadata,
@@ -232,8 +238,19 @@ def write_arrays(
             as three individual properties called "z", "y", and "x".
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+
+    Raises:
+        ValueError: If a geff already exists in `geff_store`
     """
     geff_store = remove_tilde(geff_store)
+
+    # Check for an existing geff
+    if check_for_geff(geff_store):
+        raise ValueError(
+            "Found an existing geff present in `geff_store`. "
+            "Please use `geff.core_io.delete_geff` or provide an alternative "
+            "`geff_store` to write to."
+        )
 
     write_id_arrays(geff_store, node_ids, edge_ids, zarr_format=zarr_format)
     if node_props is not None:
