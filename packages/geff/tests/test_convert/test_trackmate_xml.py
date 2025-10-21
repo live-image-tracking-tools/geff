@@ -20,18 +20,13 @@ TEST_DATA = Path(__file__).parent.parent / "data"
 
 def test_preliminary_checks(tmp_path: Path) -> None:
     xml_path = Path("path/to/xml")
-    geff_path = Path("path/to/geff")
 
     # Normal case
-    tm_xml._preliminary_checks(tmp_path, geff_path, True)
+    tm_xml._preliminary_checks(tmp_path)
 
     # FileNotFoundError for missing XML file
     with pytest.raises(FileNotFoundError):
-        tm_xml._preliminary_checks(xml_path, geff_path, False)
-
-    # FileExistsError for existing GEFF file
-    with pytest.raises(FileExistsError):
-        tm_xml._preliminary_checks(tmp_path, tmp_path, False)
+        tm_xml._preliminary_checks(xml_path)
 
 
 def test_get_units() -> None:
@@ -919,19 +914,15 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     validate_structure(geff_output)
 
     # Discard filtered spots and tracks
+    geff_output = tmp_path / "test2.geff"
     with pytest.warns() as warning_list:
         tm_xml.from_trackmate_xml_to_geff(
             TEST_DATA / "FakeTracks.xml",
             geff_output,
             discard_filtered_spots=True,
             discard_filtered_tracks=True,
-            overwrite=True,
         )
     warning_messages = [str(warning.message) for warning in warning_list]
     assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
     assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
     validate_structure(geff_output)
-
-    # Geff file already exists
-    with pytest.raises(FileExistsError):
-        tm_xml.from_trackmate_xml_to_geff(TEST_DATA / "FakeTracks.xml", geff_output)

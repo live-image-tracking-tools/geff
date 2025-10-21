@@ -76,10 +76,6 @@ def convert_ctc(
             help="Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape."
         ),
     ] = False,
-    overwrite: Annotated[
-        bool,
-        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
-    ] = False,
     zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
     # because of Typer not supporting Literal types
 ) -> None:
@@ -98,7 +94,6 @@ def convert_ctc(
         geff_path=geff_path,
         segmentation_store=segm_path,
         tczyx=tczyx,
-        overwrite=overwrite,
         zarr_format=cast("Literal[2, 3]", zarr_format),
     )
 
@@ -107,7 +102,6 @@ def convert_ctc(
             ctc_path=input_image_dir,
             output_store=output_image_path,
             ctzyx=tczyx,
-            overwrite=overwrite,
             zarr_format=cast("Literal[2, 3]", zarr_format),
         )
 
@@ -134,10 +128,6 @@ def convert_trackmate_xml(
         bool,
         typer.Option(help="True to discard the tracks filtered out in TrackMate, False otherwise."),
     ] = False,
-    overwrite: Annotated[
-        bool,
-        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
-    ] = False,
     zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
     # because of Typer not supporting Literal types
 ) -> None:
@@ -151,7 +141,6 @@ def convert_trackmate_xml(
         geff_path=geff_path,
         discard_filtered_spots=discard_filtered_spots,
         discard_filtered_tracks=discard_filtered_tracks,
-        overwrite=overwrite,
         zarr_format=cast("Literal[2, 3]", zarr_format),
     )
 

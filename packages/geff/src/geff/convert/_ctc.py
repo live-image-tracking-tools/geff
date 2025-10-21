@@ -1,4 +1,3 @@
-import shutil
 from pathlib import Path
 from typing import Literal
 
@@ -29,7 +28,6 @@ def ctc_tiffs_to_zarr(
     ctc_path: Path,
     output_store: StoreLike,
     ctzyx: bool = False,
-    overwrite: bool = False,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
@@ -40,8 +38,6 @@ def ctc_tiffs_to_zarr(
         output_store (StoreLike): The path to the Zarr file.
         ctzyx (optional, bool): Expand data to make it (T, C, Z, Y, X)
             otherwise it's (T,) + Frame shape. Defaults to False.
-        overwrite (optional, bool): Whether to overwrite the Zarr file if it already exists.
-            Defaults to False.
         zarr_format (optional, Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
     """
@@ -55,7 +51,7 @@ def ctc_tiffs_to_zarr(
         warnings.filterwarnings(
             "ignore", message=r".*ignoring keyword argument.*zarr_format.*", category=UserWarning
         )
-        array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
+        array.to_zarr(url=output_store, zarr_format=zarr_format)
 
 
 def from_ctc_to_geff(
@@ -63,7 +59,6 @@ def from_ctc_to_geff(
     geff_path: Path,
     segmentation_store: StoreLike | None = None,
     tczyx: bool = False,
-    overwrite: bool = False,
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
     """
@@ -75,7 +70,6 @@ def from_ctc_to_geff(
         segmentation_store: The path or store to save the segmentation to.
                             If not provided, it won't be exported.
         tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
-        overwrite: Whether to overwrite the GEFF file if it already exists.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
             Defaults to 2.
     """
@@ -93,12 +87,6 @@ def from_ctc_to_geff(
         raise FileNotFoundError(
             f"Tracks file {ctc_path}/man_track.txt or {ctc_path}/res_track.txt does not exist"
         )
-
-    if geff_path.exists() and not overwrite:
-        raise FileExistsError(f"GEFF file {geff_path} already exists")
-
-    if geff_path.exists() and overwrite:
-        shutil.rmtree(geff_path)
 
     tracks: dict[int, list[int]] = {}
 
@@ -142,7 +130,7 @@ def from_ctc_to_geff(
                     shape=(len(sorted_files), *n_1_padding, *frame.shape),
                     chunks=(1, *n_1_padding, *frame.shape),
                     dtype=frame.dtype,
-                    mode="w" if overwrite else "w-",
+                    mode="w-",
                     zarr_format=zarr_format,
                 )
 
