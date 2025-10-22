@@ -205,7 +205,10 @@ def from_ctc_to_geff(
             seg_path = segmentation_store
         else:
             try:
-                seg_path = segmentation_store.path  # type: ignore
+                if zarr.__version__.startswith("2"):
+                    seg_path = segmentation_store.path  # type: ignore
+                else:
+                    seg_path = segmentation_store.root  # type: ignore
             except AttributeError:
                 warnings.warn(
                     "Cannot determine path to segmentation_store for related objects metadata",
