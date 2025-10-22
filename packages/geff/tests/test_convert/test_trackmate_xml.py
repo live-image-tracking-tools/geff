@@ -205,6 +205,14 @@ def test_convert_ROI_coordinates() -> None:
     ):
         tm_xml._convert_ROI_coordinates(el_obtained, attr_obtained)
 
+    # TypeError for invalid ROI_N_POINTS
+    el_obtained = ET.Element("Spot")
+    el_obtained.text = "1 2.0 -3 -4.0 5.5 6"
+    el_obtained.attrib["ROI_N_POINTS"] = "not_an_int"
+    attr_obtained = deepcopy(el_obtained.attrib)
+    with pytest.raises(TypeError, match="ROI_N_POINTS should be an integer."):
+        tm_xml._convert_ROI_coordinates(el_obtained, attr_obtained)
+
     # No coordinates
     el_obtained = ET.Element("Spot")
     el_obtained.attrib["ROI_N_POINTS"] = "2"
