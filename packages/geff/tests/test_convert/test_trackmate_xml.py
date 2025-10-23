@@ -8,7 +8,9 @@ import pytest
 
 import geff.convert._trackmate_xml as tm_xml
 from geff import validate_structure
+from geff._graph_libs._networkx import NxBackend
 from geff.testing._utils import nx_is_equal
+from geff_spec import PropMetadata
 
 try:
     from lxml import etree as ET
@@ -624,7 +626,7 @@ def test_get_specific_tags() -> None:
         "TrackFilterCollection": track_filter_collection,
     }
 
-    def normalize_xml_string(xml_str):
+    def normalize_xml_string(xml_str: str) -> str:
         """Remove extra whitespace between XML elements."""
         normalized = re.sub(r">\s+<", "><", xml_str.strip())
         return normalized
@@ -916,6 +918,134 @@ def test_process_feature_metadata() -> None:
         tm_xml._process_feature_metadata(feature_element, obtained, "SpotFeatures", units)
 
 
+def test_metadata_info_stability(tmp_path: Path) -> None:
+    """Test that metadata information remains stable after writing to GEFF."""
+    # Metadata before writing to GEFF.
+    xml_path = TEST_DATA / "FakeTracks.xml"
+    units = {"spatialunits": "micrometer", "timeunits": "seconds"}
+    segmentation = True
+    props_md = tm_xml._extract_props_metadata(xml_path, units, segmentation)
+    with pytest.warns():
+        md_before_write = tm_xml._build_geff_metadata(
+            xml_path=xml_path,
+            units=units,
+            img_path="/path/to/image.tif",
+            trackmate_metadata={},
+            props_metadata=props_md,
+        )
+
+    # Metadata after writing to GEFF and reading it back.
+    geff_output = tmp_path / "test.geff"
+    with pytest.warns():
+        tm_xml.from_trackmate_xml_to_geff(TEST_DATA / "FakeTracks.xml", geff_output)
+    _, md_after_write = NxBackend.read(geff_output, structure_validation=False)
+
+    # Compare metadata before and after writing.
+    assert (
+        md_before_write.node_props_metadata["AREA"].unit
+        == md_after_write.node_props_metadata["AREA"].unit
+    ), "Metadata unit for 'AREA' does not match after writing."
+    assert (
+        md_before_write.node_props_metadata["AREA"] == md_after_write.node_props_metadata["AREA"]
+    ), "Metadata for 'AREA' does not match after writing."
+    assert md_before_write.node_props_metadata == md_after_write.node_props_metadata, (
+        "Metadata does not match after writing."
+    )
+
+
+def test_build_geff_metadata() -> None:
+    """Test that the node and edge metadata are correctly built."""
+    xml_path = TEST_DATA / "FakeTracks.xml"
+    units = {"spatialunits": "micrometer", "timeunits": "second"}
+    img_path = "/path/to/image.tif"
+    trackmate_metadata = {}
+    props_metadata = {
+        "node_props_metadata": {
+            "prop1": {
+                "identifier": "prop1",
+                "dtype": "float",
+                "unit": "micrometer",
+                "name": "prop 1",
+                "description": "description 1",
+            },
+            "prop2": {
+                "identifier": "prop2",
+                "dtype": "int",
+                "varlength": True,
+                "unit": "micrometer",
+                "name": "prop 2",
+                "description": "description 2",
+            },
+        },
+        "edge_props_metadata": {
+            "prop3": {
+                "identifier": "prop3",
+                "dtype": "float",
+                "unit": "second",
+                "name": "prop 3",
+                "description": "description 3",
+            }
+        },
+        "lineage_props_metadata": {
+            "prop4": {
+                "identifier": "prop4",
+                "dtype": "bool",
+                "name": "prop 4",
+                "description": "description 4",
+            }
+        },
+    }
+    prop_md_1 = PropMetadata(
+        identifier="prop1",
+        dtype="float",
+        unit="micrometer",
+        name="prop 1",
+        description="description 1",
+    )
+    prop_md_2 = PropMetadata(
+        identifier="prop2",
+        dtype="int",
+        varlength=True,
+        unit="micrometer",
+        name="prop 2",
+        description="description 2",
+    )
+    prop_md_3 = PropMetadata(
+        identifier="prop3", dtype="float", unit="second", name="prop 3", description="description 3"
+    )
+
+    obtained_md = tm_xml._build_geff_metadata(
+        xml_path=xml_path,
+        units=units,
+        img_path=img_path,
+        trackmate_metadata=trackmate_metadata,
+        props_metadata=props_metadata,
+    )
+
+    assert obtained_md.node_props_metadata["prop1"] == prop_md_1
+    assert obtained_md.node_props_metadata["prop2"] == prop_md_2
+    assert obtained_md.edge_props_metadata["prop3"] == prop_md_3
+
+
+def _validate_ROI_info(geff_path: Path) -> None:
+    """
+    Check if the GEFF file contains ROI information.
+
+    ROI information includes the node attribute 'ROI_N_POINTS' and 'ROI_coords'
+    as well as the associated metadata.
+    """
+    graph, md = NxBackend.read(geff_path, structure_validation=False)
+
+    # Data check
+    for _, data in graph.nodes(data=True):
+        assert "ROI_N_POINTS" in data, "Missing 'ROI_N_POINTS' in node attributes."
+        assert "ROI_coords" in data, "Missing 'ROI_coords' in node attributes."
+
+    # Metadata check
+    for prop in ["ROI_N_POINTS", "ROI_coords"]:
+        assert prop in md.node_props_metadata, f"Missing '{prop}' in node properties metadata."
+
+
 def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     # No arguments, should use default values
     geff_output = tmp_path / "test.geff"
@@ -925,6 +1055,7 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
     assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
     validate_structure(geff_output)
+    _validate_ROI_info(geff_output)
 
     # Discard filtered spots and tracks
     with pytest.warns() as warning_list:
@@ -939,6 +1070,7 @@ def test_from_trackmate_xml_to_geff(tmp_path: Path) -> None:
     assert any("node properties were removed from the metadata" in msg for msg in warning_messages)
     assert any("edge property was removed from the metadata" in msg for msg in warning_messages)
     validate_structure(geff_output)
+    _validate_ROI_info(geff_output)
 
     # Geff file already exists
     with pytest.raises(FileExistsError):
