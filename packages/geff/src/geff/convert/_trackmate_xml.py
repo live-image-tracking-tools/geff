@@ -835,8 +835,14 @@ def _extract_props_metadata(
                     feat, mapping_feat_type[feat_type.tag], feat_type.tag, units
                 )
 
-    # Specific case of ROI coordinates.
+    # Specific case of ROI.
     if segmentation:
+        node_props_metadata["ROI_N_POINTS"] = {
+            "identifier": "ROI_N_POINTS",
+            "dtype": "int",
+            "name": "ROI number of points",
+            "description": "Number of points defining the spot ROI.",
+        }
         node_props_metadata["ROI_coords"] = {
             "identifier": "ROI_coords",
             "dtype": "float",
