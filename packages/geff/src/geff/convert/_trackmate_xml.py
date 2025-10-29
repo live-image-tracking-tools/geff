@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import itertools
-import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
+
+from geff.core_io._utils import check_for_geff, delete_geff
 
 if TYPE_CHECKING:
     import xml.etree.ElementTree as ET
@@ -50,9 +51,7 @@ _DIMENSION_UNIT_TEMPLATES: dict[str, Callable[[str, str], str]] = {
 
 
 def _preliminary_checks(
-    xml_path: Path,
-    geff_path: Path,
-    overwrite: bool,
+    xml_path: Path, geff_path: Path, overwrite: bool, zarr_format: Literal[2, 3] = 2
 ) -> None:
     """Check the validity of input paths and clean up the output path if needed.
 
@@ -60,6 +59,7 @@ def _preliminary_checks(
         xml_path (Path): The path to the TrackMate XML file.
         geff_path (Path): The path to the GEFF file.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
 
     Raises:
         FileNotFoundError: If the XML file does not exist.
@@ -68,11 +68,16 @@ def _preliminary_checks(
     if not xml_path.exists():
         raise FileNotFoundError(f"TrackMate XML file {xml_path} does not exist.")
 
-    if geff_path.exists() and not overwrite:
-        raise FileExistsError(f"GEFF file {geff_path} already exists.")
-
-    if geff_path.exists() and overwrite:
-        shutil.rmtree(geff_path)
+    # Check for an existing geff
+    if check_for_geff(geff_path):
+        if overwrite:
+            delete_geff(geff_path, zarr_format=zarr_format)
+        else:
+            raise FileExistsError(
+                "Found an existing geff present in `geff_store`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`geff_store` to write to."
+            )
 
 
 def _get_units(
@@ -976,7 +981,7 @@ def from_trackmate_xml_to_geff(
     """
     xml_path = Path(xml_path)
     geff_path = Path(geff_path).with_suffix(".geff")
-    _preliminary_checks(xml_path, geff_path, overwrite=overwrite)
+    _preliminary_checks(xml_path, geff_path, overwrite=overwrite, zarr_format=zarr_format)
 
     # Data
     graph, units = _build_data(
