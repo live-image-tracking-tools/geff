@@ -68,7 +68,7 @@ def test_convert_ctc(tmp_path: Path, is_gt: bool, tczyx: bool) -> None:
 
 
 @pytest.mark.parametrize(
-    "other_arg", [None, "--discard-filtered-spots", "--discard-filtered-tracks"]
+    "other_arg", [None, "--discard-filtered-spots", "--discard-filtered-tracks", "--overwrite"]
 )
 def test_convert_trackmate_xml(tmp_path: Path, other_arg: str | None) -> None:
     geff_output = str(tmp_path / "test.geff")
