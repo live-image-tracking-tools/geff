@@ -11,7 +11,12 @@ from geff._graph_libs._backend_protocol import GraphAdapter
 from geff._graph_libs._networkx import NxBackend
 from geff._typing import InMemoryGeff
 from geff.core_io import read_to_memory
-from geff.testing.data import create_empty_geff, create_mock_geff, create_simple_3d_geff
+from geff.testing.data import (
+    create_empty_geff,
+    create_mock_geff,
+    create_simple_2d_geff,
+    create_simple_3d_geff,
+)
 
 if TYPE_CHECKING:
     from geff._graph_libs._backend_protocol import Backend
@@ -275,6 +280,25 @@ class Test_api_wrapper_simple:  # tests that only need backend parametrization
             new_graph = backend_module.graph_adapter(backend_module.read(store)[0])
             assert adpt_og_graph.get_node_ids() == new_graph.get_node_ids()
             assert adpt_og_graph.get_edge_ids() == new_graph.get_edge_ids()
+
+    def test_overwrite(self, backend):
+        backend_module: Backend = get_backend(backend)
+        store_2d, _ = create_simple_2d_geff()
+        _, memory_geff_3d = create_simple_3d_geff()
+
+        graph = backend_module.construct(**memory_geff_3d)
+        graph_adapter = backend_module.graph_adapter(graph)
+
+        # Fails without overwrite
+        with pytest.raises(ValueError, match="Found an existing geff present in `store`"):
+            write(graph, store_2d)
+
+        with pytest.raises(
+            UserWarning,
+            match="Cannot delete root zarr directory, but geff contents have been deleted",
+        ):
+            write(graph, store_2d, overwrite=True)
+            _assert_graph_equal_to_geff(graph_adapter, memory_geff_3d)
 
 
 @pytest.mark.parametrize("backend", get_args(SupportedBackend))

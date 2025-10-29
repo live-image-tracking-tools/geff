@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, get_args, overload
 
+from geff.core_io._utils import check_for_geff, delete_geff, remove_tilde
+
 from ._errors import MissingDependencyError
 
 R = TypeVar("R", covariant=True)
@@ -224,6 +226,7 @@ def write(
     axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
     structure_validation: bool = True,
+    overwrite: bool = False,
     node_id_dict: dict[int, int] | None = ...,
 ) -> None:
     # TODO: what is best practice for overload docstrings, want to document node_id_dict
@@ -255,6 +258,8 @@ def write(
             Defaults to 2.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        overwrite (bool): If True, deletes any existing geff and writes a new geff.
+            Defaults to False.
         node_id_dict (dict[int, int], optional): A dictionary mapping rx node indices to
             arbitrary indices. This allows custom node identifiers to be used in the geff file
             instead of rustworkx's internal indices. If None, uses rx indices directly.
@@ -275,6 +280,7 @@ def write(
     axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
     structure_validation: bool = True,
+    overwrite: bool = False,
     *args: Any,
     **kwargs: Any,
 ) -> None: ...
@@ -290,6 +296,7 @@ def write(
     axis_offset: list[float | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
     structure_validation: bool = True,
+    overwrite: bool = False,
     *args: Any,
     **kwargs: Any,
 ) -> None:
@@ -321,11 +328,26 @@ def write(
             Defaults to 2.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        overwrite (bool): If True, deletes any existing geff and writes a new geff.
+            Defaults to False.
         *args (Any): Additional args that may be accepted by the backend when writing from a
             specific type of graph.
         **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from a
             specific type of graph.
     """
+    store = remove_tilde(store)
+
+    # Check for existing geff
+    if check_for_geff(store):
+        if overwrite:
+            delete_geff(store, zarr_format=zarr_format)
+        else:
+            raise ValueError(
+                "Found an existing geff present in `store`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`store` to write to."
+            )
+
     backend_io = get_backend_from_graph_type(graph)
     backend_io.write(
         graph,

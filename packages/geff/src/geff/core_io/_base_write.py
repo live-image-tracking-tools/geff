@@ -239,7 +239,8 @@ def write_arrays(
             as three individual properties called "z", "y", and "x".
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
-        overwrite (bool): If True, deletes any existing geff and writes a new geff
+        overwrite (bool): If True, deletes any existing geff and writes a new geff.
+            Defaults to False.
 
     Raises:
         ValueError: If a geff already exists in `geff_store`
