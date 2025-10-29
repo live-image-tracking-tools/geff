@@ -146,7 +146,7 @@ class Test_delete_geff:
 class Test_check_for_geff:
     def test_path(self, tmp_path):
         geff_path = tmp_path / "test.geff"
-        # DONE
+        # does not exist
         assert check_for_geff(geff_path) is False
         # exists
         os.mkdir(geff_path)
@@ -154,7 +154,7 @@ class Test_check_for_geff:
 
     def test_str(self, tmp_path):
         geff_path = str(tmp_path / "test.geff")
-        # DONE
+        # does not exist
         assert check_for_geff(geff_path) is False
         # exists
         os.mkdir(geff_path)
@@ -162,7 +162,7 @@ class Test_check_for_geff:
 
     def test_Store(self):
         store = zarr.storage.MemoryStore()
-        # DONE
+        # does not exist
         assert check_for_geff(store) is False
         # exists
         root = zarr.open(store)
