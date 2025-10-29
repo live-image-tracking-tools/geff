@@ -205,6 +205,7 @@ def write_arrays(
     edge_props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
     structure_validation: bool = True,
+    overwrite: bool = False,
 ) -> None:
     """Write a geff file from already constructed arrays of node and edge ids and props
 
@@ -238,6 +239,7 @@ def write_arrays(
             as three individual properties called "z", "y", and "x".
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        overwrite (bool): If True, deletes any existing geff and writes a new geff
 
     Raises:
         ValueError: If a geff already exists in `geff_store`
@@ -246,11 +248,14 @@ def write_arrays(
 
     # Check for an existing geff
     if check_for_geff(geff_store):
-        raise ValueError(
-            "Found an existing geff present in `geff_store`. "
-            "Please use `geff.core_io.delete_geff` or provide an alternative "
-            "`geff_store` to write to."
-        )
+        if overwrite:
+            delete_geff(geff_store, zarr_format=zarr_format)
+        else:
+            raise ValueError(
+                "Found an existing geff present in `geff_store`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`geff_store` to write to."
+            )
 
     write_id_arrays(geff_store, node_ids, edge_ids, zarr_format=zarr_format)
     if node_props is not None:
