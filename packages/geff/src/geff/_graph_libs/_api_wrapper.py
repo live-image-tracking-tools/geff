@@ -342,7 +342,7 @@ def write(
         if overwrite:
             delete_geff(store, zarr_format=zarr_format)
         else:
-            raise ValueError(
+            raise FileExistsError(
                 "Found an existing geff present in `store`. "
                 "Please use `overwrite=True` or provide an alternative "
                 "`store` to write to."

@@ -290,7 +290,7 @@ class Test_api_wrapper_simple:  # tests that only need backend parametrization
         graph_adapter = backend_module.graph_adapter(graph)
 
         # Fails without overwrite
-        with pytest.raises(ValueError, match="Found an existing geff present in `store`"):
+        with pytest.raises(FileExistsError, match="Found an existing geff present in `store`"):
             write(graph, store_2d)
 
         with pytest.raises(

@@ -100,7 +100,7 @@ def from_ctc_to_geff(
         if overwrite:
             delete_geff(geff_path, zarr_format=zarr_format)
         else:
-            raise ValueError(
+            raise FileExistsError(
                 "Found an existing geff present in `geff_path`. "
                 "Please use `overwrite=True` or provide an alternative "
                 "`geff_path` to write to."

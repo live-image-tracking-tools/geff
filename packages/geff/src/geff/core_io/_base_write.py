@@ -243,7 +243,7 @@ def write_arrays(
             Defaults to False.
 
     Raises:
-        ValueError: If a geff already exists in `geff_store`
+        FileExistsError: If a geff already exists in `geff_store`
     """
     geff_store = remove_tilde(geff_store)
 
@@ -252,7 +252,7 @@ def write_arrays(
         if overwrite:
             delete_geff(geff_store, zarr_format=zarr_format)
         else:
-            raise ValueError(
+            raise FileExistsError(
                 "Found an existing geff present in `geff_store`. "
                 "Please use `overwrite=True` or provide an alternative "
                 "`geff_store` to write to."

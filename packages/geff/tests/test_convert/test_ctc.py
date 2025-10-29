@@ -112,7 +112,7 @@ def test_ctc_to_geff(
     np.testing.assert_array_equal(segm, expected_segm)
 
     # Writing again fails if overwrite False
-    with pytest.raises(ValueError, match="Found an existing geff present in `geff_path`"):
+    with pytest.raises(FileExistsError, match="Found an existing geff present in `geff_path`"):
         from_ctc_to_geff(
             ctc_path=ctc_path,
             geff_path=geff_path,
