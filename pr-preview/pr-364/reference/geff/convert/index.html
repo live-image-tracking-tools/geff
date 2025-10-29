@@ -1132,6 +1132,7 @@
     <span class="n">ctc_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">output_store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">ctzyx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
@@ -1203,6 +1204,23 @@ otherwise it's (T,) + Frame shape. Defaults to False.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>overwrite</code>
+            </td>
+            <td>
+                  <code>(<span title="optional">optional</span>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to overwrite the Zarr file if it already exists.
+Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>zarr_format</code>
             </td>
             <td>
@@ -1239,6 +1257,7 @@ Defaults to 2.</p>
     <span class="n">geff_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">segmentation_store</span><span class="p">:</span> <span class="n">StoreLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">tczyx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
@@ -1326,6 +1345,22 @@ Defaults to 2.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>overwrite</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to overwrite the GEFF file if it already exists.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>zarr_format</code>
             </td>
             <td>
@@ -1362,6 +1397,7 @@ Defaults to 2.</p>
     <span class="n">geff_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">discard_filtered_spots</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">discard_filtered_tracks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
@@ -1442,6 +1478,22 @@ filtered out in TrackMate, False otherwise. False by default.</p>
               <div class="doc-md-description">
                 <p>True to discard the tracks
 filtered out in TrackMate, False otherwise. False by default.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>overwrite</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Whether to overwrite the GEFF file if it already exists.</p>
               </div>
             </td>
             <td>
