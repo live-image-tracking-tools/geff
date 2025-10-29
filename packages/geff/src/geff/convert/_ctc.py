@@ -1,6 +1,7 @@
-import shutil
 from pathlib import Path
 from typing import Literal
+
+from geff.core_io._utils import check_for_geff, delete_geff
 
 try:
     import tifffile
@@ -94,11 +95,16 @@ def from_ctc_to_geff(
             f"Tracks file {ctc_path}/man_track.txt or {ctc_path}/res_track.txt does not exist"
         )
 
-    if geff_path.exists() and not overwrite:
-        raise FileExistsError(f"GEFF file {geff_path} already exists")
-
-    if geff_path.exists() and overwrite:
-        shutil.rmtree(geff_path)
+    # Check for existing geff
+    if check_for_geff(geff_path):
+        if overwrite:
+            delete_geff(geff_path, zarr_format=zarr_format)
+        else:
+            raise ValueError(
+                "Found an existing geff present in `geff_path`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`geff_path` to write to."
+            )
 
     tracks: dict[int, list[int]] = {}
 
