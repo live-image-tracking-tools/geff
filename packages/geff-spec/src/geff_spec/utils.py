@@ -154,15 +154,25 @@ def add_or_update_props_metadata(
         GeffMetadata object with updated props metadata.
 
     Warning:
-        If a key in props_md already exists in the properties metadata, it will be overwritten.
+        If a key in props_md already exists in the properties metadata, only the
+            dtype and varlength fields will be updated
     """
     metadata = copy.deepcopy(metadata)
-    md_dict = {prop.identifier: prop for prop in props_md}
     match c_type:
         case "node":
-            metadata.node_props_metadata.update(md_dict)
+            existing_props = metadata.node_props_metadata
         case "edge":
-            metadata.edge_props_metadata.update(md_dict)
+            existing_props = metadata.edge_props_metadata
+
+    md_dict = {}
+    for prop in props_md:
+        if prop.identifier in existing_props:
+            existing_props[prop.identifier].dtype = prop.dtype
+            existing_props[prop.identifier].varlength = prop.varlength
+        else:
+            md_dict[prop.identifier] = prop
+
+    existing_props.update(md_dict)
 
     return metadata
 
