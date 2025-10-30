@@ -78,7 +78,12 @@ def create_nx_graph(num_nodes: int) -> nx.DiGraph:
 def graph_file_path(num_nodes: int) -> Path:
     tmp_dir = tempfile.mkdtemp(suffix=".zarr")
     atexit.register(shutil.rmtree, tmp_dir, ignore_errors=True)
-    geff.write(graph=create_nx_graph(num_nodes), store=tmp_dir, axis_names=["t", "z", "y", "x"])
+    geff.write(
+        graph=create_nx_graph(num_nodes),
+        store=tmp_dir,
+        axis_names=["t", "z", "y", "x"],
+        overwrite=True,
+    )
     return Path(tmp_dir)
 
 
