@@ -154,7 +154,8 @@ def add_or_update_props_metadata(
         GeffMetadata object with updated props metadata.
 
     Warning:
-        If a key in props_md already exists in the properties metadata, it will be overwritten.
+        If a key in props_md already exists in the properties metadata, only the
+            dtype and varlength fields will be updated
     """
     metadata = copy.deepcopy(metadata)
     match c_type:
