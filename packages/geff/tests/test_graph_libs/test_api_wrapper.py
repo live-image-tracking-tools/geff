@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import pytest
 import zarr
+import zarr.storage
 
 from geff import construct, read, write
 from geff._graph_libs._api_wrapper import SupportedBackend, get_backend
