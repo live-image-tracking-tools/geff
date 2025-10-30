@@ -207,6 +207,13 @@ class TestWriteArrays:
                 description="zaxis",
                 name="Z axis",
             ),
+            "t": PropMetadata(
+                identifier="t",
+                dtype=str(memory_geff["node_props"]["t"]["values"].dtype),
+                unit="um",
+                description="taxis",
+                name="t axis",
+            ),
         }
         memory_geff["metadata"].node_props_metadata = props_meta
 
