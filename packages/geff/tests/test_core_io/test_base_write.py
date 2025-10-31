@@ -17,7 +17,7 @@ from geff.testing.data import (
     create_simple_temporal_geff,
 )
 from geff.validate.structure import validate_structure
-from geff_spec import GeffMetadata
+from geff_spec import GeffMetadata, PropMetadata
 
 if TYPE_CHECKING:
     from geff._typing import InMemoryGeff, PropDictNpArray
@@ -196,6 +196,47 @@ class TestWriteArrays:
         ):
             write_arrays(store, **new_geff, overwrite=True)
             check_equiv_geff(store, new_store)
+    def test_write_props_metadata(self):
+        _, memory_geff = create_simple_3d_geff()
+
+        # Define props metadata
+        props_meta = {
+            "x": PropMetadata(
+                identifier="x",
+                dtype=str(memory_geff["node_props"]["x"]["values"].dtype),
+                unit="um",
+                description="xaxis",
+                name="X axis",
+            ),
+            "y": PropMetadata(
+                identifier="y",
+                dtype=str(memory_geff["node_props"]["y"]["values"].dtype),
+                unit="um",
+                description="yaxis",
+                name="Y axis",
+            ),
+            "z": PropMetadata(
+                identifier="z",
+                dtype=str(memory_geff["node_props"]["z"]["values"].dtype),
+                unit="um",
+                description="zaxis",
+                name="Z axis",
+            ),
+            "t": PropMetadata(
+                identifier="t",
+                dtype=str(memory_geff["node_props"]["t"]["values"].dtype),
+                unit="um",
+                description="taxis",
+                name="t axis",
+            ),
+        }
+        memory_geff["metadata"].node_props_metadata = props_meta
+
+        store = zarr.storage.MemoryStore()
+        write_arrays(store, **memory_geff)
+
+        new_meta = GeffMetadata.read(store)
+        assert new_meta.node_props_metadata == props_meta
 
 
 @pytest.mark.parametrize(
