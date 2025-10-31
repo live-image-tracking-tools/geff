@@ -947,9 +947,16 @@ def test_metadata_info_stability(tmp_path: Path) -> None:
     assert (
         md_before_write.node_props_metadata["AREA"] == md_after_write.node_props_metadata["AREA"]
     ), "Metadata for 'AREA' does not match after writing."
-    assert md_before_write.node_props_metadata == md_after_write.node_props_metadata, (
-        "Metadata does not match after writing."
+
+    # Check equality of props that are present before and after writing
+    # A few props are expected to be dropped (SHAPE_INDEX, MANUAL_SPOT_COLOR)
+    # and added (ID, TRACK_ID, name)
+    shared_keys = set(md_before_write.node_props_metadata.keys()).intersection(
+        set(md_after_write.node_props_metadata.keys())
     )
+    shared_md_before = {k: md_before_write.node_props_metadata[k] for k in shared_keys}
+    shared_md_after = {k: md_after_write.node_props_metadata[k] for k in shared_keys}
+    assert shared_md_before == shared_md_after, "Metadata does not match after writing."
 
 
 def test_build_geff_metadata() -> None:
