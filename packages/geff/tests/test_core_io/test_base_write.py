@@ -196,6 +196,7 @@ class TestWriteArrays:
         ):
             write_arrays(store, **new_geff, overwrite=True)
             check_equiv_geff(store, new_store)
+
     def test_write_props_metadata(self):
         _, memory_geff = create_simple_3d_geff()
 
