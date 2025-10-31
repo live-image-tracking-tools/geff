@@ -922,17 +922,16 @@ def test_metadata_info_stability(tmp_path: Path) -> None:
     """Test that metadata information remains stable after writing to GEFF."""
     # Metadata before writing to GEFF.
     xml_path = TEST_DATA / "FakeTracks.xml"
-    units = {"spatialunits": "micrometer", "timeunits": "seconds"}
+    units = {"spatialunits": "micrometer", "timeunits": "second"}
     segmentation = True
     props_md = tm_xml._extract_props_metadata(xml_path, units, segmentation)
-    with pytest.warns():
-        md_before_write = tm_xml._build_geff_metadata(
-            xml_path=xml_path,
-            units=units,
-            img_path="/path/to/image.tif",
-            trackmate_metadata={},
-            props_metadata=props_md,
-        )
+    md_before_write = tm_xml._build_geff_metadata(
+        xml_path=xml_path,
+        units=units,
+        img_path="/path/to/image.tif",
+        trackmate_metadata={},
+        props_metadata=props_md,
+    )
 
     # Metadata after writing to GEFF and reading it back.
     geff_output = tmp_path / "test.geff"
