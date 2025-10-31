@@ -182,3 +182,18 @@ class Test_geff_to_csv:
         # Check that node file is empty
         edge_df = pd.read_csv(edge_path, index_col=0)
         assert len(edge_df) == memory_geff["edge_ids"].shape[0]
+
+    def test_overwrite(self, tmp_path):
+        store, _ = create_simple_3d_geff()
+        out_path = tmp_path / "dataframe.csv"
+        geff_to_csv(store, out_path)
+
+        store_2d, _ = create_simple_2d_geff()
+
+        # Fails if overwrite false
+        with pytest.raises(FileExistsError, match="File exists:"):
+            geff_to_csv(store_2d, out_path)
+
+        geff_to_csv(store_2d, out_path, overwrite=True)
+        df = pd.read_csv(str(out_path.with_suffix("")) + "-nodes.csv")
+        assert "z" not in df.columns

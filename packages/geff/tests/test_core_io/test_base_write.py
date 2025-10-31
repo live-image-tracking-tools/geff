@@ -181,6 +181,22 @@ class TestWriteArrays:
         ):
             write_arrays(path, **memory_geff)
 
+    def test_existing_geff(self):
+        store, memory_geff = create_simple_2d_geff()
+        with pytest.raises(
+            FileExistsError, match=r"Found an existing geff present in `geff_store`."
+        ):
+            write_arrays(store, **memory_geff)
+
+        # Try with overwrite
+        new_store, new_geff = create_simple_3d_geff()
+        with pytest.raises(
+            UserWarning,
+            match="Cannot delete root zarr directory, but geff contents have been deleted",
+        ):
+            write_arrays(store, **new_geff, overwrite=True)
+            check_equiv_geff(store, new_store)
+
     def test_write_props_metadata(self):
         _, memory_geff = create_simple_3d_geff()
 
