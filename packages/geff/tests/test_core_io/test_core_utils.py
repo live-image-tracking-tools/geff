@@ -4,11 +4,13 @@ from pathlib import Path
 import numpy as np
 import pytest
 import zarr
+import zarr.storage
 
 from geff import _path
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import (
     _detect_zarr_spec_version,
+    check_for_geff,
     delete_geff,
     open_storelike,
     setup_zarr_group,
@@ -139,3 +141,30 @@ class Test_delete_geff:
             delete_geff(store)
             root = zarr.open(store)
             assert "geff" not in root.attrs
+
+
+class Test_check_for_geff:
+    def test_path(self, tmp_path):
+        geff_path = tmp_path / "test.geff"
+        # does not exist
+        assert check_for_geff(geff_path) is False
+        # exists
+        os.mkdir(geff_path)
+        assert check_for_geff(geff_path) is True
+
+    def test_str(self, tmp_path):
+        geff_path = str(tmp_path / "test.geff")
+        # does not exist
+        assert check_for_geff(geff_path) is False
+        # exists
+        os.mkdir(geff_path)
+        assert check_for_geff(geff_path) is True
+
+    def test_Store(self):
+        store = zarr.storage.MemoryStore()
+        # does not exist
+        assert check_for_geff(store) is False
+        # exists
+        root = zarr.open(store)
+        root.attrs["geff"] = "metadata"
+        assert check_for_geff(store) is True

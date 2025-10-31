@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from geff_spec import RelatedObject
@@ -16,11 +18,13 @@ import zarr
 import zarr.storage
 
 from geff._graph_libs._networkx import NxBackend
+from geff.core_io import read_to_memory
 
 
 def create_mock_data(
     tmp_path: Path,
     is_gt: bool,
+    v2: bool = False,  # generates a slightly different dataset
 ) -> Path:
     """
     mock graph is:
@@ -31,6 +35,8 @@ def create_mock_data(
             / \\     |
     t=2    2   5     9
     """
+    mod_value = 9 if not v2 else 10
+
     labels = np.zeros((3, 10, 10), dtype=np.uint16)
 
     labels[0, 3, 3] = 1
@@ -40,7 +46,7 @@ def create_mock_data(
 
     labels[2, 2, 3] = 5
     labels[2, 4, 5] = 2
-    labels[2, 8, 9] = 9
+    labels[2, 8, 9] = mod_value
 
     fmt = "man_track{:03d}.tif" if is_gt else "mask{:03d}.tif"
 
@@ -53,7 +59,7 @@ def create_mock_data(
 
     tracks_file = tmp_path / ("man_track.txt" if is_gt else "res_track.txt")
     # track_id, start, end, parent_id
-    tracks_table = [[1, 0, 1, 0], [2, 2, 2, 1], [5, 2, 2, 1], [7, 0, 0, 0], [9, 2, 2, 7]]
+    tracks_table = [[1, 0, 1, 0], [2, 2, 2, 1], [5, 2, 2, 1], [7, 0, 0, 0], [mod_value, 2, 2, 7]]
 
     np.savetxt(
         tracks_file,
@@ -166,6 +172,33 @@ class Test_ctc_to_geff:
         graph, metadata = NxBackend.read(geff_path)
         # Check for no related objects
         assert metadata.related_objects is None
+
+        # Writing again fails if overwrite False
+        with pytest.raises(FileExistsError, match="Found an existing geff present in `geff_path`"):
+            from_ctc_to_geff(
+                ctc_path=ctc_path,
+                geff_path=geff_path,
+                segmentation_store=segm_path,
+                tczyx=True,
+            )
+
+        # Writing works if overwrite True
+        os.mkdir(tmp_path / "v2")
+        ctc_path = create_mock_data(tmp_path / "v2", is_gt, v2=True)
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=geff_path,
+            segmentation_store=segm_path,
+            tczyx=True,
+            overwrite=True,
+        )
+
+        # Check that v2 data was written
+        segm = zarr.open_array(segm_path, mode="r")[...]
+        assert 10 in segm and 9 not in segm
+        mem_geff = read_to_memory(geff_path)
+        tracklet_ids = mem_geff["node_props"]["tracklet_id"]["values"]
+        assert 10 in tracklet_ids and 9 not in tracklet_ids
 
     def test_seg_to_path(
         self,
