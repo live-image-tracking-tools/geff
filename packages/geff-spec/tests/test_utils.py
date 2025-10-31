@@ -81,6 +81,43 @@ class TestCreateOrUpdatePropsMetadata:
         assert "existing_edge_prop" in result.edge_props_metadata
         assert "new_edge_prop" in result.edge_props_metadata
 
+    def test_update_without_overwriting_existing_values(self):
+        """Test that if we already have props metadata with extras, e.g. units/description/name
+        they shouldn't be overwritten when we update identifier and dtype"""
+
+        existing_props_metadata = {
+            "existing": PropMetadata(
+                identifier="existing",
+                dtype="float",
+                unit="um",
+                description="an existing prop",
+                name="Existing",
+            )
+        }
+        metadata = GeffMetadata(
+            directed=True, node_props_metadata=existing_props_metadata, edge_props_metadata={}
+        )
+        props_md = [PropMetadata(identifier="existing", dtype="float32")]
+
+        result = add_or_update_props_metadata(metadata, props_md, "node")
+        assert len(result.node_props_metadata) == 1
+        assert (
+            result.node_props_metadata["existing"].description
+            == existing_props_metadata["existing"].description
+        )
+        assert (
+            result.node_props_metadata["existing"].unit == existing_props_metadata["existing"].unit
+        )
+        assert (
+            result.node_props_metadata["existing"].name == existing_props_metadata["existing"].name
+        )
+
+        # Ok if dtype is updated
+        assert (
+            result.node_props_metadata["existing"].dtype
+            != existing_props_metadata["existing"].dtype
+        )
+
     def test_overwrite_existing_prop(self):
         """Test that existing props are overwritten when same identifier is provided."""
         existing_props = {"prop1": PropMetadata(identifier="prop1", dtype="int32")}
