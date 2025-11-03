@@ -116,7 +116,7 @@ class Test_api_wrapper:
             include_missing=backend != "spatial-graph",
         )
 
-        graph, metadata = read(store, backend=backend)
+        graph, _metadata = read(store, backend=backend)
         graph_adapter = backend_module.graph_adapter(graph)
 
         _assert_graph_equal_to_geff(graph_adapter, memory_geff)
@@ -179,7 +179,7 @@ class Test_api_wrapper:
         if backend != "spatial-graph":
             extra_props["str"] = "str"
 
-        store, memory_geff = create_mock_geff(
+        _store, memory_geff = create_mock_geff(
             node_id_dtype,
             AXIS_DTYPES,
             extra_node_props=extra_props,
@@ -217,7 +217,7 @@ class Test_api_wrapper:
 class Test_api_wrapper_simple:  # tests that only need backend parametrization
     def test_write_axis_lists_override_metadata(self, tmp_path, backend):
         backend_module: Backend = get_backend(backend)
-        store, memory_geff = create_simple_3d_geff()
+        _store, memory_geff = create_simple_3d_geff()
 
         # this will create a graph instance of the backend type
         original_graph = backend_module.construct(**memory_geff)
@@ -308,7 +308,7 @@ class Test_empty_graph:
 
         store, memory_geff = create_empty_geff()
 
-        graph, metadata = read(store, backend=backend)
+        graph, _metadata = read(store, backend=backend)
         graph_adapter = backend_module.graph_adapter(graph)
 
         _assert_graph_equal_to_geff(graph_adapter, memory_geff)

@@ -98,7 +98,7 @@ class TestWriteArrays:
         validate_structure(geff_path)
 
     def test_write_in_mem_geff(self):
-        store, attrs = create_simple_3d_geff()
+        store, _attrs = create_simple_3d_geff()
         in_mem_geff = read_to_memory(store)
 
         # Test writing

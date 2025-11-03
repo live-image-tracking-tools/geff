@@ -287,7 +287,7 @@ class Test_check_equiv_geff:
 
     def test_id_shape_mismatch(self):
         # Id shape mismatch
-        bad_store, attrs = create_simple_2d_geff(num_nodes=5)
+        bad_store, _attrs = create_simple_2d_geff(num_nodes=5)
         with pytest.raises(ValueError, match=r".* ids shape: .* does not match .*"):
             check_equiv_geff(self.store, bad_store)
 
