@@ -6,7 +6,13 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from geff import _path
-from geff.core_io._utils import construct_var_len_props, delete_geff, remove_tilde, setup_zarr_group
+from geff.core_io._utils import (
+    check_for_geff,
+    construct_var_len_props,
+    delete_geff,
+    remove_tilde,
+    setup_zarr_group,
+)
 from geff.validate.structure import validate_structure
 from geff_spec.utils import (
     add_or_update_props_metadata,
@@ -199,6 +205,7 @@ def write_arrays(
     edge_props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
     structure_validation: bool = True,
+    overwrite: bool = False,
 ) -> None:
     """Write a geff file from already constructed arrays of node and edge ids and props
 
@@ -232,8 +239,24 @@ def write_arrays(
             as three individual properties called "z", "y", and "x".
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        overwrite (bool): If True, deletes any existing geff and writes a new geff.
+            Defaults to False.
+
+    Raises:
+        FileExistsError: If a geff already exists in `geff_store`
     """
     geff_store = remove_tilde(geff_store)
+
+    # Check for an existing geff
+    if check_for_geff(geff_store):
+        if overwrite:
+            delete_geff(geff_store, zarr_format=zarr_format)
+        else:
+            raise FileExistsError(
+                "Found an existing geff present in `geff_store`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`geff_store` to write to."
+            )
 
     write_id_arrays(geff_store, node_ids, edge_ids, zarr_format=zarr_format)
     if node_props is not None:

@@ -306,3 +306,25 @@ def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
         )
         # Delete geff metadata from attrs
         del root.attrs["geff"]
+
+
+def check_for_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> bool:
+    """Check a StoreLike for an existing geff and return True if already present
+
+    Args:
+        store (StoreLike): StoreLike to check for a geff
+        zarr_format (Literal[2, 3], optional): Defaults to 2.
+
+    Returns:
+        bool: True if a geff already exists
+    """
+    if isinstance(store, Path):
+        exists = store.exists()
+    elif isinstance(store, str):
+        exists = os.path.exists(store)
+    # If store is already open, check for geff key in metadata
+    else:
+        root = setup_zarr_group(store, zarr_format=zarr_format)
+        exists = "geff" in root.attrs
+
+    return exists

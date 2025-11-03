@@ -79,7 +79,7 @@ def geff_to_dataframes(
     return tuple(dataframes)
 
 
-def geff_to_csv(store: StoreLike, outpath: Path | str) -> None:
+def geff_to_csv(store: StoreLike, outpath: Path | str, overwrite: bool = False) -> None:
     """Convert a geff store to two csvs of nodes and edges
 
     Properties with more than 2 dimensions cannot be exported and will be skipped
@@ -90,6 +90,7 @@ def geff_to_csv(store: StoreLike, outpath: Path | str) -> None:
         store (StoreLike): Path to store or StoreLike object
         outpath (Path | str): Path to save output csvs. Any file extension will be
             stripped and replaced with "-nodes.csv" and "-edges.csv"
+        overwrite (bool): If true, existing csvs will be overwritten
     """
     # Convert to path and remove any existing suffix
     outpath = Path(outpath).with_suffix("")
@@ -99,5 +100,6 @@ def geff_to_csv(store: StoreLike, outpath: Path | str) -> None:
 
     # Convert and write to disk
     node_df, edge_df = geff_to_dataframes(store)
-    node_df.to_csv(node_path)
-    edge_df.to_csv(edge_path)
+    mode = "w" if overwrite else "x"
+    node_df.to_csv(node_path, mode=mode)
+    edge_df.to_csv(edge_path, mode=mode)

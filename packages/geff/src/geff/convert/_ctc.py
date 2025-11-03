@@ -1,6 +1,8 @@
-import shutil
+import os
 from pathlib import Path
 from typing import Literal
+
+from geff.core_io._utils import check_for_geff, delete_geff
 
 try:
     import tifffile
@@ -22,7 +24,7 @@ from zarr.storage import StoreLike
 
 import geff
 from geff.core_io import write_arrays
-from geff_spec import Axis, GeffMetadata
+from geff_spec import Axis, GeffMetadata, RelatedObject
 
 
 def ctc_tiffs_to_zarr(
@@ -94,11 +96,16 @@ def from_ctc_to_geff(
             f"Tracks file {ctc_path}/man_track.txt or {ctc_path}/res_track.txt does not exist"
         )
 
-    if geff_path.exists() and not overwrite:
-        raise FileExistsError(f"GEFF file {geff_path} already exists")
-
-    if geff_path.exists() and overwrite:
-        shutil.rmtree(geff_path)
+    # Check for existing geff
+    if check_for_geff(geff_path):
+        if overwrite:
+            delete_geff(geff_path, zarr_format=zarr_format)
+        else:
+            raise FileExistsError(
+                "Found an existing geff present in `geff_path`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`geff_path` to write to."
+            )
 
     tracks: dict[int, list[int]] = {}
 
@@ -196,6 +203,28 @@ def from_ctc_to_geff(
 
     node_ids = np.asarray(node_props.pop("id"), dtype="uint")
 
+    rel_objs = None
+    if segmentation_store is not None:
+        # Record related object metadata for segmentation
+        seg_path = None
+        if isinstance(segmentation_store, Path) or isinstance(segmentation_store, str):
+            seg_path = segmentation_store
+        else:
+            try:
+                if zarr.__version__.startswith("2"):
+                    seg_path = segmentation_store.path  # type: ignore
+                else:
+                    seg_path = segmentation_store.root  # type: ignore
+            except AttributeError:
+                warnings.warn(
+                    "Cannot determine path to segmentation_store for related objects metadata",
+                    stacklevel=2,
+                )
+
+        if seg_path is not None:
+            rel_path = os.path.relpath(seg_path, geff_path)
+            rel_objs = [RelatedObject(type="labels", path=rel_path, label_prop="tracklet_id")]
+
     write_arrays(
         geff_store=geff_path,
         node_ids=node_ids,
@@ -211,6 +240,8 @@ def from_ctc_to_geff(
             directed=True,
             node_props_metadata={},
             edge_props_metadata={},
+            track_node_props={"tracklet": "tracklet_id"},
+            related_objects=rel_objs,
         ),
         zarr_format=zarr_format,
     )
