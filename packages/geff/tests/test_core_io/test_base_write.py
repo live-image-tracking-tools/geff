@@ -12,12 +12,13 @@ from geff.core_io import construct_var_len_props, write_arrays
 from geff.core_io._base_read import read_to_memory
 from geff.testing._utils import check_equiv_geff
 from geff.testing.data import (
+    create_empty_geff,
     create_simple_2d_geff,
     create_simple_3d_geff,
     create_simple_temporal_geff,
 )
 from geff.validate.structure import validate_structure
-from geff_spec import GeffMetadata, PropMetadata
+from geff_spec import Axis, GeffMetadata, PropMetadata
 
 if TYPE_CHECKING:
     from geff._typing import InMemoryGeff, PropDictNpArray
@@ -238,6 +239,20 @@ class TestWriteArrays:
 
         new_meta = GeffMetadata.read(store)
         assert new_meta.node_props_metadata == props_meta
+
+    def test_write_empty_with_axes(self):
+        _, mem_geff = create_empty_geff()
+
+        # Add axes to metadata
+        mem_geff["metadata"].axes = [Axis(name="x", type="space"), Axis(name="y", type="space")]
+
+        store = zarr.storage.MemoryStore()
+        write_arrays(store, **mem_geff)
+
+        out_geff = read_to_memory(store)
+        assert len(out_geff["metadata"].axes) == 2
+        assert out_geff["node_props"]["x"]["values"].shape == (0,)
+        assert out_geff["node_props"]["y"]["values"].shape == (0,)
 
 
 @pytest.mark.parametrize(
