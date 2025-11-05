@@ -268,7 +268,7 @@ class TestCreatePropMetadata:
         prop_data = {"values": np.array([arr1, arr2, arr3], dtype=object)}
 
         with pytest.raises(
-            ValueError, match="Object array containing variable length properties has two dtypes.*"
+            ValueError, match=r"Object array containing variable length properties has two dtypes.*"
         ):
             create_props_metadata("mixed_dtype", prop_data)
 
@@ -276,7 +276,7 @@ class TestCreatePropMetadata:
         """Test that invalid property data raises ValueError."""
         invalid_data = "not_valid_data"
 
-        with pytest.raises(ValueError, match="Expected dict of property data, got.*"):
+        with pytest.raises(ValueError, match=r"Expected dict of property data, got.*"):
             create_props_metadata("invalid", invalid_data)
 
     def test_all_optional_parameters(self):
@@ -337,7 +337,7 @@ class TestUpdateMetadataAxes:
         axis_names = ["x", "y"]
         axis_units: list[str | None] = ["meter"]
         with pytest.raises(
-            ValueError, match="Axis units .* does not have same length as axis names .*"
+            ValueError, match=r"Axis units .* does not have same length as axis names .*"
         ):
             update_metadata_axes(metadata, axis_names, axis_units)
 
@@ -346,7 +346,7 @@ class TestUpdateMetadataAxes:
         axis_names = ["x", "y"]
         axis_types = ["space", None, None]
         with pytest.raises(
-            ValueError, match="Axis types .* does not have same length as axis names .*"
+            ValueError, match=r"Axis types .* does not have same length as axis names .*"
         ):
             update_metadata_axes(metadata, axis_names, axis_types=axis_types)
 

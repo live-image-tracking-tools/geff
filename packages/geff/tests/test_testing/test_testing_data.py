@@ -176,7 +176,7 @@ class Test_create_mock_geff:
             "type": custom_edge_types,  # Custom array
         }
 
-        store, memory_geff = create_mock_geff(
+        store, _memory_geff = create_mock_geff(
             node_id_dtype="uint",
             node_axis_dtypes={"position": "float64", "time": "float64"},
             directed=False,
@@ -262,7 +262,7 @@ class Test_create_mock_geff:
         )
 
         # Verify the graph was created correctly
-        graph, metadata = NxBackend.read(store)
+        graph, _metadata = NxBackend.read(store)
 
         # Check that no extra node properties are present
         for node in graph.nodes:
@@ -439,7 +439,7 @@ class Test_create_mock_geff:
         )
 
         # Verify the graph was created correctly
-        graph, metadata = NxBackend.read(store)
+        graph, _metadata = NxBackend.read(store)
 
         # Check that all properties are present with correct types
         for node in graph.nodes:
@@ -726,7 +726,7 @@ class Test_create_dummy_in_mem_geff:
 
 
 def test_empty_geff():
-    store, memory_geff = create_empty_geff()
+    _store, memory_geff = create_empty_geff()
     meta = memory_geff["metadata"]
     assert len(memory_geff["node_ids"]) == 0
     assert len(memory_geff["edge_ids"]) == 0

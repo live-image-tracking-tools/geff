@@ -124,7 +124,7 @@ class TestMetadataModel:
 
         # Invalid combination of type and label_prop
         with pytest.raises(
-            pydantic.ValidationError, match=".*label_prop .+ is only valid for type 'labels'.*"
+            pydantic.ValidationError, match=r".*label_prop .+ is only valid for type 'labels'.*"
         ):
             GeffMetadata(
                 geff_version="0.0.1",
