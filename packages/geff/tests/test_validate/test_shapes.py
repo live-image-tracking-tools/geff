@@ -39,7 +39,9 @@ class Test_validate_ellipsoid:
 
     def test_ndim(self):
         arr = np.ones((10, 2, 2))
-        with pytest.raises(ValueError, match="Ellipsoid covariance matrix must have .* dimensions"):
+        with pytest.raises(
+            ValueError, match=r"Ellipsoid covariance matrix must have .* dimensions"
+        ):
             validate_ellipsoid(arr, self.axes_3d)
 
     def test_symmetric(self):
@@ -62,5 +64,5 @@ def test_validate_sphere():
         validate_sphere(np.ones((2, 2, 2)))
 
     # Not positive
-    with pytest.raises(ValueError, match="Sphere radius values must be non-negative."):
+    with pytest.raises(ValueError, match=r"Sphere radius values must be non-negative."):
         validate_sphere(np.full((2), fill_value=-1))

@@ -1,3 +1,4 @@
+import re
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -98,7 +99,7 @@ class TestWriteArrays:
         validate_structure(geff_path)
 
     def test_write_in_mem_geff(self):
-        store, attrs = create_simple_3d_geff()
+        store, _attrs = create_simple_3d_geff()
         in_mem_geff = read_to_memory(store)
 
         # Test writing
@@ -176,8 +177,10 @@ class TestWriteArrays:
 
         with pytest.raises(
             ValueError,
-            match="Node property 'bad_size' values has length 2, which "
-            "does not match id length 10\nCannot write invalid geff.",
+            match=re.escape(
+                "Node property 'bad_size' values has length 2, which "
+                "does not match id length 10\nCannot write invalid geff."
+            ),
         ):
             write_arrays(path, **memory_geff)
 

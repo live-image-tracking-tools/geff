@@ -220,7 +220,7 @@ class Test_ctc_to_geff:
         assert geff_path.exists()
 
         # Check graph that was written to geff
-        graph, metadata = NxBackend.read(geff_path)
+        _graph, metadata = NxBackend.read(geff_path)
 
         # Check segmentation that was written to zarr
         expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
@@ -267,7 +267,7 @@ class Test_ctc_to_geff:
         assert geff_path.exists()
 
         # Check graph that was written to geff
-        graph, metadata = NxBackend.read(geff_path)
+        _graph, metadata = NxBackend.read(geff_path)
 
         # Check segmentation that was written to zarr
         expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
@@ -315,7 +315,7 @@ class Test_ctc_to_geff:
             assert geff_path.exists()
 
             # Check graph that was written to geff
-            graph, metadata = NxBackend.read(geff_path)
+            _graph, metadata = NxBackend.read(geff_path)
 
             # Check segmentation that was written to zarr
             expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
