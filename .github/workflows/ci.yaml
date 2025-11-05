@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - name: Run type checks
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.13"
       - uses: CodSpeedHQ/action@v4
@@ -131,7 +131,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: Packagesgeff
           path: dist
@@ -139,9 +139,10 @@ jobs:
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: Generate geff changelog
-        uses: mikepenz/release-changelog-builder-action@v5
+        uses: mikepenz/release-changelog-builder-action@v6
+        id: build_changelog
         with:
-          includeOnlyPaths: |
+          includeOnlyPaths: | # Should work after v6 release
             docs/
             packages/geff
           configuration: changelog-config.json
@@ -154,8 +155,12 @@ jobs:
                 }
               }
             }
-          toTag: github.ref
+          toTag: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          body: ${{steps.build_changelog.outputs.changelog}}
+          files: "./dist/*"
 
   upload-geff-spec-to-pypi:
     if: success() && startsWith(github.ref, 'refs/tags/spec') && github.event_name != 'schedule'
@@ -167,7 +172,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: Packagesgeff-spec
           path: dist
@@ -175,9 +180,10 @@ jobs:
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: Generate geff-spec changelog
-        uses: mikepenz/release-changelog-builder-action@v5
+        uses: mikepenz/release-changelog-builder-action@v6
+        id: build_changelog_spec
         with:
-          includeOnlyPaths: |
+          includeOnlyPaths: | # Should work after v6 release
             packages/geff-spec
           configuration: changelog-config.json
           configurationJson: | # Filter only geff-spec tags
@@ -189,5 +195,9 @@ jobs:
                 }
               }
             }
-          toTag: github.ref
+          toTag: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          body: ${{steps.build_changelog_spec.outputs.changelog}}
+          files: "./dist/*"

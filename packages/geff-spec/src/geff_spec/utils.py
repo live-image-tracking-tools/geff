@@ -8,13 +8,11 @@ from typing import TYPE_CHECKING, Any, Literal, TypeVar
 import numpy as np
 from pydantic import validate_call
 
-import geff
-
 from ._axis import Axis
 
 # The next import is needed at runtime for Pydantic validation
 from ._prop_metadata import PropMetadata
-from ._schema import GeffMetadata
+from ._schema import GEFF_VERSION, GeffMetadata
 
 if TYPE_CHECKING:
     from ._valid_values import AxisType
@@ -30,6 +28,7 @@ def update_metadata_axes(
     axis_types: list[Literal[AxisType] | None] | None = None,
     axis_scales: list[float | None] | None = None,
     scaled_units: list[str | None] | None = None,
+    axis_offset: list[float | None] | None = None,
 ) -> GeffMetadata:
     """Update the axis names, units, and types in a geff metadata object.
     Overrides any existing axes.
@@ -39,12 +38,17 @@ def update_metadata_axes(
     If neither are provided, the graph properties will be used.
 
     Args:
-        metadata: The metadata of the graph.
-        axis_names: The names of the spatial dims.
-        axis_units: The units of the spatial dims. Defaults to None.
-        axis_types: The types of the spatial dims. Defaults to None.
-        axis_scales: The scale to apply to the spatial dims. Defaults to None.
-        scaled_units: The units of the spatial dims after scaling. Defaults to None.
+        metadata (GeffMetadata): The metadata of the graph.
+        axis_names (list[str]): The names of the spatial dims.
+        axis_units (list[str | None] | None): The units of the spatial dims. Defaults to None.
+        axis_types (list[Literal[AxisType] | None] | None): The types of the spatial dims.
+            Defaults to None.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
+        axis_offset (list[float | None] | None): Amount to offset an axis after applying
+            scaling factor. Defaults to None.
 
     Returns:
         GeffMetadata: A new metadata object with updated axes.
@@ -57,6 +61,7 @@ def update_metadata_axes(
         axis_units=axis_units,
         axis_scales=axis_scales,
         scaled_units=scaled_units,
+        axis_offset=axis_offset,
     )
     new_meta.axes = axes
     return new_meta
@@ -80,6 +85,11 @@ def compute_and_add_axis_min_max(
         return new_meta
     new_axes = []
     for axis in new_meta.axes:
+        if axis.name not in node_props:
+            raise ValueError(
+                f"Spatiotemporal property '{axis.name}' not found in node properties:"
+                f"\n{node_props.keys()}"
+            )
         prop = node_props[axis.name]
         values = prop["values"]
         if len(values) == 0:
@@ -112,13 +122,13 @@ def create_or_update_metadata(
     """
     if metadata is not None:
         metadata = copy.deepcopy(metadata)
-        metadata.geff_version = geff.__version__
+        metadata.geff_version = GEFF_VERSION
         metadata.directed = is_directed
         if axes is not None:
             metadata.axes = axes
     else:
         metadata = GeffMetadata(
-            geff_version=geff.__version__,
+            geff_version=GEFF_VERSION,
             directed=is_directed,
             axes=axes,
             node_props_metadata={},
@@ -144,15 +154,25 @@ def add_or_update_props_metadata(
         GeffMetadata object with updated props metadata.
 
     Warning:
-        If a key in props_md already exists in the properties metadata, it will be overwritten.
+        If a key in props_md already exists in the properties metadata, only the
+            dtype and varlength fields will be updated
     """
     metadata = copy.deepcopy(metadata)
-    md_dict = {prop.identifier: prop for prop in props_md}
     match c_type:
         case "node":
-            metadata.node_props_metadata.update(md_dict)
+            existing_props = metadata.node_props_metadata
         case "edge":
-            metadata.edge_props_metadata.update(md_dict)
+            existing_props = metadata.edge_props_metadata
+
+    md_dict = {}
+    for prop in props_md:
+        if prop.identifier in existing_props:
+            existing_props[prop.identifier].dtype = prop.dtype
+            existing_props[prop.identifier].varlength = prop.varlength
+        else:
+            md_dict[prop.identifier] = prop
+
+    existing_props.update(md_dict)
 
     return metadata
 
@@ -163,6 +183,7 @@ def axes_from_lists(
     axis_types: Sequence[Literal[AxisType] | None] | None = None,
     axis_scales: Sequence[float | None] | None = None,
     scaled_units: Sequence[str | None] | None = None,
+    axis_offset: Sequence[float | None] | None = None,
     roi_min: Sequence[float | None] | None = None,
     roi_max: Sequence[float | None] | None = None,
 ) -> list[Axis]:
@@ -184,6 +205,8 @@ def axes_from_lists(
             spatial dims. Defaults to None.
         scaled_units(Sequence[str | None] | None, optional): The units of the spatial dims
             after scaling. Defaults to None.
+        axis_offset (list[float | None] | None): Amount to offset an axis after applying
+            scaling factor. Defaults to None.
         roi_min (Sequence[float | None] | None, optional): Minimum value for each property.
             Defaults to None.
         roi_max (Sequence[float | None] | None, optional): Maximum value for each property.
@@ -213,6 +236,11 @@ def axes_from_lists(
             f"Scaled units {scaled_units} does not have same length as axis names {axis_names}"
         )
 
+    if axis_offset is not None and len(axis_offset) != len(axis_offset):
+        raise ValueError(
+            f"Axis offset {axis_offset} does not have same length as axis names {axis_names}"
+        )
+
     for i in range(len(axis_names)):
         axes.append(
             Axis(
@@ -221,6 +249,7 @@ def axes_from_lists(
                 unit=axis_units[i] if axis_units is not None else None,
                 scale=axis_scales[i] if axis_scales is not None else None,
                 scaled_unit=scaled_units[i] if scaled_units is not None else None,
+                offset=axis_offset[i] if axis_offset is not None else None,
                 min=roi_min[i] if roi_min is not None else None,
                 max=roi_max[i] if roi_max is not None else None,
             )

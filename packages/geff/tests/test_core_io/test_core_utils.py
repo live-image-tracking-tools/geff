@@ -1,9 +1,21 @@
+import os
 from pathlib import Path
 
+import numpy as np
 import pytest
 import zarr
+import zarr.storage
 
-from geff.core_io._utils import _detect_zarr_spec_version, open_storelike, setup_zarr_group
+from geff import _path
+from geff.core_io._base_write import write_arrays
+from geff.core_io._utils import (
+    _detect_zarr_spec_version,
+    check_for_geff,
+    delete_geff,
+    open_storelike,
+    setup_zarr_group,
+)
+from geff.testing.data import create_simple_2d_geff
 
 
 @pytest.mark.skipif(zarr.__version__.startswith("2"), reason="tests for zarr-python>=v3 only")
@@ -88,3 +100,72 @@ class TestZarrV2Warnings:
     def test_warn_if_writing_zarr_format_3(self, tmp_path: Path):
         with pytest.warns(UserWarning, match="Requesting zarr spec v3 with zarr-python v2"):
             setup_zarr_group(tmp_path / "test.zarr", zarr_format=3)
+
+
+class Test_delete_geff:
+    def test_basic_path(self, tmp_path):
+        _, mem_geff = create_simple_2d_geff()
+        path = tmp_path / "test.geff"
+        write_arrays(path, **mem_geff)
+        assert os.path.exists(path)
+
+        delete_geff(path)
+
+        assert not os.path.exists(path)
+
+    def test_extra_data(self, tmp_path):
+        _, mem_geff = create_simple_2d_geff()
+        path = tmp_path / "test.geff"
+        write_arrays(path, **mem_geff, zarr_format=2)
+        assert os.path.exists(path)
+        # Test with extra data
+        root = zarr.open(path, mode="a")
+        root["other_data"] = np.zeros(shape=(10, 10))
+
+        with pytest.raises(
+            UserWarning,
+            match=r"Found non-geff members in zarr. Exiting without deleting root zarr.",
+        ):
+            delete_geff(path)
+            root = zarr.open(path)
+            assert _path.NODES not in root
+            assert _path.EDGES not in root
+            assert "geff" not in root.attrs
+
+    def test_mem_store(self):
+        store, _ = create_simple_2d_geff()
+
+        with pytest.raises(
+            UserWarning,
+            match="Cannot delete root zarr directory, but geff contents have been deleted",
+        ):
+            delete_geff(store)
+            root = zarr.open(store)
+            assert "geff" not in root.attrs
+
+
+class Test_check_for_geff:
+    def test_path(self, tmp_path):
+        geff_path = tmp_path / "test.geff"
+        # does not exist
+        assert check_for_geff(geff_path) is False
+        # exists
+        os.mkdir(geff_path)
+        assert check_for_geff(geff_path) is True
+
+    def test_str(self, tmp_path):
+        geff_path = str(tmp_path / "test.geff")
+        # does not exist
+        assert check_for_geff(geff_path) is False
+        # exists
+        os.mkdir(geff_path)
+        assert check_for_geff(geff_path) is True
+
+    def test_Store(self):
+        store = zarr.storage.MemoryStore()
+        # does not exist
+        assert check_for_geff(store) is False
+        # exists
+        root = zarr.open(store)
+        root.attrs["geff"] = "metadata"
+        assert check_for_geff(store) is True

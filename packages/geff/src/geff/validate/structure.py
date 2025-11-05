@@ -60,13 +60,14 @@ def _validate_axes_structure(graph: zarr.Group, meta: GeffMetadata) -> None:
         node_prop_group = expect_group(graph, "nodes/props")
         for ax in meta.axes:
             # Array must be present without missing values
-            assert f"{ax.name}/values" in node_prop_group, f"Axis {ax.name} data is missing"
-            assert f"{ax.name}/missing" not in node_prop_group, (
-                f"Axis {ax.name} has missing values which are not allowed"
-            )
+            if f"{ax.name}/values" not in node_prop_group:
+                raise ValueError(f"Axis {ax.name} data is missing")
+            if f"{ax.name}/missing" in node_prop_group:
+                raise ValueError(f"Axis {ax.name} has missing values which are not allowed")
             # Only 1d data allowed, already checked length of first axis
             ndim = len(expect_array(node_prop_group, f"{ax.name}/values").shape)
-            assert ndim == 1, f"Axis property {ax.name} has {ndim} dimensions, must be 1D"
+            if ndim != 1:
+                raise ValueError(f"Axis property {ax.name} has {ndim} dimensions, must be 1D")
 
 
 def _validate_props_group(
@@ -103,12 +104,30 @@ def _validate_props_group(
             )
         val_arr = expect_array(prop_group, _path.VALUES)
 
-        # check value dtype against metadata dtype
-        if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
-            raise ValueError(
-                f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
-                f"dtype {val_arr.dtype}"
-            )
+        # Check varlength cases
+        if prop_metadata.varlength:
+            data_arr = expect_array(prop_group, _path.DATA)
+            if not np.issubdtype(val_arr.dtype, np.uint64):
+                raise ValueError(
+                    f"Varlength property {prop_name} values array does not have type uint64"
+                )
+            # data array dtype should match metadata dtype
+            if not np.issubdtype(data_arr.dtype, np.dtype(prop_metadata.dtype)):
+                raise ValueError(
+                    f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
+                    f"dtype {val_arr.dtype}"
+                )
+        else:
+            # check value dtype against metadata dtype
+            if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
+                raise ValueError(
+                    f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
+                    f"dtype {val_arr.dtype}"
+                )
+            if _path.DATA in arrays:
+                raise ValueError(
+                    f"Found data array for property {prop_name} which is not a varlength property"
+                )
 
         # check values length
         val_len = val_arr.shape[0]
@@ -137,7 +156,7 @@ def _validate_nodes_group(nodes_group: zarr.Group, metadata: GeffMetadata) -> No
     """Validate the structure of a nodes group in a GEFF zarr store."""
     node_ids = expect_array(nodes_group, _path.IDS, _path.NODES)
 
-    # Node ids must be uint dtype
+    # Node ids must be int dtype
     if not np.issubdtype(np.dtype(node_ids.dtype), np.integer):
         raise ValueError("Node ids must have an integer dtype")
 
@@ -154,8 +173,8 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
         raise ValueError(
             f"edges ids must be 2d with last dimension of size 2, received shape {edges_ids.shape}"
         )
-    if not np.issubdtype(np.dtype(edges_ids.dtype), np.unsignedinteger):
-        raise ValueError("Edge ids must have an unsigned integer dtype")
+    if not np.issubdtype(np.dtype(edges_ids.dtype), np.integer):
+        raise ValueError("Edge ids must have an integer dtype")
 
     # Edge property array length should match edge id length
     edge_id_len = edges_ids.shape[0]

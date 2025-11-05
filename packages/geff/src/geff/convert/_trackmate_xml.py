@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import itertools
-import shutil
 import warnings
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import networkx as nx
+
+from geff.core_io._utils import check_for_geff, delete_geff
 
 if TYPE_CHECKING:
     import xml.etree.ElementTree as ET
@@ -25,10 +26,6 @@ else:
 
 from geff._graph_libs._networkx import NxBackend
 from geff_spec import Axis, DisplayHint, GeffMetadata, RelatedObject
-
-# TODO: extract _preliminary_checks() to a common module since similar code is already
-# used in ctc_to_geff. Need to wait for CTC PR.
-
 
 # Template mapping for TrackMate dimension to unit conversion
 _DIMENSION_UNIT_TEMPLATES: dict[str, Callable[[str, str], str]] = {
@@ -50,9 +47,7 @@ _DIMENSION_UNIT_TEMPLATES: dict[str, Callable[[str, str], str]] = {
 
 
 def _preliminary_checks(
-    xml_path: Path,
-    geff_path: Path,
-    overwrite: bool,
+    xml_path: Path, geff_path: Path, overwrite: bool, zarr_format: Literal[2, 3] = 2
 ) -> None:
     """Check the validity of input paths and clean up the output path if needed.
 
@@ -60,6 +55,7 @@ def _preliminary_checks(
         xml_path (Path): The path to the TrackMate XML file.
         geff_path (Path): The path to the GEFF file.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
 
     Raises:
         FileNotFoundError: If the XML file does not exist.
@@ -68,11 +64,16 @@ def _preliminary_checks(
     if not xml_path.exists():
         raise FileNotFoundError(f"TrackMate XML file {xml_path} does not exist.")
 
-    if geff_path.exists() and not overwrite:
-        raise FileExistsError(f"GEFF file {geff_path} already exists.")
-
-    if geff_path.exists() and overwrite:
-        shutil.rmtree(geff_path)
+    # Check for an existing geff
+    if check_for_geff(geff_path):
+        if overwrite:
+            delete_geff(geff_path, zarr_format=zarr_format)
+        else:
+            raise FileExistsError(
+                "Found an existing geff present in `geff_store`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`geff_store` to write to."
+            )
 
 
 def _get_units(
@@ -204,15 +205,19 @@ def _convert_attributes(
 def _convert_ROI_coordinates(
     element: ET.Element,
     attrs: dict[str, Any],
-) -> None:
+) -> int:
     """Extract, format and add ROI coordinates to the attributes dict.
 
     Args:
         element (ET._Element): Element from which to extract ROI coordinates.
-        attrs (dict[str, Attribute]): Attributes dict to update with ROI coordinates.
+        attrs (dict[str, Any]): Attributes dict to update with ROI coordinates.
+
+    Returns:
+        int: Number of dimensions of the ROI coordinates.
 
     Raises:
         KeyError: If the "ROI_N_POINTS" attribute is not found in the attributes dict.
+        TypeError: If the "ROI_N_POINTS" attribute is not an integer.
     """
     if "ROI_N_POINTS" not in attrs:
         raise KeyError(
@@ -221,14 +226,16 @@ def _convert_ROI_coordinates(
     if element.text:
         n_points = attrs["ROI_N_POINTS"]
         if not isinstance(n_points, int):
-            raise TypeError("ROI_N_POINTS should be an integer")
+            raise TypeError("ROI_N_POINTS should be an integer.")
 
         coords = [float(v) for v in element.text.split()]
-        dim = len(coords) // n_points
-        attrs["ROI_coords"] = [tuple(coords[i : i + dim]) for i in range(0, len(coords), dim)]
-
+        nb_dim = len(coords) // n_points
+        attrs["ROI_coords"] = [tuple(coords[i : i + nb_dim]) for i in range(0, len(coords), nb_dim)]
     else:
         attrs["ROI_coords"] = None
+        nb_dim = 0
+
+    return nb_dim
 
 
 def _add_all_nodes(
@@ -239,17 +246,18 @@ def _add_all_nodes(
 ) -> bool:
     """Add nodes and their attributes to a graph and return the presence of segmentation.
 
-    All the elements that are descendants of `ancestor` are explored.
+    All the elements that are descendants of `ancestor` are explored. The graph is
+    modified in place by adding nodes with their attributes.
 
     Args:
         it (Iterator[tuple[str, ET.Element]]): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected node attributes.
-        graph (nx.DiGraph): The graph to which the nodes will be added.
+        graph (nx.DiGraph): The graph to which the nodes will be added (modified in place).
 
     Returns:
-        bool: True if the model has segmentation data, False otherwise.
+        bool: True if the spots are segmented, False otherwise.
 
     Warns:
         UserWarning: If a node cannot be added to the graph due to missing attributes.
@@ -270,13 +278,12 @@ def _add_all_nodes(
             # the tag text. So we need to extract then format them.
             # In case of a single-point detection, the `ROI_N_POINTS` attribute
             # is not present.
-            # TODO: waiting for polygons support in GEFF.
-            # if segmentation:
-            #     _convert_ROI_coordinates(element, attrs)
-            # else:
-            #     if "ROI_N_POINTS" in attrs:
-            #         segmentation = True
-            #         _convert_ROI_coordinates(element, attrs)
+            if segmentation:
+                _convert_ROI_coordinates(element, attrs)
+            else:
+                if "ROI_N_POINTS" in attrs:
+                    segmentation = True
+                    _convert_ROI_coordinates(element, attrs)
 
             # Adding the node and its attributes to the graph.
             try:
@@ -305,13 +312,14 @@ def _add_edge(
     given XML element, along with any additional attributes defined
     within. It then adds an edge between these nodes in the specified
     graph. If the nodes have a 'TRACK_ID' attribute, it ensures consistency
-    with the current track ID.
+    with the current track ID. The graph is modified in place.
 
     Args:
         element (ET._Element): The XML element containing edge information.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing
             the expected edge attributes.
-        graph (nx.DiGraph): The graph to which the edge and its attributes will be added.
+        graph (nx.DiGraph): The graph to which the edge and its attributes will be added
+            (modified in place).
         current_track_id (int): Track ID of the track holding the edge.
 
     Raises:
@@ -366,17 +374,18 @@ def _build_tracks(
     specified `ancestor` element, adding edges and their attributes to
     the provided graph. It iterates through the XML elements using
     the provided iterator, extracting and processing relevant information
-    to construct track attributes.
+    to construct track attributes. The graph is modified in place.
 
     Args:
         iterator (Iterator[tuple[str, ET.Element]]): An iterator over XML elements.
         ancestor (ET._Element): The XML element that encompasses the information to be added.
         attrs_md (dict[str, dict[str, str]]): The attributes metadata containing the
             expected edge attributes.
-        graph (nx.DiGraph): The graph to which the edges and their attributes will be added.
+        graph (nx.DiGraph): The graph to which the edges and their attributes will be added
+            (modified in place).
 
     Returns:
-        list[dict[str, Attribute]]: A list of dictionaries, each representing the
+        list[dict[str, Any]]: A list of dictionaries, each representing the
             attributes for a track.
 
     Raises:
@@ -415,6 +424,9 @@ def _get_filtered_tracks_ID(
 ) -> list[int]:
     """
     Extract and return a list of track IDs identifying the tracks to keep.
+
+    This function processes the first element immediately, then iterates through
+    the remaining elements to extract track IDs from TrackID elements.
 
     Args:
         iterator (Iterator[tuple[str, ET.Element]]): An iterator over XML elements.
@@ -458,7 +470,7 @@ def _build_data(
     xml_path: Path,
     discard_filtered_spots: bool = False,
     discard_filtered_tracks: bool = False,
-) -> tuple[nx.DiGraph, dict[str, str]]:
+) -> tuple[nx.DiGraph, dict[str, str], bool]:
     """Read an XML file and convert the model data into several graphs.
 
     All TrackMate tracks and their associated data described in the XML file
@@ -477,8 +489,10 @@ def _build_data(
         nx.DiGraph: A NetworkX graph representing the TrackMate data.
         dict[str, str]: A dictionary containing the units of the model, with keys
             'spatialunits' and 'timeunits'.
+        bool: True if the spots are segmented, False otherwise.
     """
     graph: nx.DiGraph[int] = nx.DiGraph()
+    segmentation = False
 
     # So as not to load the entire XML file into memory at once, we're
     # using an iterator to browse over the tags one by one.
@@ -504,9 +518,7 @@ def _build_data(
 
             # Adding the spots as nodes.
             if element.tag == "AllSpots" and event == "start":
-                # TODO: segmentation will be used when GEFF supports polygons.
-                # segmentation = _add_all_nodes(it, element, attrs_md, graph)
-                _add_all_nodes(it, element, attrs_md, graph)
+                segmentation = _add_all_nodes(it, element, attrs_md, graph)
                 root.clear()
 
             # Adding the tracks as edges.
@@ -539,7 +551,7 @@ def _build_data(
             if element.tag == "Model" and event == "end":
                 break
 
-    return graph, units
+    return graph, units, segmentation
 
 
 def _get_trackmate_version(
@@ -754,7 +766,8 @@ def _process_feature_metadata(
         units: A dictionary containing the units of the model.
 
     Raises:
-        ValueError: If the feature key is missing or duplicated.
+        KeyError: If the 'feature' key is missing from the XML element.
+        ValueError: If the 'feature' key is duplicated.
     """
     if feat.attrib.get("feature") is None:
         raise KeyError(
@@ -777,12 +790,15 @@ def _process_feature_metadata(
     }
 
 
-def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, Any]:
+def _extract_props_metadata(
+    xml_path: Path, units: dict[str, str], segmentation: bool
+) -> dict[str, Any]:
     """Extract properties metadata from the TrackMate XML file.
 
     Args:
         xml_path: The file path of the XML file to be parsed.
         units: A dictionary containing the units of the model.
+        segmentation: A boolean indicating whether the spots are segmented.
 
     Returns:
         dict[str, Any]
@@ -824,6 +840,23 @@ def _extract_props_metadata(xml_path: Path, units: dict[str, str]) -> dict[str, 
                     feat, mapping_feat_type[feat_type.tag], feat_type.tag, units
                 )
 
+    # Specific case of ROI.
+    if segmentation:
+        node_props_metadata["ROI_N_POINTS"] = {
+            "identifier": "ROI_N_POINTS",
+            "dtype": "int",
+            "name": "ROI number of points",
+            "description": "Number of points defining the spot ROI.",
+        }
+        node_props_metadata["ROI_coords"] = {
+            "identifier": "ROI_coords",
+            "dtype": "float",
+            "varlength": True,
+            "unit": node_props_metadata["POSITION_X"].get("unit", "pixel"),
+            "name": "ROI coordinates",
+            "description": "List of coordinates of the spot ROI relative to the spot center.",
+        }
+
     return props_metadata
 
 
@@ -840,7 +873,7 @@ def _build_geff_metadata(
         xml_path (Path): The path to the TrackMate XML file.
         units (dict[str, str]): A dictionary containing the units of the model.
         img_path (str | None): The path to the related image file.
-        trackmate_metadata (dict[str, dict[str, ET.Element]]): The TrackMate metadata extracted
+        trackmate_metadata (dict[str, ET.Element]): The TrackMate metadata extracted
             from the XML file.
         props_metadata (dict[str, Any]): The properties metadata extracted from the XML file.
 
@@ -962,7 +995,7 @@ def from_trackmate_xml_to_geff(
 
     Args:
         xml_path (Path | str): The path to the TrackMate XML file.
-        geff_path (Store): The path to the GEFF file.
+        geff_path (Path | str): The path to the GEFF file.
         discard_filtered_spots (bool, optional): True to discard the spots
             filtered out in TrackMate, False otherwise. False by default.
         discard_filtered_tracks (bool, optional): True to discard the tracks
@@ -970,22 +1003,22 @@ def from_trackmate_xml_to_geff(
         overwrite (bool, optional): Whether to overwrite the GEFF file if it already exists.
         zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
 
-    Raises:
+    Warns:
         UserWarning: If the XML file does not contain specific metadata tags or if there are issues
             with the TrackMate metadata.
     """
     xml_path = Path(xml_path)
     geff_path = Path(geff_path).with_suffix(".geff")
-    _preliminary_checks(xml_path, geff_path, overwrite=overwrite)
+    _preliminary_checks(xml_path, geff_path, overwrite=overwrite, zarr_format=zarr_format)
 
     # Data
-    graph, units = _build_data(
+    graph, units, segmentation = _build_data(
         xml_path=xml_path,
         discard_filtered_spots=discard_filtered_spots,
         discard_filtered_tracks=discard_filtered_tracks,
     )
     # Metadata
-    props_metadata = _extract_props_metadata(xml_path, units)
+    props_metadata = _extract_props_metadata(xml_path, units, segmentation)
     _ensure_data_metadata_consistency(graph=graph, metadata=props_metadata)
     tm_md = _get_specific_tags(xml_path, ["Log", "Settings", "GUIState", "DisplaySettings"], 3)
     img_path = _extract_image_path(tm_md.get("Settings", None))
@@ -996,6 +1029,7 @@ def from_trackmate_xml_to_geff(
         trackmate_metadata=tm_md,
         props_metadata=props_metadata,
     )
+
     # Create the GEFF :D
     NxBackend.write(
         graph,

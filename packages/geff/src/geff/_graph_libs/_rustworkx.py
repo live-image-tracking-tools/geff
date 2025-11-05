@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ._errors import MissingDependencyError
+
 try:
     import rustworkx as rx
 except ImportError as e:
-    raise ImportError(
+    raise MissingDependencyError(
         "This module requires rustworkx to be installed. "
         "Please install it with `pip install 'geff[rx]'`."
     ) from e
@@ -114,14 +115,20 @@ class RxBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_types: list[AxisType | None] | None = None,
+        axis_scales: list[float | None] | None = None,
+        scaled_units: list[str | None] | None = None,
+        axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
         node_id_dict: dict[int, int] | None = None,
     ) -> None:
         directed = isinstance(graph, rx.PyDiGraph)
         metadata = create_or_update_metadata(metadata=metadata, is_directed=directed)
         if axis_names is not None:
-            metadata = update_metadata_axes(metadata, axis_names, axis_units, axis_types)
+            metadata = update_metadata_axes(
+                metadata, axis_names, axis_units, axis_types, axis_scales, scaled_units, axis_offset
+            )
 
         if graph.num_nodes() == 0:
             # Handle empty graph case - still need to write empty structure
@@ -129,8 +136,6 @@ class RxBackend(Backend):
             edge_data: list[tuple[tuple[int, int], dict[str, Any]]] = []
             node_props: list[str] = []
             edge_props: list[str] = []
-
-            warnings.warn(f"Graph is empty - only writing metadata to {store}", stacklevel=2)
 
         else:
             # Prepare node data
@@ -163,8 +168,8 @@ class RxBackend(Backend):
             node_prop_names=node_props,
             edge_prop_names=edge_props,
             metadata=metadata,
-            axis_names=axis_names,
             zarr_format=zarr_format,
+            structure_validation=structure_validation,
         )
 
     @staticmethod

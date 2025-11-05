@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, get_args, overload
 
+from geff.core_io._utils import check_for_geff, delete_geff, remove_tilde
+
+from ._errors import MissingDependencyError
+
 R = TypeVar("R", covariant=True)
 
 if TYPE_CHECKING:
@@ -17,7 +21,7 @@ if TYPE_CHECKING:
 
     from ._backend_protocol import Backend
 
-    NxGraph: TypeAlias = nx.Graph | nx.DiGraph
+    NxGraph: TypeAlias = nx.Graph[Any] | nx.DiGraph[Any]
     RxGraph: TypeAlias = rx.PyGraph | rx.PyDiGraph
     SgGraph: TypeAlias = sg.SpatialGraph | sg.SpatialDiGraph
     SupportedGraphType: TypeAlias = NxGraph | RxGraph | SgGraph
@@ -34,7 +38,7 @@ def _import_available_backends() -> None:
     for backend in backends:
         try:
             AVAILABLE_BACKENDS.append(get_backend(backend))
-        except ImportError:
+        except MissingDependencyError:
             pass
 
 
@@ -77,7 +81,7 @@ _import_available_backends()
 
 
 # Used in the write function wrapper, where the backend should be determined from the graph type
-def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend:
+def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend[SupportedGraphType]:
     for backend_module in AVAILABLE_BACKENDS:
         if isinstance(graph, backend_module.GRAPH_TYPES):
             return backend_module
@@ -216,8 +220,13 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[Literal[AxisType] | None] | None = ...,
+    axis_types: list[AxisType | None] | None = ...,
+    axis_scales: list[float | None] | None = ...,
+    scaled_units: list[str | None] | None = ...,
+    axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
+    structure_validation: bool = True,
+    overwrite: bool = False,
     node_id_dict: dict[int, int] | None = ...,
 ) -> None:
     # TODO: what is best practice for overload docstrings, want to document node_id_dict
@@ -239,8 +248,18 @@ def write(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
+        axis_offset (list[float | None] | None): Amount to offset an axis after applying
+            scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
+        overwrite (bool): If True, deletes any existing geff and writes a new geff.
+            Defaults to False.
         node_id_dict (dict[int, int], optional): A dictionary mapping rx node indices to
             arbitrary indices. This allows custom node identifiers to be used in the geff file
             instead of rustworkx's internal indices. If None, uses rx indices directly.
@@ -255,8 +274,13 @@ def write(
     metadata: GeffMetadata | None = ...,
     axis_names: list[str] | None = ...,
     axis_units: list[str | None] | None = ...,
-    axis_types: list[Literal[AxisType] | None] | None = ...,
-    zarr_format: Literal[2, 3] = 2,
+    axis_types: list[AxisType | None] | None = ...,
+    axis_scales: list[float | None] | None = ...,
+    scaled_units: list[str | None] | None = ...,
+    axis_offset: list[float | None] | None = ...,
+    zarr_format: Literal[2, 3] = ...,
+    structure_validation: bool = True,
+    overwrite: bool = False,
     *args: Any,
     **kwargs: Any,
 ) -> None: ...
@@ -266,8 +290,13 @@ def write(
     metadata: GeffMetadata | None = None,
     axis_names: list[str] | None = None,
     axis_units: list[str | None] | None = None,
-    axis_types: list[Literal[AxisType] | None] | None = None,
+    axis_types: list[AxisType | None] | None = None,
+    axis_scales: list[float | None] | None = None,
+    scaled_units: list[str | None] | None = None,
+    axis_offset: list[float | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
+    structure_validation: bool = True,
+    overwrite: bool = False,
     *args: Any,
     **kwargs: Any,
 ) -> None:
@@ -289,13 +318,36 @@ def write(
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
+        axis_scales (list[float | None] | None): The scale to apply to the spatial dims.
+            Defaults to None.
+        scaled_units (list[str | None] | None): The units of the spatial dims after scaling.
+            Defaults to None.
+        axis_offset (list[float | None] | None): Amount to offset an axis after applying
+            scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
             Defaults to 2.
+        structure_validation (bool): If True, runs structural validation and does not write
+            a geff that is invalid. Defaults to True.
+        overwrite (bool): If True, deletes any existing geff and writes a new geff.
+            Defaults to False.
         *args (Any): Additional args that may be accepted by the backend when writing from a
             specific type of graph.
         **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from a
             specific type of graph.
     """
+    store = remove_tilde(store)
+
+    # Check for existing geff
+    if check_for_geff(store):
+        if overwrite:
+            delete_geff(store, zarr_format=zarr_format)
+        else:
+            raise FileExistsError(
+                "Found an existing geff present in `store`. "
+                "Please use `overwrite=True` or provide an alternative "
+                "`store` to write to."
+            )
+
     backend_io = get_backend_from_graph_type(graph)
     backend_io.write(
         graph,
@@ -304,7 +356,11 @@ def write(
         axis_names,
         axis_units,
         axis_types,
+        axis_scales,
+        scaled_units,
+        axis_offset,
         zarr_format,
+        structure_validation,
         *args,
         **kwargs,
     )

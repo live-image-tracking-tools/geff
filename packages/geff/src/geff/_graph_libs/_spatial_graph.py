@@ -3,10 +3,12 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING, Any, Literal, cast
 
+from ._errors import MissingDependencyError
+
 try:
     import spatial_graph as sg
 except ImportError as e:
-    raise ImportError(
+    raise MissingDependencyError(
         "This module requires spatial-graph to be installed. "
         "Please install it with `pip install 'geff[spatial-graph]'`."
     ) from e
@@ -47,9 +49,18 @@ class SgBackend(Backend):
         edge_props: dict[str, PropDictNpArray],
         position_attr: str = "position",
     ) -> sg.SpatialGraph | sg.SpatialDiGraph:
-        assert metadata.axes is not None, "Can not construct a SpatialGraph from a non-spatial geff"
-
-        position_attrs = [axis.name for axis in metadata.axes]
+        # Cast empty list to None for consistency
+        if metadata.axes == []:
+            metadata.axes = None
+        if metadata.axes is None:
+            if len(node_ids) != 0:
+                raise ValueError(
+                    "Cannot construct a non-empty SpatialGraph from a geff without axes"
+                )
+            else:
+                position_attrs = []
+        else:
+            position_attrs = [axis.name for axis in metadata.axes]
         ndims = len(position_attrs)
 
         def get_dtype_str(dataset: np.ndarray) -> str:
@@ -88,7 +99,14 @@ class SgBackend(Backend):
         edge_attrs = {name: edge_props[name]["values"] for name in edge_props.keys()}
 
         # squish position attributes together into one position attribute
-        position = np.stack([node_attrs[name] for name in position_attrs], axis=1)
+        position: np.ndarray[tuple[int, ...], np.dtype[Any]]
+        if len(node_ids) == 0:
+            # Need to include a singleton spatial dimension in the shape to be
+            # valid for spatial graph
+            position = np.zeros(shape=(0, 1), dtype="float64")
+            ndims = 1
+        else:
+            position = np.stack([node_attrs[name] for name in position_attrs], axis=1)
         for name in position_attrs:
             del node_attrs[name]
             del node_attr_dtypes[name]
@@ -108,8 +126,9 @@ class SgBackend(Backend):
             directed=metadata.directed,
         )
 
-        graph.add_nodes(node_ids, **node_attrs)
-        graph.add_edges(edge_ids, **edge_attrs)
+        if len(node_ids) > 0:
+            graph.add_nodes(node_ids, **node_attrs)
+            graph.add_edges(edge_ids, **edge_attrs)
 
         return graph
 
@@ -120,8 +139,12 @@ class SgBackend(Backend):
         metadata: GeffMetadata | None = None,
         axis_names: list[str] | None = None,
         axis_units: list[str | None] | None = None,
-        axis_types: list[Literal[AxisType] | None] | None = None,
+        axis_types: list[AxisType | None] | None = None,
+        axis_scales: list[float | None] | None = None,
+        scaled_units: list[str | None] | None = None,
+        axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
+        structure_validation: bool = True,
     ) -> None:
         store = remove_tilde(store)
 
@@ -130,10 +153,14 @@ class SgBackend(Backend):
         elif axis_names is not None:
             pass
         else:
-            raise ValueError(
-                "Axis names must be specified either using the `axis_names` argument or within the "
-                "geff metadata."
-            )
+            # It's ok if there are no axes names if the graph is empty
+            if len(list(graph.nodes)) != 0:
+                raise ValueError(
+                    "Axis names must be specified either using the `axis_names` argument "
+                    "or within the geff metadata."
+                )
+            else:
+                axis_names = []
 
         # create or update metadata
         roi_min, roi_max = graph.roi
@@ -141,10 +168,19 @@ class SgBackend(Backend):
             axis_names,
             axis_units=axis_units,
             axis_types=axis_types,
+            axis_scales=axis_scales,
+            scaled_units=scaled_units,
             roi_min=roi_min,
             roi_max=roi_max,
+            axis_offset=axis_offset,
         )
         metadata = create_or_update_metadata(metadata, graph.directed, axes)
+
+        if graph.ndims != len(axes) and len(list(graph.nodes)) != 0:
+            raise ValueError(
+                f"Cannot write a SpatialGraph with ndims {graph.ndims} and "
+                f"a different number of axes ({axis_names})"
+            )
 
         # write to geff
         write_arrays(
@@ -162,6 +198,7 @@ class SgBackend(Backend):
             },
             metadata=metadata,
             zarr_format=zarr_format,
+            structure_validation=structure_validation,
         )
 
     @staticmethod

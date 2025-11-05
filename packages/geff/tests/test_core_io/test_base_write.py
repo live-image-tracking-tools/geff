@@ -1,3 +1,4 @@
+import re
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -17,13 +18,17 @@ from geff.testing.data import (
     create_simple_temporal_geff,
 )
 from geff.validate.structure import validate_structure
-from geff_spec import GeffMetadata
+from geff_spec import GeffMetadata, PropMetadata
 
 if TYPE_CHECKING:
     from geff._typing import InMemoryGeff, PropDictNpArray
 
 
-from geff.core_io._base_write import dict_props_to_arr, write_dicts, write_props_arrays
+from geff.core_io._base_write import (
+    dict_props_to_arr,
+    write_dicts,
+    write_props_arrays,
+)
 
 
 def _tmp_metadata():
@@ -94,7 +99,7 @@ class TestWriteArrays:
         validate_structure(geff_path)
 
     def test_write_in_mem_geff(self):
-        store, attrs = create_simple_3d_geff()
+        store, _attrs = create_simple_3d_geff()
         in_mem_geff = read_to_memory(store)
 
         # Test writing
@@ -163,6 +168,79 @@ class TestWriteArrays:
             )
             write_arrays(path, **memory_geff, zarr_format=zarr_format)
             check_equiv_geff(store, path)
+
+    def test_invalid_geff(self, tmp_path):
+        _, memory_geff = create_simple_2d_geff()
+        path = tmp_path / "test.geff"
+        # Add array with wrong size
+        memory_geff["node_props"]["bad_size"] = {"values": np.zeros((2, 10)), "missing": None}
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "Node property 'bad_size' values has length 2, which "
+                "does not match id length 10\nCannot write invalid geff."
+            ),
+        ):
+            write_arrays(path, **memory_geff)
+
+    def test_existing_geff(self):
+        store, memory_geff = create_simple_2d_geff()
+        with pytest.raises(
+            FileExistsError, match=r"Found an existing geff present in `geff_store`."
+        ):
+            write_arrays(store, **memory_geff)
+
+        # Try with overwrite
+        new_store, new_geff = create_simple_3d_geff()
+        with pytest.raises(
+            UserWarning,
+            match="Cannot delete root zarr directory, but geff contents have been deleted",
+        ):
+            write_arrays(store, **new_geff, overwrite=True)
+            check_equiv_geff(store, new_store)
+
+    def test_write_props_metadata(self):
+        _, memory_geff = create_simple_3d_geff()
+
+        # Define props metadata
+        props_meta = {
+            "x": PropMetadata(
+                identifier="x",
+                dtype=str(memory_geff["node_props"]["x"]["values"].dtype),
+                unit="um",
+                description="xaxis",
+                name="X axis",
+            ),
+            "y": PropMetadata(
+                identifier="y",
+                dtype=str(memory_geff["node_props"]["y"]["values"].dtype),
+                unit="um",
+                description="yaxis",
+                name="Y axis",
+            ),
+            "z": PropMetadata(
+                identifier="z",
+                dtype=str(memory_geff["node_props"]["z"]["values"].dtype),
+                unit="um",
+                description="zaxis",
+                name="Z axis",
+            ),
+            "t": PropMetadata(
+                identifier="t",
+                dtype=str(memory_geff["node_props"]["t"]["values"].dtype),
+                unit="um",
+                description="taxis",
+                name="t axis",
+            ),
+        }
+        memory_geff["metadata"].node_props_metadata = props_meta
+
+        store = zarr.storage.MemoryStore()
+        write_arrays(store, **memory_geff)
+
+        new_meta = GeffMetadata.read(store)
+        assert new_meta.node_props_metadata == props_meta
 
 
 @pytest.mark.parametrize(

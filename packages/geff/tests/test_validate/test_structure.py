@@ -38,6 +38,7 @@ def z() -> zarr.Group:
         include_z=True,  # 3D includes z
         include_y=True,
         include_x=True,
+        include_varlength=True,
     )
     return zarr.open_group(store)
 
@@ -121,7 +122,7 @@ class Test_validate_edges_group:
         edge_group[_path.IDS] = np.zeros((3, 3))
         with pytest.raises(
             ValueError,
-            match="edges ids must be 2d with last dimension of size 2, received shape .*",
+            match=r"edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
             _validate_edges_group(edge_group, meta)
 
@@ -129,17 +130,21 @@ class Test_validate_edges_group:
         edge_group[_path.IDS] = np.zeros((3, 1))
         with pytest.raises(
             ValueError,
-            match="edges ids must be 2d with last dimension of size 2, received shape .*",
+            match=r"edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
             _validate_edges_group(edge_group, meta)
 
-    def test_edge_ids_not_uint(self, edge_group, meta):
+    def test_edge_ids_not_int(self, edge_group, meta):
         edge_group[_path.IDS] = edge_group[_path.IDS][:].astype("float")
         with pytest.raises(
             ValueError,
-            match="Edge ids must have an unsigned integer dtype",
+            match="Edge ids must have an integer dtype",
         ):
             _validate_edges_group(edge_group, meta)
+
+        # int and uint are now both ok
+        edge_group[_path.IDS] = edge_group[_path.IDS][:].astype("int")
+        _validate_edges_group(edge_group, meta)
 
     # Other cases are caught in tests for _validate_props_group
 
@@ -195,14 +200,14 @@ class Test_validate_props_group:
 
     def test_missing_prop_metadata(self, node_group):
         id_len = node_group[_path.IDS].shape[0]
-        with pytest.raises(ValueError, match="Property .* is missing from the property metadata"):
+        with pytest.raises(ValueError, match=r"Property .* is missing from the property metadata"):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", {})
 
     def test_extra_prop_metadata(self, node_group, meta):
         meta.node_props_metadata["extra"] = PropMetadata(identifier="extra", dtype="int")
         id_len = node_group[_path.IDS].shape[0]
         with pytest.raises(
-            ValueError, match="Property .* is in the metadata but missing from the property group"
+            ValueError, match=r"Property .* is in the metadata but missing from the property group"
         ):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
@@ -212,7 +217,40 @@ class Test_validate_props_group:
         x_meta.dtype = "uint64"
         meta.node_props_metadata["x"] = x_meta
 
-        with pytest.raises(ValueError, match="Property .* has stated dtype .* but actual dtype .*"):
+        with pytest.raises(
+            ValueError, match=r"Property .* has stated dtype .* but actual dtype .*"
+        ):
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+
+    def test_varlen_value_dtype(self, node_group, meta):
+        id_len = node_group[_path.IDS].shape[0]
+        x_meta = meta.node_props_metadata["var_length"]
+        x_meta.dtype = "float"
+        meta.node_props_metadata["var_length"] = x_meta
+
+        with pytest.raises(
+            ValueError, match=r"Property .* has stated dtype .* but actual dtype .*"
+        ):
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+
+    def test_varlen_data_dtype(self, node_group, meta):
+        id_len = node_group[_path.IDS].shape[0]
+        node_group[_path.PROPS]["var_length"][_path.VALUES] = np.zeros(
+            shape=(id_len, 2), dtype="float"
+        )
+
+        with pytest.raises(
+            ValueError, match=r"Varlength property .* values array does not have type uint64"
+        ):
+            _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
+
+    def test_data_wo_varlen(self, node_group, meta):
+        id_len = node_group[_path.IDS].shape[0]
+        node_group[_path.PROPS]["x"][_path.DATA] = np.zeros(10)
+
+        with pytest.raises(
+            ValueError, match=r"Found data array for property .* which is not a varlength property"
+        ):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
 
@@ -253,7 +291,7 @@ class Test_check_equiv_geff:
 
     def test_id_shape_mismatch(self):
         # Id shape mismatch
-        bad_store, attrs = create_simple_2d_geff(num_nodes=5)
+        bad_store, _attrs = create_simple_2d_geff(num_nodes=5)
         with pytest.raises(ValueError, match=r".* ids shape: .* does not match .*"):
             check_equiv_geff(self.store, bad_store)
 
@@ -264,7 +302,7 @@ class Test_check_equiv_geff:
             identifier="new prop", dtype="uint64"
         )
         bad_store = self._write_new_store(bad_mem)
-        with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
+        with pytest.raises(ValueError, match=r".* properties: a .* does not match b .*"):
             check_equiv_geff(self.store, bad_store)
 
     def test_only_one_with_missing(self):
@@ -273,7 +311,7 @@ class Test_check_equiv_geff:
             bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool_
         )
         bad_store = self._write_new_store(bad_mem)
-        with pytest.raises(UserWarning, match=".* contains missing but the other does not"):
+        with pytest.raises(UserWarning, match=r".* contains missing but the other does not"):
             check_equiv_geff(bad_store, self.store)
 
     def test_value_shape_mismatch(self):
@@ -303,16 +341,16 @@ class Test_validate_axes_structure:
         key = "x"
         del z[_path.NODE_PROPS][key]
         del meta.node_props_metadata["x"]
-        with pytest.raises(AssertionError, match=f"Axis {key} data is missing"):
+        with pytest.raises(ValueError, match=f"Axis {key} data is missing"):
             _validate_axes_structure(z, meta)
 
     def test_must_be_1d(self, z, meta):
         z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10, 2))
-        with pytest.raises(AssertionError, match="Axis property x has 2 dimensions, must be 1D"):
+        with pytest.raises(ValueError, match="Axis property x has 2 dimensions, must be 1D"):
             _validate_axes_structure(z, meta)
 
     def test_no_missing_values(self, z, meta):
         z[f"{_path.NODE_PROPS}/x/{_path.VALUES}"] = np.zeros((10,))
         z[f"{_path.NODE_PROPS}/x/{_path.MISSING}"] = np.zeros((10,))
-        with pytest.raises(AssertionError, match="Axis x has missing values which are not allowed"):
+        with pytest.raises(ValueError, match="Axis x has missing values which are not allowed"):
             _validate_axes_structure(z, meta)
