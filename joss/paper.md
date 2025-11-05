@@ -132,7 +132,7 @@ GEFF is built on `zarr` [@zarr-specs], a common file format used in bioimage ana
 
 GEFF works with `zarr-python` v2 and `zarr-python` v3, and has otherwise very minimal dependencies, making it a lightweight dependency for other libraries. As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy/pulls), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff). 
 
-## Exensibility
+## Extensibility
 
 While GEFF was developed by the cell tracking research community, it is a generic graph exchange format that could be easily extended to other use cases with additional metadata to specify the meaning of standard properties.
 
