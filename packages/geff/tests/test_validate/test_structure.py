@@ -122,7 +122,7 @@ class Test_validate_edges_group:
         edge_group[_path.IDS] = np.zeros((3, 3))
         with pytest.raises(
             ValueError,
-            match="edges ids must be 2d with last dimension of size 2, received shape .*",
+            match=r"edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
             _validate_edges_group(edge_group, meta)
 
@@ -130,7 +130,7 @@ class Test_validate_edges_group:
         edge_group[_path.IDS] = np.zeros((3, 1))
         with pytest.raises(
             ValueError,
-            match="edges ids must be 2d with last dimension of size 2, received shape .*",
+            match=r"edges ids must be 2d with last dimension of size 2, received shape .*",
         ):
             _validate_edges_group(edge_group, meta)
 
@@ -200,14 +200,14 @@ class Test_validate_props_group:
 
     def test_missing_prop_metadata(self, node_group):
         id_len = node_group[_path.IDS].shape[0]
-        with pytest.raises(ValueError, match="Property .* is missing from the property metadata"):
+        with pytest.raises(ValueError, match=r"Property .* is missing from the property metadata"):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", {})
 
     def test_extra_prop_metadata(self, node_group, meta):
         meta.node_props_metadata["extra"] = PropMetadata(identifier="extra", dtype="int")
         id_len = node_group[_path.IDS].shape[0]
         with pytest.raises(
-            ValueError, match="Property .* is in the metadata but missing from the property group"
+            ValueError, match=r"Property .* is in the metadata but missing from the property group"
         ):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
@@ -217,7 +217,9 @@ class Test_validate_props_group:
         x_meta.dtype = "uint64"
         meta.node_props_metadata["x"] = x_meta
 
-        with pytest.raises(ValueError, match="Property .* has stated dtype .* but actual dtype .*"):
+        with pytest.raises(
+            ValueError, match=r"Property .* has stated dtype .* but actual dtype .*"
+        ):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
     def test_varlen_value_dtype(self, node_group, meta):
@@ -226,7 +228,9 @@ class Test_validate_props_group:
         x_meta.dtype = "float"
         meta.node_props_metadata["var_length"] = x_meta
 
-        with pytest.raises(ValueError, match="Property .* has stated dtype .* but actual dtype .*"):
+        with pytest.raises(
+            ValueError, match=r"Property .* has stated dtype .* but actual dtype .*"
+        ):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
     def test_varlen_data_dtype(self, node_group, meta):
@@ -236,7 +240,7 @@ class Test_validate_props_group:
         )
 
         with pytest.raises(
-            ValueError, match="Varlength property .* values array does not have type uint64"
+            ValueError, match=r"Varlength property .* values array does not have type uint64"
         ):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
@@ -245,7 +249,7 @@ class Test_validate_props_group:
         node_group[_path.PROPS]["x"][_path.DATA] = np.zeros(10)
 
         with pytest.raises(
-            ValueError, match="Found data array for property .* which is not a varlength property"
+            ValueError, match=r"Found data array for property .* which is not a varlength property"
         ):
             _validate_props_group(node_group[_path.PROPS], id_len, "Node", meta.node_props_metadata)
 
@@ -298,7 +302,7 @@ class Test_check_equiv_geff:
             identifier="new prop", dtype="uint64"
         )
         bad_store = self._write_new_store(bad_mem)
-        with pytest.raises(ValueError, match=".* properties: a .* does not match b .*"):
+        with pytest.raises(ValueError, match=r".* properties: a .* does not match b .*"):
             check_equiv_geff(self.store, bad_store)
 
     def test_only_one_with_missing(self):
@@ -307,7 +311,7 @@ class Test_check_equiv_geff:
             bad_mem["edge_props"]["score"]["values"].shape, dtype=np.bool_
         )
         bad_store = self._write_new_store(bad_mem)
-        with pytest.raises(UserWarning, match=".* contains missing but the other does not"):
+        with pytest.raises(UserWarning, match=r".* contains missing but the other does not"):
             check_equiv_geff(bad_store, self.store)
 
     def test_value_shape_mismatch(self):

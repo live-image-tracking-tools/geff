@@ -1,3 +1,4 @@
+import re
 import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
@@ -176,8 +177,10 @@ class TestWriteArrays:
 
         with pytest.raises(
             ValueError,
-            match="Node property 'bad_size' values has length 2, which "
-            "does not match id length 10\nCannot write invalid geff.",
+            match=re.escape(
+                "Node property 'bad_size' values has length 2, which "
+                "does not match id length 10\nCannot write invalid geff."
+            ),
         ):
             write_arrays(path, **memory_geff)
 

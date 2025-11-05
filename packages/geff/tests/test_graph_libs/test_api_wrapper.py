@@ -231,7 +231,7 @@ class Test_api_wrapper_simple:  # tests that only need backend parametrization
             # Cannot change the number of axes in sg graph without modifying position attribute
             with pytest.raises(
                 ValueError,
-                match="Cannot write a SpatialGraph with ndims .* "
+                match=r"Cannot write a SpatialGraph with ndims .* "
                 "and a different number of axes (.*)",
             ):
                 backend_module.write(

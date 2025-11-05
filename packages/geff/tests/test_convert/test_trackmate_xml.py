@@ -212,7 +212,7 @@ def test_convert_ROI_coordinates() -> None:
     el_obtained.text = "1 2.0 -3 -4.0 5.5 6"
     el_obtained.attrib["ROI_N_POINTS"] = "not_an_int"
     attr_obtained = deepcopy(el_obtained.attrib)
-    with pytest.raises(TypeError, match="ROI_N_POINTS should be an integer."):
+    with pytest.raises(TypeError, match="ROI_N_POINTS should be an integer"):
         tm_xml._convert_ROI_coordinates(el_obtained, attr_obtained)
 
     # No coordinates
@@ -372,7 +372,7 @@ def test_add_edge() -> None:
     obtained.add_nodes_from([(1, {"TRACK_ID": 1}), (2, {"TRACK_ID": 2})])
     with pytest.raises(
         AssertionError,
-        match="Incoherent track ID for nodes 1 and 2.",
+        match="Incoherent track ID for nodes 1 and 2",
     ):
         tm_xml._add_edge(element, attrs_md, obtained, 1)
 
@@ -499,8 +499,10 @@ def test_build_tracks() -> None:
     with pytest.raises(
         KeyError,
         match=(
-            "No key 'TRACK_ID' in the attributes of current element 'Track'. "
-            "Please check the XML file."
+            re.escape(
+                "No key 'TRACK_ID' in the attributes of current element 'Track'. "
+                "Please check the XML file."
+            )
         ),
     ):
         tm_xml._build_tracks(it, element, attrs_md, nx.DiGraph())
@@ -755,7 +757,7 @@ def test_get_feature_dtype() -> None:
     feat_element = ET.Element("Feature", attrib={"dimension": "TIME"})
     with pytest.raises(
         ValueError,
-        match="Missing field 'isint' in 'FeatureDeclarations' node tag.",
+        match=re.escape("Missing field 'isint' in 'FeatureDeclarations' node tag."),
     ):
         tm_xml._get_feature_dtype(feat_element, "node")
 
@@ -763,7 +765,7 @@ def test_get_feature_dtype() -> None:
     feat_element = ET.Element("Feature", attrib={"dimension": "TIME"})
     with pytest.raises(
         ValueError,
-        match="Missing field 'isint' in 'FeatureDeclarations' edge tag.",
+        match=re.escape("Missing field 'isint' in 'FeatureDeclarations' edge tag."),
     ):
         tm_xml._get_feature_dtype(feat_element, "edge")
 

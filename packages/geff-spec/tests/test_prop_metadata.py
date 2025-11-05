@@ -31,19 +31,19 @@ class TestPropMetadata:
     def test_invalid_dtype(self) -> None:
         # dtype must be parsable into a numpy dtype
         with pytest.raises(
-            ValueError, match="Provided dtype .* cannot be parsed into any of the valid dtypes"
+            ValueError, match=r"Provided dtype .* cannot be parsed into any of the valid dtypes"
         ):
             PropMetadata(identifier="prop", dtype=123)
         # parsed dtype must be valid
         with pytest.raises(
-            ValueError, match="Provided dtype name .* is not one of the valid dtypes "
+            ValueError, match=r"Provided dtype name .* is not one of the valid dtypes "
         ):
             PropMetadata(identifier="prop", dtype=np.float16)
 
         # dtype must be a non-empty string
         with pytest.raises(
             pydantic.ValidationError,
-            match="Provided dtype .* cannot be parsed into any of the valid dtypes",
+            match=r"Provided dtype .* cannot be parsed into any of the valid dtypes",
         ):
             PropMetadata(identifier="prop", dtype="")
         with pytest.raises(pydantic.ValidationError, match="Provided dtype cannot be None"):

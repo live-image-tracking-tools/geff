@@ -91,7 +91,7 @@ class Test_geff_to_dataframes:
 
     def test_no_edges(self):
         store, _memory_geff = create_simple_3d_geff(num_edges=0)
-        _node_df, edge_df = geff_to_dataframes(store)
+        _, edge_df = geff_to_dataframes(store)
 
         assert isinstance(edge_df, pd.DataFrame)
         assert len(edge_df) == 0
@@ -104,7 +104,7 @@ class Test_geff_to_dataframes:
         # Missing array exists but is all False, e.g. nothing missing
         missing = np.array([False] * num_edges)
         z[f"{_path.EDGE_PROPS}/score/{_path.MISSING}"] = missing  # pyright: ignore[reportArgumentType]
-        node_df, edge_df = geff_to_dataframes(store)
+        _, edge_df = geff_to_dataframes(store)
         # No missing so shouldn't be any nans in values
         assert not any(edge_df["score"].isna())
 
@@ -112,7 +112,7 @@ class Test_geff_to_dataframes:
         n_missing = 4
         missing = np.array([True] * n_missing + [False] * (num_edges - n_missing))
         z[f"{_path.EDGE_PROPS}/score/{_path.MISSING}"] = missing  # pyright: ignore[reportArgumentType]
-        _node_df, edge_df = geff_to_dataframes(store)
+        _, edge_df = geff_to_dataframes(store)
         # Number of nans should match number missing
         assert np.count_nonzero(edge_df["score"].isna()) == n_missing
 
