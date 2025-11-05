@@ -1,16 +1,23 @@
 ---
 title: 'GEFF: Graph Exchange File Format'
 tags:
-  - TODO
-authors: # TODO need to determine order and equal contributions `equal-contrib: true`, also determine corresponding author
+  - Python
+  - Java
+  - file format
+  - graph
+  - tracking
+authors:
   - given-names: Morgan
     surname: Schwartz
     affiliation: 1
     orcid: 0000-0001-8131-9125
+    equal-contrib: true
+    corresponding: true
   - given-names: Caroline
     surname: Malin-Mayor
     affiliation: 1
     orcid: 0000-0002-9627-6030
+    equal-contrib: true
   - given-names: Talley
     surname: Lambert
     affiliation: 2
@@ -103,11 +110,14 @@ affiliations:
    index: 11
  - name: RIKEN Center for Biosystems Dynamics Research
    index: 12
-date: day month year # TODO
+date: 5 November 2025  # TODO: Update to submission date
 bibliography: paper.bib
 ---
 
 # Summary
+GEFF is a specification for a file format for exchanging spatial graph data. It is not intended to be mutable, editable, chunked, or optimized for use in an application setting. As an exchange format with a strict specification, GEFF enables interoperability between tools written in various languages.
+
+This repository contains two packages: `geff-spec`, the specification of GEFF metadata written with pydantic BaseModels which are exported to a json schema for use in other languages, and `geff`, the Python library that reads and writes GEFF files to and from several python in-memory graph data structures (`networkx`, `rustworkx` and `spatial-graph`). A Java implementation of the GEFF v1 spec is in progress in a separate repository.
 
 # Statement of Need
 
