@@ -52,13 +52,6 @@ class ZarrPropDict(TypedDict):
 class InMemoryGeff(TypedDict):
     """
     Geff data loaded into memory as numpy arrays.
-
-    Parameters:
-        metadata (GeffMetadata): The GEFF metadata.
-        node_ids (numpy.typing.NDArray[Any]): The node IDs stored in a numpy array.
-        edge_ids (numpy.typing.NDArray[Any]): The edge IDs stored in a numpy array.
-        node_props (dict[str, PropDictNpArray]): The node properties.
-        edge_props (dict[str, PropDictNpArray]): The edge properties.
     """
 
     metadata: GeffMetadata
