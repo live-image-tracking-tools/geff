@@ -52,6 +52,10 @@ plugins:
         inventories:
           - https://docs.python.org/3/objects.inv
           - https://networkx.org/documentation/stable/objects.inv
+          - https://zarr.readthedocs.io/en/stable/objects.inv
+          - https://rustworkx.org/objects.inv
+          - https://funkelab.github.io/spatial_graph/objects.inv
+          - https://numpy.org/doc/stable/objects.inv
         options:
           docstring_section_style: table # "list" or "table"
           docstring_style: "google"
