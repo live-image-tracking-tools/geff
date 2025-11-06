@@ -119,7 +119,7 @@ bibliography: paper.bib
 # Summary
 GEFF (Graph Exchange File Format) is a specification for a file format for exchanging graph data. It is not intended to be mutable, editable, chunked, or optimized for use in an application setting. As an exchange format with a strict specification, GEFF enables interoperability between tools written in various languages.
 
-This repository contains two Python packages: `geff-spec`, the specification of GEFF metadata written with `pydantic.BaseModel` [@Colvin_Pydantic_Validation_2025], which are exported to a JSON schema for use in other languages, and `geff`, the Python library that reads and writes GEFF files to and from several Python in-memory graph data structures (`networkx` [@networkx_2008], `rustworkx` [@Treinish2022], and `spatial-graph` [@spatialgraph]). A Java implementation of the GEFF v1 spec, [`geff-java`](https://github.com/live-image-tracking-tools/geff-java) is in progress in a separate repository.
+This repository contains two Python packages: `geff-spec`, the specification of GEFF metadata written with [`pydantic.BaseModel`](https://github.com/pydantic/pydantic), which are exported to a JSON schema for use in other languages, and `geff`, the Python library that reads and writes GEFF files to and from several Python in-memory graph data structures (`networkx` [@networkx_2008], `rustworkx` [@Treinish2022], and [`spatial-graph`](https://github.com/funkelab/spatial_graph)). A Java implementation of the GEFF v1 spec, [`geff-java`](https://github.com/live-image-tracking-tools/geff-java) is in progress in a separate repository.
 
 # Statement of Need
 
