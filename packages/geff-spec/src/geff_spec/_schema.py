@@ -331,7 +331,7 @@ class GeffMetadata(BaseModel):
         """
 
         if isinstance(store, zarr.Group):
-            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+            raise TypeError("Unsupported type for store_like: should be a `zarr.storage.StoreLike")
 
         group = zarr.open_group(store)
 

@@ -235,12 +235,12 @@ class TestMetadataModel:
         # Assert that a TypeError is raised when meta.write is called with a Group
         with pytest.raises(
             TypeError,
-            match=r"Unsupported type for store_like: should be a zarr store | Path | str",
+            match=r"Unsupported type for store_like: should be a `zarr.storage.StoreLike",
         ):
             meta.write(group)
 
         with pytest.raises(
-            TypeError, match=r"Unsupported type for store_like: should be a zarr store | Path | str"
+            TypeError, match=r"Unsupported type for store_like: should be a `zarr.storage.StoreLike"
         ):
             meta.read(group)
 
@@ -360,7 +360,7 @@ def test__validate_key_identifier_equality() -> None:
         "prop2": PropMetadata(identifier="prop2", name="Property 2", dtype="float64"),
     }
     with pytest.raises(pydantic.ValidationError):
-        _validate_key_identifier_equality(props_md, "nodeeeee")
+        _validate_key_identifier_equality(props_md, "nodeee")
 
 
 def test_schema_and_round_trip() -> None:
