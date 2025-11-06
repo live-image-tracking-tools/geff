@@ -201,9 +201,9 @@ def axes_from_lists(
             Defaults to None.
         axis_types (Sequence[Literal[AxisType] | None] | None, optional): Axis type for each
             property. Choose from "space", "time", "channel". Defaults to None.
-        axis_scales((Sequence[float | None] | None, optional)): The scale to apply to the
+        axis_scales ((Sequence[float | None] | None, optional)): The scale to apply to the
             spatial dims. Defaults to None.
-        scaled_units(Sequence[str | None] | None, optional): The units of the spatial dims
+        scaled_units (Sequence[str | None] | None, optional): The units of the spatial dims
             after scaling. Defaults to None.
         axis_offset (list[float | None] | None): Amount to offset an axis after applying
             scaling factor. Defaults to None.
@@ -270,7 +270,7 @@ def create_props_metadata(
     If dtype is float16, upcasts to float32 with warning.
 
     Args:
-        identifier(str): The property identifier/name
+        identifier (str): The property identifier/name
         prop_data (PropDictNpArray): The property to generate metadata for
         unit (str): Optional unit for the property
         name (str): Optional human-friendly name for the property

@@ -39,7 +39,7 @@ class GeffReader:
         File reader class that allows subset reading to an intermediate dict representation.
 
         Args:
-            source (str | Path | zarr.store): Either a str/path to the root of the geff zarr
+            source (zarr.storage.StoreLike): Either a str/path to the root of the geff zarr
                 (where the .attrs contains the geff metadata), or a zarr store object
             validate (bool, optional): Flag indicating whether to perform validation on the
                 geff file before loading into memory. If set to False and there are
@@ -81,7 +81,7 @@ class GeffReader:
         Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
-            names (iterable of str, optional): The names of the node properties to load. If
+            names (Iterable[str], optional): The names of the node properties to load. If
                 None all node properties will be loaded.
         """
         if names is None:
@@ -99,7 +99,7 @@ class GeffReader:
         Call `build` to get the output `InMemoryGeff` with the loaded properties.
 
         Args:
-            names (iterable of str, optional): The names of the edge properties to load. If
+            names (Iterable[str], optional): The names of the edge properties to load. If
                 None all node properties will be loaded.
         """
         if names is None:
@@ -199,14 +199,14 @@ class GeffReader:
         A set of nodes and edges can be selected using `node_mask` and `edge_mask`.
 
         Args:
-            node_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
-                of a subset of nodes, where `node_mask` is equal to True. It must be a 1D
+            node_mask (numpy.typing.NDArray[numpy.bool_]): A boolean numpy array to mask build a
+                graph of a subset of nodes, where `node_mask` is equal to True. It must be a 1D
                 array of length number of nodes.
-            edge_mask (np.ndarray of bool): A boolean numpy array to mask build a graph
-                of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
+            edge_mask (numpy.typing.NDArray[numpy.bool_]): A boolean numpy array to mask build a
+                graph of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
                 array of length number of edges.
         Returns:
-            InMemoryGeff: A dictionary of in memory numpy arrays representing the graph.
+            A dictionary of in memory numpy arrays representing the graph.
         """
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray] = {}
@@ -267,21 +267,20 @@ def read_to_memory(
     `edge_props` argument.
 
     Args:
-        source (str | Path | zarr store): Either a path to the root of the geff zarr
+        source (zarr.storage.StoreLike): Either a path to the root of the geff zarr
             (where the .attrs contains the geff metadata), or a zarr store object
         structure_validation (bool, optional): Flag indicating whether to perform metadata/structure
             validation on the geff file before loading into memory. If set to False and
             there are format issues, will likely fail with a cryptic error. Defaults to True.
         data_validation (ValidationConfig, optional): Optional configuration for which
             optional types of data to validate. Each option defaults to False.
-        node_props (iterable of str, optional): The names of the node properties to load,
+        node_props (Iterable[str], optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
-        edge_props (iterable of str, optional): The names of the edge properties to load,
+        edge_props (Iterable[str], optional): The names of the edge properties to load,
             if None all properties will be loaded, defaults to None.
 
     Returns:
-        A InMemoryGeff object containing the graph as a TypeDict of in memory numpy arrays
-        (metadata, node_ids, edge_ids, node_props, edge_props)
+        A dictionary of in memory numpy arrays representing the graph.
     """
 
     file_reader = GeffReader(source, structure_validation)

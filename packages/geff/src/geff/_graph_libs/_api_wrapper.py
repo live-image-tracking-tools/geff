@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     SupportedGraphType: TypeAlias = NxGraph | RxGraph | SgGraph
 
 SupportedBackend = Literal["networkx", "rustworkx", "spatial-graph"]
+"""Supported graph library backends for reading to and writing from."""
 
 AVAILABLE_BACKENDS: list[Backend] = []
 
@@ -81,7 +82,9 @@ _import_available_backends()
 
 
 # Used in the write function wrapper, where the backend should be determined from the graph type
-def get_backend_from_graph_type(graph: SupportedGraphType) -> Backend[SupportedGraphType]:
+def get_backend_from_graph_type(
+    graph: SupportedGraphType,
+) -> Backend[SupportedGraphType]:
     for backend_module in AVAILABLE_BACKENDS:
         if isinstance(graph, backend_module.GRAPH_TYPES):
             return backend_module
@@ -135,16 +138,16 @@ def read(
     Read a GEFF to a chosen backend.
 
     Args:
-        store (StoreLike): The path or zarr store to the root of the geff zarr, where
+        store (zarr.storage.StoreLike): The path or zarr store to the root of the geff zarr, where
             the .attrs contains the geff  metadata.
         structure_validation (bool, optional): Flag indicating whether to perform validation on the
             geff file before loading into memory. If set to False and there are
             format issues, will likely fail with a cryptic error. Defaults to True.
-        node_props (list of str, optional): The names of the node properties to load,
+        node_props (list[str], optional): The names of the node properties to load,
             if None all properties will be loaded, defaults to None.
-        edge_props (list of str, optional): The names of the edge properties to load,
+        edge_props (list[str], optional): The names of the edge properties to load,
             if None all properties will be loaded, defaults to None.
-        backend ({"networkx", "rustworkx", "spatial-graph"}): Flag for the chosen backend, default
+        backend (SupportedBackend): Flag for the chosen backend, default
             is "networkx".
         data_validation (ValidationConfig, optional): Optional configuration for which
             optional types of data to validate. Each option defaults to False.
@@ -152,7 +155,7 @@ def read(
             the backend when reading the data.
 
     Returns:
-        tuple[Any, GeffMetadata]: Graph object of the chosen backend, and the GEFF metadata.
+        Graph object of the chosen backend, and the GEFF metadata.
     """
     backend_io = get_backend(backend)
     return backend_io.read(
@@ -234,7 +237,7 @@ def write(
 
     Args:
         graph (SupportedGraphType): An instance of a supported graph object.
-        store (str | Path | zarr store): The path/str to the output zarr, or the store
+        store (zarr.storage.StoreLike): The path/str to the output zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
         metadata (GeffMetadata, optional): The original metadata of the graph.
             Defaults to None. If provided, will override the graph properties.
@@ -303,7 +306,8 @@ def write(
     """Write a supported graph object to the geff file format.
 
     Args:
-        graph (SupportedGraphType): An instance of a supported graph object.
+        graph (networkx.Graph | networkx.DiGraph | rustworkx.PyGraph | rustworkx.PyDiGraph | spatial_graph.SpatialGraph | spatial_graph.SpatialDiGraph):
+            An instance of a supported graph object.
         store (str | Path | zarr store): The path/str to the output zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
         metadata (GeffMetadata, optional): The original metadata of the graph.
@@ -314,7 +318,7 @@ def write(
         axis_units (list[str | None], optional): The units of the spatial dims
             represented in position property. Defaults to None. Will override value
             both value in graph properties and metadata if provided.
-        axis_types (list[Literal[AxisType] | None], optional): The types of the spatial dims
+        axis_types (list[AxisType | None] | None, optional): The types of the spatial dims
             represented in position property. Usually one of "time", "space", or "channel".
             Defaults to None. Will override both value in graph properties and metadata
             if provided.
@@ -334,7 +338,7 @@ def write(
             specific type of graph.
         **kwargs (Any): Additional kwargs that may be accepted by the backend when writing from a
             specific type of graph.
-    """
+    """  # noqa: E501
     store = remove_tilde(store)
 
     # Check for existing geff
