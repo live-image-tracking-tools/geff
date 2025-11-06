@@ -37,6 +37,7 @@ SpaceUnits: TypeAlias = Literal[
     "zettameter",
     "pixel",
 ]
+"""Valid spatial units."""
 
 TimeUnits: TypeAlias = Literal[
     "attosecond",
@@ -64,6 +65,7 @@ TimeUnits: TypeAlias = Literal[
     "zettasecond",
     "frame",
 ]
+"""Valid temporal units."""
 
 
 AxisType: TypeAlias = Literal[
@@ -71,6 +73,7 @@ AxisType: TypeAlias = Literal[
     "time",
     "channel",
 ]
+"""Valid axis types."""
 
 # -----------------------------------------------------------------------------
 # Data-type validation
@@ -99,6 +102,7 @@ DTypes: TypeAlias = Literal[
     "bytes",
     "str",
 ]
+"""Valid data types."""
 
 VALID_SPACE_UNITS: tuple[SpaceUnits, ...] = get_args(SpaceUnits)
 VALID_TIME_UNITS: tuple[TimeUnits, ...] = get_args(TimeUnits)
