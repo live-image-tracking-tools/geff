@@ -134,7 +134,10 @@ class GeffReader:
         return prop_dict
 
     def _load_prop_to_memory(
-        self, zarr_prop: ZarrPropDict, mask: NDArray[np.bool_] | None, prop_metadata: PropMetadata
+        self,
+        zarr_prop: ZarrPropDict,
+        mask: NDArray[np.bool_] | None,
+        prop_metadata: PropMetadata,
     ) -> PropDictNpArray:
         """Load a zarr property dictionary into memory, including deserialization.
 
@@ -205,8 +208,9 @@ class GeffReader:
             edge_mask (numpy.typing.NDArray[numpy.bool_]): A boolean numpy array to mask build a
                 graph of a subset of edge, where `edge_mask` is equal to True. It must be a 1D
                 array of length number of edges.
+
         Returns:
-            A dictionary of in memory numpy arrays representing the graph.
+            InMemoryGeff: A dictionary of in memory numpy arrays representing the graph.
         """
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray] = {}
@@ -280,7 +284,7 @@ def read_to_memory(
             if None all properties will be loaded, defaults to None.
 
     Returns:
-        A dictionary of in memory numpy arrays representing the graph.
+        InMemoryGeff: A dictionary of in memory numpy arrays representing the graph.
     """
 
     file_reader = GeffReader(source, structure_validation)

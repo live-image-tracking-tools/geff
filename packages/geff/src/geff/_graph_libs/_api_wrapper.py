@@ -155,8 +155,9 @@ def read(
             the backend when reading the data.
 
     Returns:
-        Graph object of the chosen backend, and the GEFF metadata.
-    """
+        graph (tuple[networkx.Graph | networkx.DiGraph | rustworkx.PyGraph | rustworkx.PyDiGraph | spatial_graph.SpatialGraph | spatial_graph.SpatialDiGraph, GeffMetadata]):
+            Graph object of the chosen backend, and the GEFF metadata.
+    """  # noqa: E501
     backend_io = get_backend(backend)
     return backend_io.read(
         store,
