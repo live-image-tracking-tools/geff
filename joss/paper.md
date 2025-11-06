@@ -60,7 +60,7 @@ authors:
     orcid: 0000-0002-9013-9983
   - given-names: Georgeos
     surname: Hardo
-    affiliation: 9
+    affiliation: "9, 13"
     orcid: 0000-0003-0037-1293
   - given-names: Benjamin
     surname: Gallusser
@@ -110,6 +110,9 @@ affiliations:
    index: 11
  - name: RIKEN Center for Biosystems Dynamics Research
    index: 12
+ - name: University of Cambridge
+   index: 13
+
 date: 5 November 2025  # TODO: Update to submission date
 bibliography: paper.bib
 ---
