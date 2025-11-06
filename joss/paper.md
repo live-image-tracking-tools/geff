@@ -102,9 +102,9 @@ affiliations:
    index: 7
  - name: Hubrecht Institute
    index: 8
- - name: UAE University
+ - name: United Arab Emirates University
    index: 9
- - name: Chan Zuckerbeg Initiative
+ - name: Chan Zuckerberg Initiative
    index: 10
  - name: University of Pittsburgh
    index: 11
@@ -127,7 +127,7 @@ Cell tracking is an active area of research with many tools for performing track
 There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge [@mavska2014benchmark] format, which combines TIFF files with segmentation masks and a CSV to provide division edges. However, some tracking applications like particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. Each of these tools can now export to and import from GEFF in addition to their custom formats, enabling interoperability with minimal code change in each library.
 
 # Implementation
-GEFF is built on `zarr` [@zarr-specs], a common file format used in bioimage analysis. Graphs are represented as an array of node IDs and an array of edge IDs where each edge ID is a tuple of two node IDs. Nodes and edges can have properties, which are stored in an properties array with corresponding indices. The specification includes support for nodes and edges with missing properties, as well as variable length properties. To support the cell tracking community, the GEFF specification also provides specific metadata with standardized meaning, including positional axes, tracklet and lineage ids, and linking to related objects like image and segmentation arrays.
+GEFF is built on `zarr` [@zarr-specs], a common file format used in bioimage analysis. Graphs are represented as an array of node IDs and an array of edge IDs where each edge ID is a tuple of two node IDs. Nodes and edges can have properties, which are stored in a properties array with corresponding indices. The specification includes support for nodes and edges with missing properties, as well as variable length properties. To support the cell tracking community, the GEFF specification also provides specific metadata with standardized meaning, including positional axes, tracklet and lineage ids, and linking to related objects like image and segmentation arrays.
 
 GEFF supports Zarr specification v2 and v3, and has minimal dependencies, making it a lightweight dependency for other libraries. As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy/pulls), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff). 
 
