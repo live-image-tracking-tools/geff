@@ -8,12 +8,14 @@ except PackageNotFoundError:  # pragma: no cover
 from geff_spec import GeffMetadata
 
 from ._graph_libs._api_wrapper import SupportedBackend, construct, read, write
+from ._typing import InMemoryGeff
 from .core_io._base_read import GeffReader
 from .validate.structure import validate_structure
 
 __all__ = [
     "GeffMetadata",
     "GeffReader",
+    "InMemoryGeff",
     "SupportedBackend",
     "construct",
     "read",
