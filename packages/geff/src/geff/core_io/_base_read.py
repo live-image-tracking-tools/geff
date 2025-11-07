@@ -210,7 +210,17 @@ class GeffReader:
                 array of length number of edges.
 
         Returns:
-            InMemoryGeff: A dictionary of in memory numpy arrays representing the graph.
+            A dictionary of in memory numpy arrays representing the graph. The structure of
+                this dictionary is:
+                ```
+                {
+                    "metadata": GeffMetadata,
+                    "node_ids": numpy.ndarray,
+                    "edge_ids": numpy.ndarray,
+                    "node_props": dict[str, dict],
+                    "edge_props": dict[str, dict],
+                }
+                ```
         """
         nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
         node_props: dict[str, PropDictNpArray] = {}
