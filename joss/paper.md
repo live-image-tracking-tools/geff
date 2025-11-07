@@ -158,6 +158,6 @@ While GEFF was developed by the cell tracking research community, it is a generi
 # Acknowledgments
 
 We would like to thank HHMI Janelia Research Campus for hosting the 2025 Janelia Trackathon and the other attendees of the trackathon for their discussion. 
-LX and JYT acknowledges support from the French National Research Agency (France BioImaging, ANR-24-INBS-0005 FBI BIOGEN).
+LX and JYT acknowledge support from the French National Research Agency (France BioImaging, ANR-24-INBS-0005 FBI BIOGEN). LX acknowledges support from the INCEPTION project (PIA/ANR-16-CONV-0005) and the FIRE PhD program funded by the Bettencourt Schueller foundation and the EURIP graduate program (ANR-17-EURE-0012).
 
 # References
