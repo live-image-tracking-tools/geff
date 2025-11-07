@@ -133,7 +133,7 @@ Cell and organelle tracking is an active area of research with many tools for pe
 # State of the Field
 
 There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge [@mavska2014benchmark] format, which combines TIFF files with segmentation masks and a CSV to provide division edges. However, some tracking applications such as particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, Mastodon [tinevez2025mastodon] saves and loads from a binary file, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. 
-Additionnally, none of these tools shared a common file format, which prevented interactions between them and strongly limited the scope and ambition of track analysis pipelines.
+Additionally, none of these tools shared a common file format, which prevented interactions between them and strongly limited the scope and ambition of track analysis pipelines.
 Each of them can now export to and import from GEFF in addition to their custom formats, enabling interoperability with minimal code change in each library.
 
 # Implementation
@@ -145,8 +145,8 @@ GEFF’s object specification supports a wide range of shapes, enabling its appl
 The library integrates multiple representation formats, from binary masks (2D/3D), commonly used in cell biology, developmental biology, and natural image tracking—to geometric primitives (points, circles, ellipses, spheres, and ellipsoids), which are essential in super-resolution microscopy, virology, and developmental studies. 
 It also includes polygons and meshes for detailed structural analysis in cell biology, microbiology, and complex shape modeling, as well as pose-based representations for markerless tracking of anatomical keypoints in multi-animal and behavioral research.
 
-EAch object track or lineage is represented by a simple directed graph, where edges are link from one biological object detected in a frame, to its detection in the earliest next frame. 
-GEFF can therefore be used to harness tracking data with gaps (an edge extends over more that two adjavent time-points, because of a missing detections or object exit and reentry), object divisions and objects fusions. 
+Each object track or lineage is represented by a simple directed graph, where each edge is a link from one biological object detected in a frame, to its detection in the earliest next frame. 
+GEFF can therefore be used to harness tracking data with gaps (an edge extends over more that two adjacent time-points, because of a missing detection or object exit and reentry), object divisions and objects fusions. 
 
 By integrating these diverse object and link representations, GEFF facilitates seamless data exchange between segmentation algorithms, morphometric analysis tools, and tracking pipelines, ensuring compatibility with both established and emerging imaging workflows. 
 This versatility makes the library a valuable resource for researchers working across disciplines, from high-throughput cell biology to fine-grained anatomical studies in developmental and computational biology.
