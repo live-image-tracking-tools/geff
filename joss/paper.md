@@ -139,12 +139,23 @@ GEFF is built on `zarr` [@zarr-specs], a common file format used in bioimage ana
 
 GEFF supports Zarr specification v2 and v3, and has minimal dependencies, making it a lightweight dependency for other libraries. As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy/pulls), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff). 
 
+GEFF’s object specification supports a wide range of shapes, enabling its application across diverse fields in the life sciences. 
+The library integrates multiple representation formats, from binary masks (2D/3D), commonly used in cell biology, developmental biology, and natural image tracking—to geometric primitives (points, circles, ellipses, spheres, and ellipsoids), which are essential in super-resolution microscopy, virology, and developmental studies. 
+It also includes polygons and meshes for detailed structural analysis in cell biology, microbiology, and complex shape modeling, as well as pose-based representations for markerless tracking of anatomical keypoints in multi-animal and behavioral research.
+
+EAch object track or lineage is represented by a simple directed graph, where edges are link from one biological object detected in a frame, to its detection in the earliest next frame. 
+GEFF can therefore be used to harness tracking data with gaps (an edge extends over more that two adjavent time-points, because of a missing detections or object exit and reentry), object divisions and objects fusions. 
+
+By integrating these diverse object and link representations, GEFF facilitates seamless data exchange between segmentation algorithms, morphometric analysis tools, and tracking pipelines, ensuring compatibility with both established and emerging imaging workflows. 
+This versatility makes the library a valuable resource for researchers working across disciplines, from high-throughput cell biology to fine-grained anatomical studies in developmental and computational biology.
+
 # Extensibility
 
 While GEFF was developed by the cell tracking research community, it is a generic graph exchange format that could be easily extended to other use cases with additional metadata to specify the meaning of standard properties.
 
 # Acknowledgments
 
-We would like to thank HHMI Janelia Research Campus for hosting the 2025 Janelia Trackathon and the other attendees of the trackathon for their discussion.
+We would like to thank HHMI Janelia Research Campus for hosting the 2025 Janelia Trackathon and the other attendees of the trackathon for their discussion. 
+LX and JYT acknowledges support from the French National Research Agency (France BioImaging, ANR-24-INBS-0005 FBI BIOGEN).
 
 # References
