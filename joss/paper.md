@@ -32,7 +32,7 @@ authors:
     orcid: 0000-0003-4388-7783
   - given-names: Laura
     surname: Xénard
-    affiliation: 4
+    affiliation: 4, 14
     orcid: 0000-0002-8168-0970
   - given-names: Mark
     surname: Kittisopikul
@@ -112,6 +112,8 @@ affiliations:
    index: 12
  - name: University of Cambridge
    index: 13
+ - name: Institut Pasteur, Université Paris Cité, INSERM U1225, Paris, France
+   index: 14
 date: 5 November 2025  # TODO: Update to submission date
 bibliography: paper.bib
 ---
