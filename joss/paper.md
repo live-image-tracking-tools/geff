@@ -64,7 +64,7 @@ authors:
     orcid: 0000-0003-0037-1293
   - given-names: Benjamin
     surname: Gallusser
-    affiliation: 10
+    affiliation: 3
     orcid: 0000-0002-7906-4714
   - given-names: Kasia
     surname: Kedziora
@@ -90,7 +90,7 @@ affiliations:
    index: 1
  - name: Harvard Medical School
    index: 2
- - name: Chan Zuckerberg Biohub San Francisco
+ - name: Biohub
    index: 3
  - name: Institut Pasteur
    index: 4
