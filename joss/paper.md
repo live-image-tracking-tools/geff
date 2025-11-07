@@ -92,7 +92,7 @@ affiliations:
    index: 2
  - name: Chan Zuckerberg Biohub San Francisco
    index: 3
- - name: Institut Pasteur
+ - name: Institut Pasteur, Université Paris Cité, Image Analysis Hub, Paris, France
    index: 4
  - name: Monash University
    index: 5
