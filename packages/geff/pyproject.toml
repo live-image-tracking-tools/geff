@@ -51,6 +51,7 @@ pandas = ["pandas>=2","pandas>=2.3; python_version >= '3.12'"]
 [project.urls]
 repository = "https://github.com/live-image-tracking-tools/geff"
 homepage = "https://github.com/live-image-tracking-tools/geff"
+documentation = "https://liveimagetrackingtools.org/geff/"
 
 [project.scripts]
 geff = "geff._cli:app"

@@ -25,3 +25,8 @@ dependencies = [
     "numpy>=2.1; python_version >= '3.13'",
     "annotated_types",
 ]
+
+[project.urls]
+repository = "https://github.com/live-image-tracking-tools/geff"
+homepage = "https://github.com/live-image-tracking-tools/geff"
+documentation = "https://liveimagetrackingtools.org/geff/"
