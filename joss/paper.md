@@ -60,7 +60,7 @@ authors:
     orcid: 0000-0002-9013-9983
   - given-names: Georgeos
     surname: Hardo
-    affiliation: "9, 13"
+    affiliation: "9, 12"
     orcid: 0000-0003-0037-1293
   - given-names: Benjamin
     surname: Gallusser
@@ -68,7 +68,7 @@ authors:
     orcid: 0000-0002-7906-4714
   - given-names: Kasia
     surname: Kedziora
-    affiliation: 11
+    affiliation: 10
     orcid: 0000-0001-6524-7731
   - given-names: Jean-Yves
     surname: Tinevez
@@ -76,7 +76,7 @@ authors:
     orcid: 0000-0002-0998-4718
   - given-names: Ko
     surname: Sugawara
-    affiliation: 12
+    affiliation: 11
     orcid: 0000-0002-1392-9340
   - given-names: Tobias
     surname: Pietzsch
@@ -104,14 +104,12 @@ affiliations:
    index: 8
  - name: United Arab Emirates University
    index: 9
- - name: Chan Zuckerberg Initiative
-   index: 10
  - name: University of Pittsburgh
-   index: 11
+   index: 10
  - name: RIKEN Center for Biosystems Dynamics Research
-   index: 12
+   index: 11
  - name: University of Cambridge
-   index: 13
+   index: 12
 date: 5 November 2025  # TODO: Update to submission date
 bibliography: paper.bib
 ---
