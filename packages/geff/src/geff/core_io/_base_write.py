@@ -44,7 +44,7 @@ def write_dicts(
     """Write a dict-like graph representation to geff
 
     Args:
-        geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
+        geff_store (zarr.storage.StoreLike): The path/str to the geff zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
         node_data (Sequence[tuple[Any, dict[str, Any]]]): A sequence of tuples with
             node_ids and node_data, where node_data is a dictionary from str names
