@@ -1,0 +1,1916 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/v1.1.3.1.1/specification/">
+      
+      
+        <link rel="prev" href="../what-is-geff/">
+      
+      
+        <link rel="next" href="../tracking/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Geff specification - geff</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#geff-specification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="geff" class="md-header__button md-logo" aria-label="geff" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            geff
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Geff specification
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/live-image-tracking-tools/geff" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    live-image-tracking-tools/geff
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="geff" class="md-nav__button md-logo" aria-label="geff" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    geff
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/live-image-tracking-tools/geff" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    live-image-tracking-tools/geff
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Welcome to geff!
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../what-is-geff/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What is geff?
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geff specification
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geff specification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#zarr-specification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zarr specification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geff_spec.GeffMetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeffMetadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-nodes-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The nodes group
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The nodes group">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-ids-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ids array
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-props-group-and-node-property-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The props group and node property groups
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The props group and node property groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variable length properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-edges-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The edges group
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The edges group">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-ids-array_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ids array
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-props-group-and-edge-property-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The props group and edge property groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-file-structure-and-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example file structure and metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tracking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tracking graph standards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../command-line-tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tips-and-tricks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tips and Tricks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compatibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compatible Libraries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../convert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conversion to GEFF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../reference/geff/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>geff
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1" id="__nav_9_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>geff
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/convert/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>convert
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/core_io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>core_io
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../reference/geff/testing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>testing
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1_4" id="__nav_9_1_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/testing/data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_1_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../reference/geff/validate/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>validate
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_1_5" id="__nav_9_1_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_9_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>validate
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/graph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/segmentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>segmentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/shapes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>shapes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/tracks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>tracks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../reference/geff_spec/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>geff_spec
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>geff_spec
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff_spec/utils/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>utils
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#zarr-specification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zarr specification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geff_spec.GeffMetadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeffMetadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-nodes-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The nodes group
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The nodes group">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-ids-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ids array
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-props-group-and-node-property-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The props group and node property groups
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The props group and node property groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variable length properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-edges-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The edges group
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The edges group">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-ids-array_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ids array
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-props-group-and-edge-property-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The props group and edge property groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-file-structure-and-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example file structure and metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="geff-specification">Geff specification</h1>
+<p>The graph exchange file format is <code>zarr</code> based. A graph is stored in a zarr group, which can have any name. However the name of the group can include the <code>.geff</code> suffix to indicate that the group contains <code>geff</code> data. This allows storing multiple <code>geff</code> graphs inside the same zarr root directory. A <code>geff</code> group is identified by the presence of a <code>geff</code> key in the <code>.zattrs</code>. Other <code>geff</code> metadata is also stored in the <code>.zattrs</code> file of the <code>geff</code> group, nested under the <code>geff</code> key. The <code>geff</code> group must contain a <code>nodes</code> group and an <code>edges</code> group (albeit both can be empty). <code>geff</code> graphs have the option to provide properties for <code>nodes</code> and <code>edges</code>.</p>
+<p><code>geff</code> graphs have the option to provide time and spatial dimensions as special attributes. These attributes are specified in the <code>axes</code> section of the metadata, inspired by the OME-zarr <code>axes</code> specification.</p>
+<h2 id="zarr-specification">Zarr specification</h2>
+<p>Currently, <code>geff</code> supports zarr specifications <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html">2</a> and <a href="https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html">3</a>. However, <code>geff</code> will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.</p>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="geff_spec.GeffMetadata" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">geff_spec.GeffMetadata</span>
+
+
+</h2>
+
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>Geff metadata schema to validate the attributes json file in a geff zarr</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>geff_version</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>, default:
+                  <code>&#39;1.1&#39;</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Geff version string following semantic versioning (MAJOR.MINOR.PATCH), optionally with .devN and/or +local parts (e.g., 0.3.1.dev6+g61d5f18).
+If not provided, the version will be set to the current geff package version.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>directed</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>)
+          –
+          <div class="doc-md-description">
+            <p>True if the graph is directed, otherwise False.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>axes</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-internal" title="            Axis (geff_spec._axis.Axis)" href="../reference/geff_spec/#geff_spec.Axis">Axis</a>] | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Optional list of <code>Axis</code> objects defining the axes of each node
+            in the graph. The axes list is modeled after the
+            <a href="https://ngff.openmicroscopy.org/0.5/index.html#axes-md">OME-zarr</a>
+            specifications and is used to identify spatio-temporal properties on the
+            graph nodes. If the same names are used in the axes metadata of the
+            related image or segmentation data, applications can use this information
+            to align graph node locations with image data.
+            The order of the axes in the list is meaningful. For one, any downstream
+            properties that are an array of values with one value per (spatial) axis
+            will be in the order of the axis list (filtering to only the spatial axes by
+            the <code>type</code> field if needed). Secondly, if associated image or segmentation
+            data does not have axes metadata, the order of the spatiotemporal axes is a
+            good default guess for aligning the graph and the image data, although there
+            is no way to denote the channel dimension in the graph spec. If you are
+            writing out a geff with an associated segmentation and/or image dataset, we
+            highly recommend providing the axis names for your segmentation/image using
+            the OME-zarr spec, including channel dimensions if needed.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>node_props_metadata</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-internal" title="            PropMetadata (geff_spec._prop_metadata.PropMetadata)" href="../reference/geff_spec/#geff_spec.PropMetadata">PropMetadata</a>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>Metadata for node properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each node property.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>edge_props_metadata</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-internal" title="            PropMetadata (geff_spec._prop_metadata.PropMetadata)" href="../reference/geff_spec/#geff_spec.PropMetadata">PropMetadata</a>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>Metadata for edge properties. The keys are the property identifiers, and the values are PropMetadata objects describing the properties.There must be one entry for each edge property.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>sphere</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Name of the optional <code>sphere</code> property.</p>
+<p>A sphere is defined by</p>
+<ul>
+<li>a center point, already given by the <code>space</code> type properties</li>
+<li>a radius scalar, stored in this property</li>
+</ul>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>ellipsoid</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Name of the <code>ellipsoid</code> property.</p>
+<p>An ellipsoid is assumed to be in the same coordinate system as the <code>space</code> type
+properties.</p>
+<p>It is defined by</p>
+<ul>
+<li>a center point <span class="arithmatex">\(c\)</span>, already given by the <code>space</code> type properties</li>
+<li>a covariance matrix <span class="arithmatex">\(\Sigma\)</span>, symmetric and positive-definite, stored in this
+  property as a <code>2x2</code>/<code>3x3</code> array.</li>
+</ul>
+<p>To plot the ellipsoid:</p>
+<ul>
+<li>Compute the eigendecomposition of the covariance matrix
+<span class="arithmatex">\(\Sigma = Q \Lambda Q^{\top}\)</span></li>
+<li>Sample points <span class="arithmatex">\(z\)</span> on the unit sphere</li>
+<li>Transform the points to the ellipsoid by
+<span class="arithmatex">\(x = c + Q \Lambda^{(1/2)} z\)</span>.</li>
+</ul>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>track_node_props</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;lineage&#39;, &#39;tracklet&#39;], <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>] | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Node properties denoting tracklet and/or lineage IDs.
+A tracklet is defined as a simple path of connected nodes where the initiating node has any incoming degree and outgoing degree at most 1, and the terminating node has incoming degree at most 1 and any outgoing degree, and other nodes along the path have in/out degree of 1. Each tracklet must contain the maximal set of connected nodes that match this definition - no sub-tracklets.
+A lineage is defined as a weakly connected component on the graph.
+The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>related_objects</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>[<a class="autorefs autorefs-internal" title="            RelatedObject (geff_spec._schema.RelatedObject)" href="../reference/geff_spec/#geff_spec.RelatedObject">RelatedObject</a>] | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. The 'type' represents the data type. 'labels' and 'image' should be used for label and image objects, respectively. Other types are also allowed, The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The 'label_prop' is only valid for type 'labels' and specifies the node property that will be used to identify the labels in the related object.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>display_hints</code></b>
+              (<code><a class="autorefs autorefs-internal" title="            DisplayHint (geff_spec._schema.DisplayHint)" href="../reference/geff_spec/#geff_spec.DisplayHint">DisplayHint</a> | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Metadata indicating how spatiotemporal axes are displayed by a viewer</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>extra</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a>]</code>, default:
+                  <code>&lt;class &#39;dict&#39;&gt;</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>The optional <code>extra</code> object is a free-form dictionary that can hold any additional, application-specific metadata that is <strong>not</strong> covered by the core geff schema. Users may place arbitrary keys and values inside <code>extra</code> without fear of clashing with future reserved fields. Although the core <code>geff</code> reader makes these attributes available, their meaning and use are left entirely to downstream applications.</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="the-nodes-group">The <code>nodes</code> group</h2>
+<p>The nodes group will contain an <code>ids</code> array and optionally a <code>props</code> group.</p>
+<h3 id="the-ids-array">The <code>ids</code> array</h3>
+<p>The <code>nodes\ids</code> array is a 1D array of node IDs of length <code>N</code> &gt;= 0, where <code>N</code> is the number of nodes in the graph. Node ids must be unique. Node IDs must have an integer dtype. For large graphs, <code>int64</code> might be necessary to provide enough range for every node to have a unique ID. In the minimal case of an empty graph, the <code>ids</code> array will be present but empty.</p>
+<h3 id="the-props-group-and-node-property-groups">The <code>props</code> group and <code>node property</code> groups</h3>
+<p>The <code>nodes\props</code> group is optional and will contain one or more <code>node property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array.</p>
+<ul>
+<li>
+<p><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the node <code>ids</code> array, such that each row of the property <code>values</code> array stores the property for the node at that index in the ids array. String  values will be stored according to the <a href="https://github.com/zarr-developers/zarr-extensions/tree/main/data-types/string">zarr-extensions string specification</a> - as variable length UTF8 strings.</p>
+</li>
+<li>
+<p>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all nodes. A <code>1</code> at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the node at that index is None, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all nodes have values for the property.</p>
+</li>
+<li>
+<p>Geff provides special support for spatio-temporal properties, although they are not required. When <code>axes</code> are specified in the <code>geff</code> metadata, each axis name identifies a spatio-temporal property. Spatio-temporal properties are not allowed to have missing arrays. Otherwise, they are identical to other properties from a storage specification perspective.</p>
+</li>
+<li>
+<p>The <code>seg_id</code> property is an optional, special node property that stores the segmenatation label for each node. The <code>seg_id</code> values do not need to be unique, in case labels are repeated between time points. If the <code>seg_id</code> property is not present, it is assumed that the graph is not associated with a segmentation.</p>
+</li>
+<li>
+<p>Geff provides special support for predefined shape properties, although they are not required. These currently include: <code>sphere</code>, <code>ellipsoid</code>. Values can be marked as <code>missing</code>, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective. - <code>sphere</code>: Hypersphere in n spatial dimensions, defined by a scalar radius. - <code>ellipsoid</code>: Defined by a symmetric positive-definite covariance matrix, whose dimensionality is assumed to match the spatial axes.</p>
+</li>
+</ul>
+<!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When writing a graph with missing properties to the geff format, you must fill in a dummy value in the <code>values</code> array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.</p>
+</div>
+<h4 id="variable-length-properties">Variable length properties</h4>
+<p>While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have an array property of a variable shape. This is useful for properties such as polygons, meshes, or crops of bounding boxes. </p>
+<p>Variable length properties will have a <code>data</code> array in addition to the <code>values</code> and <code>missing</code> arrays. For variable length properties, the <code>data</code> array will contain a 1D flattened array of the actual values for all the nodes. The <code>values</code> array will contain the offset and shape of the relevant section of data in the <code>data</code> array.</p>
+<p><img alt="vlen properties overview" src="../images/vlen_props.png" /></p>
+<h2 id="the-edges-group">The <code>edges</code> group</h2>
+<p>Similar to the <code>nodes</code> group, the <code>edges</code> group will contain an <code>ids</code> array and an optional <code>props</code> group.</p>
+<h3 id="the-ids-array_1">The <code>ids</code> array</h3>
+<p>The <code>edges\ids</code> array is a 2D array with the same dtype as the <code>nodes\ids</code> array. It has shape <code>(E, 2)</code>, where <code>E</code> is the number of edges in the graph. If there are no edges in the graph, the edge group and <code>ids</code> array must be present with shape <code>(0, 2)</code>. All elements in the <code>edges\ids</code> array must also be present in the <code>nodes\ids</code> array, and the data types of the two id arrays must match.
+Each row represents an edge between two nodes. For directed graphs, the first column is the source nodes and the second column holds the target nodes. For undirected graphs, the order is arbitrary.
+Edges should be unique (no multiple edges between the same two nodes) and edges from a node to itself are not supported.</p>
+<h3 id="the-props-group-and-edge-property-groups">The <code>props</code> group and <code>edge property</code> groups</h3>
+<p>The <code>edges\props</code> group will contain zero or more <code>edge property</code> groups, each with a <code>values</code> array and an optional <code>missing</code> array. Variable length edge properties operate the same as variable length node properties, with an additional <code>data</code> array that the <code>values</code> array refers to.</p>
+<ul>
+<li><code>values</code> arrays can be any zarr supported dtype, and can be N-dimensional. The first dimension of the <code>values</code> array must have the same length as the <code>edges\ids</code> array, such that each row of the property <code>values</code> array stores the property for the edge at that index in the ids array.</li>
+<li>The <code>missing</code> array is an optional, a one dimensional boolean array to support properties that are not present on all edges. A <code>1</code> at an index in the <code>missing</code> array indicates that the <code>value</code> of that property for the edge at that index is missing, and the value in the <code>values</code> array at that index should be ignored. If the <code>missing</code> array is not present, that means that all edges have values for the property.</li>
+</ul>
+<p>The <code>edges/props</code> is optional. If you do not have any edge properties, the <code>edges\props</code> can be absent.</p>
+<h2 id="example-file-structure-and-metadata">Example file structure and metadata</h2>
+<p>Here is a schematic of the expected file structure.</p>
+<div class="highlight"><pre><span></span><code><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">.</span><span class="n">zarr</span>
+    <span class="o">/</span><span class="n">tracking_graph</span><span class="o">.</span><span class="n">geff</span>
+        <span class="o">.</span><span class="n">zattrs</span>  <span class="c1"># graph metadata with `geff_version`</span>
+        <span class="n">nodes</span><span class="o">/</span>
+            <span class="n">ids</span>  <span class="c1"># shape: (N,)  dtype: uint64</span>
+            <span class="n">props</span><span class="o">/</span>
+                <span class="n">t</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: uint16</span>
+                <span class="n">z</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: float32</span>
+                <span class="n">y</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: float32</span>
+                <span class="n">x</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: float32</span>
+                <span class="n">radius</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: int | float</span>
+                    <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
+                <span class="n">covariance3d</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, 3, 3) dtype: float</span>
+                    <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
+                <span class="n">color</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, 4) dtype: float32</span>
+                    <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
+                <span class="n">polygon</span><span class="o">/</span>
+                    <span class="n">data</span> <span class="c1"># shape: (V,) dtype: any, V is the length of all the flattened entries</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, ndim + 1) dtype: int64, ndim is number of dimensions in each entry array</span>
+                    <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
+        <span class="n">edges</span><span class="o">/</span>
+            <span class="n">ids</span>  <span class="c1"># shape: (E, 2) dtype: uint64</span>
+            <span class="n">props</span><span class="o">/</span>
+                <span class="n">distance</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (E,) dtype: float32</span>
+                <span class="n">score</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (E,) dtype: float32</span>
+                    <span class="n">missing</span> <span class="c1"># shape: (E,) dtype: bool</span>
+    <span class="c1"># optional:</span>
+    <span class="o">/</span><span class="n">segmentation</span>
+
+    <span class="c1"># unspecified, but totally okay:</span>
+    <span class="o">/</span><span class="n">raw</span>
+</code></pre></div>
+<p>This is a geff metadata zattrs file that matches the above example structure.</p>
+<div class="highlight"><pre><span></span><code>// /path/to.zarr/tracking_graph/.zattrs
+{
+  &quot;geff&quot;: {
+    &quot;directed&quot;: true,
+    &quot;geff_version&quot;: &quot;0.1.3&quot;,
+    // axes are optional
+    &quot;axes&quot;: [
+      { &quot;name&quot;: &quot;t&quot;, &quot;type&quot;: &quot;time&quot;, &quot;unit&quot;: &quot;second&quot;, &quot;min&quot;: 0, &quot;max&quot;: 125 },
+      {
+        &quot;name&quot;: &quot;z&quot;,
+        &quot;type&quot;: &quot;space&quot;,
+        &quot;unit&quot;: &quot;micrometer&quot;,
+        &quot;min&quot;: 1523.36,
+        &quot;max&quot;: 4398.1
+      },
+      {
+        &quot;name&quot;: &quot;y&quot;,
+        &quot;type&quot;: &quot;space&quot;,
+        &quot;unit&quot;: &quot;micrometer&quot;,
+        &quot;min&quot;: 81.667,
+        &quot;max&quot;: 1877.7
+      },
+      {
+        &quot;name&quot;: &quot;x&quot;,
+        &quot;type&quot;: &quot;space&quot;,
+        &quot;unit&quot;: &quot;micrometer&quot;,
+        &quot;min&quot;: 764.42,
+        &quot;max&quot;: 2152.3
+      }
+    ],
+    // predefined node attributes for storing detections as spheres or ellipsoids
+    &quot;sphere&quot;: &quot;radius&quot;, // optional
+    &quot;ellipsoid&quot;: &quot;covariance3d&quot;, // optional
+    &quot;display_hints&quot;: {
+      &quot;display_horizontal&quot;: &quot;x&quot;,
+      &quot;display_vertical&quot;: &quot;y&quot;,
+      &quot;display_depth&quot;: &quot;z&quot;,
+      &quot;display_time&quot;: &quot;t&quot;
+    },
+    &quot;node_props_metadata&quot;: {
+      &quot;t&quot;: {
+        &quot;identifier&quot;: &quot;t&quot;,
+        &quot;dtype&quot;: &quot;uint16&quot;,
+        &quot;varlength&quot;: false,
+        &quot;unit&quot;: &quot;second&quot;
+      },
+      &quot;z&quot;: {
+        &quot;identifier&quot;: &quot;z&quot;,
+        &quot;dtype&quot;: &quot;float32&quot;,
+        &quot;varlength&quot;: false,
+        &quot;unit&quot;: &quot;micrometer&quot;
+      },
+      &quot;y&quot;: {
+        &quot;identifier&quot;: &quot;y&quot;,
+        &quot;dtype&quot;: &quot;float32&quot;,
+        &quot;varlength&quot;: false,
+        &quot;unit&quot;: &quot;micrometer&quot;
+      },
+      &quot;x&quot;: {
+        &quot;identifier&quot;: &quot;x&quot;,
+        &quot;dtype&quot;: &quot;float32&quot;,
+        &quot;varlength&quot;: false,
+        &quot;unit&quot;: &quot;micrometer&quot;
+      },
+      &quot;radius&quot;: {
+        &quot;identifier&quot;: &quot;radius&quot;,
+        &quot;dtype&quot;: &quot;float32&quot;,
+        &quot;varlength&quot;: false,
+        &quot;unit&quot;: &quot;micrometer&quot;
+      },
+      &quot;covariance3d&quot;: {
+        &quot;identifier&quot;: &quot;covariance3d&quot;,
+        &quot;dtype&quot;: &quot;float32&quot;,
+        &quot;varlength&quot;: false
+      },
+      &quot;color&quot;: { &quot;identifier&quot;: &quot;color&quot;, &quot;dtype&quot;: &quot;float32&quot;, &quot;varlength&quot;: false }
+    },
+    &quot;edge_props_metadata&quot;: {
+      &quot;distance&quot;: {
+        &quot;identifier&quot;: &quot;distance&quot;,
+        &quot;dtype&quot;: &quot;float32&quot;,
+        &quot;varlength&quot;: false
+      },
+      &quot;score&quot;: { &quot;identifier&quot;: &quot;score&quot;, &quot;dtype&quot;: &quot;float32&quot;, &quot;varlength&quot;: false }
+    },
+    // node attributes corresponding to tracklet and/or lineage IDs
+    &quot;track_node_props&quot;: {
+      &quot;lineage&quot;: &quot;ultrack_lineage_id&quot;,
+      &quot;tracklet&quot;: &quot;ultrack_id&quot;
+    },
+    &quot;related_objects&quot;: [
+      {
+        &quot;type&quot;: &quot;labels&quot;,
+        &quot;path&quot;: &quot;../segmentation/&quot;,
+        &quot;label_prop&quot;: &quot;seg_id&quot;
+      },
+      {
+        &quot;type&quot;: &quot;image&quot;,
+        &quot;path&quot;: &quot;../raw/&quot;
+      }
+    ],
+    // optional coordinate transformation is defined as homogeneous coordinates
+    // It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
+    &quot;affine&quot;: [
+      [1, 0, 0, 0, 0],
+      [0, 1, 0, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 1]
+    ],
+    // custom other things must be placed **inside** the extra attribute
+    &quot;extra&quot;: {
+      // ...
+    }
+  }
+}
+</code></pre></div>
+<p>Minimal geff metadata must have <code>version</code> and <code>directed</code> fields under a <code>geff</code> field, as
+well as empty <code>node_props_metadata</code> and <code>edge_props_metadata</code> fields.</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;geff&quot;: {
+    &quot;version&quot;: &quot;0.0.0&quot;,
+    &quot;directed&quot;: false,
+    &quot;node_props_metadata&quot;: {},
+    &quot;edge_props_metadata&quot;: {}
+  }
+}
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
