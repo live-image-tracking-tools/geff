@@ -32,7 +32,7 @@ authors:
     orcid: 0000-0003-4388-7783
   - given-names: Laura
     surname: Xénard
-    affiliation: 4
+    affiliation: 4, 13
     orcid: 0000-0002-8168-0970
   - given-names: Mark
     surname: Kittisopikul
@@ -92,7 +92,7 @@ affiliations:
    index: 2
  - name: Biohub
    index: 3
- - name: Institut Pasteur
+ - name: Institut Pasteur, Université Paris Cité, Image Analysis Hub, Paris, France
    index: 4
  - name: Monash University
    index: 5
@@ -110,26 +110,46 @@ affiliations:
    index: 11
  - name: University of Cambridge
    index: 12
+ - name: Institut Pasteur, Université Paris Cité, INSERM U1225, Paris, France
+   index: 13
+   
 date: 5 November 2025  # TODO: Update to submission date
 bibliography: paper.bib
 ---
 
 # Summary
-GEFF (Graph Exchange File Format) is a specification for a file format for exchanging graph data. It is not intended to be mutable, editable, chunked, or optimized for use in an application setting. As an exchange format with a strict specification, GEFF enables interoperability between tools written in various languages.
+
+GEFF (Graph Exchange File Format) is a specification for a file format for exchanging graph data. 
+Its main application today is focused on exchange of animal, cell and organelle tracking data in Life Science.
+It is not intended to be mutable, editable, chunked, or optimized for use in an application setting. As an exchange format with a strict specification, GEFF enables interoperability between tools written in various languages.
 
 This repository contains two Python packages: `geff-spec`, the specification of GEFF metadata written with [`pydantic.BaseModel`](https://github.com/pydantic/pydantic), which are exported to a JSON schema for use in other languages, and `geff`, the Python library that reads and writes GEFF files to and from several Python in-memory graph data structures (`networkx` [@networkx_2008], `rustworkx` [@Treinish2022], and [`spatial-graph`](https://github.com/funkelab/spatial_graph)). A Java implementation of the GEFF v1 spec, [`geff-java`](https://github.com/live-image-tracking-tools/geff-java) is in progress in a separate repository.
 
 # Statement of Need
 
-Cell tracking is an active area of research with many tools for performing tracking and visualizing results. At the [2023 Janelia Trackathon](https://github.com/Janelia-Trackathon-2023/sequitur), a two-week workshop gathering cell tracking researchers, there was widespread agreement that a common graph file format would benefit the field by reducing code duplication and increasing standardization between projects. However, attempts made at that time were intended to be mutable and optimized, which introduced barriers to code generation and adoption by tools with different types of optimization needs. The 2025 Janelia Trackathon brought together all the authors of GEFF to decide on the specification and initial implementation, which was accomplished in a week-long hackathon. GEFF allows different research tools to all track and visualize the same data, reducing barriers to pipelining analysis and visualization tools, even across languages. 
+Cell and organelle tracking is an active area of research with many tools for performing tracking and visualizing results. At the [2023 Janelia Trackathon](https://github.com/Janelia-Trackathon-2023/sequitur), a two-week workshop gathering cell tracking researchers, there was widespread agreement that a common graph file format would benefit the field by reducing code duplication and increasing standardization between projects. However, attempts made at that time were intended to be mutable and optimized, which introduced barriers to code generation and adoption by tools with different types of optimization needs. The 2025 Janelia Trackathon brought together all the authors of GEFF to decide on the specification and initial implementation, which was accomplished in a week-long hackathon. GEFF allows different research tools to all track and visualize the same data, reducing barriers to pipelining analysis and visualization tools, even across languages. 
 
 # State of the Field
-There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge [@mavska2014benchmark] format, which combines TIFF files with segmentation masks and a CSV to provide division edges. However, some tracking applications such as particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. Each of these tools can now export to and import from GEFF in addition to their custom formats, enabling interoperability with minimal code change in each library.
+
+There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge [@mavska20
+benchmark] format, which combines TIFF files with segmentation masks and a CSV to provide division edges. However, some tracking applications such as particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, Mastodon [@tinevez2025mastodon] saves and loads from a binary file, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. 
+Additionally, none of these tools shared a common file format, which prevented interactions between them and strongly limited the scope and ambition of track analysis pipelines.
+Each of them can now export to and import from GEFF in addition to their custom formats, enabling interoperability with minimal code change in each library.
 
 # Implementation
 GEFF is built on `zarr` [@zarr-specs], a common file format used in bioimage analysis. Graphs are represented as an array of node IDs and an array of edge IDs where each edge ID is a tuple of two node IDs. Nodes and edges can have properties, which are stored in a properties array with corresponding indices. The specification includes support for nodes and edges with missing properties, as well as variable-length properties. To support the cell tracking community, the GEFF specification also provides specific metadata with standardized meaning, including positional axes, tracklet and lineage IDs, and linking to related objects such as image and segmentation arrays.
 
 GEFF supports Zarr specification v2 and v3, and has minimal dependencies, making it a lightweight dependency for other libraries. As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff). 
+
+GEFF’s object specification supports a wide range of shapes, enabling its application across diverse fields in the life sciences. 
+The library integrates multiple representation formats, from binary masks (2D/3D), commonly used in cell biology, developmental biology, and natural image tracking—to geometric primitives (points, circles, ellipses, spheres, and ellipsoids), which are essential in super-resolution microscopy, virology, and developmental studies. 
+It also includes polygons and meshes for detailed structural analysis in cell biology, microbiology, and complex shape modeling, as well as pose-based representations for markerless tracking of anatomical keypoints in multi-animal and behavioral research.
+
+Each object track or lineage is represented by a simple directed graph, where each edge is a link from one biological object detected in a frame, to its detection in the earliest next frame. 
+GEFF can therefore be used to harness tracking data with gaps (an edge extends over more that two adjacent time-points, because of a missing detection or object exit and reentry), object divisions and objects fusions. 
+
+By integrating these diverse object and link representations, GEFF facilitates seamless data exchange between segmentation algorithms, morphometric analysis tools, and tracking pipelines, ensuring compatibility with both established and emerging imaging workflows. 
+This versatility makes the library a valuable resource for researchers working across disciplines, from high-throughput cell biology to fine-grained anatomical studies in developmental and computational biology.
 
 # Extensibility
 
@@ -137,6 +157,7 @@ While GEFF was developed by the cell tracking research community, it is a generi
 
 # Acknowledgments
 
-We would like to thank HHMI Janelia Research Campus for hosting the 2025 Janelia Trackathon and the other attendees of the trackathon for their discussion.
+We would like to thank HHMI Janelia Research Campus for hosting the 2025 Janelia Trackathon and the other attendees of the trackathon for their discussion. 
+LX and JYT acknowledge support from the French National Research Agency (France BioImaging, ANR-24-INBS-0005 FBI BIOGEN). LX acknowledges support from the INCEPTION project (PIA/ANR-16-CONV-0005) and the FIRE PhD program funded by the Bettencourt Schueller foundation and the EURIP graduate program (ANR-17-EURE-0012).
 
 # References
