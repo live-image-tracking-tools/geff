@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import warnings
-from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -34,11 +33,11 @@ class Axis(BaseModel):
     """
 
     name: str = Field(..., description="Name of the corresponding node property")
-    type: Literal[AxisType] | None = Field(
+    type: AxisType | None = Field(
         default=None,
         description=f"The type of data encoded in this axis, one of {VALID_AXIS_TYPES} or None",
     )
-    unit: str | Literal[SpaceUnits] | Literal[TimeUnits] | None = Field(
+    unit: str | SpaceUnits | TimeUnits | None = Field(
         default=None,
         description="Optional, the unit for this axis. If the type is 'space' "
         "or 'time', we recommend utilizing the OME-NGFF spatial or temporal units respectively.",
@@ -52,7 +51,7 @@ class Axis(BaseModel):
     scale: float | None = Field(
         default=None, description="Optional, a scaling factor that can be applied to the data"
     )
-    scaled_unit: str | Literal[SpaceUnits] | Literal[TimeUnits] | None = Field(
+    scaled_unit: str | SpaceUnits | TimeUnits | None = Field(
         default=None,
         description="Optional, the unit after applying the `scale` value to the data. "
         "If `scaled_unit` is set, a `scale` value must also be provided.",
