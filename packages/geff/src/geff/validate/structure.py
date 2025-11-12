@@ -21,7 +21,7 @@ def validate_structure(store: StoreLike) -> None:
     """Ensure that the structure of the zarr conforms to geff specification
 
     Args:
-        store (str | Path | zarr store): Check the geff zarr, either str/Path/store
+        store (zarr.storage.StoreLike): Check the geff zarr, either str/Path/store
 
     Raises:
         ValueError: If geff specs are violated
