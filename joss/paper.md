@@ -32,7 +32,7 @@ authors:
     orcid: 0000-0003-4388-7783
   - given-names: Laura
     surname: Xénard
-    affiliation: 4, 14
+    affiliation: 4, 13
     orcid: 0000-0002-8168-0970
   - given-names: Mark
     surname: Kittisopikul
@@ -60,15 +60,15 @@ authors:
     orcid: 0000-0002-9013-9983
   - given-names: Georgeos
     surname: Hardo
-    affiliation: "9, 13"
+    affiliation: "9, 12"
     orcid: 0000-0003-0037-1293
   - given-names: Benjamin
     surname: Gallusser
-    affiliation: 10
+    affiliation: 3
     orcid: 0000-0002-7906-4714
   - given-names: Kasia
     surname: Kedziora
-    affiliation: 11
+    affiliation: 10
     orcid: 0000-0001-6524-7731
   - given-names: Jean-Yves
     surname: Tinevez
@@ -76,7 +76,7 @@ authors:
     orcid: 0000-0002-0998-4718
   - given-names: Ko
     surname: Sugawara
-    affiliation: 12
+    affiliation: 11
     orcid: 0000-0002-1392-9340
   - given-names: Tobias
     surname: Pietzsch
@@ -90,7 +90,7 @@ affiliations:
    index: 1
  - name: Harvard Medical School
    index: 2
- - name: Chan Zuckerberg Biohub San Francisco
+ - name: Biohub
    index: 3
  - name: Institut Pasteur, Université Paris Cité, Image Analysis Hub, Paris, France
    index: 4
@@ -104,16 +104,15 @@ affiliations:
    index: 8
  - name: United Arab Emirates University
    index: 9
- - name: Chan Zuckerberg Initiative
-   index: 10
  - name: University of Pittsburgh
-   index: 11
+   index: 10
  - name: RIKEN Center for Biosystems Dynamics Research
-   index: 12
+   index: 11
  - name: University of Cambridge
-   index: 13
+   index: 12
  - name: Institut Pasteur, Université Paris Cité, INSERM U1225, Paris, France
-   index: 14
+   index: 13
+   
 date: 5 November 2025  # TODO: Update to submission date
 bibliography: paper.bib
 ---
@@ -132,14 +131,15 @@ Cell and organelle tracking is an active area of research with many tools for pe
 
 # State of the Field
 
-There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge [@mavska2014benchmark] format, which combines TIFF files with segmentation masks and a CSV to provide division edges. However, some tracking applications such as particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, Mastodon [tinevez2025mastodon] saves and loads from a binary file, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. 
+There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge [@mavska20
+benchmark] format, which combines TIFF files with segmentation masks and a CSV to provide division edges. However, some tracking applications such as particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, Mastodon [tinevez2025mastodon] saves and loads from a binary file, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. 
 Additionally, none of these tools shared a common file format, which prevented interactions between them and strongly limited the scope and ambition of track analysis pipelines.
 Each of them can now export to and import from GEFF in addition to their custom formats, enabling interoperability with minimal code change in each library.
 
 # Implementation
 GEFF is built on `zarr` [@zarr-specs], a common file format used in bioimage analysis. Graphs are represented as an array of node IDs and an array of edge IDs where each edge ID is a tuple of two node IDs. Nodes and edges can have properties, which are stored in a properties array with corresponding indices. The specification includes support for nodes and edges with missing properties, as well as variable-length properties. To support the cell tracking community, the GEFF specification also provides specific metadata with standardized meaning, including positional axes, tracklet and lineage IDs, and linking to related objects such as image and segmentation arrays.
 
-GEFF supports Zarr specification v2 and v3, and has minimal dependencies, making it a lightweight dependency for other libraries. As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy/pulls), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff). 
+GEFF supports Zarr specification v2 and v3, and has minimal dependencies, making it a lightweight dependency for other libraries. As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff). 
 
 GEFF’s object specification supports a wide range of shapes, enabling its application across diverse fields in the life sciences. 
 The library integrates multiple representation formats, from binary masks (2D/3D), commonly used in cell biology, developmental biology, and natural image tracking—to geometric primitives (points, circles, ellipses, spheres, and ellipsoids), which are essential in super-resolution microscopy, virology, and developmental studies. 
