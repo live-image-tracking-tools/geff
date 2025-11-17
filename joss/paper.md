@@ -119,7 +119,7 @@ bibliography: paper.bib
 
 # Summary
 
-GEFF (Graph Exchange File Format) is a specification for a file format for exchanging graph data. 
+GEFF (Graph Exchange File Format) is a file format specification for exchanging graph data. 
 Its main application today is focused on exchange of animal, cell and organelle tracking data in Life Science.
 It is not intended to be mutable, editable, chunked, or optimized for use in an application setting. As an exchange format with a strict specification, GEFF enables interoperability between tools written in various programming languages.
 
