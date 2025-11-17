@@ -146,6 +146,7 @@ It also includes polygons and meshes for detailed structural analysis in cell bi
 
 Each object track or lineage is represented by a simple directed graph, where each edge is a link from one biological object detected in a frame, to its detection in the earliest next frame. 
 GEFF can therefore be used to harness tracking data with gaps (an edge extends over more that two adjacent time-points, because of a missing detection or object exit and reentry), object divisions and objects fusions. 
+Multiple GEFFs can refer to the same set of segmentations or detections which makes it possible to easily store multiple tracking solutions or hypotheses without duplicating the underlying data, which is a limitation of the commonly-used CTC format. 
 
 By integrating these diverse object and link representations, GEFF facilitates seamless data exchange between segmentation algorithms, morphometric analysis tools, and tracking pipelines, ensuring compatibility with both established and emerging imaging workflows. 
 This versatility makes the library a valuable resource for researchers working across disciplines, from high-throughput cell biology to fine-grained anatomical studies in developmental and computational biology.
