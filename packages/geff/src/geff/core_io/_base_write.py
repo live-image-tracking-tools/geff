@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from geff import _path
+from geff._typing import PropDictNpArray
 from geff.core_io._utils import (
     check_for_geff,
     construct_var_len_props,
@@ -27,7 +28,6 @@ if TYPE_CHECKING:
 
     from zarr.storage import StoreLike
 
-    from geff._typing import PropDictNpArray
     from geff_spec import GeffMetadata, PropMetadata
 
 
@@ -213,6 +213,11 @@ def write_arrays(
     as an optional flag.
     Adds the PropMetadata for the nodes and edges, if not provided.
 
+    If an axis is specified in the metadata, but the graph is empty, creates an empty array
+    for that property so that the geff passes validation. Empty arrays are not created for
+    non-axis properties that are specified in the metadata and would instead trigger a
+    validation error.
+
     Args:
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
@@ -259,6 +264,15 @@ def write_arrays(
             )
 
     write_id_arrays(geff_store, node_ids, edge_ids, zarr_format=zarr_format)
+
+    # Create empty arrays for axis properties in an empty geff
+    if len(node_ids) == 0 and metadata.axes is not None:
+        for ax in metadata.axes:
+            if node_props is not None and ax.name not in node_props:
+                node_props[ax.name] = PropDictNpArray(
+                    values=np.empty(shape=(0), dtype="float64"), missing=None
+                )
+
     if node_props is not None:
         node_meta = write_props_arrays(
             geff_store, _path.NODES, node_props, node_props_unsquish, zarr_format=zarr_format
