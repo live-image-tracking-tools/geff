@@ -213,6 +213,11 @@ def write_arrays(
     as an optional flag.
     Adds the PropMetadata for the nodes and edges, if not provided.
 
+    If an axis is specified in the metadata, but the graph is empty, creates an empty array
+    for that property so that the geff passes validation. Empty arrays are not created for
+    non-axis properties that are specified in the metadata and would instead trigger a
+    validation error.
+
     Args:
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
             itself. Opens in append mode, so will only overwrite geff-controlled groups.
