@@ -310,11 +310,11 @@ class GeffMetadata(BaseModel):
         Maintains consistency by preserving ignored attributes with their original values.
 
         Args:
-            store (zarr store | Path | str): The geff store to write the metadata to
+            store (zarr.storage.StoreLike): The geff store to write the metadata to
         """
 
         if isinstance(store, zarr.Group):
-            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+            raise TypeError("Unsupported type for store_like: should be a `zarr.storage.StoreLike`")
 
         group = zarr.open_group(store)
         group.attrs["geff"] = self.model_dump(mode="json")
@@ -324,14 +324,14 @@ class GeffMetadata(BaseModel):
         """Helper function to read GeffMetadata from a zarr geff group.
 
         Args:
-            store (zarr store | Path | str): The geff store to read the metadata from
+            store (zarr.storage.StoreLike): The geff store to read the metadata from
 
         Returns:
             GeffMetadata: The GeffMetadata object
         """
 
         if isinstance(store, zarr.Group):
-            raise TypeError("Unsupported type for store_like: should be a zarr store | Path | str")
+            raise TypeError("Unsupported type for store_like: should be a `zarr.storage.StoreLike")
 
         group = zarr.open_group(store)
 

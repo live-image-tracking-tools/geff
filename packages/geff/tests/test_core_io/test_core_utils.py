@@ -123,7 +123,8 @@ class Test_delete_geff:
         root["other_data"] = np.zeros(shape=(10, 10))
 
         with pytest.raises(
-            UserWarning, match="Found non-geff members in zarr. Exiting without deleting root zarr."
+            UserWarning,
+            match=r"Found non-geff members in zarr. Exiting without deleting root zarr.",
         ):
             delete_geff(path)
             root = zarr.open(path)

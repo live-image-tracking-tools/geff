@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geff-spec"
-version = "1.1.0"
+version = "1.1.0.post0"
 description = "Specification of the Graph Exchange File Format"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,3 +25,8 @@ dependencies = [
     "numpy>=2.1; python_version >= '3.13'",
     "annotated_types",
 ]
+
+[project.urls]
+repository = "https://github.com/live-image-tracking-tools/geff"
+homepage = "https://github.com/live-image-tracking-tools/geff"
+documentation = "https://liveimagetrackingtools.org/geff/"

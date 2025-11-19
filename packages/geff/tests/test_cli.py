@@ -18,7 +18,7 @@ TEST_DATA = Path(__file__).parent / "data"
 @pytest.fixture
 def example_geff_path(tmp_path: Path) -> str:
     file_path = str(tmp_path / "test.geff")
-    store, memory_geff = create_simple_temporal_geff()
+    _store, memory_geff = create_simple_temporal_geff()
     write_arrays(file_path, **memory_geff)
     return file_path
 

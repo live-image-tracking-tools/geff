@@ -139,7 +139,7 @@ jobs:
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: Generate geff changelog
-        uses: mikepenz/release-changelog-builder-action@v5
+        uses: mikepenz/release-changelog-builder-action@v6
         id: build_changelog
         with:
           includeOnlyPaths: | # Should work after v6 release
@@ -180,7 +180,7 @@ jobs:
       - name: 🚢 Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: Generate geff-spec changelog
-        uses: mikepenz/release-changelog-builder-action@v5
+        uses: mikepenz/release-changelog-builder-action@v6
         id: build_changelog_spec
         with:
           includeOnlyPaths: | # Should work after v6 release
