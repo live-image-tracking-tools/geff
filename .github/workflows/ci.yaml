@@ -108,13 +108,8 @@ jobs:
           enable-cache: true
 
       - name: Set up isolated geff-spec environment
-        run: |
-          uv venv --python 3.13
-          uv pip install packages/geff-spec
-          uv pip install "pytest>=8.3.4" "pytest-cov>=6.2"
-
       - name: Test geff-spec
-        run: uv run --no-sync pytest packages/geff-spec
+        run: uv run --with pytest --package geff-spec --no-dev pytest packages/geff-spec
 
   benchmark:
     name: Run Benchmarks
