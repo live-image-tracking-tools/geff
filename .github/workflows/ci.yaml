@@ -106,8 +106,7 @@ jobs:
         with:
           python-version: "3.13"
           enable-cache: true
-
-      - name: Set up isolated geff-spec environment
+      
       - name: Test geff-spec
         run: uv run --with pytest --package geff-spec --no-dev pytest packages/geff-spec
 
