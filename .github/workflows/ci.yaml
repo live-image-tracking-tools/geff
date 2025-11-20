@@ -93,8 +93,6 @@ jobs:
   test-spec:
     runs-on: ubuntu-latest
     env:
-      # disable resyncing on uv run
-      UV_NO_SYNC: "1"
       # test package pre-releases on cron-scheduled runs
       UV_PRERELEASE: ${{ github.event_name == 'schedule' && 'allow' || 'if-necessary-or-explicit' }}
     
