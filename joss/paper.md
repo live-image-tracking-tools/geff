@@ -12,12 +12,12 @@ authors:
     affiliation: 1
     orcid: 0000-0001-8131-9125
     equal-contrib: true
-    corresponding: true
   - given-names: Caroline
     surname: Malin-Mayor
     affiliation: 1
     orcid: 0000-0002-9627-6030
     equal-contrib: true
+    corresponding: true
   - given-names: Talley
     surname: Lambert
     affiliation: 2
@@ -120,10 +120,10 @@ bibliography: paper.bib
 # Summary
 
 GEFF (Graph Exchange File Format) is a file format specification for exchanging graph data. 
-Its main application today is focused on exchange of animal, cell and organelle tracking data in Life Science.
+Its main application today is focused on exchange of animal, cell and organelle tracking data in the life sciences.
 It is not intended to be mutable, editable, chunked, or optimized for use in an application setting. As an exchange format with a strict specification, GEFF enables interoperability between tools written in various programming languages.
 
-This repository contains two Python packages: `geff-spec`, the specification of GEFF metadata written with [`pydantic.BaseModel`](https://github.com/pydantic/pydantic), which are exported to a JSON schema for use in other languages, and `geff`, the Python library that reads and writes GEFF files to and from several Python in-memory graph data structures (`networkx` [@networkx_2008], `rustworkx` [@Treinish2022], and [`spatial-graph`](https://github.com/funkelab/spatial_graph)). A Java implementation of the GEFF v1 spec, [`geff-java`](https://github.com/live-image-tracking-tools/geff-java) is in progress in a separate repository.
+The geff repository contains two Python packages: `geff-spec`, the specification of GEFF metadata written with [`pydantic.BaseModel`s](https://github.com/pydantic/pydantic), which are exported to a JSON schema for use in other languages, and `geff`, the Python library that reads and writes GEFF files to and from several Python in-memory graph data structures (`networkx` [@networkx_2008], `rustworkx` [@Treinish2022], and [`spatial-graph`](https://github.com/funkelab/spatial_graph)). A Java implementation of the GEFF v1 spec, [`geff-java`](https://github.com/live-image-tracking-tools/geff-java) is in progress in a separate repository.
 
 # Statement of Need
 
@@ -131,7 +131,7 @@ Cell and organelle tracking is an active area of research with many tools for pe
 
 # State of the Field
 
-There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge [@mavska2014benchmark] format, which combines TIFF files with segmentation masks and a CSV file to provide division edges. However, some tracking applications such as particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, Mastodon [@tinevez2025mastodon] saves and loads from a binary file, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. 
+There are many formats used to store and exchange tracking solutions. A commonly used one is the Cell Tracking Challenge (CTC) [@mavska2014benchmark] format, which combines TIFF files with segmentation masks and a CSV file to provide division edges. However, some tracking applications such as particle tracking do not operate on segmentations, but instead utilize point detections, making this format not applicable. As such, individual tracking tools often define their own format for saving tracking results; for example, TrackMate [@tinevez2017trackmate] has a specific XML file format, Mastodon [@tinevez2025mastodon] saves and loads from a binary file, the [Motile Tracker](https://github.com/funkelab/motile_tracker) exports and loads to CSV files with specific node ID, parent ID, and location columns, and Ultrack [@bragantini2025ultrack] has a custom SQL database. In these existing file formats, there is limited support for storing additional properties on either nodes or edges. 
 Additionally, none of these tools shared a common file format, which prevented interactions between them and strongly limited the scope and ambition of track analysis pipelines.
 Each of them can now export to and import from GEFF in addition to their custom formats, enabling interoperability with minimal code change in each library.
 
