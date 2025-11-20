@@ -1767,6 +1767,10 @@ if None all properties will be loaded, defaults to None.</p>
 <p>Currently does not do any validation that the arrays are valid, but could be added
 as an optional flag.
 Adds the PropMetadata for the nodes and edges, if not provided.</p>
+<p>If an axis is specified in the metadata, but the graph is empty, creates an empty array
+for that property so that the geff passes validation. Empty arrays are not created for
+non-axis properties that are specified in the metadata and would instead trigger a
+validation error.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
