@@ -89,6 +89,25 @@ jobs:
           path: ${{ steps.cache-path.outputs.path }}
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
+  # Test geff-spec independently to catch any issues with dependencies
+  test-spec:
+    runs-on: ubuntu-latest
+    env:
+      # test package pre-releases on cron-scheduled runs
+      UV_PRERELEASE: ${{ github.event_name == 'schedule' && 'allow' || 'if-necessary-or-explicit' }}
+    
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python 3.13
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      
+      - name: Test geff-spec
+        run: uv run --with pytest --package geff-spec --no-dev pytest packages/geff-spec
+
   benchmark:
     name: Run Benchmarks
     runs-on: ubuntu-latest
