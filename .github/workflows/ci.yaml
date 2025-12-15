@@ -66,7 +66,7 @@ jobs:
 
       - name: Restore witty cache
         if: matrix.group == 'test-third-party'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: witty-cache
         with:
           path: ${{ steps.cache-path.outputs.path }}
@@ -84,7 +84,7 @@ jobs:
 
       - name: Save witty cache
         if: matrix.group == 'test-third-party'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: ${{ steps.cache-path.outputs.path }}
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
