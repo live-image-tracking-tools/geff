@@ -150,7 +150,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: Packagesgeff
           path: dist
@@ -191,7 +191,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: Packagesgeff-spec
           path: dist
