@@ -80,6 +80,7 @@ authors:
     orcid: 0000-0002-1392-9340
   - given-names: Tobias
     surname: Pietzsch
+    affiliation: 14
     orcid: 0000-0002-9477-3957
   - given-names: Ilan
     surname: Theodoro
@@ -112,8 +113,10 @@ affiliations:
    index: 12
  - name: Institut Pasteur, Université Paris Cité, INSERM U1225, Paris, France
    index: 13
+ - name: Independent Contractor
+   index: 14
    
-date: 5 November 2025  # TODO: Update to submission date
+date: 16 December 2025  # TODO: Update to submission date
 bibliography: paper.bib
 ---
 
