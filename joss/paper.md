@@ -87,29 +87,29 @@ authors:
     affiliation: 3
     orcid: 0000-0003-4019-3380
 affiliations:
- - name: Janelia Research Campus, Howard Hughes Medical Institute
+ - name: Janelia Research Campus, Howard Hughes Medical Institute, Ashburn, VA, USA
    index: 1
- - name: Harvard Medical School
+ - name: Harvard Medical School, Boston, MA, USA
    index: 2
- - name: Biohub
+ - name: Biohub, San Fransisco, CA, USA
    index: 3
  - name: Institut Pasteur, Université Paris Cité, Image Analysis Hub, Paris, France
    index: 4
- - name: Monash University
+ - name: Monash University, Melbourne, Australia
    index: 5
- - name: RIKEN Pioneering Research Institute
+ - name: RIKEN Pioneering Research Institute, Japan
    index: 6
- - name: Human Technopole
+ - name: Human Technopole, Milan, Italy
    index: 7
- - name: Hubrecht Institute
+ - name: Hubrecht Institute, Utrecht, Netherlands
    index: 8
- - name: United Arab Emirates University
+ - name: United Arab Emirates University, Al Ain, UAE
    index: 9
- - name: University of Pittsburgh
+ - name: University of Pittsburgh, Pittsburg, PA, USA
    index: 10
- - name: RIKEN Center for Biosystems Dynamics Research
+ - name: RIKEN Center for Biosystems Dynamics Research, Kobe, Japan
    index: 11
- - name: University of Cambridge
+ - name: University of Cambridge, Cambridge, UK
    index: 12
  - name: Institut Pasteur, Université Paris Cité, INSERM U1225, Paris, France
    index: 13
