@@ -8,6 +8,9 @@ on:
       - spec-v*
   pull_request:
   workflow_dispatch:
+  schedule:
+    # Run every Monday at 00:00 UTC to catch new dependency issues
+    - cron: '0 0 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
