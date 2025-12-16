@@ -91,7 +91,7 @@ affiliations:
    index: 1
  - name: Harvard Medical School, Boston, MA, USA
    index: 2
- - name: Biohub, San Fransisco, CA, USA
+ - name: Biohub, San Francisco, CA, USA
    index: 3
  - name: Institut Pasteur, Université Paris Cité, Image Analysis Hub, Paris, France
    index: 4
@@ -113,7 +113,7 @@ affiliations:
    index: 12
  - name: Institut Pasteur, Université Paris Cité, INSERM U1225, Paris, France
    index: 13
- - name: Independent Contractor
+ - name: Independent Contractor, Germany
    index: 14
    
 date: 16 December 2025  # TODO: Update to submission date
