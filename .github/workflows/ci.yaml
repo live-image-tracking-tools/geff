@@ -8,6 +8,9 @@ on:
       - spec-v*
   pull_request:
   workflow_dispatch:
+  schedule:
+    # Run every Monday at 00:00 UTC to catch new dependency issues
+    - cron: '0 0 * * 1'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,7 +21,7 @@ jobs:
     name: Type checking
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
@@ -45,7 +48,7 @@ jobs:
             resolution: lowest-direct # (already tested by third-party group)
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: astral-sh/setup-uv@v7
@@ -89,11 +92,30 @@ jobs:
           path: ${{ steps.cache-path.outputs.path }}
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
 
+  # Test geff-spec independently to catch any issues with dependencies
+  test-spec:
+    runs-on: ubuntu-latest
+    env:
+      # test package pre-releases on cron-scheduled runs
+      UV_PRERELEASE: ${{ github.event_name == 'schedule' && 'allow' || 'if-necessary-or-explicit' }}
+    
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.13
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      
+      - name: Test geff-spec
+        run: uv run --with pytest --package geff-spec --no-dev pytest packages/geff-spec
+
   benchmark:
     name: Run Benchmarks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.13"
@@ -107,7 +129,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: hynek/build-and-inspect-python-package@v2

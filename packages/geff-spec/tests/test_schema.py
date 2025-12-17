@@ -7,7 +7,6 @@ import pytest
 import zarr
 import zarr.storage
 
-import geff
 from geff_spec import GeffMetadata, GeffSchema, PropMetadata
 from geff_spec._schema import (
     VERSION_PATTERN,
@@ -398,6 +397,11 @@ def test_schema_file_updated(pytestconfig: pytest.Config) -> None:
 
     To update the schema file, run `pytest --update-schema`.
     """
+    try:
+        import geff
+    except ImportError:
+        pytest.skip("geff not installed, cannot update schema")
+
     root = Path(geff.__file__).parent.parent.parent.parent.parent
     schema_path = root / "geff-schema.json"
     if schema_path.is_file():
