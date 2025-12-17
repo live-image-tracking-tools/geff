@@ -97,7 +97,7 @@ affiliations:
    index: 4
  - name: Monash University, Melbourne, Australia
    index: 5
- - name: RIKEN Pioneering Research Institute, Japan
+ - name: RIKEN Pioneering Research Institute, Kobe, Hyōgo, Japan
    index: 6
  - name: Human Technopole, Milan, Italy
    index: 7
