@@ -52,10 +52,18 @@ def ctc_tiffs_to_zarr(
         n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
-    # Warning is triggered when the zarr_format argument is ignored by zarr 2
+    # Suppress warnings from dask/zarr compatibility layer
+    # Note: dask 2025.12.0+ deprecated passing storage args via **kwargs in favor of
+    # zarr_array_kwargs/zarr_read_kwargs parameters. When the deprecated API is removed,
+    # we'll need to update to use the new parameters and handle version compatibility.
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore", message=r".*ignoring keyword argument.*zarr_format.*", category=UserWarning
+        )
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*Passing storage-related arguments via \*\*kwargs is deprecated.*",
+            category=FutureWarning,
         )
         array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
 
