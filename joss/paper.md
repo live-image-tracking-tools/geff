@@ -113,7 +113,7 @@ affiliations:
    index: 12
  - name: Institut Pasteur, Université Paris Cité, INSERM U1225, Paris, France
    index: 13
- - name: Independent Contractor, Germany
+ - name: Independent Consultant, Germany
    index: 14
    
 date: 16 December 2025  # TODO: Update to submission date
