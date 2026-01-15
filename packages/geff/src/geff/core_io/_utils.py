@@ -212,6 +212,7 @@ def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype
             dtype = element.dtype
         else:
             ndim = max(element.ndim, ndim)
+            assert dtype is not None  # Set in previous iteration when ndim was None
             if np.can_cast(dtype, element.dtype):
                 dtype = np.promote_types(dtype, element.dtype)
             else:
