@@ -177,4 +177,7 @@ While GEFF was developed by the cell tracking research community, it is a generi
 We would like to thank HHMI Janelia Research Campus for hosting the 2025 Janelia Trackathon and the other attendees of the trackathon for their discussion. 
 LX and JYT acknowledge support from the French National Research Agency (France BioImaging, ANR-24-INBS-0005 FBI BIOGEN). LX acknowledges support from the INCEPTION project (PIA/ANR-16-CONV-0005) and the FIRE PhD program funded by the Bettencourt Schueller foundation and the EURIP graduate program (ANR-17-EURE-0012).
 
+# AI Usage Disclosure
+All specification and paper content was written manually and reflects the careful thought and input of the community. GEFF is an open source project, and as such contributors are free to use whatever tools, AI or otherwise, to generate code contained in pull requests.  All pull requests are reviewed by a core developer and often iterated on multiple times; therefore, we are confident that all content in the repository represents the effort and judgment of the authors.
+
 # References
