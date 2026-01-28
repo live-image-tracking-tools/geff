@@ -130,7 +130,13 @@ The geff repository contains two Python packages: `geff-spec`, the specification
 
 # Statement of Need
 
-Cell and organelle tracking is an active area of research with many tools for performing tracking and visualizing results. At the [2023 Janelia Trackathon](https://github.com/Janelia-Trackathon-2023/sequitur), a two-week workshop gathering cell tracking researchers, there was widespread agreement that a common graph file format would benefit the field by reducing code duplication and increasing standardization between projects. However, attempts made at that time were intended to be mutable and optimized, which introduced barriers to code generation and adoption by tools with different types of optimization needs. The 2025 Janelia Trackathon brought together all the authors of GEFF to decide on the specification and initial implementation, which was accomplished in a week-long hackathon. GEFF allows different research tools to all track and visualize the same data, reducing barriers to pipelining analysis and visualization tools, even across languages. 
+Cell and organelle tracking is an active area of research with many tools for performing tracking and visualizing results. At the [2023 Janelia Trackathon](https://github.com/Janelia-Trackathon-2023/sequitur), a two-week workshop gathering cell tracking researchers, there was widespread agreement that a common graph file format would benefit the field by reducing code duplication and increasing standardization between projects. However, attempts made at that time were intended to be mutable and optimized, which introduced barriers to code generation and adoption by tools with different types of optimization needs. The 2025 Janelia Trackathon brought together all the authors of GEFF to decide on the specification and initial implementation, which was accomplished in a week-long hackathon. 
+
+# Research Impact Statement
+GEFF allows different research tools to all track and visualize the same data, reducing barriers to pipelining analysis and visualization tools, even across languages. 
+As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff).
+The developers have already fielded inquiries through GitHub and email from researchers, both developers and end-users, about how best to use GEFF to accelerate their research workflow. We hope that GEFF will become the standard for storing and exchanging tracking information in the bio-image analysis community, and potentially even other fields that require exchanging graph-based information.
+
 
 # State of the Field
 
@@ -140,8 +146,6 @@ Each of them can now export to and import from GEFF in addition to their custom 
 
 # Implementation
 GEFF is built on `zarr` [@zarr-specs], a common file format used in bioimage analysis. Graphs are represented as an array of node IDs and an array of edge IDs where each edge ID is a tuple of two node IDs. Nodes and edges can have properties, which are stored in a properties array with corresponding indices. The specification includes support for nodes and edges with missing properties, as well as variable-length properties. To support the cell tracking community, the GEFF specification also provides specific metadata with standardized meaning, including positional axes, tracklet and lineage IDs, and linking to related objects such as image and segmentation arrays.
-
-As of submission time, the following tools all support either saving and/or loading GEFF files: [`motile-tracker`](https://github.com/funkelab/motile_tracker), [`traccuracy`](https://github.com/live-image-tracking-tools/traccuracy), [`ultrack`](https://github.com/royerlab/ultrack), [`track_gardener`](https://github.com/fjorka/track_gardener), [`laptrack`](https://github.com/yfukai/laptrack), [`trackastra`](https://github.com/weigertlab/trackastra), [`TrackMate`](https://imagej.net/plugins/trackmate/), [`InTRACKtive`](https://github.com/royerlab/inTRACKtive), [`tracksdata`](https://github.com/royerlab/tracksdata) and [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff). 
 
 GEFF’s object specification supports a wide range of shapes, enabling its application across diverse fields in the life sciences. 
 The library integrates multiple representation formats, from binary masks (2D/3D), commonly used in cell biology, developmental biology, and natural image tracking—to geometric primitives (points, circles, ellipses, spheres, and ellipsoids), which are essential in super-resolution microscopy, virology, and developmental studies. 
@@ -164,9 +168,7 @@ The `_graph_libs` currently implements three graph backends. `networkx` and `rus
 The other three modules provide additional functionality for new users and developers. The `convert` module contains a CLI tool for converting existing on-disk formats to GEFF, including TrackMate XML, the Cell Tracking Challenge format, and any CSV-like format that can be loaded into a Pandas dataframe. The `testing` module provides `InMemoryGeff` objects with a variety of valid GEFF data combinations for testing both existing and new implementations. Finally, the `validate` module provides helper functions for testing the validity of on-disk GEFFs with varying levels of inspection, from fast, structure-only validation to intensive data validation.
 
 
-
-
-# Extensibility
+## Extensibility
 
 While GEFF was developed by the cell tracking research community, it is a generic graph exchange format that could be easily extended to other use cases with additional metadata to specify the meaning of standard properties.
 
