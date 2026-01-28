@@ -69,7 +69,7 @@ jobs:
 
       - name: Restore witty cache
         if: matrix.group == 'test-third-party'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: witty-cache
         with:
           path: ${{ steps.cache-path.outputs.path }}
@@ -87,7 +87,7 @@ jobs:
 
       - name: Save witty cache
         if: matrix.group == 'test-third-party'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: ${{ steps.cache-path.outputs.path }}
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}
@@ -153,7 +153,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: Packagesgeff
           path: dist
@@ -194,7 +194,7 @@ jobs:
       contents: write # this permission is required for generate_release_notes
     steps:
       - name: Download built artifact to dist/
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: Packagesgeff-spec
           path: dist
