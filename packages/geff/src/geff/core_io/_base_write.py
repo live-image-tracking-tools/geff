@@ -132,7 +132,9 @@ def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_na
         # find first non-missing value
         if prop_name in data_dict:
             value = data_dict[prop_name]
-            if isinstance(value, int | float):
+            if isinstance(value, bool):
+                return False
+            elif isinstance(value, int | float):
                 return 0
             elif isinstance(value, str):
                 return ""
