@@ -11,6 +11,7 @@ from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import (
     _detect_zarr_spec_version,
     check_for_geff,
+    construct_props,
     delete_geff,
     open_storelike,
     setup_zarr_group,
@@ -100,6 +101,34 @@ class TestZarrV2Warnings:
     def test_warn_if_writing_zarr_format_3(self, tmp_path: Path):
         with pytest.warns(UserWarning, match="Requesting zarr spec v3 with zarr-python v2"):
             setup_zarr_group(tmp_path / "test.zarr", zarr_format=3)
+
+
+class Test_construct_props:
+    @pytest.mark.parametrize(
+        ("values", "expected_values", "expected_missing", "expected_dtype"),
+        [
+            ([True, None, False], [True, False, False], [False, True, False], np.bool_),
+            ([1, None, 3], [1, 0, 3], [False, True, False], np.int64),
+            ([1.5, None, 3.5], [1.5, 0, 3.5], [False, True, False], np.float64),
+            (["a", None, "c"], ["a", "", "c"], [False, True, False], np.dtype("<U1")),
+            ([1, 2, 3], [1, 2, 3], None, np.int64),
+            ([True, False, True], [True, False, True], None, np.bool_),
+        ],
+    )
+    def test_values_and_missing(self, values, expected_values, expected_missing, expected_dtype):
+        result = construct_props(values)
+        np.testing.assert_array_equal(result["values"], np.array(expected_values))
+        assert result["values"].dtype == expected_dtype
+        if expected_missing is None:
+            assert result["missing"] is None
+        else:
+            np.testing.assert_array_equal(result["missing"], np.array(expected_missing, dtype=bool))
+
+    def test_all_none(self):
+        with pytest.warns(UserWarning, match="All values are None"):
+            result = construct_props([None, None, None])
+        np.testing.assert_array_equal(result["values"], np.array([0, 0, 0]))
+        np.testing.assert_array_equal(result["missing"], np.array([True, True, True]))
 
 
 class Test_delete_geff:

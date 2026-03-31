@@ -8,6 +8,7 @@ import numpy as np
 from geff import _path
 from geff._typing import PropDictNpArray
 from geff.core_io._utils import (
+    _default_for_value,
     check_for_geff,
     construct_var_len_props,
     delete_geff,
@@ -110,13 +111,8 @@ def write_dicts(
 def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_name: str) -> Any:
     """Determine default value to fill in missing values
 
-    Find the first non-missing value and then uses the following heuristics:
-    - Native python bool -> False
-    - Native python numerical types (int, float) -> 0
-    - Native python string -> ""
-    - Otherwise, return the  value, which is definitely the right type and
-    shape, but is potentially both confusing and inefficient. Should reconsider in
-    the future.
+    Find the first non-missing value and return a type-appropriate default
+    using _default_for_value.
 
     If there are no non-missing values, warns and then returns 0.
 
@@ -132,15 +128,7 @@ def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_na
     for _, data_dict in data:
         # find first non-missing value
         if prop_name in data_dict:
-            value = data_dict[prop_name]
-            if isinstance(value, bool):
-                return False
-            elif isinstance(value, int | float):
-                return 0
-            elif isinstance(value, str):
-                return ""
-            else:
-                return value
+            return _default_for_value(data_dict[prop_name])
     warnings.warn(
         f"Property {prop_name} is not present on any graph elements. Using 0 as the default.",
         stacklevel=2,

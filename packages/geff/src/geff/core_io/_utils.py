@@ -4,7 +4,7 @@ import os
 import shutil
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
 import numpy as np
 import zarr
@@ -230,6 +230,83 @@ def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype
         dtype = np.dtype("int64")
         ndim = 1
     return dtype, ndim
+
+
+def _default_for_value(value: Any) -> Any:
+    """Return a type-appropriate default value for filling missing entries.
+
+    Uses the following heuristics:
+    - bool -> False
+    - int or float -> 0
+    - str -> ""
+    - Otherwise, returns the value itself, which preserves type and shape but
+      may be confusing or inefficient for some types.
+
+    Args:
+        value: A non-None example value to determine the default from.
+
+    Returns:
+        A default value with the same type (and shape, for the fallback case).
+    """
+    if isinstance(value, bool):
+        return False
+    elif isinstance(value, int | float):
+        return 0
+    elif isinstance(value, str):
+        return ""
+    else:
+        return value
+
+
+def construct_props(values: Sequence[Any | None]) -> PropDictNpArray:
+    """Convert a sequence of values with possible None entries into a PropDictNpArray.
+
+    Builds a values array and a missing mask from the input sequence. None entries
+    are replaced with a type-appropriate default value (False for bool, 0 for int/float,
+    "" for str) determined from the first non-None entry. The missing mask indicates
+    which positions were None.
+
+    Non-None values are expected to have a consistent type and shape so they can
+    form a regular numpy array. For variable-length or variable-shape values, use
+    construct_var_len_props instead.
+
+    Args:
+        values: A sequence of values with one entry per node or edge.
+            Missing values are indicated by None entries.
+
+    Returns:
+        PropDictNpArray: A dict with "values" as a numpy array of the appropriate dtype
+            and "missing" as a boolean numpy array (or None if no values were missing).
+    """
+    filled_values = []
+    missing = np.zeros(len(values), dtype=np.bool_)
+    default_val = None
+    missing_any = False
+
+    for i, value in enumerate(values):
+        if value is None:
+            if default_val is None:
+                # find first non-None value to determine default
+                for v in values:
+                    if v is not None:
+                        default_val = _default_for_value(v)
+                        break
+                else:
+                    warnings.warn(
+                        "All values are None. Using 0 as the default.",
+                        stacklevel=2,
+                    )
+                    default_val = 0
+            filled_values.append(default_val)
+            missing[i] = True
+            missing_any = True
+        else:
+            filled_values.append(value)
+
+    return {
+        "values": np.asarray(filled_values),
+        "missing": missing if missing_any else None,
+    }
 
 
 def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpArray:
