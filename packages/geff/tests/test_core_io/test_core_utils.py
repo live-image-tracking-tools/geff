@@ -9,6 +9,7 @@ import zarr.storage
 from geff import _path
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import (
+    _default_for_value,
     _detect_zarr_spec_version,
     check_for_geff,
     construct_props,
@@ -17,6 +18,34 @@ from geff.core_io._utils import (
     setup_zarr_group,
 )
 from geff.testing.data import create_simple_2d_geff
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # Python native types
+        (True, False),
+        (False, False),
+        (1, 0),
+        (3.14, 0),
+        ("hello", ""),
+        # numpy scalar types (preserves dtype)
+        (np.bool_(True), np.bool_(False)),
+        (np.bool_(False), np.bool_(False)),
+        (np.int64(5), np.int64(0)),
+        (np.int32(5), np.int32(0)),
+        (np.int16(5), np.int16(0)),
+        (np.uint8(5), np.uint8(0)),
+        (np.float64(2.5), np.float64(0)),
+        (np.float32(2.5), np.float32(0)),
+        # fallback: returns value itself
+        ([1, 2, 3], [1, 2, 3]),
+    ],
+)
+def test_default_for_value(value, expected):
+    result = _default_for_value(value)
+    assert result == expected
+    assert type(result) is type(expected)
 
 
 @pytest.mark.skipif(zarr.__version__.startswith("2"), reason="tests for zarr-python>=v3 only")
@@ -107,12 +136,27 @@ class Test_construct_props:
     @pytest.mark.parametrize(
         ("values", "expected_values", "expected_missing", "expected_dtype"),
         [
+            # Python native types
             ([True, None, False], [True, False, False], [False, True, False], np.bool_),
             ([1, None, 3], [1, 0, 3], [False, True, False], np.int64),
             ([1.5, None, 3.5], [1.5, 0, 3.5], [False, True, False], np.float64),
             (["a", None, "c"], ["a", "", "c"], [False, True, False], np.dtype("<U1")),
             ([1, 2, 3], [1, 2, 3], None, np.int64),
             ([True, False, True], [True, False, True], None, np.bool_),
+            # numpy scalar types (e.g. from pandas iteration)
+            (
+                [np.bool_(True), None, np.bool_(False)],
+                [True, False, False],
+                [False, True, False],
+                np.bool_,
+            ),
+            ([np.int64(1), None, np.int64(3)], [1, 0, 3], [False, True, False], np.int64),
+            (
+                [np.float32(1.5), None, np.float32(3.5)],
+                [1.5, 0, 3.5],
+                [False, True, False],
+                np.float32,
+            ),
         ],
     )
     def test_values_and_missing(self, values, expected_values, expected_missing, expected_dtype):

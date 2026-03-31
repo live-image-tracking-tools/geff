@@ -235,9 +235,14 @@ def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype
 def _default_for_value(value: Any) -> Any:
     """Return a type-appropriate default value for filling missing entries.
 
+    Handles both native Python types and numpy scalar types (e.g. np.bool_,
+    np.int64, np.float32) which commonly arise when iterating pandas DataFrames.
+    For numpy scalars, returns a zero of the same dtype to avoid unnecessary
+    upcasting when the values are later combined into a numpy array.
+
     Uses the following heuristics:
-    - bool -> False
-    - int or float -> 0
+    - bool or np.bool_ -> False (preserving dtype)
+    - int, float, np.integer, or np.floating -> 0 (preserving dtype)
     - str -> ""
     - Otherwise, returns the value itself, which preserves type and shape but
       may be confusing or inefficient for some types.
@@ -248,7 +253,9 @@ def _default_for_value(value: Any) -> Any:
     Returns:
         A default value with the same type (and shape, for the fallback case).
     """
-    if isinstance(value, bool):
+    if isinstance(value, np.generic):
+        return type(value)(0)
+    elif isinstance(value, bool):
         return False
     elif isinstance(value, int | float):
         return 0
