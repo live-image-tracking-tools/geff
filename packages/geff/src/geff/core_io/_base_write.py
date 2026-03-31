@@ -111,6 +111,7 @@ def _determine_default_value(data: Sequence[tuple[Any, dict[str, Any]]], prop_na
     """Determine default value to fill in missing values
 
     Find the first non-missing value and then uses the following heuristics:
+    - Native python bool -> False
     - Native python numerical types (int, float) -> 0
     - Native python string -> ""
     - Otherwise, return the  value, which is definitely the right type and

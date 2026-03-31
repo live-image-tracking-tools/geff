@@ -42,7 +42,7 @@ def _tmp_metadata():
 @pytest.fixture
 def dict_data():
     data = [
-        (0, {"num": 1, "str": "category"}),
+        (0, {"num": 1, "str": "category", "flag": True}),
         (127, {"num": 5, "str_arr": ["test", "string"]}),
         (1, {"num": 6, "num_arr": [1, 2]}),
     ]
@@ -265,6 +265,7 @@ class TestWriteArrays:
         ("str", (["category", "", ""], [0, 1, 1])),
         ("num_arr", ([[1, 2], [1, 2], [1, 2]], [1, 1, 0])),
         ("str_arr", ([["test", "string"], ["test", "string"], ["test", "string"]], [1, 0, 1])),
+        ("flag", ([True, False, False], [0, 1, 1])),
     ],
 )
 def test_dict_prop_to_arr(dict_data, data_type, expected) -> None:
@@ -277,6 +278,7 @@ def test_dict_prop_to_arr(dict_data, data_type, expected) -> None:
 
     np.testing.assert_array_equal(missing, ex_missing)
     np.testing.assert_array_equal(values, ex_values)
+    assert values.dtype == ex_values.dtype
 
 
 class Test_write_dicts:
