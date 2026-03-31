@@ -5,6 +5,7 @@ try:
     import pandas as pd
 
     from geff.convert._dataframe import (
+        csv_to_geff,
         dataframes_to_geff,
         dataframes_to_memory_geff,
         geff_to_csv,
@@ -298,3 +299,28 @@ class Test_dataframes_to_geff:
         np.testing.assert_array_equal(result["node_props"]["x"]["values"], [1.0, 2.0, 3.0])
         np.testing.assert_array_equal(result["node_props"]["y"]["values"], [4.0, 5.0, 6.0])
         np.testing.assert_array_equal(result["edge_props"]["weight"]["values"], [0.5, 0.8])
+
+
+class Test_csv_to_geff:
+    def test_round_trip(self, tmp_path):
+        """geff_to_csv -> csv_to_geff should preserve data."""
+        store_in, original = create_simple_3d_geff()
+        out_path = tmp_path / "test"
+        geff_to_csv(store_in, out_path)
+
+        store_out = zarr.storage.MemoryStore()
+        csv_to_geff(
+            f"{out_path}-nodes.csv",
+            f"{out_path}-edges.csv",
+            store_out,
+            directed=original["metadata"].directed,
+        )
+
+        result = read_to_memory(store_out)
+        np.testing.assert_array_equal(result["node_ids"], original["node_ids"])
+        np.testing.assert_array_equal(result["edge_ids"], original["edge_ids"])
+        for name in original["node_props"]:
+            np.testing.assert_allclose(
+                result["node_props"][name]["values"],
+                original["node_props"][name]["values"],
+            )

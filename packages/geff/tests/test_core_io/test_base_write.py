@@ -281,6 +281,16 @@ def test_dict_prop_to_arr(dict_data, data_type, expected) -> None:
     assert values.dtype == ex_values.dtype
 
 
+def test_dict_prop_to_arr_missing_on_all(dict_data) -> None:
+    """Property not present on any element should warn and default to 0."""
+    with pytest.warns(UserWarning, match="not present on any graph elements"):
+        props_dict = dict_props_to_arr(dict_data, ["nonexistent"])
+    values = props_dict["nonexistent"]["values"]
+    missing = props_dict["nonexistent"]["missing"]
+    np.testing.assert_array_equal(values, [0, 0, 0])
+    np.testing.assert_array_equal(missing, [True, True, True])
+
+
 class Test_write_dicts:
     def test_node_ids_not_int(self):
         store = zarr.storage.MemoryStore()
