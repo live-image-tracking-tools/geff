@@ -4,6 +4,13 @@ from geff.convert._trackmate_xml import from_trackmate_xml_to_geff
 
 if TYPE_CHECKING:
     from ._ctc import ctc_tiffs_to_zarr, from_ctc_to_geff
+    from ._dataframe import (
+        csv_to_geff,
+        dataframes_to_geff,
+        dataframes_to_memory_geff,
+        geff_to_csv,
+        geff_to_dataframes,
+    )
 
 __all__ = [
     "csv_to_geff",
