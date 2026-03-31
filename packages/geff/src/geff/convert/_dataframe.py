@@ -236,3 +236,42 @@ def dataframes_to_geff(
         edge_target_col=edge_target_col,
     )
     write_arrays(store, zarr_format=zarr_format, **in_memory_geff)
+
+
+def csv_to_geff(
+    node_csv: Path | str,
+    edge_csv: Path | str,
+    store: StoreLike,
+    directed: bool = True,
+    node_id_col: str = "id",
+    edge_source_col: str = "source",
+    edge_target_col: str = "target",
+    zarr_format: Literal[2, 3] = 2,
+) -> None:
+    """Convert CSV files to a geff store.
+
+    Reads node and edge CSV files and writes them to a geff store.
+
+    Args:
+        node_csv: Path to the node CSV file.
+        edge_csv: Path to the edge CSV file.
+        store: The zarr store to write to.
+        directed: Whether the graph is directed. Defaults to True.
+        node_id_col: Name of the node ID column. Defaults to "id".
+        edge_source_col: Name of the source node column. Defaults to "source".
+        edge_target_col: Name of the target node column. Defaults to "target".
+        zarr_format: The zarr specification to use when writing. Defaults to 2.
+    """
+    node_df = pd.read_csv(node_csv, index_col=0)
+    edge_df = pd.read_csv(edge_csv, index_col=0)
+
+    dataframes_to_geff(
+        node_df,
+        edge_df,
+        store,
+        directed=directed,
+        node_id_col=node_id_col,
+        edge_source_col=edge_source_col,
+        edge_target_col=edge_target_col,
+        zarr_format=zarr_format,
+    )
