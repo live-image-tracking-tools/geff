@@ -4,7 +4,12 @@ import zarr
 try:
     import pandas as pd
 
-    from geff.convert._dataframe import geff_to_csv, geff_to_dataframes
+    from geff.convert._dataframe import (
+        dataframes_to_geff,
+        dataframes_to_memory_geff,
+        geff_to_csv,
+        geff_to_dataframes,
+    )
 except ImportError:
     pytest.skip("geff[pandas] not installed", allow_module_level=True)
 
@@ -14,6 +19,7 @@ import numpy as np
 import pytest
 
 from geff import _path
+from geff.core_io._base_read import read_to_memory
 from geff.testing.data import create_mock_geff, create_simple_2d_geff, create_simple_3d_geff
 
 
@@ -197,3 +203,98 @@ class Test_geff_to_csv:
         geff_to_csv(store_2d, out_path, overwrite=True)
         df = pd.read_csv(str(out_path.with_suffix("")) + "-nodes.csv")
         assert "z" not in df.columns
+
+
+class Test_dataframes_to_geff:
+    def test_round_trip(self):
+        """geff -> dataframes -> geff should preserve data."""
+        store, original = create_simple_3d_geff()
+        node_df, edge_df = geff_to_dataframes(store)
+
+        result = dataframes_to_memory_geff(node_df, edge_df, directed=original["metadata"].directed)
+
+        np.testing.assert_array_equal(result["node_ids"], original["node_ids"])
+        np.testing.assert_array_equal(result["edge_ids"], original["edge_ids"])
+        for name in original["node_props"]:
+            np.testing.assert_array_equal(
+                result["node_props"][name]["values"],
+                original["node_props"][name]["values"],
+            )
+        for name in original["edge_props"]:
+            np.testing.assert_array_equal(
+                result["edge_props"][name]["values"],
+                original["edge_props"][name]["values"],
+            )
+
+    def test_missing_values(self):
+        """NaN values in DataFrame should produce missing masks."""
+        node_df = pd.DataFrame(
+            {
+                "id": [0, 1, 2],
+                "score": [1.0, np.nan, 3.0],
+            }
+        )
+        edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
+
+        result = dataframes_to_memory_geff(node_df, edge_df)
+
+        assert result["node_props"]["score"]["missing"] is not None
+        np.testing.assert_array_equal(
+            result["node_props"]["score"]["missing"], [False, True, False]
+        )
+        np.testing.assert_array_equal(result["node_props"]["score"]["values"], [1.0, 0, 3.0])
+
+    def test_boolean_column_with_missing(self):
+        """Boolean columns with NaN should preserve bool dtype."""
+        node_df = pd.DataFrame(
+            {
+                "id": [0, 1, 2],
+                "flag": pd.array([True, pd.NA, False], dtype=pd.BooleanDtype()),
+            }
+        )
+        edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
+
+        result = dataframes_to_memory_geff(node_df, edge_df)
+
+        assert result["node_props"]["flag"]["values"].dtype == np.bool_
+        np.testing.assert_array_equal(result["node_props"]["flag"]["values"], [True, False, False])
+        np.testing.assert_array_equal(result["node_props"]["flag"]["missing"], [False, True, False])
+
+    def test_empty_dataframes(self):
+        """Empty DataFrames should produce valid InMemoryGeff with empty arrays."""
+        node_df = pd.DataFrame({"id": pd.Series(dtype=int)})
+        edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
+
+        result = dataframes_to_memory_geff(node_df, edge_df)
+
+        assert result["node_ids"].shape == (0,)
+        assert result["edge_ids"].shape == (0, 2)
+        assert result["node_props"] == {}
+        assert result["edge_props"] == {}
+
+    def test_write_round_trip(self):
+        """dataframes_to_geff -> read_to_memory should preserve data."""
+        node_df = pd.DataFrame(
+            {
+                "id": [0, 1, 2],
+                "x": [1.0, 2.0, 3.0],
+                "y": [4.0, 5.0, 6.0],
+            }
+        )
+        edge_df = pd.DataFrame(
+            {
+                "source": [0, 1],
+                "target": [1, 2],
+                "weight": [0.5, 0.8],
+            }
+        )
+
+        store = zarr.storage.MemoryStore()
+        dataframes_to_geff(node_df, edge_df, store)
+
+        result = read_to_memory(store)
+        np.testing.assert_array_equal(result["node_ids"], [0, 1, 2])
+        np.testing.assert_array_equal(result["edge_ids"], [[0, 1], [1, 2]])
+        np.testing.assert_array_equal(result["node_props"]["x"]["values"], [1.0, 2.0, 3.0])
+        np.testing.assert_array_equal(result["node_props"]["y"]["values"], [4.0, 5.0, 6.0])
+        np.testing.assert_array_equal(result["edge_props"]["weight"]["values"], [0.5, 0.8])

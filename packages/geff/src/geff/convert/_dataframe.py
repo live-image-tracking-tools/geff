@@ -5,10 +5,20 @@ except ImportError as e:
 
 import warnings
 from pathlib import Path
+from typing import Literal
 
+import numpy as np
 from zarr.storage import StoreLike
 
+from geff._typing import InMemoryGeff, PropDictNpArray
 from geff.core_io._base_read import read_to_memory
+from geff.core_io._base_write import write_arrays
+from geff.core_io._utils import construct_props
+from geff_spec.utils import (
+    add_or_update_props_metadata,
+    create_or_update_metadata,
+    create_props_metadata,
+)
 
 
 def geff_to_dataframes(
@@ -103,3 +113,126 @@ def geff_to_csv(store: StoreLike, outpath: Path | str, overwrite: bool = False) 
     mode = "w" if overwrite else "x"
     node_df.to_csv(node_path, mode=mode)
     edge_df.to_csv(edge_path, mode=mode)
+
+
+def dataframes_to_memory_geff(
+    node_df: pd.DataFrame,
+    edge_df: pd.DataFrame,
+    directed: bool = True,
+    node_id_col: str = "id",
+    edge_source_col: str = "source",
+    edge_target_col: str = "target",
+) -> InMemoryGeff:
+    """Convert pandas DataFrames to an InMemoryGeff representation.
+
+    This is the inverse of geff_to_dataframes. Takes a node DataFrame and an edge
+    DataFrame and converts them into the InMemoryGeff dict format. Missing values
+    (NaN/None) are handled via boolean missing masks with correct dtypes preserved.
+
+    Args:
+        node_df: DataFrame with node data. Must contain a node ID column and any
+            number of property columns.
+        edge_df: DataFrame with edge data. Must contain source and target ID columns
+            and any number of property columns.
+        directed: Whether the graph is directed. Defaults to True.
+        node_id_col: Name of the node ID column in node_df. Defaults to "id".
+        edge_source_col: Name of the source node column in edge_df. Defaults to "source".
+        edge_target_col: Name of the target node column in edge_df. Defaults to "target".
+
+    Returns:
+        InMemoryGeff: A dict with metadata, node_ids, edge_ids, node_props, and edge_props.
+    """
+    # Extract node IDs
+    if len(node_df) > 0:
+        node_ids = np.asarray(node_df[node_id_col]).astype(np.uint64)
+    else:
+        node_ids = np.empty((0,), dtype=np.uint64)
+
+    # Extract edge IDs
+    if len(edge_df) > 0:
+        edge_ids = np.column_stack(
+            [
+                np.asarray(edge_df[edge_source_col]),
+                np.asarray(edge_df[edge_target_col]),
+            ]
+        ).astype(np.uint64)
+    else:
+        edge_ids = np.empty((0, 2), dtype=np.uint64)
+
+    # Convert property columns to PropDictNpArray
+    node_prop_cols = [c for c in node_df.columns if c != node_id_col]
+    node_props = _df_columns_to_props(node_df, node_prop_cols)
+
+    edge_prop_cols = [c for c in edge_df.columns if c not in (edge_source_col, edge_target_col)]
+    edge_props = _df_columns_to_props(edge_df, edge_prop_cols)
+
+    # Build metadata
+    metadata = create_or_update_metadata(metadata=None, is_directed=directed)
+    node_prop_meta = [
+        create_props_metadata(identifier=name, prop_data=prop_data)
+        for name, prop_data in node_props.items()
+    ]
+    edge_prop_meta = [
+        create_props_metadata(identifier=name, prop_data=prop_data)
+        for name, prop_data in edge_props.items()
+    ]
+    metadata = add_or_update_props_metadata(metadata, node_prop_meta, "node")
+    metadata = add_or_update_props_metadata(metadata, edge_prop_meta, "edge")
+
+    return {
+        "metadata": metadata,
+        "node_ids": node_ids,
+        "edge_ids": edge_ids,
+        "node_props": node_props,
+        "edge_props": edge_props,
+    }
+
+
+def _df_columns_to_props(df: pd.DataFrame, columns: list[str]) -> dict[str, PropDictNpArray]:
+    """Convert DataFrame columns to a dict of PropDictNpArray.
+
+    Replaces NaN/None with None before passing to construct_props, which handles
+    default value filling and missing mask creation.
+    """
+    props: dict[str, PropDictNpArray] = {}
+    for col in columns:
+        values = [None if pd.isna(v) else v for v in df[col]]
+        props[col] = construct_props(values)
+    return props
+
+
+def dataframes_to_geff(
+    node_df: pd.DataFrame,
+    edge_df: pd.DataFrame,
+    store: StoreLike,
+    directed: bool = True,
+    node_id_col: str = "id",
+    edge_source_col: str = "source",
+    edge_target_col: str = "target",
+    zarr_format: Literal[2, 3] = 2,
+) -> None:
+    """Convert pandas DataFrames and write directly to a geff store.
+
+    Combines dataframes_to_geff with write_arrays for convenience.
+
+    Args:
+        node_df: DataFrame with node data. Must contain a node ID column and any
+            number of property columns.
+        edge_df: DataFrame with edge data. Must contain source and target ID columns
+            and any number of property columns.
+        store: The zarr store to write to.
+        directed: Whether the graph is directed. Defaults to True.
+        node_id_col: Name of the node ID column in node_df. Defaults to "id".
+        edge_source_col: Name of the source node column in edge_df. Defaults to "source".
+        edge_target_col: Name of the target node column in edge_df. Defaults to "target".
+        zarr_format: The zarr specification to use when writing. Defaults to 2.
+    """
+    in_memory_geff = dataframes_to_memory_geff(
+        node_df,
+        edge_df,
+        directed=directed,
+        node_id_col=node_id_col,
+        edge_source_col=edge_source_col,
+        edge_target_col=edge_target_col,
+    )
+    write_arrays(store, zarr_format=zarr_format, **in_memory_geff)
