@@ -1408,7 +1408,14 @@
     <div class="doc doc-contents ">
 
         <p>Convert CSV files to a geff store.</p>
-<p>Reads node and edge CSV files and writes them to a geff store.</p>
+<p>Reads node and edge CSV files into pandas DataFrames and writes them to a
+geff store. The CSVs are expected to have a header row and a pandas-style
+index column (column 0).</p>
+<p>The node CSV must contain a column with node IDs (default "id"). All other
+columns are stored as node properties. The edge CSV must contain columns for
+source and target node IDs (default "source" and "target"). All other columns
+are stored as edge properties. Missing values (empty cells / NaN) are recorded
+in the GEFF missing mask.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1495,7 +1502,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the node ID column. Defaults to "id".</p>
+                <p>Name of the node ID column in the node CSV. Defaults to "id".</p>
               </div>
             </td>
             <td>
@@ -1511,7 +1518,8 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the source node column. Defaults to "source".</p>
+                <p>Name of the source node column in the edge CSV.
+Defaults to "source".</p>
               </div>
             </td>
             <td>
@@ -1527,7 +1535,8 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Name of the target node column. Defaults to "target".</p>
+                <p>Name of the target node column in the edge CSV.
+Defaults to "target".</p>
               </div>
             </td>
             <td>
@@ -1548,6 +1557,29 @@
             </td>
             <td>
                   <code>2</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If required columns are missing from the CSVs.</p>
+              </div>
             </td>
           </tr>
       </tbody>
@@ -1996,6 +2028,30 @@ and any number of property columns.</p>
     </table>
 
 
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If node_df is missing the node_id_col column, or edge_df is
+missing the edge_source_col or edge_target_col columns.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
     <p><span class="doc-section-title">Returns:</span></p>
     <table>
       <thead>
@@ -2345,9 +2401,10 @@ with the TrackMate metadata.</p>
     <div class="doc doc-contents ">
 
         <p>Convert a geff store to two csvs of nodes and edges</p>
-<p>Properties with more than 2 dimensions cannot be exported and will be skipped
+<p>Properties with more than 2 dimensions cannot be exported and will be skipped.
 Properties with two dimensions where the second dimension is &gt; 1 will be unpacked
-into separate columns with the name "{prop_name}_{dim_index}"</p>
+into separate columns with the name "{prop_name}_{dim_index}", and saved in extra
+metadata.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2434,7 +2491,7 @@ stripped and replaced with "-nodes.csv" and "-edges.csv"</p>
     <div class="doc doc-contents ">
 
         <p>Convert a GEFF store to a pandas DataFrame.</p>
-<p>Properties with more than 2 dimensions cannot be converted and will be skipped
+<p>Properties with more than 2 dimensions cannot be converted and will be skipped.
 Properties with two dimensions where the second dimension is &gt; 1 will be unpacked
 into separate columns with the name "{prop_name}_{dim_index}"</p>
 
