@@ -1409,13 +1409,13 @@
 
         <p>Convert CSV files to a geff store.</p>
 <p>Reads node and edge CSV files into pandas DataFrames and writes them to a
-geff store. The CSVs are expected to have a header row and a pandas-style
-index column (column 0).</p>
+geff store. The CSVs are expected to have a header row.</p>
 <p>The node CSV must contain a column with node IDs (default "id"). All other
 columns are stored as node properties. The edge CSV must contain columns for
 source and target node IDs (default "source" and "target"). All other columns
 are stored as edge properties. Missing values (empty cells / NaN) are recorded
-in the GEFF missing mask.</p>
+in the GEFF missing mask. Columns starting with "Unnamed:" are ignored (e.g.
+pandas index columns written by <code>df.to_csv()</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
