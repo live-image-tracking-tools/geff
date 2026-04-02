@@ -270,14 +270,14 @@ def csv_to_geff(
     """Convert CSV files to a geff store.
 
     Reads node and edge CSV files into pandas DataFrames and writes them to a
-    geff store. The CSVs are expected to have a header row and a pandas-style
-    index column (column 0).
+    geff store. The CSVs are expected to have a header row.
 
     The node CSV must contain a column with node IDs (default "id"). All other
     columns are stored as node properties. The edge CSV must contain columns for
     source and target node IDs (default "source" and "target"). All other columns
     are stored as edge properties. Missing values (empty cells / NaN) are recorded
-    in the GEFF missing mask.
+    in the GEFF missing mask. Columns starting with "Unnamed:" are ignored (e.g.
+    pandas index columns written by ``df.to_csv()``).
 
     Args:
         node_csv: Path to the node CSV file.
@@ -294,8 +294,12 @@ def csv_to_geff(
     Raises:
         ValueError: If required columns are missing from the CSVs.
     """
-    node_df = pd.read_csv(node_csv, index_col=0)
-    edge_df = pd.read_csv(edge_csv, index_col=0)
+    node_df = pd.read_csv(node_csv)
+    edge_df = pd.read_csv(edge_csv)
+
+    # Drop unnamed columns (e.g. pandas index columns written by df.to_csv())
+    node_df = node_df.loc[:, ~node_df.columns.str.startswith("Unnamed:")]
+    edge_df = edge_df.loc[:, ~edge_df.columns.str.startswith("Unnamed:")]
 
     dataframes_to_geff(
         node_df,
