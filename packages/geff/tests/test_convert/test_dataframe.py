@@ -261,6 +261,22 @@ class Test_dataframes_to_geff:
         np.testing.assert_array_equal(result["node_props"]["flag"]["values"], [True, False, False])
         np.testing.assert_array_equal(result["node_props"]["flag"]["missing"], [False, True, False])
 
+    def test_missing_node_id_column(self):
+        """Should raise ValueError when node_df is missing the ID column."""
+        node_df = pd.DataFrame({"x": [1.0, 2.0]})
+        edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
+
+        with pytest.raises(ValueError, match="node_df must contain a 'id' column"):
+            dataframes_to_memory_geff(node_df, edge_df)
+
+    def test_missing_edge_columns(self):
+        """Should raise ValueError when edge_df is missing source/target columns."""
+        node_df = pd.DataFrame({"id": [0, 1]})
+        edge_df = pd.DataFrame({"src": [0], "tgt": [1]})
+
+        with pytest.raises(ValueError, match="edge_df must contain"):
+            dataframes_to_memory_geff(node_df, edge_df)
+
     def test_empty_dataframes(self):
         """Empty DataFrames should produce valid InMemoryGeff with empty arrays."""
         node_df = pd.DataFrame({"id": pd.Series(dtype=int)})

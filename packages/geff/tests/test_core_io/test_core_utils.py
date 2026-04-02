@@ -27,7 +27,7 @@ from geff.testing.data import create_simple_2d_geff
         (True, False),
         (False, False),
         (1, 0),
-        (3.14, 0),
+        (3.14, 0.0),
         ("hello", ""),
         # numpy scalar types (preserves dtype)
         (np.bool_(True), np.bool_(False)),

@@ -27,7 +27,7 @@ def geff_to_dataframes(
     """
     Convert a GEFF store to a pandas DataFrame.
 
-    Properties with more than 2 dimensions cannot be converted and will be skipped
+    Properties with more than 2 dimensions cannot be converted and will be skipped.
     Properties with two dimensions where the second dimension is > 1 will be unpacked
     into separate columns with the name "{prop_name}_{dim_index}"
 
@@ -92,9 +92,10 @@ def geff_to_dataframes(
 def geff_to_csv(store: StoreLike, outpath: Path | str, overwrite: bool = False) -> None:
     """Convert a geff store to two csvs of nodes and edges
 
-    Properties with more than 2 dimensions cannot be exported and will be skipped
+    Properties with more than 2 dimensions cannot be exported and will be skipped.
     Properties with two dimensions where the second dimension is > 1 will be unpacked
-    into separate columns with the name "{prop_name}_{dim_index}"
+    into separate columns with the name "{prop_name}_{dim_index}", and saved in extra
+    metadata.
 
     Args:
         store (StoreLike): Path to store or StoreLike object
@@ -139,9 +140,27 @@ def dataframes_to_memory_geff(
         edge_source_col: Name of the source node column in edge_df. Defaults to "source".
         edge_target_col: Name of the target node column in edge_df. Defaults to "target".
 
+    Raises:
+        ValueError: If node_df is missing the node_id_col column, or edge_df is
+            missing the edge_source_col or edge_target_col columns.
+
     Returns:
         InMemoryGeff: A dict with metadata, node_ids, edge_ids, node_props, and edge_props.
     """
+    # Validate required columns
+    if node_id_col not in node_df.columns:
+        raise ValueError(
+            f"node_df must contain a {node_id_col!r} column. Found columns: {list(node_df.columns)}"
+        )
+    missing_edge_cols = [
+        col for col in (edge_source_col, edge_target_col) if col not in edge_df.columns
+    ]
+    if missing_edge_cols:
+        raise ValueError(
+            f"edge_df must contain {missing_edge_cols} column(s). "
+            f"Found columns: {list(edge_df.columns)}"
+        )
+
     # Extract node IDs
     if len(node_df) > 0:
         node_ids = np.asarray(node_df[node_id_col]).astype(np.uint64)
@@ -250,17 +269,30 @@ def csv_to_geff(
 ) -> None:
     """Convert CSV files to a geff store.
 
-    Reads node and edge CSV files and writes them to a geff store.
+    Reads node and edge CSV files into pandas DataFrames and writes them to a
+    geff store. The CSVs are expected to have a header row and a pandas-style
+    index column (column 0).
+
+    The node CSV must contain a column with node IDs (default "id"). All other
+    columns are stored as node properties. The edge CSV must contain columns for
+    source and target node IDs (default "source" and "target"). All other columns
+    are stored as edge properties. Missing values (empty cells / NaN) are recorded
+    in the GEFF missing mask.
 
     Args:
         node_csv: Path to the node CSV file.
         edge_csv: Path to the edge CSV file.
         store: The zarr store to write to.
         directed: Whether the graph is directed. Defaults to True.
-        node_id_col: Name of the node ID column. Defaults to "id".
-        edge_source_col: Name of the source node column. Defaults to "source".
-        edge_target_col: Name of the target node column. Defaults to "target".
+        node_id_col: Name of the node ID column in the node CSV. Defaults to "id".
+        edge_source_col: Name of the source node column in the edge CSV.
+            Defaults to "source".
+        edge_target_col: Name of the target node column in the edge CSV.
+            Defaults to "target".
         zarr_format: The zarr specification to use when writing. Defaults to 2.
+
+    Raises:
+        ValueError: If required columns are missing from the CSVs.
     """
     node_df = pd.read_csv(node_csv, index_col=0)
     edge_df = pd.read_csv(edge_csv, index_col=0)

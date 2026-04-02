@@ -241,8 +241,8 @@ def _default_for_value(value: Any) -> Any:
     upcasting when the values are later combined into a numpy array.
 
     Uses the following heuristics:
-    - bool or np.bool_ -> False (preserving dtype)
-    - int, float, np.integer, or np.floating -> 0 (preserving dtype)
+    - np.generic (np.bool_, np.int64, np.float32, etc.) -> type(value)(0)
+    - bool, int, float -> type(value)(0) (e.g. False, 0, 0.0)
     - str -> ""
     - Otherwise, returns the value itself, which preserves type and shape but
       may be confusing or inefficient for some types.
@@ -255,10 +255,8 @@ def _default_for_value(value: Any) -> Any:
     """
     if isinstance(value, np.generic):
         return type(value)(0)
-    elif isinstance(value, bool):
-        return False
-    elif isinstance(value, int | float):
-        return 0
+    elif isinstance(value, bool | int | float):
+        return type(value)(0)
     elif isinstance(value, str):
         return ""
     else:
