@@ -368,6 +368,11 @@ class Test_dataframes_to_geff:
             )
             if expected["edge_props"][name]["missing"] is None:
                 assert result["edge_props"][name]["missing"] is None
+            else:
+                np.testing.assert_array_equal(
+                    result["edge_props"][name]["missing"],
+                    expected["edge_props"][name]["missing"],
+                )
 
 
 class Test_csv_to_geff:
@@ -406,6 +411,13 @@ class Test_csv_to_geff:
                 result["edge_props"][name]["values"],
                 expected["edge_props"][name]["values"],
             )
+            if expected["edge_props"][name]["missing"] is None:
+                assert result["edge_props"][name]["missing"] is None
+            else:
+                np.testing.assert_array_equal(
+                    result["edge_props"][name]["missing"],
+                    expected["edge_props"][name]["missing"],
+                )
 
         # Unnamed: column must have been filtered out
         assert all(not k.startswith("Unnamed:") for k in result["node_props"])
