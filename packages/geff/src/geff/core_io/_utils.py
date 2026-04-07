@@ -232,7 +232,7 @@ def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype
     return dtype, ndim
 
 
-def _default_for_value(value: Any) -> Any:
+def default_for_value(value: Any) -> Any:
     """Return a type-appropriate default value for filling missing entries.
 
     Handles both native Python types and numpy scalar types (e.g. np.bool_,
@@ -294,7 +294,7 @@ def construct_props(values: Sequence[Any | None]) -> PropDictNpArray:
                 # find first non-None value to determine default
                 for v in values:
                     if v is not None:
-                        default_val = _default_for_value(v)
+                        default_val = default_for_value(v)
                         break
                 else:
                     warnings.warn(

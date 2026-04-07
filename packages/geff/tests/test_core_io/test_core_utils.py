@@ -9,10 +9,10 @@ import zarr.storage
 from geff import _path
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import (
-    _default_for_value,
     _detect_zarr_spec_version,
     check_for_geff,
     construct_props,
+    default_for_value,
     delete_geff,
     open_storelike,
     setup_zarr_group,
@@ -43,7 +43,7 @@ from geff.testing.data import create_simple_2d_geff
     ],
 )
 def test_default_for_value(value, expected):
-    result = _default_for_value(value)
+    result = default_for_value(value)
     assert result == expected
     assert type(result) is type(expected)
 
