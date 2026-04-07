@@ -1,5 +1,7 @@
 # CONTRIBUTING
 
+`geff` is an open source project and we enthusiastically welcome community contributions. We adhere to the Live Image Tracking Tools [Code of Conduct](https://liveimagetrackingtools.org/pages/code-of-conduct/). Any concerns or issues that cannot be addressed in a Github Issue can be emailed to litt-steering-council@googlegroups.com.
+
 ## Setup
 
 For local development, clone the repo:
