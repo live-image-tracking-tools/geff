@@ -160,11 +160,14 @@ def dataframes_to_memory_geff(
             f"Found columns: {list(edge_df.columns)}"
         )
 
+    # Infer the smallest integer dtype from node IDs (edge IDs are a subset)
+    raw_node_ids = np.asarray(node_df[node_id_col]) if len(node_df) > 0 else np.empty((0,))
+    id_dtype = _infer_int_dtype(raw_node_ids) if len(raw_node_ids) > 0 else np.dtype(np.uint8)
+
     # Extract node IDs
-    if len(node_df) > 0:
-        node_ids = np.asarray(node_df[node_id_col]).astype(np.uint64)
-    else:
-        node_ids = np.empty((0,), dtype=np.uint64)
+    node_ids = raw_node_ids.astype(id_dtype)
+    if len(node_ids) == 0:
+        node_ids = np.empty((0,), dtype=id_dtype)
 
     # Extract edge IDs
     if len(edge_df) > 0:
@@ -173,9 +176,9 @@ def dataframes_to_memory_geff(
                 np.asarray(edge_df[edge_source_col]),
                 np.asarray(edge_df[edge_target_col]),
             ]
-        ).astype(np.uint64)
+        ).astype(id_dtype)
     else:
-        edge_ids = np.empty((0, 2), dtype=np.uint64)
+        edge_ids = np.empty((0, 2), dtype=id_dtype)
 
     # Convert property columns to PropDictNpArray
     node_prop_cols = [c for c in node_df.columns if c != node_id_col]
@@ -204,6 +207,33 @@ def dataframes_to_memory_geff(
         "node_props": node_props,
         "edge_props": edge_props,
     }
+
+
+def _infer_int_dtype(values: np.ndarray) -> np.dtype:
+    """Infer the smallest integer dtype that can represent all values.
+
+    Uses an unsigned type when all values are non-negative, otherwise signed.
+
+    Args:
+        values (np.ndarray): 1-D array of integer values.
+
+    Returns:
+        np.dtype: The smallest numpy integer dtype that fits the data.
+    """
+    min_val = values.min()
+    max_val = values.max()
+
+    if min_val < 0:
+        for signed in (np.int8, np.int16, np.int32, np.int64):
+            info = np.iinfo(signed)
+            if info.min <= min_val and max_val <= info.max:
+                return np.dtype(signed)
+    else:
+        for unsigned in (np.uint8, np.uint16, np.uint32, np.uint64):
+            if max_val <= np.iinfo(unsigned).max:
+                return np.dtype(unsigned)
+
+    raise ValueError(f"ID values (min={min_val}, max={max_val}) exceed supported integer range")
 
 
 def _df_columns_to_props(df: pd.DataFrame, columns: list[str]) -> dict[str, PropDictNpArray]:
@@ -241,9 +271,8 @@ def dataframes_to_geff(
     The node DataFrame must contain a column with node IDs (default "id"). All other
     columns are stored as node properties. The edge DataFrame must contain columns for
     source and target node IDs (default "source" and "target"). All other columns
-    are stored as edge properties. Missing values (NaN) are recorded
-    in the GEFF missing mask. Columns starting with "Unnamed:" are ignored (e.g.
-    pandas index columns written by ``df.to_csv()``).
+    are stored as edge properties. NaN values are considered missing and are recorded
+    in the GEFF missing mask.
 
     Args:
         node_df (pd.DataFrame): DataFrame with node data. Must contain a node ID column
