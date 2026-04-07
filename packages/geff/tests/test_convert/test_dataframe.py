@@ -7,7 +7,6 @@ try:
     from geff.convert._dataframe import (
         _infer_int_dtype,
         csv_to_geff,
-        dataframes_to_geff,
         dataframes_to_memory_geff,
         geff_to_csv,
         geff_to_dataframes,
@@ -241,61 +240,62 @@ class Test_geff_to_csv:
         assert "z" not in df.columns
 
 
+@pytest.fixture()
+def sample_dataframes():
+    """Node and edge DataFrames covering multiple dtypes and missing values."""
+    node_df = pd.DataFrame(
+        {
+            "id": [0, 1, 2, 3, 4, 5],
+            "x": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            "label": ["a", "b", "c", "d", "e", "f"],
+            "flag": pd.array([True, False, pd.NA, True, False, True], dtype=pd.BooleanDtype()),
+            "score": [10.0, np.nan, 30.0, 40.0, 50.0, 60.0],
+        }
+    )
+    edge_df = pd.DataFrame(
+        {
+            "source": [0, 1, 2, 3],
+            "target": [1, 2, 3, 4],
+            "weight": [0.1, 0.2, 0.3, 0.4],
+        }
+    )
+    return node_df, edge_df
+
+
+@pytest.fixture()
+def expected_memory_geff():
+    """Manually constructed expected InMemoryGeff for the sample DataFrames."""
+    return {
+        "node_ids": np.array([0, 1, 2, 3, 4, 5], dtype=np.uint8),
+        "edge_ids": np.array([[0, 1], [1, 2], [2, 3], [3, 4]], dtype=np.uint8),
+        "node_props": {
+            "x": {
+                "values": np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
+                "missing": None,
+            },
+            "label": {
+                "values": np.array(["a", "b", "c", "d", "e", "f"]),
+                "missing": None,
+            },
+            "flag": {
+                "values": np.array([True, False, False, True, False, True]),
+                "missing": np.array([False, False, True, False, False, False]),
+            },
+            "score": {
+                "values": np.array([10.0, 0.0, 30.0, 40.0, 50.0, 60.0]),
+                "missing": np.array([False, True, False, False, False, False]),
+            },
+        },
+        "edge_props": {
+            "weight": {
+                "values": np.array([0.1, 0.2, 0.3, 0.4]),
+                "missing": None,
+            },
+        },
+    }
+
+
 class Test_dataframes_to_geff:
-    def test_round_trip(self):
-        """geff -> dataframes -> geff should preserve data."""
-        store, original = create_simple_3d_geff()
-        node_df, edge_df = geff_to_dataframes(store)
-
-        result = dataframes_to_memory_geff(node_df, edge_df, directed=original["metadata"].directed)
-
-        np.testing.assert_array_equal(result["node_ids"], original["node_ids"])
-        np.testing.assert_array_equal(result["edge_ids"], original["edge_ids"])
-        for name in original["node_props"]:
-            np.testing.assert_array_equal(
-                result["node_props"][name]["values"],
-                original["node_props"][name]["values"],
-            )
-        for name in original["edge_props"]:
-            np.testing.assert_array_equal(
-                result["edge_props"][name]["values"],
-                original["edge_props"][name]["values"],
-            )
-
-    def test_missing_values(self):
-        """NaN values in DataFrame should produce missing masks."""
-        node_df = pd.DataFrame(
-            {
-                "id": [0, 1, 2],
-                "score": [1.0, np.nan, 3.0],
-            }
-        )
-        edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
-
-        result = dataframes_to_memory_geff(node_df, edge_df)
-
-        assert result["node_props"]["score"]["missing"] is not None
-        np.testing.assert_array_equal(
-            result["node_props"]["score"]["missing"], [False, True, False]
-        )
-        np.testing.assert_array_equal(result["node_props"]["score"]["values"], [1.0, 0, 3.0])
-
-    def test_boolean_column_with_missing(self):
-        """Boolean columns with NaN should preserve bool dtype."""
-        node_df = pd.DataFrame(
-            {
-                "id": [0, 1, 2],
-                "flag": pd.array([True, pd.NA, False], dtype=pd.BooleanDtype()),
-            }
-        )
-        edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
-
-        result = dataframes_to_memory_geff(node_df, edge_df)
-
-        assert result["node_props"]["flag"]["values"].dtype == np.bool_
-        np.testing.assert_array_equal(result["node_props"]["flag"]["values"], [True, False, False])
-        np.testing.assert_array_equal(result["node_props"]["flag"]["missing"], [False, True, False])
-
     def test_missing_node_id_column(self):
         """Should raise ValueError when node_df is missing the ID column."""
         node_df = pd.DataFrame({"x": [1.0, 2.0]})
@@ -324,54 +324,89 @@ class Test_dataframes_to_geff:
         assert result["node_props"] == {}
         assert result["edge_props"] == {}
 
-    def test_write_round_trip(self):
-        """dataframes_to_geff -> read_to_memory should preserve data."""
-        node_df = pd.DataFrame(
-            {
-                "id": [0, 1, 2],
-                "x": [1.0, 2.0, 3.0],
-                "y": [4.0, 5.0, 6.0],
-            }
-        )
-        edge_df = pd.DataFrame(
-            {
-                "source": [0, 1],
-                "target": [1, 2],
-                "weight": [0.5, 0.8],
-            }
-        )
+    def test_all_edge_cases(self, sample_dataframes, expected_memory_geff):
+        """Manually constructed input DataFrames produce expected InMemoryGeff."""
+        node_df, edge_df = sample_dataframes
+        result = dataframes_to_memory_geff(node_df, edge_df, directed=True)
+        expected = expected_memory_geff
 
-        store = zarr.storage.MemoryStore()
-        dataframes_to_geff(node_df, edge_df, store)
+        assert result["metadata"].directed is True
 
-        result = read_to_memory(store)
-        np.testing.assert_array_equal(result["node_ids"], [0, 1, 2])
-        np.testing.assert_array_equal(result["edge_ids"], [[0, 1], [1, 2]])
-        np.testing.assert_array_equal(result["node_props"]["x"]["values"], [1.0, 2.0, 3.0])
-        np.testing.assert_array_equal(result["node_props"]["y"]["values"], [4.0, 5.0, 6.0])
-        np.testing.assert_array_equal(result["edge_props"]["weight"]["values"], [0.5, 0.8])
+        np.testing.assert_array_equal(result["node_ids"], expected["node_ids"])
+        assert result["node_ids"].dtype == expected["node_ids"].dtype
+
+        np.testing.assert_array_equal(result["edge_ids"], expected["edge_ids"])
+        assert result["edge_ids"].dtype == expected["edge_ids"].dtype
+
+        assert set(result["node_props"].keys()) == set(expected["node_props"].keys())
+        for name in expected["node_props"]:
+            np.testing.assert_array_equal(
+                result["node_props"][name]["values"],
+                expected["node_props"][name]["values"],
+            )
+            assert (
+                result["node_props"][name]["values"].dtype
+                == expected["node_props"][name]["values"].dtype
+            )
+            if expected["node_props"][name]["missing"] is None:
+                assert result["node_props"][name]["missing"] is None
+            else:
+                np.testing.assert_array_equal(
+                    result["node_props"][name]["missing"],
+                    expected["node_props"][name]["missing"],
+                )
+
+        assert set(result["edge_props"].keys()) == set(expected["edge_props"].keys())
+        for name in expected["edge_props"]:
+            np.testing.assert_array_equal(
+                result["edge_props"][name]["values"],
+                expected["edge_props"][name]["values"],
+            )
+            assert (
+                result["edge_props"][name]["values"].dtype
+                == expected["edge_props"][name]["values"].dtype
+            )
+            if expected["edge_props"][name]["missing"] is None:
+                assert result["edge_props"][name]["missing"] is None
 
 
 class Test_csv_to_geff:
-    def test_round_trip(self, tmp_path):
-        """geff_to_csv -> csv_to_geff should preserve data."""
-        store_in, original = create_simple_3d_geff()
-        out_path = tmp_path / "test"
-        geff_to_csv(store_in, out_path)
+    def test_end_to_end(self, tmp_path, sample_dataframes, expected_memory_geff):
+        """CSV files with an Unnamed: column should produce correct geff on disk."""
+        node_df, edge_df = sample_dataframes
 
-        store_out = zarr.storage.MemoryStore()
-        csv_to_geff(
-            f"{out_path}-nodes.csv",
-            f"{out_path}-edges.csv",
-            store_out,
-            directed=original["metadata"].directed,
-        )
+        # Write CSVs with a pandas-style index column (Unnamed: 0)
+        node_df.to_csv(tmp_path / "nodes.csv")
+        edge_df.to_csv(tmp_path / "edges.csv")
 
-        result = read_to_memory(store_out)
-        np.testing.assert_array_equal(result["node_ids"], original["node_ids"])
-        np.testing.assert_array_equal(result["edge_ids"], original["edge_ids"])
-        for name in original["node_props"]:
-            np.testing.assert_allclose(
+        store_path = str(tmp_path / "output.zarr")
+        csv_to_geff(tmp_path / "nodes.csv", tmp_path / "edges.csv", store_path, directed=True)
+
+        result = read_to_memory(store_path)
+        expected = expected_memory_geff
+
+        np.testing.assert_array_equal(result["node_ids"], expected["node_ids"])
+        np.testing.assert_array_equal(result["edge_ids"], expected["edge_ids"])
+
+        for name in expected["node_props"]:
+            np.testing.assert_array_equal(
                 result["node_props"][name]["values"],
-                original["node_props"][name]["values"],
+                expected["node_props"][name]["values"],
             )
+            if expected["node_props"][name]["missing"] is None:
+                assert result["node_props"][name]["missing"] is None
+            else:
+                np.testing.assert_array_equal(
+                    result["node_props"][name]["missing"],
+                    expected["node_props"][name]["missing"],
+                )
+
+        for name in expected["edge_props"]:
+            np.testing.assert_array_equal(
+                result["edge_props"][name]["values"],
+                expected["edge_props"][name]["values"],
+            )
+
+        # Unnamed: column must have been filtered out
+        assert all(not k.startswith("Unnamed:") for k in result["node_props"])
+        assert all(not k.startswith("Unnamed:") for k in result["edge_props"])
