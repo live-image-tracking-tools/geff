@@ -1739,9 +1739,8 @@ Defaults to 2.</p>
 <p>The node DataFrame must contain a column with node IDs (default "id"). All other
 columns are stored as node properties. The edge DataFrame must contain columns for
 source and target node IDs (default "source" and "target"). All other columns
-are stored as edge properties. Missing values (NaN) are recorded
-in the GEFF missing mask. Columns starting with "Unnamed:" are ignored (e.g.
-pandas index columns written by <code>df.to_csv()</code>).</p>
+are stored as edge properties. NaN values are considered missing and are recorded
+in the GEFF missing mask.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
