@@ -94,8 +94,7 @@ def geff_to_csv(store: StoreLike, outpath: Path | str, overwrite: bool = False) 
 
     Properties with more than 2 dimensions cannot be exported and will be skipped.
     Properties with two dimensions where the second dimension is > 1 will be unpacked
-    into separate columns with the name "{prop_name}_{dim_index}", and saved in extra
-    metadata.
+    into separate columns with the name "{prop_name}_{dim_index}"
 
     Args:
         store (StoreLike): Path to store or StoreLike object
@@ -126,19 +125,19 @@ def dataframes_to_memory_geff(
 ) -> InMemoryGeff:
     """Convert pandas DataFrames to an InMemoryGeff representation.
 
-    This is the inverse of geff_to_dataframes. Takes a node DataFrame and an edge
-    DataFrame and converts them into the InMemoryGeff dict format. Missing values
-    (NaN/None) are handled via boolean missing masks with correct dtypes preserved.
+    Takes a node DataFrame and an edge DataFrame and converts them into the InMemoryGeff
+    dict format. Missing values (NaN/None) are handled via boolean missing masks with
+    correct dtypes preserved.
 
     Args:
-        node_df: DataFrame with node data. Must contain a node ID column and any
-            number of property columns.
-        edge_df: DataFrame with edge data. Must contain source and target ID columns
+        node_df (pd.DataFrame): DataFrame with node data. Must contain a node ID column
             and any number of property columns.
-        directed: Whether the graph is directed. Defaults to True.
-        node_id_col: Name of the node ID column in node_df. Defaults to "id".
-        edge_source_col: Name of the source node column in edge_df. Defaults to "source".
-        edge_target_col: Name of the target node column in edge_df. Defaults to "target".
+        edge_df (pd.DataFrame): DataFrame with edge data. Must contain source and target
+            ID columns and any number of property columns.
+        directed (bool): Whether the graph is directed. Defaults to True.
+        node_id_col (str): Name of the node ID column in node_df. Defaults to "id".
+        edge_source_col (str): Name of the source node column in edge_df. Defaults to "source".
+        edge_target_col (str): Name of the target node column in edge_df. Defaults to "target".
 
     Raises:
         ValueError: If node_df is missing the node_id_col column, or edge_df is
@@ -212,6 +211,13 @@ def _df_columns_to_props(df: pd.DataFrame, columns: list[str]) -> dict[str, Prop
 
     Replaces NaN/None with None before passing to construct_props, which handles
     default value filling and missing mask creation.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing the columns to convert.
+        columns (list[str]): List of column names to convert.
+
+    Returns:
+        dict[str, PropDictNpArray]: A mapping of column names to PropDictNpArray dicts.
     """
     props: dict[str, PropDictNpArray] = {}
     for col in columns:
@@ -230,21 +236,26 @@ def dataframes_to_geff(
     edge_target_col: str = "target",
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
-    """Convert pandas DataFrames and write directly to a geff store.
+    """Convert node and edge pandas DataFrames to a geff store.
 
-    Combines dataframes_to_geff with write_arrays for convenience.
+    The node DataFrame must contain a column with node IDs (default "id"). All other
+    columns are stored as node properties. The edge DataFrame must contain columns for
+    source and target node IDs (default "source" and "target"). All other columns
+    are stored as edge properties. Missing values (NaN) are recorded
+    in the GEFF missing mask. Columns starting with "Unnamed:" are ignored (e.g.
+    pandas index columns written by ``df.to_csv()``).
 
     Args:
-        node_df: DataFrame with node data. Must contain a node ID column and any
-            number of property columns.
-        edge_df: DataFrame with edge data. Must contain source and target ID columns
+        node_df (pd.DataFrame): DataFrame with node data. Must contain a node ID column
             and any number of property columns.
-        store: The zarr store to write to.
-        directed: Whether the graph is directed. Defaults to True.
-        node_id_col: Name of the node ID column in node_df. Defaults to "id".
-        edge_source_col: Name of the source node column in edge_df. Defaults to "source".
-        edge_target_col: Name of the target node column in edge_df. Defaults to "target".
-        zarr_format: The zarr specification to use when writing. Defaults to 2.
+        edge_df (pd.DataFrame): DataFrame with edge data. Must contain source and target
+            ID columns and any number of property columns.
+        store (StoreLike): The zarr store to write to.
+        directed (bool): Whether the graph is directed. Defaults to True.
+        node_id_col (str): Name of the node ID column in node_df. Defaults to "id".
+        edge_source_col (str): Name of the source node column in edge_df. Defaults to "source".
+        edge_target_col (str): Name of the target node column in edge_df. Defaults to "target".
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing. Defaults to 2.
     """
     in_memory_geff = dataframes_to_memory_geff(
         node_df,
@@ -267,11 +278,9 @@ def csv_to_geff(
     edge_target_col: str = "target",
     zarr_format: Literal[2, 3] = 2,
 ) -> None:
-    """Convert CSV files to a geff store.
+    """Convert node and edge CSV files to a geff store.
 
-    Reads node and edge CSV files into pandas DataFrames and writes them to a
-    geff store. The CSVs are expected to have a header row.
-
+    The CSVs are expected to have a header row.
     The node CSV must contain a column with node IDs (default "id"). All other
     columns are stored as node properties. The edge CSV must contain columns for
     source and target node IDs (default "source" and "target"). All other columns
@@ -280,16 +289,16 @@ def csv_to_geff(
     pandas index columns written by ``df.to_csv()``).
 
     Args:
-        node_csv: Path to the node CSV file.
-        edge_csv: Path to the edge CSV file.
-        store: The zarr store to write to.
-        directed: Whether the graph is directed. Defaults to True.
-        node_id_col: Name of the node ID column in the node CSV. Defaults to "id".
-        edge_source_col: Name of the source node column in the edge CSV.
+        node_csv (Path | str): Path to the node CSV file.
+        edge_csv (Path | str): Path to the edge CSV file.
+        store (StoreLike): The zarr store to write to.
+        directed (bool): Whether the graph is directed. Defaults to True.
+        node_id_col (str): Name of the node ID column in the node CSV. Defaults to "id".
+        edge_source_col (str): Name of the source node column in the edge CSV.
             Defaults to "source".
-        edge_target_col: Name of the target node column in the edge CSV.
+        edge_target_col (str): Name of the target node column in the edge CSV.
             Defaults to "target".
-        zarr_format: The zarr specification to use when writing. Defaults to 2.
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing. Defaults to 2.
 
     Raises:
         ValueError: If required columns are missing from the CSVs.
