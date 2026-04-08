@@ -113,7 +113,7 @@ plugins = ["pydantic.mypy"]
 init_forbid_extra = true
 
 [tool.pyright]
-include = ["src"]
+include = ["packages/geff/src", "packages/geff-spec/src"]
 venv = ".venv"
 
 # https://coverage.readthedocs.io/en/6.4/config.html
