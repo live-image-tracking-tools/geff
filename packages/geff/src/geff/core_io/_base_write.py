@@ -307,6 +307,73 @@ def write_arrays(
             raise ValueError(e.args[0] + message) from e
 
 
+_TARGET_CHUNK_BYTES = 1 << 23  # 8 MiB — power-of-two, close to 10 MB
+
+
+def _compute_first_dim_chunk(shape: tuple[int, ...], itemsize: int) -> int:
+    """Return a power-of-two first-dimension chunk size targeting ~8 MiB per chunk.
+
+    Trailing dimensions are kept whole so only the first dimension is chunked.
+    """
+    row_bytes = int(np.prod(shape[1:])) * itemsize if len(shape) > 1 else itemsize
+    n_rows = _TARGET_CHUNK_BYTES // max(row_bytes, 1)
+    # Round down to nearest power of two
+    if n_rows >= 1:
+        n_rows = 1 << (n_rows.bit_length() - 1)
+    return max(1, min(shape[0], n_rows))
+
+
+def _write_zarr_array(
+    group: Any,
+    path: str,
+    data: np.ndarray,
+) -> None:
+    """Write a numpy array to a zarr group with sensible chunking.
+
+    Chunks only along the first dimension (trailing dimensions are kept whole)
+    with a power-of-two first-dimension size targeting ~8 MiB per chunk.
+
+    On zarr v3 sharding is used so every array becomes a single file: the shard
+    (outer chunk) spans the entire first dimension while inner sub-chunks are
+    ~8 MiB each.
+
+    Args:
+        group: The zarr group to write into.
+        path: The path within the group.
+        data: The numpy array to write.
+    """
+    import zarr as _zarr
+
+    if data.shape[0] == 0:
+        group[path] = data
+        return
+
+    first_dim = _compute_first_dim_chunk(data.shape, data.dtype.itemsize)
+    chunks = (first_dim, *data.shape[1:])
+
+    use_sharding = (
+        not _zarr.__version__.startswith("2")
+        and hasattr(group, "metadata")
+        and getattr(group.metadata, "zarr_format", 2) == 3
+    )
+
+    if use_sharding:
+        # Shard spans entire array → one file per array.
+        # Must be a multiple of the inner chunk size.
+        shard_first = ((data.shape[0] + first_dim - 1) // first_dim) * first_dim
+        shards = (shard_first, *data.shape[1:])
+        arr = group.create_array(
+            path, shape=data.shape, dtype=data.dtype, chunks=chunks, shards=shards
+        )
+        arr[:] = data
+    elif _zarr.__version__.startswith("2"):
+        group.create_dataset(path, data=data, chunks=chunks)
+    else:
+        # zarr v3 library with zarr_format=2 — no sharding
+        arr = group.create_array(path, shape=data.shape, dtype=data.dtype, chunks=chunks)
+        arr[:] = data
+
+
 def write_id_arrays(
     geff_store: StoreLike,
     node_ids: np.ndarray,
@@ -337,8 +404,8 @@ def write_id_arrays(
         )
 
     geff_root = setup_zarr_group(geff_store, zarr_format)
-    geff_root[_path.NODE_IDS] = node_ids
-    geff_root[_path.EDGE_IDS] = edge_ids
+    _write_zarr_array(geff_root, _path.NODE_IDS, node_ids)
+    _write_zarr_array(geff_root, _path.EDGE_IDS, edge_ids)
 
 
 def write_props_arrays(
@@ -412,10 +479,10 @@ def write_props_arrays(
             data = None
 
         prop_group = props_group.create_group(prop)
-        prop_group[_path.VALUES] = values
+        _write_zarr_array(prop_group, _path.VALUES, values)
         if missing is not None:
-            prop_group[_path.MISSING] = missing
+            _write_zarr_array(prop_group, _path.MISSING, missing)
         if data is not None:
-            prop_group[_path.DATA] = data
+            _write_zarr_array(prop_group, _path.DATA, data)
 
     return metadata
