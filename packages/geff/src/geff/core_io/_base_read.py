@@ -187,7 +187,7 @@ class GeffReader:
         indices = np.where(mask)[0] if mask is not None else None
 
         dtype = np.dtype(prop_metadata.dtype)
-        values_dtype = np.uint64 if prop_metadata.varlength else dtype
+        values_dtype = np.dtype(np.uint64) if prop_metadata.varlength else dtype
         values = self._load_zarr_subset(zarr_prop[_path.VALUES], indices, dtype=values_dtype)
 
         if _path.MISSING in zarr_prop:

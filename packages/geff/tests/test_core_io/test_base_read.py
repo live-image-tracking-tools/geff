@@ -226,6 +226,38 @@ def test_read_edge_props() -> None:
     _ = NxBackend.construct(**in_memory_geff)
 
 
+def test_build_w_masked_nodes_varlength() -> None:
+    """Regression test: varlength props must survive node masking.
+
+    The varlength DATA array is a flat concatenation of all elements and cannot
+    be indexed by a per-node boolean mask.  _load_prop_to_memory must load DATA
+    in full and rely on the per-node offsets stored in VALUES for deserialization.
+    """
+    store, memory_geff = create_mock_geff(
+        node_id_dtype="uint8",
+        node_axis_dtypes={"position": "double", "time": "uint8"},
+        extra_edge_props={"score": "float64"},
+        directed=True,
+        include_varlength=True,
+    )
+
+    reader = GeffReader(store)
+    reader.read_node_props(["var_length"])
+
+    n_nodes = reader.nodes.shape[0]
+    node_mask = np.zeros(n_nodes, dtype=bool)
+    node_mask[: n_nodes // 2] = True
+
+    in_memory_geff = reader.build(node_mask=node_mask)
+
+    expected = memory_geff["node_props"]["var_length"]["values"][node_mask]
+    actual = in_memory_geff["node_props"]["var_length"]["values"]
+
+    assert len(actual) == len(expected)
+    for exp, act in zip(expected, actual, strict=True):
+        np.testing.assert_array_equal(exp, act)
+
+
 def test_read_to_memory():
     # Mostly testing that conditionals run correctly since functionality is tested elsewhere
     store, _attrs = create_simple_2d_geff()

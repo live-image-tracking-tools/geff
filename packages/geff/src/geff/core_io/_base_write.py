@@ -315,12 +315,13 @@ def _compute_first_dim_chunk(shape: tuple[int, ...], itemsize: int) -> int:
 
     Trailing dimensions are kept whole so only the first dimension is chunked.
     """
+    first_dim = shape[0] if len(shape) > 0 else 1
     row_bytes = int(np.prod(shape[1:])) * itemsize if len(shape) > 1 else itemsize
     n_rows = _TARGET_CHUNK_BYTES // max(row_bytes, 1)
     # Round down to nearest power of two
     if n_rows >= 1:
         n_rows = 1 << (n_rows.bit_length() - 1)
-    return max(1, min(shape[0], n_rows))
+    return max(1, min(first_dim, n_rows))
 
 
 def _write_zarr_array(
