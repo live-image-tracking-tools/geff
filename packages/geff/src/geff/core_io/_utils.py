@@ -253,9 +253,7 @@ def default_for_value(value: Any) -> Any:
     Returns:
         A default value with the same type (and shape, for the fallback case).
     """
-    if isinstance(value, np.generic):
-        return type(value)(0)
-    elif isinstance(value, bool | int | float):
+    if isinstance(value, np.generic | bool | int | float):
         return type(value)(0)
     elif isinstance(value, str):
         return ""
