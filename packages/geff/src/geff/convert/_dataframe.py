@@ -161,12 +161,13 @@ def _dataframes_to_memory_geff(
         )
 
     # Infer the smallest integer dtype from node IDs (edge IDs are a subset)
-    raw_node_ids = np.asarray(node_df[node_id_col]) if len(node_df) > 0 else np.empty((0,))
-    id_dtype = _infer_int_dtype(raw_node_ids) if len(raw_node_ids) > 0 else np.dtype(np.uint8)
-
-    # Extract node IDs
-    node_ids = raw_node_ids.astype(id_dtype)
-    if len(node_ids) == 0:
+    if len(node_df) > 0:
+        raw_node_ids = np.asarray(node_df[node_id_col])
+        id_dtype = _infer_int_dtype(raw_node_ids)
+        node_ids = raw_node_ids.astype(id_dtype)
+    # Default to uint8 if no nodes 
+    else:
+        id_dtype = np.uint8
         node_ids = np.empty((0,), dtype=id_dtype)
 
     # Extract edge IDs
