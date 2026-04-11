@@ -96,6 +96,7 @@ filterwarnings = [
     # "ignore:Some message:SomeCategory",
     "ignore:.*skipping conversion test:ImportWarning:networkx",
     "ignore:In the future `np.bool` will be defined as the corresponding NumPy scalar.",
+    "ignore:Pyarrow will become a required dependency:DeprecationWarning",
 ]
 
 
