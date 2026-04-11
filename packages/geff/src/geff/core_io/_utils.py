@@ -261,6 +261,33 @@ def default_for_value(value: Any) -> Any:
         return value
 
 
+def _infer_int_dtype(values: np.ndarray) -> np.dtype:
+    """Infer the smallest integer dtype that can represent all values.
+
+    Uses an unsigned type when all values are non-negative, otherwise signed.
+
+    Args:
+        values (np.ndarray): 1-D array of integer values.
+
+    Returns:
+        np.dtype: The smallest numpy integer dtype that fits the data.
+    """
+    min_val = values.min()
+    max_val = values.max()
+
+    if min_val < 0:
+        for signed in (np.int8, np.int16, np.int32, np.int64):
+            info = np.iinfo(signed)
+            if info.min <= min_val and max_val <= info.max:
+                return np.dtype(signed)
+    else:
+        for unsigned in (np.uint8, np.uint16, np.uint32, np.uint64):
+            if max_val <= np.iinfo(unsigned).max:
+                return np.dtype(unsigned)
+
+    raise ValueError(f"ID values (min={min_val}, max={max_val}) exceed supported integer range")
+
+
 def construct_props(values: Sequence[Any | None]) -> PropDictNpArray:
     """Convert a sequence of values with possible None entries into a PropDictNpArray.
 
@@ -268,6 +295,8 @@ def construct_props(values: Sequence[Any | None]) -> PropDictNpArray:
     are replaced with a type-appropriate default value (False for bool, 0 for int/float,
     "" for str) determined from the first non-None entry. The missing mask indicates
     which positions were None.
+
+    For integer dtypes, the smallest bit width is chosen that can represent the values.
 
     Non-None values are expected to have a consistent type and shape so they can
     form a regular numpy array. For variable-length or variable-shape values, use
@@ -306,8 +335,12 @@ def construct_props(values: Sequence[Any | None]) -> PropDictNpArray:
         else:
             filled_values.append(value)
 
+    values_arr = np.asarray(filled_values)
+    if np.issubdtype(values_arr.dtype, np.integer):
+        values_arr = values_arr.astype(_infer_int_dtype(values_arr))
+
     return {
-        "values": np.asarray(filled_values),
+        "values": values_arr,
         "missing": missing if missing_any else None,
     }
 

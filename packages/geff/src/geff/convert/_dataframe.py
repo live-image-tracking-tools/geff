@@ -13,7 +13,7 @@ from zarr.storage import StoreLike
 from geff._typing import InMemoryGeff, PropDictNpArray
 from geff.core_io._base_read import read_to_memory
 from geff.core_io._base_write import write_arrays
-from geff.core_io._utils import construct_props
+from geff.core_io._utils import _infer_int_dtype, construct_props
 from geff_spec.utils import (
     add_or_update_props_metadata,
     create_or_update_metadata,
@@ -165,9 +165,9 @@ def _dataframes_to_memory_geff(
         raw_node_ids = np.asarray(node_df[node_id_col])
         id_dtype = _infer_int_dtype(raw_node_ids)
         node_ids = raw_node_ids.astype(id_dtype)
-    # Default to uint8 if no nodes 
+    # Default to uint8 if no nodes
     else:
-        id_dtype = np.uint8
+        id_dtype = np.dtype(np.uint8)
         node_ids = np.empty((0,), dtype=id_dtype)
 
     # Extract edge IDs
@@ -208,33 +208,6 @@ def _dataframes_to_memory_geff(
         "node_props": node_props,
         "edge_props": edge_props,
     }
-
-
-def _infer_int_dtype(values: np.ndarray) -> np.dtype:
-    """Infer the smallest integer dtype that can represent all values.
-
-    Uses an unsigned type when all values are non-negative, otherwise signed.
-
-    Args:
-        values (np.ndarray): 1-D array of integer values.
-
-    Returns:
-        np.dtype: The smallest numpy integer dtype that fits the data.
-    """
-    min_val = values.min()
-    max_val = values.max()
-
-    if min_val < 0:
-        for signed in (np.int8, np.int16, np.int32, np.int64):
-            info = np.iinfo(signed)
-            if info.min <= min_val and max_val <= info.max:
-                return np.dtype(signed)
-    else:
-        for unsigned in (np.uint8, np.uint16, np.uint32, np.uint64):
-            if max_val <= np.iinfo(unsigned).max:
-                return np.dtype(unsigned)
-
-    raise ValueError(f"ID values (min={min_val}, max={max_val}) exceed supported integer range")
 
 
 def _df_columns_to_props(df: pd.DataFrame, columns: list[str]) -> dict[str, PropDictNpArray]:

@@ -10,6 +10,7 @@ from geff import _path
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import (
     _detect_zarr_spec_version,
+    _infer_int_dtype,
     check_for_geff,
     construct_props,
     default_for_value,
@@ -132,16 +133,50 @@ class TestZarrV2Warnings:
             setup_zarr_group(tmp_path / "test.zarr", zarr_format=3)
 
 
+class Test_infer_int_dtype:
+    def test_small_unsigned(self):
+        values = np.array([0, 1, 255])
+        assert _infer_int_dtype(values) == np.dtype(np.uint8)
+
+    def test_uint16(self):
+        values = np.array([0, 256])
+        assert _infer_int_dtype(values) == np.dtype(np.uint16)
+
+    def test_uint32(self):
+        values = np.array([0, 2**16])
+        assert _infer_int_dtype(values) == np.dtype(np.uint32)
+
+    def test_uint64(self):
+        values = np.array([0, 2**32])
+        assert _infer_int_dtype(values) == np.dtype(np.uint64)
+
+    def test_negative_int8(self):
+        values = np.array([-1, 0, 127])
+        assert _infer_int_dtype(values) == np.dtype(np.int8)
+
+    def test_negative_int16(self):
+        values = np.array([-129, 0])
+        assert _infer_int_dtype(values) == np.dtype(np.int16)
+
+    def test_negative_int32(self):
+        values = np.array([-(2**15) - 1, 0])
+        assert _infer_int_dtype(values) == np.dtype(np.int32)
+
+    def test_negative_int64(self):
+        values = np.array([-(2**31) - 1, 0])
+        assert _infer_int_dtype(values) == np.dtype(np.int64)
+
+
 class Test_construct_props:
     @pytest.mark.parametrize(
         ("values", "expected_values", "expected_missing", "expected_dtype"),
         [
             # Python native types
             ([True, None, False], [True, False, False], [False, True, False], np.bool_),
-            ([1, None, 3], [1, 0, 3], [False, True, False], np.int64),
+            ([1, None, 3], [1, 0, 3], [False, True, False], np.uint8),
             ([1.5, None, 3.5], [1.5, 0, 3.5], [False, True, False], np.float64),
             (["a", None, "c"], ["a", "", "c"], [False, True, False], np.dtype("<U1")),
-            ([1, 2, 3], [1, 2, 3], None, np.int64),
+            ([1, 2, 3], [1, 2, 3], None, np.uint8),
             ([True, False, True], [True, False, True], None, np.bool_),
             # numpy scalar types (e.g. from pandas iteration)
             (
@@ -150,7 +185,7 @@ class Test_construct_props:
                 [False, True, False],
                 np.bool_,
             ),
-            ([np.int64(1), None, np.int64(3)], [1, 0, 3], [False, True, False], np.int64),
+            ([np.int64(1), None, np.int64(3)], [1, 0, 3], [False, True, False], np.uint8),
             (
                 [np.float32(1.5), None, np.float32(3.5)],
                 [1.5, 0, 3.5],

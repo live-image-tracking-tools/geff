@@ -5,9 +5,8 @@ try:
     import pandas as pd
 
     from geff.convert._dataframe import (
-        _infer_int_dtype,
+        _dataframes_to_memory_geff,
         csv_to_geff,
-        dataframes_to_memory_geff,
         geff_to_csv,
         geff_to_dataframes,
     )
@@ -22,40 +21,6 @@ import pytest
 from geff import _path
 from geff.core_io._base_read import read_to_memory
 from geff.testing.data import create_mock_geff, create_simple_2d_geff, create_simple_3d_geff
-
-
-class Test_infer_int_dtype:
-    def test_small_unsigned(self):
-        values = np.array([0, 1, 255])
-        assert _infer_int_dtype(values) == np.dtype(np.uint8)
-
-    def test_uint16(self):
-        values = np.array([0, 256])
-        assert _infer_int_dtype(values) == np.dtype(np.uint16)
-
-    def test_uint32(self):
-        values = np.array([0, 2**16])
-        assert _infer_int_dtype(values) == np.dtype(np.uint32)
-
-    def test_uint64(self):
-        values = np.array([0, 2**32])
-        assert _infer_int_dtype(values) == np.dtype(np.uint64)
-
-    def test_negative_int8(self):
-        values = np.array([-1, 0, 127])
-        assert _infer_int_dtype(values) == np.dtype(np.int8)
-
-    def test_negative_int16(self):
-        values = np.array([-129, 0])
-        assert _infer_int_dtype(values) == np.dtype(np.int16)
-
-    def test_negative_int32(self):
-        values = np.array([-(2**15) - 1, 0])
-        assert _infer_int_dtype(values) == np.dtype(np.int32)
-
-    def test_negative_int64(self):
-        values = np.array([-(2**31) - 1, 0])
-        assert _infer_int_dtype(values) == np.dtype(np.int64)
 
 
 class Test_geff_to_dataframes:
@@ -302,7 +267,7 @@ class Test_dataframes_to_geff:
         edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
 
         with pytest.raises(ValueError, match="node_df must contain a 'id' column"):
-            dataframes_to_memory_geff(node_df, edge_df)
+            _dataframes_to_memory_geff(node_df, edge_df)
 
     def test_missing_edge_columns(self):
         """Should raise ValueError when edge_df is missing source/target columns."""
@@ -310,14 +275,14 @@ class Test_dataframes_to_geff:
         edge_df = pd.DataFrame({"src": [0], "tgt": [1]})
 
         with pytest.raises(ValueError, match="edge_df must contain"):
-            dataframes_to_memory_geff(node_df, edge_df)
+            _dataframes_to_memory_geff(node_df, edge_df)
 
     def test_empty_dataframes(self):
         """Empty DataFrames should produce valid InMemoryGeff with empty arrays."""
         node_df = pd.DataFrame({"id": pd.Series(dtype=int)})
         edge_df = pd.DataFrame({"source": pd.Series(dtype=int), "target": pd.Series(dtype=int)})
 
-        result = dataframes_to_memory_geff(node_df, edge_df)
+        result = _dataframes_to_memory_geff(node_df, edge_df)
 
         assert result["node_ids"].shape == (0,)
         assert result["edge_ids"].shape == (0, 2)
@@ -327,7 +292,7 @@ class Test_dataframes_to_geff:
     def test_all_edge_cases(self, sample_dataframes, expected_memory_geff):
         """Manually constructed input DataFrames produce expected InMemoryGeff."""
         node_df, edge_df = sample_dataframes
-        result = dataframes_to_memory_geff(node_df, edge_df, directed=True)
+        result = _dataframes_to_memory_geff(node_df, edge_df, directed=True)
         expected = expected_memory_geff
 
         assert result["metadata"].directed is True
