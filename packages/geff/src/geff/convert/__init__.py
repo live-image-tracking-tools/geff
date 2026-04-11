@@ -5,18 +5,18 @@ from geff.convert._trackmate_xml import from_trackmate_xml_to_geff
 if TYPE_CHECKING:
     from ._ctc import ctc_tiffs_to_zarr, from_ctc_to_geff
     from ._dataframe import (
+        _dataframes_to_memory_geff,
         csv_to_geff,
         dataframes_to_geff,
-        dataframes_to_memory_geff,
         geff_to_csv,
         geff_to_dataframes,
     )
 
 __all__ = [
+    "_dataframes_to_memory_geff",
     "csv_to_geff",
     "ctc_tiffs_to_zarr",
     "dataframes_to_geff",
-    "dataframes_to_memory_geff",
     "from_ctc_to_geff",
     "from_trackmate_xml_to_geff",
     "geff_to_csv",
@@ -46,9 +46,9 @@ def __getattr__(name: str) -> Any:
 
         return dataframes_to_geff
     if name == "dataframes_to_memory_geff":
-        from geff.convert._dataframe import dataframes_to_memory_geff
+        from geff.convert._dataframe import _dataframes_to_memory_geff
 
-        return dataframes_to_memory_geff
+        return _dataframes_to_memory_geff
     if name == "geff_to_dataframes":
         from geff.convert._dataframe import geff_to_dataframes
 

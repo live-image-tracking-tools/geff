@@ -115,7 +115,7 @@ def geff_to_csv(store: StoreLike, outpath: Path | str, overwrite: bool = False) 
     edge_df.to_csv(edge_path, mode=mode)
 
 
-def dataframes_to_memory_geff(
+def _dataframes_to_memory_geff(
     node_df: pd.DataFrame,
     edge_df: pd.DataFrame,
     directed: bool = True,
@@ -286,7 +286,7 @@ def dataframes_to_geff(
         edge_target_col (str): Name of the target node column in edge_df. Defaults to "target".
         zarr_format (Literal[2, 3]): The zarr specification to use when writing. Defaults to 2.
     """
-    in_memory_geff = dataframes_to_memory_geff(
+    in_memory_geff = _dataframes_to_memory_geff(
         node_df,
         edge_df,
         directed=directed,
