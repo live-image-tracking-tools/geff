@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from geff._typing import InMemoryGeff
-    from geff.metadata._schema import GeffMetadata
+    from geff_spec import GeffMetadata
 
 
 def has_valid_seg_id(memory_geff: InMemoryGeff, seg_id: str = "seg_id") -> tuple[bool, list[str]]:
