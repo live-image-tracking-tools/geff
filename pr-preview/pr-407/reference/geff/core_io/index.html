@@ -1475,6 +1475,7 @@
 are replaced with a type-appropriate default value (False for bool, 0 for int/float,
 "" for str) determined from the first non-None entry. The missing mask indicates
 which positions were None.</p>
+<p>For integer dtypes, the smallest bit width is chosen that can represent the values.</p>
 <p>Non-None values are expected to have a consistent type and shape so they can
 form a regular numpy array. For variable-length or variable-shape values, use
 construct_var_len_props instead.</p>
