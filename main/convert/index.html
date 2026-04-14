@@ -501,6 +501,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dataframes-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataFrames / CSV
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#acetree" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1212,6 +1223,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dataframes-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DataFrames / CSV
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#acetree" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1259,8 +1281,12 @@ The output GEFF is missing:</p>
 </div>
 <p>To convert a Trackmat XML file to GEFF using the <code>geff</code> cli, see the docs for <a class="autorefs autorefs-internal" href="../command-line-tools/#convert-trackmate-xml"><code>geff convert-trackmate-xml</code></a>.</p>
 <p>To use the <code>geff</code> python API, see the docs for <a class="autorefs autorefs-internal" title="            from_trackmate_xml_to_geff" href="../reference/geff/convert/#geff.convert.from_trackmate_xml_to_geff"><code>from_trackmate_xml_to_geff</code></a>.</p>
+<h2 id="dataframes-csv">DataFrames / CSV</h2>
+<p>To convert pandas DataFrames to a GEFF store, use <a class="autorefs autorefs-internal" title="            dataframes_to_geff" href="../reference/geff/convert/#geff.convert.dataframes_to_geff"><code>dataframes_to_geff</code></a>. The node DataFrame must have an ID column (default <code>"id"</code>) and the edge DataFrame must have source and target columns (default <code>"source"</code> and <code>"target"</code>). All other columns become node or edge properties.</p>
+<p>To convert CSV files directly, use <a class="autorefs autorefs-internal" title="            csv_to_geff" href="../reference/geff/convert/#geff.convert.csv_to_geff"><code>csv_to_geff</code></a>. The CSVs are expected to have a header row and a pandas-style index column.</p>
+<p>To convert in the other direction, use <a class="autorefs autorefs-internal" title="            geff_to_dataframes" href="../reference/geff/convert/#geff.convert.geff_to_dataframes"><code>geff_to_dataframes</code></a> or <a class="autorefs autorefs-internal" title="            geff_to_csv" href="../reference/geff/convert/#geff.convert.geff_to_csv"><code>geff_to_csv</code></a>.</p>
 <h2 id="acetree">AceTree</h2>
-<p>An example of how to convert AceTree data to a GEFF is available <a href="https://github.com/zhirongbaolab/AceTreePythonReader/blob/main/testAceTreeReaderGeffWrite.py">here</a>. </p>
+<p>An example of how to convert AceTree data to a GEFF is available <a href="https://github.com/zhirongbaolab/AceTreePythonReader/blob/main/testAceTreeReaderGeffWrite.py">here</a>.</p>
 
 
 

@@ -672,6 +672,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#geff.core_io.construct_props" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;construct_props
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#geff.core_io.construct_var_len_props" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1238,6 +1249,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#geff.core_io.construct_props" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;construct_props
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#geff.core_io.construct_var_len_props" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1422,6 +1444,92 @@
             <td>
               <div class="doc-md-description">
                 <p>True if a geff already exists</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="geff.core_io.construct_props" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">construct_props</span>
+
+
+</h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">construct_props</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropDictNpArray</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Convert a sequence of values with possible None entries into a PropDictNpArray.</p>
+<p>Builds a values array and a missing mask from the input sequence. None entries
+are replaced with a type-appropriate default value (False for bool, 0 for int/float,
+"" for str) determined from the first non-None entry. The missing mask indicates
+which positions were None.</p>
+<p>For integer dtypes, the smallest bit width is chosen that can represent the values.</p>
+<p>Non-None values are expected to have a consistent type and shape so they can
+form a regular numpy array. For variable-length or variable-shape values, use
+construct_var_len_props instead.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>values</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Sequence" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence">Sequence</a>[<a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a> | None]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A sequence of values with one entry per node or edge.
+Missing values are indicated by None entries.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>PropDictNpArray</code></td>            <td>
+                  <code><span title="geff._typing.PropDictNpArray">PropDictNpArray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dict with "values" as a numpy array of the appropriate dtype
+and "missing" as a boolean numpy array (or None if no values were missing).</p>
               </div>
             </td>
           </tr>
