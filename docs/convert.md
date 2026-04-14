@@ -21,6 +21,14 @@ To convert a Trackmat XML file to GEFF using the `geff` cli, see the docs for [`
 
 To use the `geff` python API, see the docs for [`from_trackmate_xml_to_geff`][geff.convert.from_trackmate_xml_to_geff].
 
+## DataFrames / CSV
+
+To convert pandas DataFrames to a GEFF store, use [`dataframes_to_geff`][geff.convert.dataframes_to_geff]. The node DataFrame must have an ID column (default `"id"`) and the edge DataFrame must have source and target columns (default `"source"` and `"target"`). All other columns become node or edge properties.
+
+To convert CSV files directly, use [`csv_to_geff`][geff.convert.csv_to_geff]. The CSVs are expected to have a header row and a pandas-style index column.
+
+To convert in the other direction, use [`geff_to_dataframes`][geff.convert.geff_to_dataframes] or [`geff_to_csv`][geff.convert.geff_to_csv].
+
 ## AceTree
 
-An example of how to convert AceTree data to a GEFF is available [here](https://github.com/zhirongbaolab/AceTreePythonReader/blob/main/testAceTreeReaderGeffWrite.py). 
+An example of how to convert AceTree data to a GEFF is available [here](https://github.com/zhirongbaolab/AceTreePythonReader/blob/main/testAceTreeReaderGeffWrite.py).

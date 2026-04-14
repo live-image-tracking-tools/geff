@@ -10,12 +10,43 @@ from geff import _path
 from geff.core_io._base_write import write_arrays
 from geff.core_io._utils import (
     _detect_zarr_spec_version,
+    _infer_int_dtype,
     check_for_geff,
+    construct_props,
+    default_for_value,
     delete_geff,
     open_storelike,
     setup_zarr_group,
 )
 from geff.testing.data import create_simple_2d_geff
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # Python native types
+        (True, False),
+        (False, False),
+        (1, 0),
+        (3.14, 0.0),
+        ("hello", ""),
+        # numpy scalar types (preserves dtype)
+        (np.bool_(True), np.bool_(False)),
+        (np.bool_(False), np.bool_(False)),
+        (np.int64(5), np.int64(0)),
+        (np.int32(5), np.int32(0)),
+        (np.int16(5), np.int16(0)),
+        (np.uint8(5), np.uint8(0)),
+        (np.float64(2.5), np.float64(0)),
+        (np.float32(2.5), np.float32(0)),
+        # fallback: returns value itself
+        ([1, 2, 3], [1, 2, 3]),
+    ],
+)
+def test_default_for_value(value, expected):
+    result = default_for_value(value)
+    assert result == expected
+    assert type(result) is type(expected)
 
 
 @pytest.mark.skipif(zarr.__version__.startswith("2"), reason="tests for zarr-python>=v3 only")
@@ -100,6 +131,83 @@ class TestZarrV2Warnings:
     def test_warn_if_writing_zarr_format_3(self, tmp_path: Path):
         with pytest.warns(UserWarning, match="Requesting zarr spec v3 with zarr-python v2"):
             setup_zarr_group(tmp_path / "test.zarr", zarr_format=3)
+
+
+class Test_infer_int_dtype:
+    def test_small_unsigned(self):
+        values = np.array([0, 1, 255])
+        assert _infer_int_dtype(values) == np.dtype(np.uint8)
+
+    def test_uint16(self):
+        values = np.array([0, 256])
+        assert _infer_int_dtype(values) == np.dtype(np.uint16)
+
+    def test_uint32(self):
+        values = np.array([0, 2**16])
+        assert _infer_int_dtype(values) == np.dtype(np.uint32)
+
+    def test_uint64(self):
+        values = np.array([0, 2**32])
+        assert _infer_int_dtype(values) == np.dtype(np.uint64)
+
+    def test_negative_int8(self):
+        values = np.array([-1, 0, 127])
+        assert _infer_int_dtype(values) == np.dtype(np.int8)
+
+    def test_negative_int16(self):
+        values = np.array([-129, 0])
+        assert _infer_int_dtype(values) == np.dtype(np.int16)
+
+    def test_negative_int32(self):
+        values = np.array([-(2**15) - 1, 0])
+        assert _infer_int_dtype(values) == np.dtype(np.int32)
+
+    def test_negative_int64(self):
+        values = np.array([-(2**31) - 1, 0])
+        assert _infer_int_dtype(values) == np.dtype(np.int64)
+
+
+class Test_construct_props:
+    @pytest.mark.parametrize(
+        ("values", "expected_values", "expected_missing", "expected_dtype"),
+        [
+            # Python native types
+            ([True, None, False], [True, False, False], [False, True, False], np.bool_),
+            ([1, None, 3], [1, 0, 3], [False, True, False], np.uint8),
+            ([1.5, None, 3.5], [1.5, 0, 3.5], [False, True, False], np.float64),
+            (["a", None, "c"], ["a", "", "c"], [False, True, False], np.dtype("<U1")),
+            ([1, 2, 3], [1, 2, 3], None, np.uint8),
+            ([True, False, True], [True, False, True], None, np.bool_),
+            # numpy scalar types (e.g. from pandas iteration)
+            (
+                [np.bool_(True), None, np.bool_(False)],
+                [True, False, False],
+                [False, True, False],
+                np.bool_,
+            ),
+            ([np.int64(1), None, np.int64(3)], [1, 0, 3], [False, True, False], np.uint8),
+            (
+                [np.float32(1.5), None, np.float32(3.5)],
+                [1.5, 0, 3.5],
+                [False, True, False],
+                np.float32,
+            ),
+        ],
+    )
+    def test_values_and_missing(self, values, expected_values, expected_missing, expected_dtype):
+        result = construct_props(values)
+        np.testing.assert_array_equal(result["values"], np.array(expected_values))
+        assert result["values"].dtype == expected_dtype
+        if expected_missing is None:
+            assert result["missing"] is None
+        else:
+            np.testing.assert_array_equal(result["missing"], np.array(expected_missing, dtype=bool))
+
+    def test_all_none(self):
+        with pytest.warns(UserWarning, match="All values are None"):
+            result = construct_props([None, None, None])
+        np.testing.assert_array_equal(result["values"], np.array([0, 0, 0]))
+        np.testing.assert_array_equal(result["missing"], np.array([True, True, True]))
 
 
 class Test_delete_geff:

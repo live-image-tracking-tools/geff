@@ -4,7 +4,7 @@ import os
 import shutil
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, TypeVar
+from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
 import numpy as np
 import zarr
@@ -230,6 +230,119 @@ def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype
         dtype = np.dtype("int64")
         ndim = 1
     return dtype, ndim
+
+
+def default_for_value(value: Any) -> Any:
+    """Return a type-appropriate default value for filling missing entries.
+
+    Handles both native Python types and numpy scalar types (e.g. np.bool_,
+    np.int64, np.float32) which commonly arise when iterating pandas DataFrames.
+    For numpy scalars, returns a zero of the same dtype to avoid unnecessary
+    upcasting when the values are later combined into a numpy array.
+
+    Uses the following heuristics:
+    - np.generic (np.bool_, np.int64, np.float32, etc.) -> type(value)(0)
+    - bool, int, float -> type(value)(0) (e.g. False, 0, 0.0)
+    - str -> ""
+    - Otherwise, returns the value itself, which preserves type and shape but
+      may be confusing or inefficient for some types.
+
+    Args:
+        value: A non-None example value to determine the default from.
+
+    Returns:
+        A default value with the same type (and shape, for the fallback case).
+    """
+    if isinstance(value, np.generic | bool | int | float):
+        return type(value)(0)
+    elif isinstance(value, str):
+        return ""
+    else:
+        return value
+
+
+def _infer_int_dtype(values: np.ndarray) -> np.dtype:
+    """Infer the smallest integer dtype that can represent all values.
+
+    Uses an unsigned type when all values are non-negative, otherwise signed.
+
+    Args:
+        values (np.ndarray): 1-D array of integer values.
+
+    Returns:
+        np.dtype: The smallest numpy integer dtype that fits the data.
+    """
+    min_val = values.min()
+    max_val = values.max()
+
+    if min_val < 0:
+        for signed in (np.int8, np.int16, np.int32, np.int64):
+            info = np.iinfo(signed)
+            if info.min <= min_val and max_val <= info.max:
+                return np.dtype(signed)
+    else:
+        for unsigned in (np.uint8, np.uint16, np.uint32, np.uint64):
+            if max_val <= np.iinfo(unsigned).max:
+                return np.dtype(unsigned)
+
+    raise ValueError(f"ID values (min={min_val}, max={max_val}) exceed supported integer range")
+
+
+def construct_props(values: Sequence[Any | None]) -> PropDictNpArray:
+    """Convert a sequence of values with possible None entries into a PropDictNpArray.
+
+    Builds a values array and a missing mask from the input sequence. None entries
+    are replaced with a type-appropriate default value (False for bool, 0 for int/float,
+    "" for str) determined from the first non-None entry. The missing mask indicates
+    which positions were None.
+
+    For integer dtypes, the smallest bit width is chosen that can represent the values.
+
+    Non-None values are expected to have a consistent type and shape so they can
+    form a regular numpy array. For variable-length or variable-shape values, use
+    construct_var_len_props instead.
+
+    Args:
+        values: A sequence of values with one entry per node or edge.
+            Missing values are indicated by None entries.
+
+    Returns:
+        PropDictNpArray: A dict with "values" as a numpy array of the appropriate dtype
+            and "missing" as a boolean numpy array (or None if no values were missing).
+    """
+    filled_values = []
+    missing = np.zeros(len(values), dtype=np.bool_)
+    default_val = None
+    missing_any = False
+
+    for i, value in enumerate(values):
+        if value is None:
+            if default_val is None:
+                # find first non-None value to determine default
+                for v in values:
+                    if v is not None:
+                        default_val = default_for_value(v)
+                        break
+                else:
+                    warnings.warn(
+                        "All values are None. Using 0 as the default.",
+                        stacklevel=2,
+                    )
+                    default_val = 0
+            filled_values.append(default_val)
+            missing[i] = True
+            missing_any = True
+        else:
+            filled_values.append(value)
+
+    values_arr = np.asarray(filled_values)
+    if np.issubdtype(values_arr.dtype, np.integer):
+        values_arr = values_arr.astype(_infer_int_dtype(values_arr))
+
+    return {
+        "values": values_arr,
+        "missing": missing if missing_any else None,
+    }
 
 
 def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpArray:
