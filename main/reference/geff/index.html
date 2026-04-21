@@ -1187,6 +1187,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#geff.GeffReader._load_zarr_subset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;_load_zarr_subset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#geff.GeffReader._read_prop" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1963,6 +1974,119 @@ Can be None, which loads all the elements to memory.</p>
             <td>
               <div class="doc-md-description">
                 <p>The property loaded into memory as "values" and "missing" arrays.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="geff.GeffReader._load_zarr_subset" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">_load_zarr_subset</span>
+
+
+</h3>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">_load_zarr_subset</span><span class="p">(</span>
+    <span class="n">zarr_arr</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+    <span class="n">indices</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">intp</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Load a subset of a zarr array using integer indices.</p>
+<p>Uses <code>oindex</code> (orthogonal indexing) which is significantly faster than
+boolean-mask indexing for sparse selections, because zarr only needs to
+read the chunks that contain the requested indices.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>zarr_arr</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="zarr.Array" href="https://zarr.readthedocs.io/en/stable/api/zarr/array/#zarr.Array">Array</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The zarr array to read from.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>indices</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="numpy.typing.NDArray" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray">NDArray</a>[<a class="autorefs autorefs-external" title="numpy.intp" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.intp">intp</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Integer indices to select, or <code>None</code> to load the full array.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>dtype</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="numpy.dtype" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype">dtype</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional dtype to cast the result to.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" title="numpy.typing.NDArray" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.NDArray">NDArray</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A numpy array with the selected data.</p>
               </div>
             </td>
           </tr>
