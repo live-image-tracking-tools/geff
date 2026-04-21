@@ -226,6 +226,32 @@ def test_read_edge_props() -> None:
     _ = NxBackend.construct(**in_memory_geff)
 
 
+def test_build_w_empty_node_mask() -> None:
+    """All-False node mask triggers the len(indices)==0 branch in _load_zarr_subset."""
+    store, _memory_geff = create_mock_geff(
+        node_id_dtype="uint8",
+        node_axis_dtypes={"position": "double", "time": "uint8"},
+        extra_edge_props={"score": "float64"},
+        directed=True,
+    )
+
+    reader = GeffReader(store)
+    reader.read_node_props(["z", "t"])
+
+    n_nodes = reader.nodes.shape[0]
+    node_mask = np.zeros(n_nodes, dtype=bool)  # select no nodes
+
+    in_memory_geff = reader.build(node_mask=node_mask)
+
+    assert len(in_memory_geff["node_ids"]) == 0
+    assert len(in_memory_geff["edge_ids"]) == 0
+    for prop_dict in in_memory_geff["node_props"].values():
+        assert len(prop_dict["values"]) == 0
+
+    # make sure graph dict can be ingested
+    _ = NxBackend.construct(**in_memory_geff)
+
+
 def test_build_w_masked_nodes_varlength() -> None:
     """Regression test: varlength props must survive node masking.
 
