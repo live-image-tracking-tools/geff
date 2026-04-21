@@ -322,7 +322,7 @@ def _compute_first_dim_chunk(shape: tuple[int, ...], itemsize: int) -> int:
 
 
 def _write_zarr_array(
-    group: Any,
+    group: zarr.Group,
     path: str,
     data: np.ndarray,
 ) -> None:
