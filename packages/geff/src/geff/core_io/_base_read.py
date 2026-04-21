@@ -133,6 +133,35 @@ class GeffReader:
             prop_dict[_path.DATA] = expect_array(prop_group, _path.DATA, prop_type)
         return prop_dict
 
+    @staticmethod
+    def _load_zarr_subset(
+        zarr_arr: zarr.Array,
+        indices: NDArray[np.intp] | None,
+        dtype: np.dtype | None = None,
+    ) -> NDArray:
+        """Load a subset of a zarr array using integer indices.
+
+        Uses ``oindex`` (orthogonal indexing) which is significantly faster than
+        boolean-mask indexing for sparse selections, because zarr only needs to
+        read the chunks that contain the requested indices.
+
+        Args:
+            zarr_arr: The zarr array to read from.
+            indices: Integer indices to select, or ``None`` to load the full array.
+            dtype: Optional dtype to cast the result to.
+
+        Returns:
+            A numpy array with the selected data.
+        """
+        if indices is None:
+            data = zarr_arr[:]
+        elif len(indices) == 0:
+            shape = (0, *zarr_arr.shape[1:])
+            return np.empty(shape, dtype=dtype or zarr_arr.dtype)
+        else:
+            data = zarr_arr.oindex[indices]
+        return np.asarray(data, dtype=dtype) if dtype is not None else np.asarray(data)
+
     def _load_prop_to_memory(
         self,
         zarr_prop: ZarrPropDict,
@@ -155,24 +184,23 @@ class GeffReader:
         Returns:
             PropDictNpArray: The property loaded into memory as "values" and "missing" arrays.
         """
+        indices = np.where(mask)[0] if mask is not None else None
+
         dtype = np.dtype(prop_metadata.dtype)
-        values_dtype = np.uint64 if prop_metadata.varlength else dtype
-        values = np.array(
-            zarr_prop[_path.VALUES][mask.tolist() if mask is not None else ...],
-            dtype=values_dtype,
-        )
+        values_dtype = np.dtype(np.uint64) if prop_metadata.varlength else dtype
+        values = self._load_zarr_subset(zarr_prop[_path.VALUES], indices, dtype=values_dtype)
+
         if _path.MISSING in zarr_prop:
-            missing = np.array(
-                zarr_prop[_path.MISSING][mask.tolist() if mask is not None else ...],
-                dtype=bool,
+            missing = self._load_zarr_subset(
+                zarr_prop[_path.MISSING], indices, dtype=np.dtype(bool)
             )
         else:
             missing = None
+
         if _path.DATA in zarr_prop:
-            data = np.array(
-                zarr_prop[_path.DATA][mask.tolist() if mask is not None else ...],
-                dtype=dtype,
-            )
+            # DATA is a flat 1D array of concatenated varlength values; it cannot
+            # be subset by the per-element mask — always load it in full.
+            data = np.asarray(zarr_prop[_path.DATA][:], dtype=dtype)
         else:
             data = None
 
@@ -222,14 +250,16 @@ class GeffReader:
                 }
                 ```
         """
-        nodes = np.array(self.nodes[node_mask.tolist() if node_mask is not None else ...])
+        node_indices = np.where(node_mask)[0] if node_mask is not None else None
+        nodes = self._load_zarr_subset(self.nodes, node_indices)
+
         node_props: dict[str, PropDictNpArray] = {}
         for name, props in self.node_props.items():
             prop_metadata = self.metadata.node_props_metadata[name]
             node_props[name] = self._load_prop_to_memory(props, node_mask, prop_metadata)
 
-        # remove edges if any of it's nodes has been masked
-        edges = np.array(self.edges[:])
+        # remove edges if any of its nodes has been masked
+        edges = np.asarray(self.edges[:])
         if node_mask is not None:
             edge_mask_removed_nodes = np.isin(edges, nodes).all(axis=1)
             if edge_mask is not None:
