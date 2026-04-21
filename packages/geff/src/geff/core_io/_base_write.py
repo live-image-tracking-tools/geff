@@ -8,6 +8,7 @@ import numpy as np
 from geff import _path
 from geff._typing import PropDictNpArray
 from geff.core_io._utils import (
+    _detect_zarr_spec_version,
     check_for_geff,
     construct_var_len_props,
     default_for_value,
@@ -347,11 +348,8 @@ def _write_zarr_array(
     first_dim = _compute_first_dim_chunk(data.shape, data.dtype.itemsize)
     chunks = (first_dim, *data.shape[1:])
 
-    use_sharding = (
-        not _zarr.__version__.startswith("2")
-        and hasattr(group, "metadata")
-        and getattr(group.metadata, "zarr_format", 2) == 3
-    )
+    zarr_version = _detect_zarr_spec_version(group)
+    use_sharding = True if zarr_version is not None and zarr_version >= 3 else False
 
     if use_sharding:
         # Shard spans entire array → one file per array.
