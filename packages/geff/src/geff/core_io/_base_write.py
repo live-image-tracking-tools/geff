@@ -4,6 +4,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
+import zarr
 
 from geff import _path
 from geff._typing import PropDictNpArray
@@ -339,8 +340,6 @@ def _write_zarr_array(
         path: The path within the group.
         data: The numpy array to write.
     """
-    import zarr as _zarr
-
     if data.shape[0] == 0:
         group[path] = data
         return
@@ -360,7 +359,8 @@ def _write_zarr_array(
             path, shape=data.shape, dtype=data.dtype, chunks=chunks, shards=shards
         )
         arr[:] = data
-    elif _zarr.__version__.startswith("2"):
+    # this is more an API thing than a zarr spec version
+    elif zarr.__version__.startswith("2"):
         group.create_dataset(path, data=data, chunks=chunks)
     else:
         # zarr v3 library with zarr_format=2 — no sharding
