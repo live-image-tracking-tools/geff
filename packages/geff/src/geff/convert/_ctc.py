@@ -135,11 +135,10 @@ def from_ctc_to_geff(
 
     for t, filepath in enumerate(sorted_files):
         frame = tifffile.imread(filepath)
+        if frame.ndim == 3 and "z" not in node_props:
+            node_props["z"] = []
 
         if segmentation_store is not None and segm_array is None:
-            if frame.ndim == 3:
-                node_props["z"] = []
-
             # created in first iteration
             if tczyx:
                 n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
