@@ -4,6 +4,7 @@
 
 <!--intro-start-->
 
+[![JOSS](https://joss.theoj.org/papers/2640e1f0234367408761bbc90cc344e9/status.svg)](https://joss.theoj.org/papers/2640e1f0234367408761bbc90cc344e9)
 [![License](https://img.shields.io/pypi/l/geff.svg?color=green)](https://github.com/live-image-tracking-tools/geff/raw/main/LICENSE)
 [![geff PyPI](https://img.shields.io/pypi/v/geff?label=geff%20pypi&color=green)](https://pypi.org/project/geff)
 [![geff Conda Version](https://img.shields.io/conda/vn/conda-forge/geff?label=geff%20conda-forge)](https://anaconda.org/conda-forge/geff)
