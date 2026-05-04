@@ -24,6 +24,7 @@ from geff.core_io import read_to_memory
 def create_mock_data(
     tmp_path: Path,
     is_gt: bool,
+    is_3d: bool = False,
     v2: bool = False,  # generates a slightly different dataset
 ) -> Path:
     """
@@ -35,6 +36,13 @@ def create_mock_data(
             / \\     |
     t=2    2   5     9
     """
+    if is_3d:
+        # for 3D example data, we created a different function to avoid littering this one with
+        # if-statements. But please keep the mock graph structure of both in sync!
+        if v2:
+            raise ValueError("v2=True not implemented for 3D data")
+        return _create_mock_data_3d(tmp_path, is_gt)
+
     mod_value = 9 if not v2 else 10
 
     labels = np.zeros((3, 10, 10), dtype=np.uint16)
@@ -70,16 +78,62 @@ def create_mock_data(
     return tmp_path
 
 
+def _create_mock_data_3d(tmp_path: Path, is_gt: bool) -> Path:
+    """
+    mock graph is:
+
+    t=0      1       7
+             |       |
+    t=1      1       |
+            / \\     |
+    t=2    2   5     9
+    """
+
+    labels = np.zeros((3, 10, 10, 10), dtype=np.uint16)
+
+    labels[0, 1, 3, 3] = 1
+    labels[0, 2, 8, 8] = 7
+
+    labels[1, 2, 3, 4] = 1
+
+    labels[2, 3, 2, 3] = 5
+    labels[2, 2, 4, 5] = 2
+    labels[2, 4, 8, 9] = 9
+
+    fmt = "man_track{:03d}.tif" if is_gt else "mask{:03d}.tif"
+
+    for t in range(labels.shape[0]):
+        tifffile.imwrite(
+            tmp_path / fmt.format(t),
+            labels[t],
+            compression="LZW",
+        )
+
+    tracks_file = tmp_path / ("man_track.txt" if is_gt else "res_track.txt")
+    # track_id, start, end, parent_id
+    tracks_table = [[1, 0, 1, 0], [2, 2, 2, 1], [5, 2, 2, 1], [7, 0, 0, 0], [9, 2, 2, 7]]
+
+    np.savetxt(
+        tracks_file,
+        tracks_table,
+        fmt="%d",
+    )
+
+    return tmp_path
+
+
 @pytest.mark.parametrize("is_gt", [True, False])
+@pytest.mark.parametrize("is_3d", [True, False])
 @pytest.mark.parametrize("tczyx", [True, False])
 class Test_ctc_to_geff:
     def test_basic(
         self,
         tmp_path: Path,
         is_gt: bool,
+        is_3d: bool,
         tczyx: bool,
     ) -> None:
-        ctc_path = create_mock_data(tmp_path, is_gt)
+        ctc_path = create_mock_data(tmp_path, is_gt, is_3d=is_3d)
         geff_path = tmp_path / "little.geff"
 
         from_ctc_to_geff(
@@ -204,9 +258,10 @@ class Test_ctc_to_geff:
         self,
         tmp_path: Path,
         is_gt: bool,
+        is_3d: bool,
         tczyx: bool,
     ):
-        ctc_path = create_mock_data(tmp_path, is_gt)
+        ctc_path = create_mock_data(tmp_path, is_gt, is_3d=is_3d)
         geff_path = tmp_path / "little.geff"
         segm_path = tmp_path / "segm.zarr"
 
@@ -239,13 +294,14 @@ class Test_ctc_to_geff:
         assert metadata.track_node_props == {"tracklet": "tracklet_id"}
         assert metadata.related_objects is not None
         assert metadata.related_objects[0] == RelatedObject(
-            type="labels", label_prop="tracklet_id", path="../segm.zarr"
+            type="labels", label_prop="tracklet_id", path=os.path.join("..", "segm.zarr")
         )
 
     def test_seg_to_store(
         self,
         tmp_path: Path,
         is_gt: bool,
+        is_3d: bool,
         tczyx: bool,
     ):
         ctc_path = create_mock_data(tmp_path, is_gt)
@@ -286,18 +342,19 @@ class Test_ctc_to_geff:
         assert metadata.track_node_props == {"tracklet": "tracklet_id"}
         assert metadata.related_objects is not None
         assert metadata.related_objects[0] == RelatedObject(
-            type="labels", label_prop="tracklet_id", path="../segm.zarr"
+            type="labels", label_prop="tracklet_id", path=os.path.join("..", "segm.zarr")
         )
 
     def test_seg_to_bad_store(
         self,
         tmp_path: Path,
         is_gt: bool,
+        is_3d: bool,
         tczyx: bool,
     ):
         # Finding the relative path won't work with a memory store and should issue a warning
 
-        ctc_path = create_mock_data(tmp_path, is_gt)
+        ctc_path = create_mock_data(tmp_path, is_gt, is_3d=is_3d)
         geff_path = tmp_path / "little.geff"
         store = zarr.storage.MemoryStore()
 
