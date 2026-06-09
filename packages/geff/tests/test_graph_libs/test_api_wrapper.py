@@ -268,8 +268,6 @@ class Test_api_wrapper_simple:  # tests that only need backend parametrization
             assert axis_types == [axis.type for axis in metadata.axes]
 
     def test_write_read_different_stores(self, tmp_path, backend):
-        if backend == "spatial-graph" and sys.platform == "win32":
-            pytest.xfail("spatial-graph bug on windows discovered in #420")
         stores = [
             tmp_path / "test_path.zarr",  # Path object
             str(tmp_path / "test_string.zarr"),  # string path
