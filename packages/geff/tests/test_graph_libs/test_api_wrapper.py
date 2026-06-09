@@ -1,3 +1,4 @@
+import sys
 from typing import TYPE_CHECKING, get_args
 
 import networkx as nx
@@ -94,6 +95,8 @@ class Test_api_wrapper:
         include_spatial,
         backend,
     ) -> None:
+        if backend == "spatial-graph" and sys.platform == "win32":
+            pytest.xfail("spatial-graph bug on windows discovered in #420")
         if include_spatial is False and backend == "spatial-graph":
             pytest.skip("Non-spatial graphs not supported by spatial-graph")
         backend_module: Backend = get_backend(backend)
@@ -129,6 +132,8 @@ class Test_api_wrapper:
         include_spatial,
         backend,
     ) -> None:
+        if backend == "spatial-graph" and sys.platform == "win32":
+            pytest.xfail("spatial-graph bug on windows discovered in #420")
         backend_module: Backend = get_backend(backend)
 
         extra_props = {dtype: dtype for dtype in PROP_DTYPES}
@@ -171,6 +176,8 @@ class Test_api_wrapper:
         include_spatial,
         backend,
     ) -> None:
+        if backend == "spatial-graph" and sys.platform == "win32":
+            pytest.xfail("spatial-graph bug on windows discovered in #420")
         if include_spatial is False and backend == "spatial-graph":
             pytest.skip("Non-spatial graphs not supported by spatial-graph")
         backend_module: Backend = get_backend(backend)
