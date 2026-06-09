@@ -280,13 +280,17 @@ class Test_api_wrapper_simple:  # tests that only need backend parametrization
         # this will create a graph instance of the backend type
         original_graph = backend_module.construct(**memory_geff)
         adpt_og_graph = backend_module.graph_adapter(original_graph)
+        _assert_graph_equal_to_geff(adpt_og_graph, memory_geff)
 
         # Write to store type
         for store in stores:
             backend_module.write(original_graph, store, memory_geff["metadata"])
             new_graph = backend_module.graph_adapter(backend_module.read(store)[0])
-            assert adpt_og_graph.get_node_ids() == new_graph.get_node_ids()
-            assert adpt_og_graph.get_edge_ids() == new_graph.get_edge_ids()
+            # Node/edge order is not a meaningful contract: spatial-graph stores
+            # nodes in a std::unordered_map whose iteration order is unspecified
+            # (and differs between libstdc++/libc++ and MSVC's STL). Compare ids
+            # as sets and check that every attribute matches by node/edge id.
+            _assert_graph_equal_to_geff(new_graph, memory_geff)
 
     def test_overwrite(self, backend):
         backend_module: Backend = get_backend(backend)
