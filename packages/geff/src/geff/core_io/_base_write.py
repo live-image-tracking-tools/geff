@@ -361,7 +361,7 @@ def _write_zarr_array(
         arr[:] = data
     # this is more an API thing than a zarr spec version
     elif zarr.__version__.startswith("2"):
-        group.create_dataset(path, data=data, chunks=chunks)  # pyright: ignore[reportAttributeAccessIssue]
+        group.create_dataset(path, data=data, chunks=chunks)  # type: ignore[attr-defined, unused-ignore]  # pyright: ignore[reportAttributeAccessIssue]
     else:
         # zarr v3 library with zarr_format=2 — no sharding
         arr = group.create_array(path, shape=data.shape, dtype=data.dtype, chunks=chunks)
