@@ -103,9 +103,9 @@ class TestMetadataModel:
             node_props_metadata={},
             edge_props_metadata={},
             related_objects=[
-                {"type": "labels", "path": "segmentation/", "node_prop": "seg_id"},
-                {"type": "image", "path": "raw/"},
-                {"type": "geff", "path": "tracks.geff"},
+                RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
+                RelatedObject(type="image", path="raw/"),
+                RelatedObject(type="geff", path="tracks.geff"),
             ],
         )
         assert len(model.related_objects) == 3
@@ -119,7 +119,7 @@ class TestMetadataModel:
                 directed=True,
                 node_props_metadata={},
                 edge_props_metadata={},
-                related_objects=[{"type": "invalid_type", "path": "invalid/"}],
+                related_objects=[RelatedObject(type="invalid_type", path="invalid/")],
             )
 
         # label_prop deprecated
@@ -132,7 +132,6 @@ class TestMetadataModel:
                 directed=True,
                 node_props_metadata={},
                 edge_props_metadata={},
-                # related_objects=[{"type": "labels", "path": "raw/", "label_prop": "seg_id"}],
                 related_objects=[RelatedObject(type="labels", path="seg", label_prop="seg_id")],
             )
         # Directly accessing RelatedObject.label_prop also triggers deprecation warning
@@ -153,7 +152,7 @@ class TestMetadataModel:
                     directed=True,
                     node_props_metadata={},
                     edge_props_metadata={},
-                    related_objects=[{"type": "image", "path": "raw/", "label_prop": "seg_id"}],
+                    related_objects=[RelatedObject(type="image", path="raw/", label_prop="seg_id")],
                 )
 
     def test_props_metadata(self) -> None:
