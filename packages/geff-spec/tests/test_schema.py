@@ -65,8 +65,8 @@ class TestMetadataModel:
             node_props_metadata=node_props,
             edge_props_metadata=edge_props,
             related_objects=[
-                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
-                {"type": "image", "path": "raw/"},
+                RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
+                RelatedObject(type="image", path="raw/"),
             ],
         )
         assert model.axes and len(model.axes) == 1
@@ -400,8 +400,8 @@ def test_schema_and_round_trip() -> None:
                 {"name": "y", "type": "space", "unit": "micrometer"},
             ],
             related_objects=[
-                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
-                {"type": "image", "path": "raw/"},
+                RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
+                RelatedObject(type="image", path="raw/"),
             ],
             display_hints={"display_horizontal": "x", "display_vertical": "y"},
         )
