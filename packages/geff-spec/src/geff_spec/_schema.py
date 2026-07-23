@@ -98,17 +98,40 @@ class RelatedObject(BaseModel):
         description=(
             "Property name for label objects. This is the node property that will be used "
             "to identify the labels in the related object. "
-            "This is only valid for type 'labels'."
+            "This is only valid for type 'labels'. "
+        ),
+        deprecated="Deprecated in geff-spec v1.2.1 in favor of `node_prop`.",
+    )
+    node_prop: str | None = Field(
+        default=None,
+        description=(
+            "Property name that links between the related object and node properties. "
+            "For segmentation data, this field should refer to the node property that "
+            "specifies the segmentation ID for each node. For geffception, this property "
+            "typically links between the node ID of the geffception graphs and the property "
+            "that specifies which geffception graph a node in the core graph belongs to."
         ),
     )
 
     @model_validator(mode="after")
     def _validate_model(self) -> RelatedObject:
-        if self.type != "labels" and self.label_prop is not None:
-            raise ValueError(
-                f"label_prop {self.label_prop} is only valid for type 'labels', "
-                f"but got type {self.type}."
+        # Suppress deprecation warnings triggered by accessing label_prop and instead
+        # warn only when label_prop is not None
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", message="Deprecated in geff-spec v1.2.1 in favor of `node_prop`."
             )
+            if self.label_prop is not None:
+                warnings.warn(
+                    "`label_prop` was deprecated in geff-spec v1.2.1 in favor of `node_prop`",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                if self.type != "labels":
+                    raise ValueError(
+                        f"label_prop {self.label_prop} is only valid for type 'labels', "
+                        f"but got type {self.type}."
+                    )
         if self.type not in ["labels", "image", "geff"]:
             warnings.warn(
                 f"Got type {self.type} for related object, "
