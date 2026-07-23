@@ -1,4 +1,4 @@
-# Geff specification
+# GEFF specification
 
 The graph exchange file format is `zarr` based. A graph is stored in a zarr group, which can have any name. However the name of the group can include the `.geff` suffix to indicate that the group contains `geff` data. This allows storing multiple `geff` graphs inside the same zarr root directory. A `geff` group is identified by the presence of a `geff` key in the `.zattrs`. Other `geff` metadata is also stored in the `.zattrs` file of the `geff` group, nested under the `geff` key. The `geff` group must contain a `nodes` group and an `edges` group (albeit both can be empty). `geff` graphs have the option to provide properties for `nodes` and `edges`.
 
@@ -126,7 +126,7 @@ This is a geff metadata zattrs file that matches the above example structure.
 {
   "geff": {
     "directed": true,
-    "geff_version": "0.1.3",
+    "geff_version": "1.2.0.1.1",
     // axes are optional
     "axes": [
       { "name": "t", "type": "time", "unit": "second", "min": 0, "max": 125 },
@@ -216,7 +216,7 @@ This is a geff metadata zattrs file that matches the above example structure.
       {
         "type": "labels",
         "path": "../segmentation/",
-        "label_prop": "seg_id"
+        "node_prop": "seg_id"
       },
       {
         "type": "image",
