@@ -105,6 +105,7 @@ class TestMetadataModel:
             related_objects=[
                 {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
                 {"type": "image", "path": "raw/"},
+                {"type": "geff", "path": "tracks.geff"},
             ],
         )
         assert len(model.related_objects) == 2

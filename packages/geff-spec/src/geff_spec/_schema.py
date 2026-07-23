@@ -79,7 +79,8 @@ class RelatedObject(BaseModel):
         ...,
         description=(
             "Type of the related object. 'labels' for label objects, "
-            "'image' for image objects. Other types are also allowed, but may not be "
+            "'image' for image objects. 'geff' for geffception graphs. "
+            "Other types are also allowed, but may not be "
             "recognized by reader applications. "
         ),
     )
@@ -108,7 +109,7 @@ class RelatedObject(BaseModel):
                 f"label_prop {self.label_prop} is only valid for type 'labels', "
                 f"but got type {self.type}."
             )
-        if self.type not in ["labels", "image"]:
+        if self.type not in ["labels", "image", "geff"]:
             warnings.warn(
                 f"Got type {self.type} for related object, "
                 "which might not be recognized by reader applications. ",
