@@ -387,7 +387,7 @@
             }
           ],
           "default": null,
-          "description": "A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'label_prop' properties. The 'type' represents the data type. 'labels' and 'image' should be used for label and image objects, respectively. Other types are also allowed, The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The 'label_prop' is only valid for type 'labels' and specifies the node property that will be used to identify the labels in the related object. ",
+          "description": "A list of dictionaries of related objects such as labels or images. Each dictionary must contain 'type', 'path', and optionally 'node_prop' properties. The 'type' represents the data type. 'labels' and 'image' should be used for label and image objects, respectively. 'geff' should be used to refer to geffception. See geffception docs for more details. Other types are also allowed. The 'path' should be relative to the geff zarr-attributes file. It is strongly recommended all related objects are stored as siblings of the geff group within the top-level zarr group. The deprecated 'label_prop' is only valid for type 'labels' and specifies the nodeproperty that will be used to identify the labels in the related object. ",
           "title": "Related Objects"
         },
         "display_hints": {
@@ -487,7 +487,7 @@
       "type": "object"
     },
     "RelatedObject": {
-      "description": "A set of metadata for data that is associated with the graph. The types\n'labels' and 'image' should be used for label and image objects, respectively.\nOther types are also allowed.",
+      "description": "A set of metadata for data that is associated with the graph. The types\n'labels' and 'image' should be used for label and image objects, respectively.\n'geff' should be used for geffception.\nOther types are also allowed.\n\n!!! warning\n\n    `label_prop` was deprecated as of geff-spec v1.2.1 in favor of `node_prop`.",
       "properties": {
         "type": {
           "description": "Type of the related object. 'labels' for label objects, 'image' for image objects. 'geff' for geffception graphs. Other types are also allowed, but may not be recognized by reader applications. ",
@@ -510,7 +510,7 @@
           ],
           "default": null,
           "deprecated": true,
-          "description": "Property name for label objects. This is the node property that will be used to identify the labels in the related object. This is only valid for type 'labels'. ",
+          "description": "Deprecated in geff-spec v1.2.1 in favor of `node_prop`. Property name for label objects. This is the node property that will be used to identify the labels in the related object. This is only valid for type 'labels'. ",
           "title": "Label Prop"
         },
         "node_prop": {
