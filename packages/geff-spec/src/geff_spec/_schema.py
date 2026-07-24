@@ -72,7 +72,12 @@ def _validate_key_identifier_equality(
 class RelatedObject(BaseModel):
     """A set of metadata for data that is associated with the graph. The types
     'labels' and 'image' should be used for label and image objects, respectively.
+    'geff' should be used for geffception.
     Other types are also allowed.
+
+    !!! warning
+
+        `label_prop` was deprecated as of geff-spec v1.2.1 in favor of `node_prop`.
     """
 
     type: str = Field(
@@ -96,6 +101,7 @@ class RelatedObject(BaseModel):
     label_prop: str | None = Field(
         default=None,
         description=(
+            "Deprecated in geff-spec v1.2.1 in favor of `node_prop`. "
             "Property name for label objects. This is the node property that will be used "
             "to identify the labels in the related object. "
             "This is only valid for type 'labels'. "
@@ -259,14 +265,16 @@ class GeffMetadata(BaseModel):
         default=None,
         description=(
             "A list of dictionaries of related objects such as labels or images. "
-            "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
+            "Each dictionary must contain 'type', 'path', and optionally 'node_prop' "
             "properties. The 'type' represents the data type. 'labels' and 'image' should "
-            "be used for label and image objects, respectively. Other types are also allowed, "
+            "be used for label and image objects, respectively. 'geff' should be used to "
+            "refer to geffception. See geffception docs for more details. Other types are "
+            "also allowed. "
             "The 'path' should be relative to the geff zarr-attributes file. "
             "It is strongly recommended all related objects are stored as siblings "
             "of the geff group within the top-level zarr group. "
-            "The 'label_prop' is only valid for type 'labels' and specifies the node property "
-            "that will be used to identify the labels in the related object. "
+            "The deprecated 'label_prop' is only valid for type 'labels' and specifies the node"
+            "property that will be used to identify the labels in the related object. "
         ),
     )
     display_hints: DisplayHint | None = Field(
