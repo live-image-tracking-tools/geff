@@ -1159,7 +1159,7 @@
 
 
 <h1 id="geffception">Geffception</h1>
-<p>The GEFF specification supports hierarchical nesting of GEFF files. This is particularly useful in the context of cell tracking where some properties may be computed for an entire tracklet or lineage as opposed to for an individual node or edge.</p>
+<p>The GEFF specification supports hierarchical nesting of GEFF files. This is particularly useful in the context of cell tracking where some properties may be computed for an entire tracklet or lineage as opposed to for an individual node or edge. For a complete example of a tracking graph that uses geffception to store tracklet and lineage properties, see <a href="../tracking/">the tracking docs</a>.</p>
 <p>In the example illustrated below, <code>tracking_graph.geff</code> contains nodes with the properties <code>track_id</code>, <code>t</code>, <code>y</code>, and <code>x</code> and edges with the property <code>distance</code>. Within the folder structure of <code>tracking_graph.geff</code> is <code>lineage.geff</code>. The <code>GeffMetadata</code> of <code>tracking_graph.geff</code> points to <code>lineage.geff</code> as a related object whose node ids correspond to the <code>track_id</code> property of nodes in <code>tracking_graph.geff</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">.</span><span class="n">zarr</span>
     <span class="n">tracking_graph</span><span class="o">.</span><span class="n">geff</span><span class="o">/</span>
