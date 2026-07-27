@@ -115,7 +115,8 @@ class RelatedObject(BaseModel):
             "For segmentation data, this field should refer to the node property that "
             "specifies the segmentation ID for each node. For geffception, this property "
             "typically links between the node ID of the geffception graphs and the property "
-            "that specifies which geffception graph a node in the core graph belongs to."
+            "that specifies which geffception graph a node in the core graph belongs to. "
+            "See the geffception page in the documentation for a concrete example."
         ),
     )
 
