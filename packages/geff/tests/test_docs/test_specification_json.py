@@ -9,6 +9,7 @@ from geff_spec import GeffSchema
 
 DOCS = Path(__file__).parent.parent.parent.parent.parent / "docs"
 SPECIFICATION_MD_PATH = DOCS / "specification.md"
+GEFFCEPTION_MD_PATH = DOCS / "geffception.md"
 
 # Matches fenced JSONC code blocks in markdown files
 JSONC_MD_RE = re.compile(r"```jsonc\s+(.*?)```", re.DOTALL)
@@ -35,6 +36,11 @@ def check_jsonc_markdown_blocks(markdown_text, geff=True):
 def test_specification_md():
     """Test JSONC blocks in docs/specification.md validate as geff."""
     check_jsonc_markdown_blocks(SPECIFICATION_MD_PATH.read_text())
+
+
+def test_geffception_md():
+    """Test JSONC blocks in docs/geffception.md validate as geff."""
+    check_jsonc_markdown_blocks(GEFFCEPTION_MD_PATH.read_text())
 
 
 def test_check_jsonc_markdown_blocks():

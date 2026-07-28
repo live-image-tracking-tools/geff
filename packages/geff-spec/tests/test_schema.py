@@ -7,7 +7,7 @@ import pytest
 import zarr
 import zarr.storage
 
-from geff_spec import GeffMetadata, GeffSchema, PropMetadata
+from geff_spec import GeffMetadata, GeffSchema, PropMetadata, RelatedObject
 from geff_spec._schema import (
     VERSION_PATTERN,
     _formatted_schema_json,
@@ -65,8 +65,8 @@ class TestMetadataModel:
             node_props_metadata=node_props,
             edge_props_metadata=edge_props,
             related_objects=[
-                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
-                {"type": "image", "path": "raw/"},
+                RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
+                RelatedObject(type="image", path="raw/"),
             ],
         )
         assert model.axes and len(model.axes) == 1
@@ -103,11 +103,12 @@ class TestMetadataModel:
             node_props_metadata={},
             edge_props_metadata={},
             related_objects=[
-                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
-                {"type": "image", "path": "raw/"},
+                RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
+                RelatedObject(type="image", path="raw/"),
+                RelatedObject(type="geff", path="tracks.geff"),
             ],
         )
-        assert len(model.related_objects) == 2
+        assert len(model.related_objects) == 3
 
         # Related object type
         with pytest.warns(
@@ -118,20 +119,41 @@ class TestMetadataModel:
                 directed=True,
                 node_props_metadata={},
                 edge_props_metadata={},
-                related_objects=[{"type": "invalid_type", "path": "invalid/"}],
+                related_objects=[RelatedObject(type="invalid_type", path="invalid/")],
             )
 
-        # Invalid combination of type and label_prop
-        with pytest.raises(
-            pydantic.ValidationError, match=r".*label_prop .+ is only valid for type 'labels'.*"
+        # label_prop deprecated
+        with pytest.warns(
+            DeprecationWarning,
+            match=r"`label_prop` was deprecated in geff-spec v1.2.1 in favor of `node_prop`",
         ):
             GeffMetadata(
                 geff_version="0.0.1",
                 directed=True,
                 node_props_metadata={},
                 edge_props_metadata={},
-                related_objects=[{"type": "image", "path": "raw/", "label_prop": "seg_id"}],
+                related_objects=[RelatedObject(type="labels", path="seg", label_prop="seg_id")],
             )
+        # Directly accessing RelatedObject.label_prop also triggers deprecation warning
+        rel_obj = RelatedObject(type="labels", path="seg")
+        with pytest.warns(
+            DeprecationWarning, match="Deprecated in geff-spec v1.2.1 in favor of `node_prop`."
+        ):
+            _ = rel_obj.label_prop
+
+        # Invalid combination of type and label_prop
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            with pytest.raises(
+                pydantic.ValidationError, match=r".*label_prop .+ is only valid for type 'labels'.*"
+            ):
+                GeffMetadata(
+                    geff_version="0.0.1",
+                    directed=True,
+                    node_props_metadata={},
+                    edge_props_metadata={},
+                    related_objects=[RelatedObject(type="image", path="raw/", label_prop="seg_id")],
+                )
 
     def test_props_metadata(self) -> None:
         # Valid props metadata
@@ -378,8 +400,8 @@ def test_schema_and_round_trip() -> None:
                 {"name": "y", "type": "space", "unit": "micrometer"},
             ],
             related_objects=[
-                {"type": "labels", "path": "segmentation/", "label_prop": "seg_id"},
-                {"type": "image", "path": "raw/"},
+                RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
+                RelatedObject(type="image", path="raw/"),
             ],
             display_hints={"display_horizontal": "x", "display_vertical": "y"},
         )

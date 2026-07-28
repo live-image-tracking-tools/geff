@@ -8,6 +8,7 @@ nav:
   - index.md
   - what-is-geff.md
   - specification.md
+  - geffception.md
   - tracking.md
   - command-line-tools.md
   - tips-and-tricks.md

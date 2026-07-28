@@ -72,14 +72,20 @@ def _validate_key_identifier_equality(
 class RelatedObject(BaseModel):
     """A set of metadata for data that is associated with the graph. The types
     'labels' and 'image' should be used for label and image objects, respectively.
+    'geff' should be used for GEFFception.
     Other types are also allowed.
+
+    !!! warning
+
+        `label_prop` was deprecated as of geff-spec v1.2.1 in favor of `node_prop`.
     """
 
     type: str = Field(
         ...,
         description=(
             "Type of the related object. 'labels' for label objects, "
-            "'image' for image objects. Other types are also allowed, but may not be "
+            "'image' for image objects. 'geff' for GEFFception graphs. "
+            "Other types are also allowed, but may not be "
             "recognized by reader applications. "
         ),
     )
@@ -95,20 +101,45 @@ class RelatedObject(BaseModel):
     label_prop: str | None = Field(
         default=None,
         description=(
+            "Deprecated in geff-spec v1.2.1 in favor of `node_prop`. "
             "Property name for label objects. This is the node property that will be used "
             "to identify the labels in the related object. "
-            "This is only valid for type 'labels'."
+            "This is only valid for type 'labels'. "
+        ),
+        deprecated="Deprecated in geff-spec v1.2.1 in favor of `node_prop`.",
+    )
+    node_prop: str | None = Field(
+        default=None,
+        description=(
+            "Property name that links between the related object and node properties. "
+            "For segmentation data, this field should refer to the node property that "
+            "specifies the segmentation ID for each node. For GEFFception, this property "
+            "typically links between the node ID of the GEFFception graphs and the property "
+            "that specifies which GEFFception graph a node in the core graph belongs to. "
+            "See the GEFFception page in the documentation for a concrete example."
         ),
     )
 
     @model_validator(mode="after")
     def _validate_model(self) -> RelatedObject:
-        if self.type != "labels" and self.label_prop is not None:
-            raise ValueError(
-                f"label_prop {self.label_prop} is only valid for type 'labels', "
-                f"but got type {self.type}."
+        # Suppress deprecation warnings triggered by accessing label_prop and instead
+        # warn only when label_prop is not None
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", message="Deprecated in geff-spec v1.2.1 in favor of `node_prop`."
             )
-        if self.type not in ["labels", "image"]:
+            if self.label_prop is not None:
+                warnings.warn(
+                    "`label_prop` was deprecated in geff-spec v1.2.1 in favor of `node_prop`",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                if self.type != "labels":
+                    raise ValueError(
+                        f"label_prop {self.label_prop} is only valid for type 'labels', "
+                        f"but got type {self.type}."
+                    )
+        if self.type not in ["labels", "image", "geff"]:
             warnings.warn(
                 f"Got type {self.type} for related object, "
                 "which might not be recognized by reader applications. ",
@@ -235,14 +266,16 @@ class GeffMetadata(BaseModel):
         default=None,
         description=(
             "A list of dictionaries of related objects such as labels or images. "
-            "Each dictionary must contain 'type', 'path', and optionally 'label_prop' "
+            "Each dictionary must contain 'type', 'path', and optionally 'node_prop' "
             "properties. The 'type' represents the data type. 'labels' and 'image' should "
-            "be used for label and image objects, respectively. Other types are also allowed, "
+            "be used for label and image objects, respectively. 'geff' should be used to "
+            "refer to GEFFception. See GEFFception docs for more details. Other types are "
+            "also allowed. "
             "The 'path' should be relative to the geff zarr-attributes file. "
             "It is strongly recommended all related objects are stored as siblings "
             "of the geff group within the top-level zarr group. "
-            "The 'label_prop' is only valid for type 'labels' and specifies the node property "
-            "that will be used to identify the labels in the related object. "
+            "The deprecated 'label_prop' is only valid for type 'labels' and specifies the node"
+            "property that will be used to identify the nodes in the related object. "
         ),
     )
     display_hints: DisplayHint | None = Field(
