@@ -69,7 +69,7 @@ jobs:
 
       - name: Restore witty cache
         if: matrix.group == 'test-third-party'
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         id: witty-cache
         with:
           path: ${{ steps.cache-path.outputs.path }}
@@ -79,6 +79,7 @@ jobs:
         run: |
           uv run coverage run -m pytest --color=yes -v
           uv run coverage xml
+        shell: bash
 
       - name: Coverage
         uses: codecov/codecov-action@v7
@@ -87,7 +88,7 @@ jobs:
 
       - name: Save witty cache
         if: matrix.group == 'test-third-party'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: ${{ steps.cache-path.outputs.path }}
           key: ${{ matrix.platform }} - ${{ matrix.python-version }}

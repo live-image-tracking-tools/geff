@@ -28,16 +28,21 @@ sg = pytest.importorskip("spatial_graph")
 
 # assert that all the data in the graph are equal to those in the memory geff it was created from
 def _assert_graph_equal_to_geff(
-    graph_adapter: GraphAdapter,
-    memory_geff: InMemoryGeff,
+    graph_adapter: GraphAdapter, memory_geff: InMemoryGeff, relax_edge_direction: bool = False
 ):
     metadata = memory_geff["metadata"]
 
     # nodes and edges correct
     assert {*graph_adapter.get_node_ids()} == {*memory_geff["node_ids"].tolist()}
-    assert {*graph_adapter.get_edge_ids()} == {
-        *[tuple(edges) for edges in memory_geff["edge_ids"].tolist()]
-    }
+    if relax_edge_direction:
+        # Cast tuples to sets to remove the directionality constraint when testing spatial graph
+        assert {frozenset(t) for t in graph_adapter.get_edge_ids()} == {
+            *[frozenset(edges) for edges in memory_geff["edge_ids"].tolist()]
+        }
+    else:
+        assert {*graph_adapter.get_edge_ids()} == {
+            *[tuple(edges) for edges in memory_geff["edge_ids"].tolist()]
+        }
 
     for name, data in memory_geff["node_props"].items():
         values = data["values"]
@@ -208,7 +213,9 @@ class Test_api_wrapper:
         graph, metadata = NxBackend.read(path_store)
         graph_adapter = NxBackend.graph_adapter(graph)
 
-        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+        _assert_graph_equal_to_geff(
+            graph_adapter, memory_geff, relax_edge_direction=backend == "spatial-graph"
+        )
         assert metadata.extra["foo"] == "bar"
         assert metadata.extra["bar"]["baz"] == "qux"
 
@@ -273,13 +280,17 @@ class Test_api_wrapper_simple:  # tests that only need backend parametrization
         # this will create a graph instance of the backend type
         original_graph = backend_module.construct(**memory_geff)
         adpt_og_graph = backend_module.graph_adapter(original_graph)
+        _assert_graph_equal_to_geff(adpt_og_graph, memory_geff)
 
         # Write to store type
         for store in stores:
             backend_module.write(original_graph, store, memory_geff["metadata"])
             new_graph = backend_module.graph_adapter(backend_module.read(store)[0])
-            assert adpt_og_graph.get_node_ids() == new_graph.get_node_ids()
-            assert adpt_og_graph.get_edge_ids() == new_graph.get_edge_ids()
+            # Node/edge order is not a meaningful contract: spatial-graph stores
+            # nodes in a std::unordered_map whose iteration order is unspecified
+            # (and differs between libstdc++/libc++ and MSVC's STL). Compare ids
+            # as sets and check that every attribute matches by node/edge id.
+            _assert_graph_equal_to_geff(new_graph, memory_geff)
 
     def test_overwrite(self, backend):
         backend_module: Backend = get_backend(backend)

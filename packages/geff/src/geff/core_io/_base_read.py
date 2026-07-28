@@ -261,11 +261,11 @@ class GeffReader:
         # remove edges if any of its nodes has been masked
         edges = np.asarray(self.edges[:])
         if node_mask is not None:
-            edge_mask_removed_nodes = np.isin(edges, nodes).all(axis=1)
+            edge_mask_removed_nodes = np.asarray(np.isin(edges, nodes).all(axis=1), dtype=np.bool_)
             if edge_mask is not None:
                 edge_mask = np.logical_and(edge_mask, edge_mask_removed_nodes)
             else:
-                edge_mask = edge_mask_removed_nodes  # type: ignore[assignment]
+                edge_mask = edge_mask_removed_nodes
         edges = edges[edge_mask if edge_mask is not None else ...]
 
         edge_props: dict[str, PropDictNpArray] = {}
