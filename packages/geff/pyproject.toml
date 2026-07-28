@@ -37,7 +37,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-spatial-graph = ["spatial-graph>=0.0.4"]
+spatial-graph = ["spatial-graph>=0.0.7"]
 ctc = [
     "dask>=2024.10",
     "imagecodecs>=2025.3.30",

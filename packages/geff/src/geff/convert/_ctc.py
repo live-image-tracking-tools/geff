@@ -230,7 +230,7 @@ def from_ctc_to_geff(
 
         if seg_path is not None:
             rel_path = os.path.relpath(seg_path, geff_path)
-            rel_objs = [RelatedObject(type="labels", path=rel_path, label_prop="tracklet_id")]
+            rel_objs = [RelatedObject(type="labels", path=rel_path, node_prop="tracklet_id")]
 
     write_arrays(
         geff_store=geff_path,

@@ -210,7 +210,7 @@ class Test_ctc_to_geff:
         assert metadata.track_node_props == {"tracklet": "tracklet_id"}
         assert metadata.related_objects is not None
         assert metadata.related_objects[0] == RelatedObject(
-            type="labels", label_prop="tracklet_id", path="../segm.zarr"
+            type="labels", node_prop="tracklet_id", path="../segm.zarr"
         )
 
         # Test without exporting segmentation
@@ -294,7 +294,7 @@ class Test_ctc_to_geff:
         assert metadata.track_node_props == {"tracklet": "tracklet_id"}
         assert metadata.related_objects is not None
         assert metadata.related_objects[0] == RelatedObject(
-            type="labels", label_prop="tracklet_id", path=os.path.join("..", "segm.zarr")
+            type="labels", node_prop="tracklet_id", path=os.path.join("..", "segm.zarr")
         )
 
     def test_seg_to_store(
@@ -342,7 +342,7 @@ class Test_ctc_to_geff:
         assert metadata.track_node_props == {"tracklet": "tracklet_id"}
         assert metadata.related_objects is not None
         assert metadata.related_objects[0] == RelatedObject(
-            type="labels", label_prop="tracklet_id", path=os.path.join("..", "segm.zarr")
+            type="labels", node_prop="tracklet_id", path=os.path.join("..", "segm.zarr")
         )
 
     def test_seg_to_bad_store(
