@@ -28,16 +28,21 @@ sg = pytest.importorskip("spatial_graph")
 
 # assert that all the data in the graph are equal to those in the memory geff it was created from
 def _assert_graph_equal_to_geff(
-    graph_adapter: GraphAdapter,
-    memory_geff: InMemoryGeff,
+    graph_adapter: GraphAdapter, memory_geff: InMemoryGeff, relax_edge_direction: bool = False
 ):
     metadata = memory_geff["metadata"]
 
     # nodes and edges correct
     assert {*graph_adapter.get_node_ids()} == {*memory_geff["node_ids"].tolist()}
-    assert {*graph_adapter.get_edge_ids()} == {
-        *[tuple(edges) for edges in memory_geff["edge_ids"].tolist()]
-    }
+    if relax_edge_direction:
+        # Cast tuples to sets to remove the directionality constraint when testing spatial graph
+        assert {frozenset(t) for t in graph_adapter.get_edge_ids()} == {
+            *[frozenset(edges) for edges in memory_geff["edge_ids"].tolist()]
+        }
+    else:
+        assert {*graph_adapter.get_edge_ids()} == {
+            *[tuple(edges) for edges in memory_geff["edge_ids"].tolist()]
+        }
 
     for name, data in memory_geff["node_props"].items():
         values = data["values"]
@@ -208,7 +213,9 @@ class Test_api_wrapper:
         graph, metadata = NxBackend.read(path_store)
         graph_adapter = NxBackend.graph_adapter(graph)
 
-        _assert_graph_equal_to_geff(graph_adapter, memory_geff)
+        _assert_graph_equal_to_geff(
+            graph_adapter, memory_geff, relax_edge_direction=backend == "spatial-graph"
+        )
         assert metadata.extra["foo"] == "bar"
         assert metadata.extra["bar"]["baz"] == "qux"
 
