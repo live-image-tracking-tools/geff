@@ -79,6 +79,7 @@ jobs:
         run: |
           uv run coverage run -m pytest --color=yes -v
           uv run coverage xml
+        shell: bash
 
       - name: Coverage
         uses: codecov/codecov-action@v7

@@ -147,7 +147,7 @@ class TestCreateOrUpdatePropsMetadata:
 
     def test_multiple_props_same_call(self):
         """Test adding multiple props in a single call."""
-        existing_props = {"newprop": PropMetadata(identifier="newprop", dtype="int")}
+        existing_props = {"newprop": PropMetadata(identifier="newprop", dtype="int64")}
         metadata = GeffMetadata(
             directed=True,
             node_props_metadata={},
