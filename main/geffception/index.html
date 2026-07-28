@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/main/reference/geff/validate/">
+        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/main/geffception/">
       
       
-        <link rel="prev" href="../testing/data/">
+        <link rel="prev" href="../specification/">
       
       
-        <link rel="next" href="data/">
+        <link rel="next" href="../tracking/">
       
       
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>validate - geff</title>
+        <title>GEFFception: Hierarchical nesting of GEFFs - geff</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
       
 
@@ -48,11 +48,11 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../../css/extra.css">
+      <link rel="stylesheet" href="../css/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#geff.validate" class="md-skip">
+        <a href="#geffception-hierarchical-nesting-of-geffs" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +90,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="geff" class="md-header__button md-logo" aria-label="geff" data-md-component="logo">
+    <a href=".." title="geff" class="md-header__button md-logo" aria-label="geff" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              validate
+              GEFFception: Hierarchical nesting of GEFFs
             
           </span>
         </div>
@@ -200,7 +200,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="geff" class="md-nav__button md-logo" aria-label="geff" data-md-component="logo">
+    <a href=".." title="geff" class="md-nav__button md-logo" aria-label="geff" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -230,7 +230,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -257,7 +257,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../what-is-geff/" class="md-nav__link">
+      <a href="../what-is-geff/" class="md-nav__link">
         
   
   
@@ -284,7 +284,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../specification/" class="md-nav__link">
+      <a href="../specification/" class="md-nav__link">
         
   
   
@@ -308,10 +308,19 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../geffception/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -327,6 +336,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -338,7 +348,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tracking/" class="md-nav__link">
+      <a href="../tracking/" class="md-nav__link">
         
   
   
@@ -365,7 +375,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../command-line-tools/" class="md-nav__link">
+      <a href="../command-line-tools/" class="md-nav__link">
         
   
   
@@ -392,7 +402,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tips-and-tricks/" class="md-nav__link">
+      <a href="../tips-and-tricks/" class="md-nav__link">
         
   
   
@@ -419,7 +429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../compatibility/" class="md-nav__link">
+      <a href="../compatibility/" class="md-nav__link">
         
   
   
@@ -446,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../convert/" class="md-nav__link">
+      <a href="../convert/" class="md-nav__link">
         
   
   
@@ -470,10 +480,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -485,11 +493,11 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
           <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
@@ -510,7 +518,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
@@ -525,8 +533,6 @@
                 
   
   
-    
-  
   
   
     
@@ -548,15 +554,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_1" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../reference/geff/" class="md-nav__link ">
               
   
   
@@ -580,7 +586,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_10_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -600,7 +606,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../convert/" class="md-nav__link">
+      <a href="../reference/geff/convert/" class="md-nav__link">
         
   
   
@@ -628,7 +634,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../core_io/" class="md-nav__link">
+      <a href="../reference/geff/core_io/" class="md-nav__link">
         
   
   
@@ -676,7 +682,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../testing/" class="md-nav__link ">
+            <a href="../reference/geff/testing/" class="md-nav__link ">
               
   
   
@@ -720,7 +726,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../testing/data/" class="md-nav__link">
+      <a href="../reference/geff/testing/data/" class="md-nav__link">
         
   
   
@@ -753,8 +759,6 @@
                 
   
   
-    
-  
   
   
     
@@ -780,15 +784,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_1_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_1_5" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../reference/geff/validate/" class="md-nav__link ">
               
   
   
@@ -806,13 +810,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_10_1_5" id="__nav_10_1_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_10_1_5" id="__nav_10_1_5_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_10_1_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_10_1_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_10_1_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -832,7 +836,7 @@
   
   
     <li class="md-nav__item">
-      <a href="data/" class="md-nav__link">
+      <a href="../reference/geff/validate/data/" class="md-nav__link">
         
   
   
@@ -860,7 +864,7 @@
   
   
     <li class="md-nav__item">
-      <a href="graph/" class="md-nav__link">
+      <a href="../reference/geff/validate/graph/" class="md-nav__link">
         
   
   
@@ -888,7 +892,7 @@
   
   
     <li class="md-nav__item">
-      <a href="segmentation/" class="md-nav__link">
+      <a href="../reference/geff/validate/segmentation/" class="md-nav__link">
         
   
   
@@ -916,7 +920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="shapes/" class="md-nav__link">
+      <a href="../reference/geff/validate/shapes/" class="md-nav__link">
         
   
   
@@ -944,7 +948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="structure/" class="md-nav__link">
+      <a href="../reference/geff/validate/structure/" class="md-nav__link">
         
   
   
@@ -972,7 +976,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tracks/" class="md-nav__link">
+      <a href="../reference/geff/validate/tracks/" class="md-nav__link">
         
   
   
@@ -1036,7 +1040,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../geff_spec/" class="md-nav__link ">
+            <a href="../reference/geff_spec/" class="md-nav__link ">
               
   
   
@@ -1080,7 +1084,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../geff_spec/utils/" class="md-nav__link">
+      <a href="../reference/geff_spec/utils/" class="md-nav__link">
         
   
   
@@ -1150,55 +1154,137 @@
                   
 
 
-
-<div class="doc doc-object doc-module">
-
-
-
-<h1 id="geff.validate" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">geff.validate</span>
-
-
-</h1>
-
-    <div class="doc doc-contents first">
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
-    </div>
-
-</div>
-
-
-
-
-
-
-
   
   
+
+
+<h1 id="geffception-hierarchical-nesting-of-geffs">GEFFception: Hierarchical nesting of GEFFs</h1>
+<p>The GEFF specification supports hierarchical nesting of GEFF files. This is particularly useful in the context of cell tracking where some properties may be computed for an entire tracklet or lineage as opposed to for an individual node or edge. For a complete example of a tracking graph that uses GEFFception to store tracklet and lineage properties, see <a href="../tracking/">the tracking docs</a>.</p>
+<p>In the example illustrated below, <code>tracking_graph.geff</code> contains nodes with the properties <code>track_id</code>, <code>t</code>, <code>y</code>, and <code>x</code> and edges with the property <code>distance</code>. Within the folder structure of <code>tracking_graph.geff</code> is <code>lineage.geff</code>. The <code>GeffMetadata</code> of <code>tracking_graph.geff</code> points to <code>lineage.geff</code> as a related object whose node ids correspond to the <code>track_id</code> property of nodes in <code>tracking_graph.geff</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">.</span><span class="n">zarr</span>
+    <span class="n">tracking_graph</span><span class="o">.</span><span class="n">geff</span><span class="o">/</span>
+        <span class="o">.</span><span class="n">zattrs</span> <span class="c1"># graph metadata with `geff_version` and RelatedObject metadata for lineage.geff</span>
+        <span class="n">nodes</span><span class="o">/</span> 
+            <span class="n">ids</span> <span class="c1"># shape: (N,) dtype: uint64</span>
+            <span class="n">props</span><span class="o">/</span>
+                <span class="n">track_id</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: uint16</span>
+                <span class="n">t</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: uint16</span>
+                <span class="n">y</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: float32</span>
+                <span class="n">x</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N,) dtype: float32</span>
+        <span class="n">edges</span><span class="o">/</span>
+            <span class="n">ids</span> <span class="c1"># shape: (E, 2) dtype: uint64</span>
+            <span class="n">props</span><span class="o">/</span>
+                <span class="n">distance</span><span class="o">/</span>
+                    <span class="n">values</span> <span class="c1"># shape: (E,) dtype: float32</span>
+        <span class="n">lineage</span><span class="o">.</span><span class="n">geff</span><span class="o">/</span>
+            <span class="o">.</span><span class="n">zattrs</span> <span class="c1"># geff metadata</span>
+            <span class="n">nodes</span><span class="o">/</span>
+                <span class="n">ids</span> <span class="c1"># shape: (L,) dtype: uint64</span>
+                <span class="n">props</span><span class="o">/</span>
+                    <span class="n">track_displacement</span><span class="o">/</span>
+                        <span class="n">values</span> <span class="c1"># shape: (L,) dtype: float32</span>
+            <span class="n">edges</span><span class="o">/</span>
+                <span class="n">ids</span> <span class="c1"># shape: (0,) dytpe: uint64</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>// /path/to.zarr/tracking_graph.geff/.zattrs
+{
+    &quot;geff&quot;: {
+        &quot;directed&quot;: true,
+        &quot;geff_version&quot;: &quot;1.2.0.1.1&quot;,
+        &quot;axes&quot;: [
+            { 
+                &quot;name&quot;: &quot;t&quot;, 
+                &quot;type&quot;: &quot;time&quot;,
+                &quot;unit&quot;: &quot;second&quot;, 
+                &quot;min&quot;: 0, 
+                &quot;max&quot;: 125 
+            },
+            {
+                &quot;name&quot;: &quot;x&quot;,
+                &quot;type&quot;: &quot;space&quot;,
+                &quot;unit&quot;: &quot;micrometer&quot;,
+                &quot;min&quot;: 764.42,
+                &quot;max&quot;: 2152.3
+            },
+            {
+                &quot;name&quot;: &quot;y&quot;,
+                &quot;type&quot;: &quot;space&quot;,
+                &quot;unit&quot;: &quot;micrometer&quot;,
+                &quot;min&quot;: 81.667,
+                &quot;max&quot;: 1877.7
+            }
+        ],
+        &quot;node_props_metadata&quot;: {
+            &quot;track_id&quot;: {
+                &quot;identifier&quot;: &quot;track_id&quot;,
+                &quot;dtype&quot;: &quot;uint16&quot;,
+                &quot;varlength&quot;: false
+            },
+            &quot;t&quot;: {
+                &quot;identifier&quot;: &quot;t&quot;,
+                &quot;dtype&quot;: &quot;uint16&quot;,
+                &quot;varlength&quot;: false,
+                &quot;unit&quot;: &quot;second&quot;
+            },
+            &quot;y&quot;: {
+                &quot;identifier&quot;: &quot;y&quot;,
+                &quot;dtype&quot;: &quot;float32&quot;,
+                &quot;varlength&quot;: false,
+                &quot;unit&quot;: &quot;micrometer&quot;
+            },
+            &quot;x&quot;: {
+                &quot;identifier&quot;: &quot;x&quot;,
+                &quot;dtype&quot;: &quot;float32&quot;,
+                &quot;varlength&quot;: false,
+                &quot;unit&quot;: &quot;micrometer&quot;
+            }
+        },
+        &quot;edge_props_metadata&quot;: {
+            &quot;distance&quot;: {
+                &quot;identifier&quot;: &quot;distance&quot;,
+                &quot;dtype&quot;: &quot;float32&quot;,
+                &quot;varlength&quot;: false
+            }
+        },
+        &quot;track_node_props&quot;: {
+            &quot;lineage&quot;: &quot;track_id&quot;
+        },
+        &quot;related_objects&quot;: [
+            {
+                &quot;type&quot;: &quot;geff&quot;,
+                &quot;path&quot;: &quot;lineage.geff&quot;,
+                &quot;node_prop&quot;: &quot;track_id&quot;
+            }
+        ]
+    }
+}
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>// /path/to.zarr/tracking_graph.geff/lineage.geff/.zattrs
+{
+    &quot;geff&quot;: {
+        &quot;directed&quot;: true,
+        &quot;geff_version&quot;: &quot;1.2.0.1.1&quot;,
+        &quot;node_props_metadata&quot;: {
+            &quot;track_displacement&quot;: {
+                &quot;identifier&quot;: &quot;track_displacement&quot;,
+                &quot;dtype&quot;: &quot;float32&quot;,
+                &quot;varlength&quot;: false
+            }
+        },
+        &quot;edge_props_metadata&quot;: {}
+    }
+}
+</code></pre></div>
+
+
+
+
+
+
 
 
 
@@ -1242,12 +1328,12 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
-        <script src="../../../javascripts/mathjax.js"></script>
+        <script src="../javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
