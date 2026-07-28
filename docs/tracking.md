@@ -14,9 +14,9 @@ The `tracklet` and `lineage` properties specified in the `track_node_props` sect
 
 By providing and enforcing a definition of tracklet and lineage, and ensuring tracklet and lineage IDs can be exchanged rather than requiring them to be recomputed, we can ensure consistency of downstream analyses on the tracks across different tools.
 
-### Geffception for tracking
+### GEFFception for tracking
 
-In order to store properties that apply to an entire tracklet or lineage as opposed to an individual node or edge, we recommend [geffception](./geffception.md). Geffception allows for hierarchical nesting of geffs. 
+In order to store properties that apply to an entire tracklet or lineage as opposed to an individual node or edge, we recommend [geffception](./geffception.md). GEFFception allows for hierarchical nesting of geffs. 
 
 In the example illustrated below, there are three levels of nested geffs.
 

@@ -72,7 +72,7 @@ def _validate_key_identifier_equality(
 class RelatedObject(BaseModel):
     """A set of metadata for data that is associated with the graph. The types
     'labels' and 'image' should be used for label and image objects, respectively.
-    'geff' should be used for geffception.
+    'geff' should be used for GEFFception.
     Other types are also allowed.
 
     !!! warning
@@ -84,7 +84,7 @@ class RelatedObject(BaseModel):
         ...,
         description=(
             "Type of the related object. 'labels' for label objects, "
-            "'image' for image objects. 'geff' for geffception graphs. "
+            "'image' for image objects. 'geff' for GEFFception graphs. "
             "Other types are also allowed, but may not be "
             "recognized by reader applications. "
         ),
@@ -113,10 +113,10 @@ class RelatedObject(BaseModel):
         description=(
             "Property name that links between the related object and node properties. "
             "For segmentation data, this field should refer to the node property that "
-            "specifies the segmentation ID for each node. For geffception, this property "
-            "typically links between the node ID of the geffception graphs and the property "
-            "that specifies which geffception graph a node in the core graph belongs to. "
-            "See the geffception page in the documentation for a concrete example."
+            "specifies the segmentation ID for each node. For GEFFception, this property "
+            "typically links between the node ID of the GEFFception graphs and the property "
+            "that specifies which GEFFception graph a node in the core graph belongs to. "
+            "See the GEFFception page in the documentation for a concrete example."
         ),
     )
 
@@ -269,7 +269,7 @@ class GeffMetadata(BaseModel):
             "Each dictionary must contain 'type', 'path', and optionally 'node_prop' "
             "properties. The 'type' represents the data type. 'labels' and 'image' should "
             "be used for label and image objects, respectively. 'geff' should be used to "
-            "refer to geffception. See geffception docs for more details. Other types are "
+            "refer to GEFFception. See GEFFception docs for more details. Other types are "
             "also allowed. "
             "The 'path' should be relative to the geff zarr-attributes file. "
             "It is strongly recommended all related objects are stored as siblings "

@@ -1,6 +1,6 @@
-# Geffception
+# GEFFception: Hierarchical nesting of GEFFs
 
-The GEFF specification supports hierarchical nesting of GEFF files. This is particularly useful in the context of cell tracking where some properties may be computed for an entire tracklet or lineage as opposed to for an individual node or edge. For a complete example of a tracking graph that uses geffception to store tracklet and lineage properties, see [the tracking docs](./tracking.md).
+The GEFF specification supports hierarchical nesting of GEFF files. This is particularly useful in the context of cell tracking where some properties may be computed for an entire tracklet or lineage as opposed to for an individual node or edge. For a complete example of a tracking graph that uses GEFFception to store tracklet and lineage properties, see [the tracking docs](./tracking.md).
 
 In the example illustrated below, `tracking_graph.geff` contains nodes with the properties `track_id`, `t`, `y`, and `x` and edges with the property `distance`. Within the folder structure of `tracking_graph.geff` is `lineage.geff`. The `GeffMetadata` of `tracking_graph.geff` points to `lineage.geff` as a related object whose node ids correspond to the `track_id` property of nodes in `tracking_graph.geff`.
 
