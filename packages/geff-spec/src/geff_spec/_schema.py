@@ -275,7 +275,7 @@ class GeffMetadata(BaseModel):
             "It is strongly recommended all related objects are stored as siblings "
             "of the geff group within the top-level zarr group. "
             "The deprecated 'label_prop' is only valid for type 'labels' and specifies the node"
-            "property that will be used to identify the labels in the related object. "
+            "property that will be used to identify the nodes in the related object. "
         ),
     )
     display_hints: DisplayHint | None = Field(

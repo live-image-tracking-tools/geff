@@ -33,7 +33,7 @@ core.geff/
     {
         "type": "geff",
         "path": "tracklet.geff",
-        "node_prop": "track_id"
+        "node_prop": "tracklet_id"
     }
 ]
 ```

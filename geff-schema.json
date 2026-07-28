@@ -523,7 +523,7 @@
             }
           ],
           "default": null,
-          "description": "Property name that links between the related object and node properties. For segmentation data, this field should refer to the node property that specifies the segmentation ID for each node. For geffception, this property typically links between the node ID of the geffception graphs and the property that specifies which geffception graph a node in the core graph belongs to. See the geffception page in the documentation for a concrete example.",
+          "description": "Property on current geff graph nodes that link to the related object. For segmentation data, this field should refer to the node property that specifies the segmentation ID for each node. For geffception, this property typically links a node property on the current graph to node IDs of the related, geffception graphs. See the geffception page in the documentation for a concrete example.",
           "title": "Node Prop"
         }
       },
