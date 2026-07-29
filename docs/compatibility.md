@@ -12,3 +12,4 @@ The following libraries can read and/or write GEFF files:
 - [`InTRACKtive`](https://github.com/royerlab/inTRACKtive)
 - [`tracksdata`](https://github.com/royerlab/tracksdata)
 - [`napari-geff`](https://github.com/live-image-tracking-tools/napari-geff)
+- [`byotrack`](https://github.com/raphaelreme/byotrack)
