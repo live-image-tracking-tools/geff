@@ -76,6 +76,8 @@ extend-select = [
 ]
 ignore = [
     "ANN401", # disallow Any
+    "PLC0105", # TypeVar name doesn't reflect covariance
+    "PT031", # `pytest.warns()` block should contain a single simple statement
 ]
 
 

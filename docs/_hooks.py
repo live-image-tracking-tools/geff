@@ -36,7 +36,8 @@ def _gen_schema_docs() -> str:
                 "--no-copy-js",
                 "geff-schema.json",
                 str(dest),
-            ]
+            ],
+            check=False,
         )
 
         # Read in docs, and make some modifications

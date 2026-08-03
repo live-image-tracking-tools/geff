@@ -376,7 +376,7 @@ class GeffMetadata(BaseModel):
                 f"/dataset.zarr/)."
             )
         if not isinstance(geff_dict := group.attrs["geff"], Mapping):
-            raise ValueError(f"Expected geff metadata to be a Mapping. Got {type(geff_dict)}")
+            raise TypeError(f"Expected geff metadata to be a Mapping. Got {type(geff_dict)}")
         return cls.model_validate(geff_dict)
 
 
