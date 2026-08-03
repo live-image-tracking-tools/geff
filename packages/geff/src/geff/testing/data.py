@@ -137,8 +137,8 @@ def create_dummy_in_mem_geff(
     # Generate spatiotemporal coordinates with flexible dimensions
     def _add_axis(
         name: str,
-        ax_type: Literal[AxisType],
-        unit: Literal[SpaceUnits, TimeUnits] | str,
+        ax_type: AxisType,
+        unit: SpaceUnits | TimeUnits | str,
         values: np.ndarray,
     ) -> PropMetadata:
         node_props[name] = {"values": values, "missing": None}
@@ -328,7 +328,7 @@ def create_dummy_in_mem_geff(
     if extra_edge_props is not None:
         # Validate input is a dict
         if not isinstance(extra_edge_props, dict):
-            raise ValueError(f"extra_edge_props must be a dict, got {type(extra_edge_props)}")
+            raise TypeError(f"extra_edge_props must be a dict, got {type(extra_edge_props)}")
 
         # Validate dict contains only string keys and valid dtype values or numpy arrays
         for prop_name, prop_value in extra_edge_props.items():
