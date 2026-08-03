@@ -346,12 +346,12 @@ class TestWritePropsArrays:
         np.testing.assert_array_equal(written_values[:], expected_values)
 
         if expected_missing is None:
-            assert "missing" not in root[group_path][_path.PROPS][prop_name].keys()
+            assert "missing" not in root[group_path][_path.PROPS][prop_name]
         else:
             written_missing = root[group_path][_path.PROPS][prop_name]["missing"]
             np.testing.assert_array_equal(written_missing[:], expected_missing)
         if expected_data is None:
-            assert "data" not in root[group_path][_path.PROPS][prop_name].keys()
+            assert "data" not in root[group_path][_path.PROPS][prop_name]
         else:
             written_data = root[group_path][_path.PROPS][prop_name]["data"]
             np.testing.assert_array_equal(written_data[:], expected_data)

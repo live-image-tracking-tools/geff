@@ -400,7 +400,7 @@ def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
     # If the root is empty, try to delete the root zarr
     if len(list(root.keys())) == 0:
         # Handle Path or str storelike
-        if isinstance(store, Path) or isinstance(store, str):
+        if isinstance(store, (Path, str)):
             shutil.rmtree(store)
         else:
             # Try to get a valid path from the store

@@ -348,7 +348,7 @@ def _write_zarr_array(
     chunks = (first_dim, *data.shape[1:])
 
     zarr_version = _detect_zarr_spec_version(group)
-    use_sharding = True if zarr_version is not None and zarr_version >= 3 else False
+    use_sharding = bool(zarr_version is not None and zarr_version >= 3)
 
     if use_sharding:
         # Shard spans entire array → one file per array.

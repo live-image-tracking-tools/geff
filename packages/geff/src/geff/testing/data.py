@@ -138,7 +138,7 @@ def create_dummy_in_mem_geff(
     def _add_axis(
         name: str,
         ax_type: Literal[AxisType],
-        unit: str | Literal[SpaceUnits] | Literal[TimeUnits],
+        unit: Literal[SpaceUnits, TimeUnits] | str,
         values: np.ndarray,
     ) -> PropMetadata:
         node_props[name] = {"values": values, "missing": None}

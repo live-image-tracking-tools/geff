@@ -79,12 +79,12 @@ def _validate_props_group(
     """Validate every property subgroup under `props_group`."""
     # check that all properties in the metadata are in the group
     for prop_name in props_metadata:
-        if prop_name not in props_group.keys():
+        if prop_name not in props_group:
             raise ValueError(
                 f"Property {prop_name} is in the metadata but missing from the property group"
             )
 
-    for prop_name in props_group.keys():
+    for prop_name in props_group:
         # check that all properties in the group are in the metadata
         if prop_name not in props_metadata:
             raise ValueError(f"Property {prop_name} is missing from the property metadata")

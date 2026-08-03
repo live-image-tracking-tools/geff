@@ -268,7 +268,6 @@ def write(
             arbitrary indices. This allows custom node identifiers to be used in the geff file
             instead of rustworkx's internal indices. If None, uses rx indices directly.
     """
-    ...
 
 
 @overload
