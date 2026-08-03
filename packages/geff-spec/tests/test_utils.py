@@ -273,10 +273,10 @@ class TestCreatePropMetadata:
             create_props_metadata("mixed_dtype", prop_data)
 
     def test_invalid_prop_data_raises_error(self):
-        """Test that invalid property data raises ValueError."""
+        """Test that invalid property data raises TypeError."""
         invalid_data = "not_valid_data"
 
-        with pytest.raises(ValueError, match=r"Expected dict of property data, got.*"):
+        with pytest.raises(TypeError, match=r"Expected dict of property data, got.*"):
             create_props_metadata("invalid", invalid_data)
 
     def test_all_optional_parameters(self):

@@ -244,7 +244,7 @@ class TestSerializeVlenPropertyData:
 
     def test_serialize_nonarrays(self):
         with pytest.raises(
-            ValueError,
+            TypeError,
             match="For variable length properties, each node/edge property must be a numpy array",
         ):
             serialize_vlen_property_data(

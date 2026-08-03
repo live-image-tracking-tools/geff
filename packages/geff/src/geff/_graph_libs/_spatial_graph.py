@@ -76,27 +76,23 @@ class SgBackend(Backend):
         node_dtype = get_dtype_str(node_ids)
 
         # collect node and edge attributes
-        node_attr_dtypes = {
-            name: get_dtype_str(node_props[name]["values"]) for name in node_props.keys()
-        }
-        for name in node_props.keys():
+        node_attr_dtypes = {name: get_dtype_str(node_props[name]["values"]) for name in node_props}
+        for name in node_props:
             if node_props[name]["missing"] is not None:
                 warnings.warn(
                     f"Potential missing values for attr {name} are being ignored",
                     stacklevel=2,
                 )
-        edge_attr_dtypes = {
-            name: get_dtype_str(edge_props[name]["values"]) for name in edge_props.keys()
-        }
-        for name in edge_props.keys():
+        edge_attr_dtypes = {name: get_dtype_str(edge_props[name]["values"]) for name in edge_props}
+        for name in edge_props:
             if edge_props[name]["missing"] is not None:
                 warnings.warn(
                     f"Potential missing values for attr {name} are being ignored",
                     stacklevel=2,
                 )
 
-        node_attrs = {name: node_props[name]["values"] for name in node_props.keys()}
-        edge_attrs = {name: edge_props[name]["values"] for name in edge_props.keys()}
+        node_attrs = {name: node_props[name]["values"] for name in node_props}
+        edge_attrs = {name: edge_props[name]["values"] for name in edge_props}
 
         # squish position attributes together into one position attribute
         position: np.ndarray[tuple[int, ...], np.dtype[Any]]
@@ -188,13 +184,13 @@ class SgBackend(Backend):
             node_ids=graph.nodes,
             node_props={
                 name: {"values": getattr(graph.node_attrs[graph.nodes], name), "missing": None}
-                for name in graph.node_attr_dtypes.keys()
+                for name in graph.node_attr_dtypes
             },
             node_props_unsquish={graph.position_attr: axis_names},
             edge_ids=graph.edges,
             edge_props={
                 name: {"values": getattr(graph.edge_attrs[graph.edges], name), "missing": None}
-                for name in graph.edge_attr_dtypes.keys()
+                for name in graph.edge_attr_dtypes
             },
             metadata=metadata,
             zarr_format=zarr_format,
