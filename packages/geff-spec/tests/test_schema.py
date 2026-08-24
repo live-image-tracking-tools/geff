@@ -8,8 +8,10 @@ import zarr
 import zarr.storage
 
 from geff_spec import GeffMetadata, GeffSchema, PropMetadata, RelatedObject
+from geff_spec._axis import Axis
 from geff_spec._schema import (
     VERSION_PATTERN,
+    DisplayHint,
     _formatted_schema_json,
     _validate_key_identifier_equality,
 )
@@ -351,6 +353,42 @@ class TestMetadataModel:
                     **meta,
                 }
             )
+
+    def test_all_fields(self) -> None:
+        """Test all possible fields in metadata so dropping a field will
+        trigger a test failure in the future"""
+
+        GeffMetadata(
+            geff_version="0.0.1",
+            directed=True,
+            axes=[
+                Axis(name="t", type="time"),
+                Axis(name="x", type="space"),
+                Axis(name="y", type="space"),
+            ],
+            node_props_metadata={
+                "t": PropMetadata(identifier="t", dtype="float32"),
+                "x": PropMetadata(identifier="x", dtype="float64"),
+                "y": PropMetadata(identifier="y", dtype="float64"),
+                "ellipse": PropMetadata(identifier="ellipse", dtype="float64"),
+                "sphere": PropMetadata(identifier="sphere", dtype="float64"),
+                "polygon": PropMetadata(identifier="polygon", dtype="float64"),
+                "tracklet": PropMetadata(identifier="tracklet", dtype="int64"),
+                "lineage": PropMetadata(identifier="lineage", dtype="int64"),
+            },
+            edge_props_metadata={},
+            sphere="sphere",
+            ellipsoid="ellipse",
+            track_node_props={"tracklet": "tracklet", "lineage": "lineage"},
+            related_objects=[
+                RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
+                RelatedObject(type="image", path="raw/"),
+            ],
+            display_hints=DisplayHint(
+                display_horizontal="x", display_vertical="y", display_time="t"
+            ),
+            extra={"random metadata": "information"},
+        )
 
 
 def test__validate_key_identifier_equality() -> None:
