@@ -1754,108 +1754,108 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
 <p>This is a geff metadata zattrs file that matches the above example structure.</p>
 <div class="highlight"><pre><span></span><code>// /path/to.zarr/tracking_graph/.zattrs
 {
-  &quot;geff&quot;: {
-    &quot;directed&quot;: true,
-    &quot;geff_version&quot;: &quot;1.2.0.1.1&quot;,
+  "geff": {
+    "directed": true,
+    "geff_version": "1.2.0.1.1",
     // axes are optional
-    &quot;axes&quot;: [
-      { &quot;name&quot;: &quot;t&quot;, &quot;type&quot;: &quot;time&quot;, &quot;unit&quot;: &quot;second&quot;, &quot;min&quot;: 0, &quot;max&quot;: 125 },
+    "axes": [
+      { "name": "t", "type": "time", "unit": "second", "min": 0, "max": 125 },
       {
-        &quot;name&quot;: &quot;z&quot;,
-        &quot;type&quot;: &quot;space&quot;,
-        &quot;unit&quot;: &quot;micrometer&quot;,
-        &quot;min&quot;: 1523.36,
-        &quot;max&quot;: 4398.1
+        "name": "z",
+        "type": "space",
+        "unit": "micrometer",
+        "min": 1523.36,
+        "max": 4398.1
       },
       {
-        &quot;name&quot;: &quot;y&quot;,
-        &quot;type&quot;: &quot;space&quot;,
-        &quot;unit&quot;: &quot;micrometer&quot;,
-        &quot;min&quot;: 81.667,
-        &quot;max&quot;: 1877.7
+        "name": "y",
+        "type": "space",
+        "unit": "micrometer",
+        "min": 81.667,
+        "max": 1877.7
       },
       {
-        &quot;name&quot;: &quot;x&quot;,
-        &quot;type&quot;: &quot;space&quot;,
-        &quot;unit&quot;: &quot;micrometer&quot;,
-        &quot;min&quot;: 764.42,
-        &quot;max&quot;: 2152.3
+        "name": "x",
+        "type": "space",
+        "unit": "micrometer",
+        "min": 764.42,
+        "max": 2152.3
       }
     ],
     // predefined node attributes for storing detections as spheres or ellipsoids
-    &quot;sphere&quot;: &quot;radius&quot;, // optional
-    &quot;ellipsoid&quot;: &quot;covariance3d&quot;, // optional
-    &quot;display_hints&quot;: {
-      &quot;display_horizontal&quot;: &quot;x&quot;,
-      &quot;display_vertical&quot;: &quot;y&quot;,
-      &quot;display_depth&quot;: &quot;z&quot;,
-      &quot;display_time&quot;: &quot;t&quot;
+    "sphere": "radius", // optional
+    "ellipsoid": "covariance3d", // optional
+    "display_hints": {
+      "display_horizontal": "x",
+      "display_vertical": "y",
+      "display_depth": "z",
+      "display_time": "t"
     },
-    &quot;node_props_metadata&quot;: {
-      &quot;t&quot;: {
-        &quot;identifier&quot;: &quot;t&quot;,
-        &quot;dtype&quot;: &quot;uint16&quot;,
-        &quot;varlength&quot;: false,
-        &quot;unit&quot;: &quot;second&quot;
+    "node_props_metadata": {
+      "t": {
+        "identifier": "t",
+        "dtype": "uint16",
+        "varlength": false,
+        "unit": "second"
       },
-      &quot;z&quot;: {
-        &quot;identifier&quot;: &quot;z&quot;,
-        &quot;dtype&quot;: &quot;float32&quot;,
-        &quot;varlength&quot;: false,
-        &quot;unit&quot;: &quot;micrometer&quot;
+      "z": {
+        "identifier": "z",
+        "dtype": "float32",
+        "varlength": false,
+        "unit": "micrometer"
       },
-      &quot;y&quot;: {
-        &quot;identifier&quot;: &quot;y&quot;,
-        &quot;dtype&quot;: &quot;float32&quot;,
-        &quot;varlength&quot;: false,
-        &quot;unit&quot;: &quot;micrometer&quot;
+      "y": {
+        "identifier": "y",
+        "dtype": "float32",
+        "varlength": false,
+        "unit": "micrometer"
       },
-      &quot;x&quot;: {
-        &quot;identifier&quot;: &quot;x&quot;,
-        &quot;dtype&quot;: &quot;float32&quot;,
-        &quot;varlength&quot;: false,
-        &quot;unit&quot;: &quot;micrometer&quot;
+      "x": {
+        "identifier": "x",
+        "dtype": "float32",
+        "varlength": false,
+        "unit": "micrometer"
       },
-      &quot;radius&quot;: {
-        &quot;identifier&quot;: &quot;radius&quot;,
-        &quot;dtype&quot;: &quot;float32&quot;,
-        &quot;varlength&quot;: false,
-        &quot;unit&quot;: &quot;micrometer&quot;
+      "radius": {
+        "identifier": "radius",
+        "dtype": "float32",
+        "varlength": false,
+        "unit": "micrometer"
       },
-      &quot;covariance3d&quot;: {
-        &quot;identifier&quot;: &quot;covariance3d&quot;,
-        &quot;dtype&quot;: &quot;float32&quot;,
-        &quot;varlength&quot;: false
+      "covariance3d": {
+        "identifier": "covariance3d",
+        "dtype": "float32",
+        "varlength": false
       },
-      &quot;color&quot;: { &quot;identifier&quot;: &quot;color&quot;, &quot;dtype&quot;: &quot;float32&quot;, &quot;varlength&quot;: false }
+      "color": { "identifier": "color", "dtype": "float32", "varlength": false }
     },
-    &quot;edge_props_metadata&quot;: {
-      &quot;distance&quot;: {
-        &quot;identifier&quot;: &quot;distance&quot;,
-        &quot;dtype&quot;: &quot;float32&quot;,
-        &quot;varlength&quot;: false
+    "edge_props_metadata": {
+      "distance": {
+        "identifier": "distance",
+        "dtype": "float32",
+        "varlength": false
       },
-      &quot;score&quot;: { &quot;identifier&quot;: &quot;score&quot;, &quot;dtype&quot;: &quot;float32&quot;, &quot;varlength&quot;: false }
+      "score": { "identifier": "score", "dtype": "float32", "varlength": false }
     },
     // node attributes corresponding to tracklet and/or lineage IDs
-    &quot;track_node_props&quot;: {
-      &quot;lineage&quot;: &quot;ultrack_lineage_id&quot;,
-      &quot;tracklet&quot;: &quot;ultrack_id&quot;
+    "track_node_props": {
+      "lineage": "ultrack_lineage_id",
+      "tracklet": "ultrack_id"
     },
-    &quot;related_objects&quot;: [
+    "related_objects": [
       {
-        &quot;type&quot;: &quot;labels&quot;,
-        &quot;path&quot;: &quot;../segmentation/&quot;,
-        &quot;node_prop&quot;: &quot;seg_id&quot;
+        "type": "labels",
+        "path": "../segmentation/",
+        "node_prop": "seg_id"
       },
       {
-        &quot;type&quot;: &quot;image&quot;,
-        &quot;path&quot;: &quot;../raw/&quot;
+        "type": "image",
+        "path": "../raw/"
       }
     ],
     // optional coordinate transformation is defined as homogeneous coordinates
     // It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
-    &quot;affine&quot;: [
+    "affine": [
       [1, 0, 0, 0, 0],
       [0, 1, 0, 0, 0],
       [0, 0, 1, 0, 0],
@@ -1863,7 +1863,7 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
       [0, 0, 0, 0, 1]
     ],
     // custom other things must be placed **inside** the extra attribute
-    &quot;extra&quot;: {
+    "extra": {
       // ...
     }
   }
@@ -1872,11 +1872,11 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
 <p>Minimal geff metadata must have <code>version</code> and <code>directed</code> fields under a <code>geff</code> field, as
 well as empty <code>node_props_metadata</code> and <code>edge_props_metadata</code> fields.</p>
 <div class="highlight"><pre><span></span><code>{
-  &quot;geff&quot;: {
-    &quot;version&quot;: &quot;0.0.0&quot;,
-    &quot;directed&quot;: false,
-    &quot;node_props_metadata&quot;: {},
-    &quot;edge_props_metadata&quot;: {}
+  "geff": {
+    "version": "0.0.0",
+    "directed": false,
+    "node_props_metadata": {},
+    "edge_props_metadata": {}
   }
 }
 </code></pre></div>
