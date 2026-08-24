@@ -28,8 +28,28 @@ class Axis(BaseModel):
     define the range of the axis
 
     The optional `scale` field can be used to store a scaling factor such as converting
-    the data from pixel space into real world units. The associated, optional `scaled_unit`
-    field specifies the output unit after applying `scale` to the data.
+    the data from pixel space into real world units or from imaging frames into real world time.
+    The associated, optional `scaled_unit` field specifies the output unit after applying `scale`
+    to the data.
+
+    ```json
+    "axes": [
+        {
+            "name": "t",
+            "type": "time",
+            "unit": "frame",
+            "scale": "5",
+            "scaled_unit": "minute"
+        },
+        {
+            "name": "x",
+            "type": "space",
+            "unit": "pixel",
+            "scale": "0.24",
+            "scaled_unit": "micrometer"
+        }
+    ]
+    ```
     """
 
     name: str = Field(..., description="Name of the corresponding node property")
