@@ -45,8 +45,6 @@ class RxBackend(Backend):
         node_props: dict[str, PropDictNpArray],
         edge_props: dict[str, PropDictNpArray],
     ) -> rx.PyGraph | rx.PyDiGraph:
-        metadata = metadata
-
         graph = rx.PyDiGraph() if metadata.directed else rx.PyGraph()
         graph.attrs = metadata.model_dump()
 

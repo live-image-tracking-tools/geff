@@ -1,5 +1,21 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+# hatchling is pinned below 1.32 because 1.32.0 started emitting
+# `Metadata-Version: 2.5` in built wheels/sdists. Our CI (the
+# hynek/build-and-inspect-python-package@v2 action) runs `twine check
+# --strict` using twine==6.2.0, which hardcodes the list of metadata
+# versions it accepts (see `metadata._VALID_METADATA_VERSIONS` in
+# twine/package.py) and only goes up to "2.4" — so the build fails with
+# "InvalidDistribution: Invalid distribution metadata: '2.5' is not a
+# valid metadata version". This is a version-skew issue between
+# hatchling (ahead) and twine (behind), not a problem with our config.
+# See: https://github.com/live-image-tracking-tools/geff/actions/runs/32746856843/job/97499268558
+#
+# Remove this pin once hynek/build-and-inspect-python-package@v2 picks
+# up a twine release that recognizes metadata-version 2.5 (i.e. once
+# `uv tool run --from twine python -c "import twine.package; from
+# packaging import metadata; print(metadata._VALID_METADATA_VERSIONS)"`
+# includes "2.5").
+requires = ["hatchling<1.32", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]

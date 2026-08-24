@@ -231,7 +231,7 @@ def has_seg_ids_at_coords(
     """
 
     errors: list[str] = []
-    if not len(coords) == len(seg_ids):
+    if len(coords) != len(seg_ids):
         errors.append("Coordinate list must have the same length as the list of seg_ids to test.")
         return False, errors
 

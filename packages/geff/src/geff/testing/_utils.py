@@ -56,15 +56,12 @@ def nx_is_equal(g1: nx.Graph, g2: nx.Graph) -> bool:
             else:
                 same_edges = False
 
-    if (
+    return bool(
         nx.is_isomorphic(g1, g2, edge_match=em, node_match=nm)
         and g1.graph == g2.graph
         and same_nodes
         and same_edges
-    ):
-        return True
-    else:
-        return False
+    )
 
 
 def check_equiv_geff(store_a: StoreLike, store_b: StoreLike) -> None:

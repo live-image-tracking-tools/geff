@@ -108,7 +108,7 @@ def expect_array(parent: zarr.Group, key: str, parent_name: str = "array") -> za
     """Return an array in the parent group with the given key, or raise ValueError."""
     arr = parent.get(key)
     if not isinstance(arr, zarr.Array):
-        raise ValueError(f"{parent_name!r} group must contain an {key!r} array")
+        raise ValueError(f"{parent_name!r} group must contain an {key!r} array")  # noqa: TRY004
     return arr
 
 
@@ -116,7 +116,7 @@ def expect_group(parent: zarr.Group, key: str, parent_name: str = "graph") -> za
     """Return a group in the parent group with the given key, or raise ValueError."""
     grp = parent.get(key)
     if not isinstance(grp, zarr.Group):
-        raise ValueError(f"{parent_name!r} group must contain a group named {key!r}")
+        raise ValueError(f"{parent_name!r} group must contain a group named {key!r}")  # noqa: TRY004
     return grp
 
 
@@ -146,7 +146,7 @@ def _detect_zarr_spec_version(store: StoreLike) -> int | None:
                 return 3
             elif group.metadata.zarr_format == 2:  # pyright: ignore
                 return 2
-    except Exception:
+    except Exception:  # noqa: BLE001, S110
         # If we can't detect, return None
         pass
 
@@ -400,7 +400,7 @@ def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
     # If the root is empty, try to delete the root zarr
     if len(list(root.keys())) == 0:
         # Handle Path or str storelike
-        if isinstance(store, Path) or isinstance(store, str):
+        if isinstance(store, (Path, str)):
             shutil.rmtree(store)
         else:
             # Try to get a valid path from the store
