@@ -1315,9 +1315,9 @@
 
 <span class="c1"># Print names of available node/edge properties</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">node_prop_names</span><span class="p">,</span> <span class="n">reader</span><span class="o">.</span><span class="n">edge_prop_names</span><span class="p">)</span>
-<span class="c1"># &gt;&gt;&gt; ([&#39;t&#39;, &#39;x&#39;, &#39;y&#39;, &#39;label&#39;, &#39;score&#39;] [&#39;color&#39;, &#39;score&#39;])</span>
+<span class="c1"># &gt;&gt;&gt; (['t', 'x', 'y', 'label', 'score'] ['color', 'score'])</span>
 
-<span class="n">geff_reader</span><span class="o">.</span><span class="n">read_node_props</span><span class="p">([</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">])</span>
+<span class="n">geff_reader</span><span class="o">.</span><span class="n">read_node_props</span><span class="p">([</span><span class="s1">'t'</span><span class="p">,</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">])</span>
 <span class="c1"># By default all edge properties will be loaded</span>
 <span class="n">geff_reader</span><span class="o">.</span><span class="n">read_edge_props</span><span class="p">()</span>
 
@@ -1325,7 +1325,7 @@
 <span class="n">in_memory_geff</span> <span class="o">=</span> <span class="n">geff_reader</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
 
 <span class="c1"># Construct a graph representation of the data with the backend of your choice</span>
-<span class="n">graph</span> <span class="o">=</span> <span class="n">construct</span><span class="p">(</span><span class="o">**</span><span class="n">in_memory_geff</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;networkx&quot;</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">construct</span><span class="p">(</span><span class="o">**</span><span class="n">in_memory_geff</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"networkx"</span><span class="p">)</span>
 <span class="c1"># Nodes will contain the attributes t, x, and y</span>
 <span class="c1"># Edges will contain the attributes color and score</span>
 </code></pre></div>
@@ -1339,13 +1339,13 @@
 <span class="n">geff_reader</span><span class="o">.</span><span class="n">read_node_props</span><span class="p">()</span>
 <span class="n">geff_reader</span><span class="o">.</span><span class="n">read_edge_props</span><span class="p">()</span>
 <span class="c1"># Access the property values, load it into memory as a numpy and then create the mask</span>
-<span class="n">node_mask</span> <span class="o">=</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">node_props</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">][:]</span> <span class="o">&lt;</span> <span class="mi">5</span>
+<span class="n">node_mask</span> <span class="o">=</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">node_props</span><span class="p">[</span><span class="s2">"t"</span><span class="p">][</span><span class="s2">"values"</span><span class="p">][:]</span> <span class="o">&lt;</span> <span class="mi">5</span>
 
 <span class="c1"># Read the data of the geff into memory using the mask to filter which nodes to load</span>
 <span class="n">in_memory_geff</span> <span class="o">=</span> <span class="n">geff_reader</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">node_mask</span><span class="o">=</span><span class="n">node_mask</span><span class="p">)</span>
 
 <span class="c1"># Construct a graph representation of the data with the backend of your choice</span>
-<span class="n">graph</span> <span class="o">=</span> <span class="n">construct</span><span class="p">(</span><span class="o">**</span><span class="n">in_memory_geff</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;networkx&quot;</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">construct</span><span class="p">(</span><span class="o">**</span><span class="n">in_memory_geff</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"networkx"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="filtering-based-on-edges">Filtering based on edges</h3>
 <div class="admonition note">
@@ -1361,13 +1361,13 @@
 <span class="n">geff_reader</span><span class="o">.</span><span class="n">read_node_props</span><span class="p">()</span>
 <span class="n">geff_reader</span><span class="o">.</span><span class="n">read_edge_props</span><span class="p">()</span>
 <span class="c1"># Access the property values, load it into memory as a numpy and then create the mask</span>
-<span class="n">edge_mask</span> <span class="o">=</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">edge_props</span><span class="p">[</span><span class="s2">&quot;score&quot;</span><span class="p">][</span><span class="s2">&quot;values&quot;</span><span class="p">][:]</span> <span class="o">&lt;</span> <span class="mf">0.5</span>
+<span class="n">edge_mask</span> <span class="o">=</span> <span class="n">file_reader</span><span class="o">.</span><span class="n">edge_props</span><span class="p">[</span><span class="s2">"score"</span><span class="p">][</span><span class="s2">"values"</span><span class="p">][:]</span> <span class="o">&lt;</span> <span class="mf">0.5</span>
 
 <span class="c1"># Read the data of the geff into memory using the mask to filter which edges to load</span>
 <span class="n">in_memory_geff</span> <span class="o">=</span> <span class="n">geff_reader</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">edge_mask</span><span class="o">=</span><span class="n">edge_mask</span><span class="p">)</span>
 
 <span class="c1"># Construct a graph representation of the data with the backend of your choice</span>
-<span class="n">graph</span> <span class="o">=</span> <span class="n">construct</span><span class="p">(</span><span class="o">**</span><span class="n">in_memory_geff</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;networkx&quot;</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">construct</span><span class="p">(</span><span class="o">**</span><span class="n">in_memory_geff</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"networkx"</span><span class="p">)</span>
 </code></pre></div>
 
 

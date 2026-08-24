@@ -1362,7 +1362,7 @@
 
 </h2>
 <div class="doc-signature highlight"><pre><span></span><code><span class="n">SupportedBackend</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span>
-    <span class="s2">&quot;networkx&quot;</span><span class="p">,</span> <span class="s2">&quot;rustworkx&quot;</span><span class="p">,</span> <span class="s2">&quot;spatial-graph&quot;</span>
+    <span class="s2">"networkx"</span><span class="p">,</span> <span class="s2">"rustworkx"</span><span class="p">,</span> <span class="s2">"spatial-graph"</span>
 <span class="p">]</span>
 </code></pre></div>
 
@@ -2134,7 +2134,7 @@ read the chunks that contain the requested indices.</p>
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">_read_prop</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">]</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"node"</span><span class="p">,</span> <span class="s2">"edge"</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZarrPropDict</span>
 </code></pre></div>
 
@@ -2307,11 +2307,11 @@ array of length number of edges.</p>
                 <p>A dictionary of in memory numpy arrays representing the graph. The structure of
 this dictionary is:
 <div class="highlight"><pre><span></span><code>{
-    &quot;metadata&quot;: GeffMetadata,
-    &quot;node_ids&quot;: numpy.ndarray,
-    &quot;edge_ids&quot;: numpy.ndarray,
-    &quot;node_props&quot;: dict[str, dict],
-    &quot;edge_props&quot;: dict[str, dict],
+    "metadata": GeffMetadata,
+    "node_ids": numpy.ndarray,
+    "edge_ids": numpy.ndarray,
+    "node_props": dict[str, dict],
+    "edge_props": dict[str, dict],
 }
 </code></pre></div></p>
               </div>
@@ -2458,7 +2458,7 @@ None all node properties will be loaded.</p>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;networkx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"networkx"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"networkx"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NxGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
@@ -2467,7 +2467,7 @@ None all node properties will be loaded.</p>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;rustworkx&quot;</span><span class="p">],</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"rustworkx"</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">RxGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div><div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
     <span class="n">store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
@@ -2476,8 +2476,8 @@ None all node properties will be loaded.</p>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;spatial-graph&quot;</span><span class="p">],</span>
-    <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;position&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"spatial-graph"</span><span class="p">],</span>
+    <span class="n">position_attr</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"position"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SgGraph</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>          </div>
 <div class="doc-signature highlight"><pre><span></span><code><span class="nf">read</span><span class="p">(</span>
@@ -2487,7 +2487,7 @@ None all node properties will be loaded.</p>
     <span class="n">edge_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">data_validation</span><span class="p">:</span> <span class="n">ValidationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">backend</span><span class="p">:</span> <span class="n">SupportedBackend</span> <span class="o">=</span> <span class="s2">&quot;networkx&quot;</span><span class="p">,</span>
+    <span class="n">backend</span><span class="p">:</span> <span class="n">SupportedBackend</span> <span class="o">=</span> <span class="s2">"networkx"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">backend_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SupportedGraphType</span><span class="p">,</span> <span class="n">GeffMetadata</span><span class="p">]</span>
 </code></pre></div>

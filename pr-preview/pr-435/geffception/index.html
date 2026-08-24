@@ -1192,72 +1192,72 @@
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>// /path/to.zarr/tracking_graph.geff/.zattrs
 {
-    &quot;geff&quot;: {
-        &quot;directed&quot;: true,
-        &quot;geff_version&quot;: &quot;1.2.0.1.1&quot;,
-        &quot;axes&quot;: [
+    "geff": {
+        "directed": true,
+        "geff_version": "1.2.0.1.1",
+        "axes": [
             { 
-                &quot;name&quot;: &quot;t&quot;, 
-                &quot;type&quot;: &quot;time&quot;,
-                &quot;unit&quot;: &quot;second&quot;, 
-                &quot;min&quot;: 0, 
-                &quot;max&quot;: 125 
+                "name": "t", 
+                "type": "time",
+                "unit": "second", 
+                "min": 0, 
+                "max": 125 
             },
             {
-                &quot;name&quot;: &quot;x&quot;,
-                &quot;type&quot;: &quot;space&quot;,
-                &quot;unit&quot;: &quot;micrometer&quot;,
-                &quot;min&quot;: 764.42,
-                &quot;max&quot;: 2152.3
+                "name": "x",
+                "type": "space",
+                "unit": "micrometer",
+                "min": 764.42,
+                "max": 2152.3
             },
             {
-                &quot;name&quot;: &quot;y&quot;,
-                &quot;type&quot;: &quot;space&quot;,
-                &quot;unit&quot;: &quot;micrometer&quot;,
-                &quot;min&quot;: 81.667,
-                &quot;max&quot;: 1877.7
+                "name": "y",
+                "type": "space",
+                "unit": "micrometer",
+                "min": 81.667,
+                "max": 1877.7
             }
         ],
-        &quot;node_props_metadata&quot;: {
-            &quot;track_id&quot;: {
-                &quot;identifier&quot;: &quot;track_id&quot;,
-                &quot;dtype&quot;: &quot;uint16&quot;,
-                &quot;varlength&quot;: false
+        "node_props_metadata": {
+            "track_id": {
+                "identifier": "track_id",
+                "dtype": "uint16",
+                "varlength": false
             },
-            &quot;t&quot;: {
-                &quot;identifier&quot;: &quot;t&quot;,
-                &quot;dtype&quot;: &quot;uint16&quot;,
-                &quot;varlength&quot;: false,
-                &quot;unit&quot;: &quot;second&quot;
+            "t": {
+                "identifier": "t",
+                "dtype": "uint16",
+                "varlength": false,
+                "unit": "second"
             },
-            &quot;y&quot;: {
-                &quot;identifier&quot;: &quot;y&quot;,
-                &quot;dtype&quot;: &quot;float32&quot;,
-                &quot;varlength&quot;: false,
-                &quot;unit&quot;: &quot;micrometer&quot;
+            "y": {
+                "identifier": "y",
+                "dtype": "float32",
+                "varlength": false,
+                "unit": "micrometer"
             },
-            &quot;x&quot;: {
-                &quot;identifier&quot;: &quot;x&quot;,
-                &quot;dtype&quot;: &quot;float32&quot;,
-                &quot;varlength&quot;: false,
-                &quot;unit&quot;: &quot;micrometer&quot;
+            "x": {
+                "identifier": "x",
+                "dtype": "float32",
+                "varlength": false,
+                "unit": "micrometer"
             }
         },
-        &quot;edge_props_metadata&quot;: {
-            &quot;distance&quot;: {
-                &quot;identifier&quot;: &quot;distance&quot;,
-                &quot;dtype&quot;: &quot;float32&quot;,
-                &quot;varlength&quot;: false
+        "edge_props_metadata": {
+            "distance": {
+                "identifier": "distance",
+                "dtype": "float32",
+                "varlength": false
             }
         },
-        &quot;track_node_props&quot;: {
-            &quot;lineage&quot;: &quot;track_id&quot;
+        "track_node_props": {
+            "lineage": "track_id"
         },
-        &quot;related_objects&quot;: [
+        "related_objects": [
             {
-                &quot;type&quot;: &quot;geff&quot;,
-                &quot;path&quot;: &quot;lineage.geff&quot;,
-                &quot;node_prop&quot;: &quot;track_id&quot;
+                "type": "geff",
+                "path": "lineage.geff",
+                "node_prop": "track_id"
             }
         ]
     }
@@ -1265,17 +1265,17 @@
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>// /path/to.zarr/tracking_graph.geff/lineage.geff/.zattrs
 {
-    &quot;geff&quot;: {
-        &quot;directed&quot;: true,
-        &quot;geff_version&quot;: &quot;1.2.0.1.1&quot;,
-        &quot;node_props_metadata&quot;: {
-            &quot;track_displacement&quot;: {
-                &quot;identifier&quot;: &quot;track_displacement&quot;,
-                &quot;dtype&quot;: &quot;float32&quot;,
-                &quot;varlength&quot;: false
+    "geff": {
+        "directed": true,
+        "geff_version": "1.2.0.1.1",
+        "node_props_metadata": {
+            "track_displacement": {
+                "identifier": "track_displacement",
+                "dtype": "float32",
+                "varlength": false
             }
         },
-        &quot;edge_props_metadata&quot;: {}
+        "edge_props_metadata": {}
     }
 }
 </code></pre></div>
