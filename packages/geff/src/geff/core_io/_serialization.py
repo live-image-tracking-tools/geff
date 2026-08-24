@@ -35,7 +35,7 @@ def serialize_vlen_property_data(
     # Elements should already be numpy arrays of numpy arrays with dtypes
     for element in values:
         if not isinstance(element, np.ndarray):
-            raise ValueError(
+            raise TypeError(
                 "For variable length properties, each node/edge property must be a "
                 f"numpy array, got {type(element)}. Try using `construct_var_len_props` "
                 "helper function to standardize the properties."

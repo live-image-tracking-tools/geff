@@ -177,22 +177,22 @@ def _convert_attributes(
     Warns:
         UserWarning: If an attribute is not found in the attributes metadata.
     """
-    for key in attrs:
+    for key, val in attrs.items():
         if key in attrs_metadata:
             if attrs_metadata[key]["isint"] == "true":
                 try:
-                    attrs[key] = int(attrs[key])
+                    attrs[key] = int(val)
                 except ValueError as err:
-                    raise ValueError(f"Invalid integer value for {key}: {attrs[key]}") from err
+                    raise ValueError(f"Invalid integer value for {key}: {val}") from err
             else:
                 try:
-                    attrs[key] = float(attrs[key])
+                    attrs[key] = float(val)
                 except ValueError:
                     # Then it's a string and no need to convert.
                     pass
         elif key == "ID" or key == "ROI_N_POINTS":
             # IDs are always integers in TrackMate.
-            attrs[key] = int(attrs[key])
+            attrs[key] = int(val)
         elif key == "name":
             pass  # "name" is a string so we don't need to convert it.
         else:

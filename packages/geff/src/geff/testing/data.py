@@ -137,8 +137,8 @@ def create_dummy_in_mem_geff(
     # Generate spatiotemporal coordinates with flexible dimensions
     def _add_axis(
         name: str,
-        ax_type: Literal[AxisType],
-        unit: str | Literal[SpaceUnits] | Literal[TimeUnits],
+        ax_type: AxisType,
+        unit: SpaceUnits | TimeUnits | str,
         values: np.ndarray,
     ) -> PropMetadata:
         node_props[name] = {"values": values, "missing": None}
@@ -271,12 +271,12 @@ def create_dummy_in_mem_geff(
     if extra_node_props is not None:
         # Validate input is a dict
         if not isinstance(extra_node_props, dict):
-            raise ValueError(f"extra_node_props must be a dict, got {type(extra_node_props)}")
+            raise TypeError(f"extra_node_props must be a dict, got {type(extra_node_props)}")
 
         # Validate dict contains only string keys and valid dtype values or numpy arrays
         for prop_name, prop_value in extra_node_props.items():
             if not isinstance(prop_name, str):
-                raise ValueError(f"extra_node_props keys must be strings, got {type(prop_name)}")
+                raise TypeError(f"extra_node_props keys must be strings, got {type(prop_name)}")
 
             # Check if value is a string (dtype) or numpy array
             if isinstance(prop_value, str):
@@ -316,7 +316,7 @@ def create_dummy_in_mem_geff(
                 node_props[prop_name] = {"values": prop_value, "missing": None}
 
             else:
-                raise ValueError(
+                raise TypeError(
                     f"extra_node_props[{prop_name}] must be a string dtype or numpy array, "
                     f"got {type(prop_value)}"
                 )
@@ -328,12 +328,12 @@ def create_dummy_in_mem_geff(
     if extra_edge_props is not None:
         # Validate input is a dict
         if not isinstance(extra_edge_props, dict):
-            raise ValueError(f"extra_edge_props must be a dict, got {type(extra_edge_props)}")
+            raise TypeError(f"extra_edge_props must be a dict, got {type(extra_edge_props)}")
 
         # Validate dict contains only string keys and valid dtype values or numpy arrays
         for prop_name, prop_value in extra_edge_props.items():
             if not isinstance(prop_name, str):
-                raise ValueError(f"extra_edge_props keys must be strings, got {type(prop_name)}")
+                raise TypeError(f"extra_edge_props keys must be strings, got {type(prop_name)}")
 
             # Check if value is a string (dtype) or numpy array
             if isinstance(prop_value, str):
@@ -371,7 +371,7 @@ def create_dummy_in_mem_geff(
                 edge_props_dict[prop_name] = {"values": prop_value, "missing": None}
 
             else:
-                raise ValueError(
+                raise TypeError(
                     f"extra_edge_props[{prop_name}] must be a string dtype or numpy array, "
                     f"got {type(prop_value)}"
                 )

@@ -277,7 +277,7 @@ class Test_create_mock_geff:
         """Test validation of extra_node_props parameter"""
 
         # Test with invalid input types
-        with pytest.raises(ValueError, match="extra_node_props must be a dict"):
+        with pytest.raises(TypeError, match="extra_node_props must be a dict"):
             create_mock_geff(
                 node_id_dtype="int",
                 node_axis_dtypes={"position": "float64", "time": "float64"},
@@ -286,7 +286,7 @@ class Test_create_mock_geff:
                 extra_node_props="not_a_dict",  # Should be a dict
             )
 
-        with pytest.raises(ValueError, match="extra_node_props keys must be strings"):
+        with pytest.raises(TypeError, match="extra_node_props keys must be strings"):
             create_mock_geff(
                 node_id_dtype="int",
                 node_axis_dtypes={"position": "float64", "time": "float64"},
@@ -295,7 +295,7 @@ class Test_create_mock_geff:
                 extra_node_props={123: "str"},  # Key should be string
             )
 
-        with pytest.raises(ValueError, match="extra_node_props\\[label\\] must be a string dtype"):
+        with pytest.raises(TypeError, match="extra_node_props\\[label\\] must be a string dtype"):
             create_mock_geff(
                 node_id_dtype="int",
                 node_axis_dtypes={"position": "float64", "time": "float64"},
@@ -365,7 +365,7 @@ class Test_create_mock_geff:
 
         # Test invalid type for node properties (non-string, non-array)
         with pytest.raises(
-            ValueError, match="extra_node_props\\[label\\] must be a string dtype or numpy array"
+            TypeError, match="extra_node_props\\[label\\] must be a string dtype or numpy array"
         ):
             create_mock_geff(
                 node_id_dtype="int",
@@ -377,7 +377,7 @@ class Test_create_mock_geff:
 
         # Test invalid type for edge properties (non-string, non-array)
         with pytest.raises(
-            ValueError, match="extra_edge_props\\[weight\\] must be a string dtype or numpy array"
+            TypeError, match="extra_edge_props\\[weight\\] must be a string dtype or numpy array"
         ):
             create_mock_geff(
                 node_id_dtype="int",
@@ -387,7 +387,7 @@ class Test_create_mock_geff:
             )
 
         # Test extra_edge_props is not a dict
-        with pytest.raises(ValueError, match="extra_edge_props must be a dict"):
+        with pytest.raises(TypeError, match="extra_edge_props must be a dict"):
             create_mock_geff(
                 node_id_dtype="int",
                 node_axis_dtypes={"position": "float64", "time": "float64"},
@@ -396,7 +396,7 @@ class Test_create_mock_geff:
             )
 
         # Test extra_edge_props property name is not a string
-        with pytest.raises(ValueError, match="extra_edge_props keys must be strings"):
+        with pytest.raises(TypeError, match="extra_edge_props keys must be strings"):
             create_mock_geff(
                 node_id_dtype="int",
                 node_axis_dtypes={"position": "float64", "time": "float64"},

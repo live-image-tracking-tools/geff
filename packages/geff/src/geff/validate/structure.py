@@ -79,12 +79,12 @@ def _validate_props_group(
     """Validate every property subgroup under `props_group`."""
     # check that all properties in the metadata are in the group
     for prop_name in props_metadata:
-        if prop_name not in props_group.keys():
+        if prop_name not in props_group:
             raise ValueError(
                 f"Property {prop_name} is in the metadata but missing from the property group"
             )
 
-    for prop_name in props_group.keys():
+    for prop_name in props_group:
         # check that all properties in the group are in the metadata
         if prop_name not in props_metadata:
             raise ValueError(f"Property {prop_name} is missing from the property metadata")
@@ -92,7 +92,7 @@ def _validate_props_group(
 
         prop_group = props_group[prop_name]
         if not isinstance(prop_group, zarr.Group):
-            raise ValueError(
+            raise TypeError(
                 f"{_path.PROPS!r} group '{prop_name}' under {parent_key!r} "
                 f"must be a zarr group. Got {type(prop_group)}"
             )
@@ -182,7 +182,7 @@ def _validate_edges_group(edges_group: zarr.Group, metadata: GeffMetadata) -> No
     if edge_props is None:
         return
     if not isinstance(edge_props, zarr.Group):
-        raise ValueError(
+        raise TypeError(
             f"{_path.EDGES!r} group must contain a {_path.PROPS!r} group. Got {type(edge_props)}"
         )
     _validate_props_group(edge_props, edge_id_len, "Edge", metadata.edge_props_metadata)

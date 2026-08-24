@@ -58,7 +58,7 @@ class GeffReader:
 
         # get node properties names
         nodes_group = expect_group(self.group, _path.NODES)
-        if _path.PROPS in nodes_group.keys():
+        if _path.PROPS in nodes_group:
             node_props_group = zarr.open_group(self.group.store, path=_path.NODE_PROPS, mode="r")
             self.node_prop_names: list[str] = [*node_props_group.group_keys()]
         else:
@@ -66,7 +66,7 @@ class GeffReader:
 
         # get edge property names
         edges_group = expect_group(self.group, _path.EDGES)
-        if _path.PROPS in edges_group.keys():
+        if _path.PROPS in edges_group:
             edge_props_group = zarr.open_group(self.group.store, path=_path.EDGE_PROPS, mode="r")
             self.edge_prop_names: list[str] = [*edge_props_group.group_keys()]
         else:
@@ -125,11 +125,11 @@ class GeffReader:
         prop_group = zarr.open_group(self.group.store, path=group_path, mode="r")
         values = expect_array(prop_group, _path.VALUES, prop_type)
         prop_dict: ZarrPropDict = {_path.VALUES: values}
-        if _path.MISSING in prop_group.keys():
+        if _path.MISSING in prop_group:
             missing = expect_array(prop_group, _path.MISSING, prop_type)
             prop_dict[_path.MISSING] = missing
 
-        if _path.DATA in prop_group.keys():
+        if _path.DATA in prop_group:
             prop_dict[_path.DATA] = expect_array(prop_group, _path.DATA, prop_type)
         return prop_dict
 
@@ -278,12 +278,12 @@ class GeffReader:
 
         all_node_props = self.metadata.node_props_metadata.keys()
         for prop in all_node_props:
-            if prop not in self.node_props.keys():
+            if prop not in self.node_props:
                 del output_metadata.node_props_metadata[prop]
 
         all_edge_props = self.metadata.edge_props_metadata.keys()
         for prop in all_edge_props:
-            if prop not in self.edge_props.keys():
+            if prop not in self.edge_props:
                 del output_metadata.edge_props_metadata[prop]
 
         return {

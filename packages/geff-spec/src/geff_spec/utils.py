@@ -236,7 +236,7 @@ def axes_from_lists(
             f"Scaled units {scaled_units} does not have same length as axis names {axis_names}"
         )
 
-    if axis_offset is not None and len(axis_offset) != len(axis_offset):
+    if axis_offset is not None and len(axis_offset) != len(axis_names):
         raise ValueError(
             f"Axis offset {axis_offset} does not have same length as axis names {axis_names}"
         )
@@ -284,7 +284,7 @@ def create_props_metadata(
     """
     # Check if this is a variable length property (sequence of arrays)
     if not isinstance(prop_data, dict):
-        raise ValueError(f"Expected dict of property data, got {prop_data}")
+        raise TypeError(f"Expected dict of property data, got {prop_data}")
     values = prop_data["values"]
     if np.issubdtype(values.dtype, np.float16):
         warnings.warn(

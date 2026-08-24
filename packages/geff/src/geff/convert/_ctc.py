@@ -214,7 +214,7 @@ def from_ctc_to_geff(
     if segmentation_store is not None:
         # Record related object metadata for segmentation
         seg_path = None
-        if isinstance(segmentation_store, Path) or isinstance(segmentation_store, str):
+        if isinstance(segmentation_store, (Path, str)):
             seg_path = segmentation_store
         else:
             try:
