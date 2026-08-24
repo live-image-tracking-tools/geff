@@ -390,6 +390,17 @@ class TestMetadataModel:
             extra={"random metadata": "information"},
         )
 
+    def test_other_fields_not_allowed(self) -> None:
+        with pytest.raises(pydantic.ValidationError, match=r".*Extra inputs are not permitted"):
+            GeffMetadata(
+                geff_version="0.0.1",
+                directed=True,
+                axes=[Axis(name="t", type="time")],
+                node_props_metadata={"t": PropMetadata(identifier="t", dtype="float32")},
+                edge_props_metadata={},
+                other_field=True,
+            )
+
 
 def test__validate_key_identifier_equality() -> None:
     # Matching key / identifier
