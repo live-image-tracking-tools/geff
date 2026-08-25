@@ -231,13 +231,13 @@ This is a geff metadata zattrs file that matches the above example structure.
 }
 ```
 
-Minimal geff metadata must have `version` and `directed` fields under a `geff` field, as
+Minimal geff metadata must have `geff_version` and `directed` fields under a `geff` field, as
 well as empty `node_props_metadata` and `edge_props_metadata` fields.
 
 ```jsonc
 {
   "geff": {
-    "version": "0.0.0",
+    "geff_version": "0.0.0",
     "directed": false,
     "node_props_metadata": {},
     "edge_props_metadata": {}
