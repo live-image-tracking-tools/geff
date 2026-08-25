@@ -223,15 +223,6 @@ This is a geff metadata zattrs file that matches the above example structure.
         "path": "../raw/"
       }
     ],
-    // optional coordinate transformation is defined as homogeneous coordinates
-    // It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
-    "affine": [
-      [1, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0],
-      [0, 0, 1, 0, 0],
-      [0, 0, 0, 1, 0],
-      [0, 0, 0, 0, 1]
-    ],
     // custom other things must be placed **inside** the extra attribute
     "extra": {
       // ...
