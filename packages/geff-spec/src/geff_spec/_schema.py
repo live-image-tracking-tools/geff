@@ -175,13 +175,15 @@ class GeffMetadata(BaseModel):
     directed: bool = Field(description="True if the graph is directed, otherwise False.")
     axes: list[Axis] | None = Field(
         default=None,
-        description="""Optional list of `Axis` objects defining the axes of each node
+        description="""
+            Optional list of `Axis` objects defining the axes of each node
             in the graph. The axes list is modeled after the
             [OME-zarr](https://ngff.openmicroscopy.org/0.5/index.html#axes-md)
             specifications and is used to identify spatio-temporal properties on the
             graph nodes. If the same names are used in the axes metadata of the
             related image or segmentation data, applications can use this information
             to align graph node locations with image data.
+
             The order of the axes in the list is meaningful. For one, any downstream
             properties that are an array of values with one value per (spatial) axis
             will be in the order of the axis list (filtering to only the spatial axes by
@@ -191,7 +193,10 @@ class GeffMetadata(BaseModel):
             is no way to denote the channel dimension in the graph spec. If you are
             writing out a geff with an associated segmentation and/or image dataset, we
             highly recommend providing the axis names for your segmentation/image using
-            the OME-zarr spec, including channel dimensions if needed.""",
+            the OME-zarr spec, including channel dimensions if needed. Additionally,
+            if a time axis specifies the unit as `frame` that implies that the axis
+            matches the image index in the source timelapse.
+            """,
     )
 
     node_props_metadata: dict[str, PropMetadata] = Field(

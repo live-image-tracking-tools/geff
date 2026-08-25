@@ -25,7 +25,7 @@ class Axis(BaseModel):
     The `name` must be an existing attribute on the nodes. The optional `type` key
     must be one of `space`, `time` or `channel`, though readers may not use this information.
     An optional `unit` key should match the valid OME-Zarr units and `min` and `max` keys
-    define the range of the axis
+    define the range of the axis.
 
     The optional `scale` field can be used to store a scaling factor such as converting
     the data from pixel space into real world units or from imaging frames into real world time.
