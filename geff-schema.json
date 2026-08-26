@@ -281,6 +281,7 @@
       "type": "object"
     },
     "GeffMetadata": {
+      "additionalProperties": false,
       "description": "Geff metadata schema to validate the attributes json file in a geff zarr",
       "properties": {
         "geff_version": {

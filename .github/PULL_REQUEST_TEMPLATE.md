@@ -31,6 +31,7 @@ Put an x in the boxes that apply. You can also fill these out after creating the
 - [ ] I have updated the GeffMetadata and the json schema using `pytest --update-schema` if necessary.
 - [ ] I have updated docs/specification.md to reflect the change.
 - [ ] I have updated implementations to reflect the change. (This can happen in separate PRs on a feature branch, but must be complete before merging into main.)
+- [ ] If I added a new field to GeffMetadata, I also added it to tests/geff-spec/test_schema.py `test_all_fields`.
 
 ## If you have added or changed an implementation
 - [ ] I wrote tests for the new implementation using standard fixtures supplied in conftest.py.
