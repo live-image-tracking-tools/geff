@@ -157,10 +157,7 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(
-        title="geff_metadata",
-        validate_assignment=True,
-    )
+    model_config = ConfigDict(title="geff_metadata", validate_assignment=True, extra="forbid")
 
     geff_version: str = Field(
         default=GEFF_VERSION,
@@ -208,7 +205,6 @@ class GeffMetadata(BaseModel):
             "There must be one entry for each edge property."
         ),
     )
-
     sphere: str | None = Field(
         default=None,
         title="Node property: Detections as spheres",
