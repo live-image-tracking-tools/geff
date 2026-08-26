@@ -103,6 +103,7 @@ filterwarnings = [
     # typer imports click.utils.get_binary_stream, which newer click releases
     # (>=8.3) deprecate ahead of removal in Click 9.0; nothing to fix on our end.
     "ignore:'click.utils.get_binary_stream' is deprecated.*:DeprecationWarning",
+    "ignore:'click.utils.get_text_stream' is deprecated.*:DeprecationWarning",
 ]
 
 
