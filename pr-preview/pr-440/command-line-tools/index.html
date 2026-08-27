@@ -1408,14 +1408,7 @@
 <div class="highlight"><pre><span></span><code> convert-ctc [OPTIONS] CTC_PATH GEFF_PATH
 </code></pre></div>
 <p>Options:</p>
-<div class="highlight"><pre><span></span><code>  CTC_PATH                      The path to the directory containing ctc
-                                tracks (man_track.txt or res_track.txt), e.g.
-                                data/01_GT/TRA or data/01_RES  \[required]
-  GEFF_PATH                     Path to save the output geff, including the
-                                geff directory name (eg.
-                                ~/folder/folder/data.zarr/tracks.geff)
-                                \[required]
-  --segm-path PATH              The path to export the segmentation file, if
+<div class="highlight"><pre><span></span><code>  --segm-path PATH              The path to export the segmentation file, if
                                 not provided, it won't be exported.
   --input-image-dir PATH        The path to the input image directory. If not
                                 provided, it won't be exported.
@@ -1432,24 +1425,13 @@
 <p>Usage:</p>
 <div class="highlight"><pre><span></span><code> convert-to-csv [OPTIONS] STORE OUTPATH
 </code></pre></div>
-<p>Options:</p>
-<div class="highlight"><pre><span></span><code>  STORE    Path to geff group to convert  \[required]
-  OUTPATH  Path to save output csvs. Any file extension will be stripped and
-           replaced with '-nodes.csv' and '-edges.csv'  \[required]
-</code></pre></div>
 <h3 id="convert-trackmate-xml">convert-trackmate-xml</h3>
 <p>Convert a TrackMate XML file to a GEFF file.</p>
 <p>Usage:</p>
 <div class="highlight"><pre><span></span><code> convert-trackmate-xml [OPTIONS] XML_PATH GEFF_PATH
 </code></pre></div>
 <p>Options:</p>
-<div class="highlight"><pre><span></span><code>  XML_PATH                        The path to the TrackMate XML file
-                                  \[required]
-  GEFF_PATH                       Path to save the output geff, including the
-                                  geff directory name (eg.
-                                  ~/folder/folder/data.zarr/tracks.geff)
-                                  \[required]
-  --discard-filtered-spots / --no-discard-filtered-spots
+<div class="highlight"><pre><span></span><code>  --discard-filtered-spots / --no-discard-filtered-spots
                                   True to discard the spots filtered out in
                                   TrackMate, False otherwise.  \[default: no-
                                   discard-filtered-spots]
@@ -1466,16 +1448,10 @@
 <p>Usage:</p>
 <div class="highlight"><pre><span></span><code> info [OPTIONS] INPUT_PATH
 </code></pre></div>
-<p>Options:</p>
-<div class="highlight"><pre><span></span><code>  INPUT_PATH  Path to the GEFF folder, e.g. data.zarr/tracks.geff  \[required]
-</code></pre></div>
 <h3 id="validate">validate</h3>
 <p>Validate a GEFF file.</p>
 <p>Usage:</p>
 <div class="highlight"><pre><span></span><code> validate [OPTIONS] INPUT_PATH
-</code></pre></div>
-<p>Options:</p>
-<div class="highlight"><pre><span></span><code>  INPUT_PATH  Path to the GEFF folder, e.g. data.zarr/tracks.geff  \[required]
 </code></pre></div>
 <h2 id="running-command-line-tools">Running command line tools</h2>
 <p>Without pip-installing <code>geff</code>, you can run the tools as 

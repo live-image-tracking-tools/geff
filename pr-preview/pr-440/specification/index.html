@@ -401,6 +401,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#shape-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shape properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#variable-length-properties" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1369,6 +1380,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#shape-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shape properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#variable-length-properties" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1593,6 +1615,23 @@ properties.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
+            <b><code>polygon</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Name of the <code>polygon</code> property.</p>
+<p>A polygon is assumed to be in the same coordinate system as the <code>space</code> type
+properties.</p>
+<p>A polygon for a single node is an array of shape <code>(n_points, n_dimensions)</code>. Each
+point on the polygon is given relative to the position of the node as defined by
+the <code>space</code> axes. Nodes are not required to have polygons with the same number of
+points. As such, this property is usually encoded as a variable length property (see
+the "Variable length properties" section of the Specification for more information).</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
             <b><code>track_node_props</code></b>
               (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>[<a class="autorefs autorefs-external" title="typing.Literal" href="https://docs.python.org/3/library/typing.html#typing.Literal">Literal</a>[&#39;lineage&#39;, &#39;tracklet&#39;], <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>] | None</code>, default:
                   <code>None</code>
@@ -1683,16 +1722,24 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 <li>
 <p>The <code>seg_id</code> property is an optional, special node property that stores the segmenatation label for each node. The <code>seg_id</code> values do not need to be unique, in case labels are repeated between time points. If the <code>seg_id</code> property is not present, it is assumed that the graph is not associated with a segmentation.</p>
 </li>
-<li>
-<p>Geff provides special support for predefined shape properties, although they are not required. These currently include: <code>sphere</code>, <code>ellipsoid</code>. Values can be marked as <code>missing</code>, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective. - <code>sphere</code>: Hypersphere in n spatial dimensions, defined by a scalar radius. - <code>ellipsoid</code>: Defined by a symmetric positive-definite covariance matrix, whose dimensionality is assumed to match the spatial axes.</p>
-</li>
 </ul>
-<!-- Perhaps we just let the user specify the seg id property in the metadata instead? Then you can point it to the node ids if you wanted to -->
-
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>When writing a graph with missing properties to the geff format, you must fill in a dummy value in the <code>values</code> array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.</p>
 </div>
+<h4 id="shape-properties">Shape properties</h4>
+<p>Geff provides special support for predefined shape properties, although they are not required. These currently include <code>sphere</code>, <code>ellipsoid</code> and <code>polygon</code>. Values can be marked as <code>missing</code>, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective. </p>
+<ul>
+<li>
+<p><code>sphere</code>: Hypersphere in n spatial dimensions, defined by a scalar radius. </p>
+</li>
+<li>
+<p><code>ellipsoid</code>: Defined by a symmetric positive-definite covariance matrix, whose dimensionality is assumed to match the spatial axes.</p>
+</li>
+<li>
+<p><code>polygon</code>: Defined by a series of points matching the dimensionality of the spatial axes. Each point is defined relative to the spatial position of the node itself.</p>
+</li>
+</ul>
 <h4 id="variable-length-properties">Variable length properties</h4>
 <p>While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have an array property of a variable shape. This is useful for properties such as polygons, meshes, or crops of bounding boxes. </p>
 <p>Variable length properties will have a <code>data</code> array in addition to the <code>values</code> and <code>missing</code> arrays. For variable length properties, the <code>data</code> array will contain a 1D flattened array of the actual values for all the nodes. The <code>values</code> array will contain the offset and shape of the relevant section of data in the <code>data</code> array.</p>
@@ -1855,15 +1902,6 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
         "path": "../raw/"
       }
     ],
-    // optional coordinate transformation is defined as homogeneous coordinates
-    // It is expected to be a (D+1)x(D+1) matrix where D is the number of axes
-    "affine": [
-      [1, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0],
-      [0, 0, 1, 0, 0],
-      [0, 0, 0, 1, 0],
-      [0, 0, 0, 0, 1]
-    ],
     // custom other things must be placed **inside** the extra attribute
     "extra": {
       // ...
@@ -1871,11 +1909,11 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
   }
 }
 </code></pre></div>
-<p>Minimal geff metadata must have <code>version</code> and <code>directed</code> fields under a <code>geff</code> field, as
+<p>Minimal geff metadata must have <code>geff_version</code> and <code>directed</code> fields under a <code>geff</code> field, as
 well as empty <code>node_props_metadata</code> and <code>edge_props_metadata</code> fields.</p>
 <div class="highlight"><pre><span></span><code>{
   "geff": {
-    "version": "0.0.0",
+    "geff_version": "0.0.0",
     "directed": false,
     "node_props_metadata": {},
     "edge_props_metadata": {}
