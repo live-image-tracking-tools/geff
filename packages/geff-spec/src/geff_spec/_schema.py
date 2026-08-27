@@ -157,10 +157,7 @@ class GeffMetadata(BaseModel):
     """
 
     # this determines the title of the generated json schema
-    model_config = ConfigDict(
-        title="geff_metadata",
-        validate_assignment=True,
-    )
+    model_config = ConfigDict(title="geff_metadata", validate_assignment=True, extra="forbid")
 
     geff_version: str = Field(
         default=GEFF_VERSION,
@@ -213,7 +210,6 @@ class GeffMetadata(BaseModel):
             "There must be one entry for each edge property."
         ),
     )
-
     sphere: str | None = Field(
         default=None,
         title="Node property: Detections as spheres",
@@ -251,6 +247,24 @@ class GeffMetadata(BaseModel):
             - Sample points $z$ on the unit sphere
             - Transform the points to the ellipsoid by
             $x = c + Q \\Lambda^{(1/2)} z$.
+            """
+        ),
+    )
+    polygon: str | None = Field(
+        default=None,
+        title="Node property: Detections as polygons",
+        description=(
+            """
+            Name of the `polygon` property.
+
+            A polygon is assumed to be in the same coordinate system as the `space` type
+            properties.
+
+            A polygon for a single node is an array of shape `(n_points, n_dimensions)`. Each
+            point on the polygon is given relative to the position of the node as defined by
+            the `space` axes. Nodes are not required to have polygons with the same number of
+            points. As such, this property is usually encoded as a variable length property (see
+            the "Variable length properties" section of the Specification for more information).
             """
         ),
     )
