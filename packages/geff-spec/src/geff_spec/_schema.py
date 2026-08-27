@@ -245,6 +245,24 @@ class GeffMetadata(BaseModel):
             """
         ),
     )
+    polygon: str | None = Field(
+        default=None,
+        title="Node property: Detections as polygons",
+        description=(
+            """
+            Name of the `polygon` property.
+
+            A polygon is assumed to be in the same coordinate system as the `space` type
+            properties.
+
+            A polygon for a single node is an array of shape `(n_points, n_dimensions)`. Each
+            point on the polygon is given relative to the position of the node as defined by
+            the `space` axes. Nodes are not required to have polygons with the same number of
+            points. As such, this property is usually encoded as a variable length property (see
+            the "Variable length properties" section of the Specification for more information).
+            """
+        ),
+    )
     track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
         default=None,
         description=(

@@ -379,6 +379,7 @@ class TestMetadataModel:
             edge_props_metadata={},
             sphere="sphere",
             ellipsoid="ellipse",
+            polygon="polygon",
             track_node_props={"tracklet": "tracklet", "lineage": "lineage"},
             related_objects=[
                 RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),
