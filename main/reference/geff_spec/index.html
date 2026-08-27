@@ -1972,6 +1972,29 @@ properties.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>polygon</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the <code>polygon</code> property.</p>
+<p>A polygon is assumed to be in the same coordinate system as the <code>space</code> type
+properties.</p>
+<p>A polygon for a single node is an array of shape <code>(n_points, n_dimensions)</code>. Each
+point on the polygon is given relative to the position of the node as defined by
+the <code>space</code> axes. Nodes are not required to have polygons with the same number of
+points. As such, this property is usually encoded as a variable length property (see
+the "Variable length properties" section of the Specification for more information).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>track_node_props</code>
             </td>
             <td>
