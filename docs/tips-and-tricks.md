@@ -17,7 +17,7 @@ geff_reader = GeffReader(path)
 print(reader.node_prop_names, reader.edge_prop_names)
 # >>> (['t', 'x', 'y', 'label', 'score'] ['color', 'score'])
 
-geff_reader.read_node_props(['t', 'x', 'y'])
+geff_reader.read_node_props(["t", "x", "y"])
 # By default all edge properties will be loaded
 geff_reader.read_edge_props()
 
