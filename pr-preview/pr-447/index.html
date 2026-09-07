@@ -1293,22 +1293,16 @@ or
 <span class="n">write</span><span class="p">(</span>
     <span class="n">graph</span><span class="p">,</span>
     <span class="s2">"simple.geff"</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="o">=</span><span class="mi">2</span>  <span class="c1"># 2 or 3</span>
+    <span class="n">zarr_format</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># 2 or 3</span>
 <span class="p">)</span>
 
 <span class="n">read_graph</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span>
     <span class="s2">"simple.geff"</span><span class="p">,</span>
-    <span class="n">backend</span><span class="o">=</span><span class="s2">"networkx"</span>  <span class="c1"># or "spatial-graph" or "rustworkx"</span>
+    <span class="n">backend</span><span class="o">=</span><span class="s2">"networkx"</span><span class="p">,</span>  <span class="c1"># or "spatial-graph" or "rustworkx"</span>
 <span class="p">)</span>
 </code></pre></div></p>
 <p>Basic metadata about spatial-temporal axes can be included in the write function call. Additional metadata defined in the <code>geff-spec</code> can be included by creating a <code>GeffMetadata</code> object.
-<div class="highlight"><pre><span></span><code><span class="n">write</span><span class="p">(</span>
-    <span class="n">graph</span><span class="p">,</span>
-    <span class="s2">"simple-metadata.geff"</span><span class="p">,</span>
-    <span class="n">axis_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"t"</span><span class="p">],</span>
-    <span class="n">axis_units</span><span class="o">=</span><span class="p">[</span><span class="s2">"second"</span><span class="p">],</span>
-    <span class="n">axis_types</span><span class="o">=</span><span class="p">[</span><span class="s2">"time"</span><span class="p">]</span>
-<span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">write</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="s2">"simple-metadata.geff"</span><span class="p">,</span> <span class="n">axis_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"t"</span><span class="p">],</span> <span class="n">axis_units</span><span class="o">=</span><span class="p">[</span><span class="s2">"second"</span><span class="p">],</span> <span class="n">axis_types</span><span class="o">=</span><span class="p">[</span><span class="s2">"time"</span><span class="p">])</span>
 </code></pre></div></p>
 
 
