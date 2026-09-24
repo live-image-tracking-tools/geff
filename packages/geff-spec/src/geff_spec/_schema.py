@@ -14,6 +14,7 @@ import geff_spec
 
 # The next imports are needed at runtime for Pydantic validation
 from ._axis import Axis  # noqa: TC001
+from ._mesh import Mesh  # noqa: TC001
 from ._prop_metadata import PropMetadata  # noqa: TC001
 
 if TYPE_CHECKING:
@@ -267,6 +268,9 @@ class GeffMetadata(BaseModel):
             the "Variable length properties" section of the Specification for more information).
             """
         ),
+    )
+    mesh: Mesh | None = Field(
+        default=None, description=("Specification of node properties that encode a triangular mesh")
     )
     track_node_props: dict[Literal["lineage", "tracklet"], str] | None = Field(
         default=None,
