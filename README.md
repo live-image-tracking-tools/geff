@@ -63,23 +63,17 @@ from geff import write, read
 write(
     graph,
     "simple.geff",
-    zarr_format=2  # 2 or 3
+    zarr_format=2,  # 2 or 3
 )
 
 read_graph = read(
     "simple.geff",
-    backend="networkx"  # or "spatial-graph" or "rustworkx"
+    backend="networkx",  # or "spatial-graph" or "rustworkx"
 )
 ```
 
 Basic metadata about spatial-temporal axes can be included in the write function call. Additional metadata defined in the `geff-spec` can be included by creating a `GeffMetadata` object.
 ```python
-write(
-    graph,
-    "simple-metadata.geff",
-    axis_names=["t"],
-    axis_units=["second"],
-    axis_types=["time"]
-)
+write(graph, "simple-metadata.geff", axis_names=["t"], axis_units=["second"], axis_types=["time"])
 ```
 <!--intro-end-->
