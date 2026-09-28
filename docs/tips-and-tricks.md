@@ -78,7 +78,7 @@ graph = construct(**in_memory_geff, backend="networkx")
 
 ## Relative Paths
 
-Relative paths need to be defined for [RelatedObjects](geff_spec.RelatedObject) including [geffception](./geffception.md). The source object for the relative path is the geff directory.
+Relative paths need to be defined for `RelatedObjects` including [geffception](./geffception.md). The source object for the relative path is the geff directory.
 
 ```python
 from pathlib import Path
