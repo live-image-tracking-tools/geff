@@ -75,3 +75,92 @@ in_memory_geff = geff_reader.build(edge_mask=edge_mask)
 # Construct a graph representation of the data with the backend of your choice
 graph = construct(**in_memory_geff, backend="networkx")
 ```
+
+## Relative Paths
+
+Relative paths need to be defined for `RelatedObjects` including [geffception](./geffception.md). The source object for the relative path is the geff directory.
+
+```python
+from pathlib import Path
+
+geff_source = Path("/path/to/graph.geff")
+```
+
+If the target of the `RelatedObject` is another geff, the path should point to the geff directory of the related geff.
+
+```python
+from pathlib import Path
+
+target = Path("graph.geff/lineage.geff")
+rel_path = target.relative_to(source, walk_up=True)
+print(rel_path)
+# 'lineage.geff'
+```
+
+A geff containing tracking data may be located within a larger zarr that contains the source imaging data and segmentation labels as illustrated below. In this case, the relative path will point to a directory 
+
+```
+/path/to/big.zarr
+    zarr.json
+    images/
+        zarr.json
+    labels/
+        zarr.json
+    tracks.geff/
+        zarr.json
+```
+
+```python
+from pathlib import Path
+
+source_geff = Path("/path/to/big.zarr/tracks.geff")
+labels = Path("/path/to/big.zarr/labels")
+images = Path("/path/to/big.zarr/images")
+
+rel_labels = labels.relative_to(source_geff, walk_up=True)
+print(rel_labels)
+# '../labels'
+
+rel_images = images.relative_to(source_geff, walk_up=True)
+print(rel_images)
+# '../images'
+```
+
+### OME-Zarr and Multiscale data
+
+Related objects that follow OME-Zarr conventions and may contain multiscale data should point to the lowest level zarr group that contains the multiscale arrays.
+
+```
+/path/to/data/
+    zarr.json
+    raw.ome.zarr/ ...
+    deconv.ome.zarr/
+        zarr.json
+        0/ # image multiscales
+        1/
+        labels/
+            zarr.json
+            nucleus/
+                zarr.json
+                0/ # segmentation multiscales
+                1/
+        tracks/
+            nucleus.geff/
+                zarr.json
+```
+
+```python
+from pathlib import Path
+
+deconv = Path("/path/to/data/deconv.ome.zarr")
+nuc_labels = Path("/path/to/data/deconv.ome.zarr/labels/nucleus")
+geff = Path("/path/to/data/deconv.ome.zarr/tracks/nucleus.geff")
+
+image_rel_path = deconv.relative_to(geff, walk_up=True)
+print(image_rel_path)
+# '../..'
+
+labels_rel_path = nuc_labels.relative_to(geff, walk_up=True)
+print(labels_rel_path)
+# '../../labels/nucleus'
+```
