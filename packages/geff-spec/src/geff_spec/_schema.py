@@ -92,8 +92,8 @@ class RelatedObject(BaseModel):
     path: str = Field(
         ...,
         description=(
-            "Path of the related object within the zarr group, relative "
-            "to the geff directory. See Tips and Tricks in the documentation for "
+            "Path of the related object within the zarr group, using POSIX-style separators, "
+            "relative to the geff directory. See Tips and Tricks in the documentation for "
             "more information about how to structure relative paths. "
             "It is strongly recommended all related objects are stored as siblings "
             "of the geff group within the top-level zarr group."
