@@ -62,6 +62,7 @@ class Backend(Protocol[T]):
         axis_offset: list[float | None] | None = None,
         zarr_format: Literal[2, 3] = 2,
         structure_validation: bool = True,
+        metadata_validation: bool = True,
         *args: Any,
         **kwargs: Any,
     ) -> None: ...

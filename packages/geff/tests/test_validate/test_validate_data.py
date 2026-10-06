@@ -42,6 +42,30 @@ class Test_validate_data:
         with pytest.raises(ValueError, match="Some node ids are not unique"):
             validate_data(self.memory_geff, ValidationConfig(graph=True))
 
+    def test_metadata(self):
+        # Invalid metadata cross-references are tested in test_metadata.py
+        # Only need to test wiring here: a valid case passes, an invalid case raises
+        _, memory_geff = create_mock_geff(
+            node_id_dtype="int",
+            node_axis_dtypes={"position": "float64", "time": "float64"},
+            directed=True,
+            num_nodes=10,
+            num_edges=10,
+            extra_node_props={"radius": "int"},
+            include_t=True,
+            include_z=False,  # 2D only
+            include_y=True,
+            include_x=True,
+        )
+        memory_geff["metadata"].sphere = "radius"
+        validate_data(config=ValidationConfig(metadata=True), memory_geff=memory_geff)
+
+        memory_geff["metadata"].sphere = "nonexistent"
+        with pytest.raises(
+            ValueError, match=r"Sphere property 'nonexistent' not found in node_props_metadata"
+        ):
+            validate_data(config=ValidationConfig(metadata=True), memory_geff=memory_geff)
+
     def test_sphere(self):
         # Invalid spheres are tested in test_shapes
         # Only need to test a valid case
