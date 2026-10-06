@@ -9,6 +9,7 @@ import zarr.storage
 
 from geff_spec import GeffMetadata, GeffSchema, PropMetadata, RelatedObject
 from geff_spec._axis import Axis
+from geff_spec._mesh import Mesh
 from geff_spec._schema import (
     VERSION_PATTERN,
     DisplayHint,
@@ -373,6 +374,12 @@ class TestMetadataModel:
                 "ellipse": PropMetadata(identifier="ellipse", dtype="float64"),
                 "sphere": PropMetadata(identifier="sphere", dtype="float64"),
                 "polygon": PropMetadata(identifier="polygon", dtype="float64"),
+                "mesh_vertices": PropMetadata(
+                    identifier="mesh_vertices", dtype="float64", varlength=True
+                ),
+                "mesh_triangles": PropMetadata(
+                    identifier="mesh_triangles", dtype="int64", varlength=True
+                ),
                 "tracklet": PropMetadata(identifier="tracklet", dtype="int64"),
                 "lineage": PropMetadata(identifier="lineage", dtype="int64"),
             },
@@ -380,6 +387,7 @@ class TestMetadataModel:
             sphere="sphere",
             ellipsoid="ellipse",
             polygon="polygon",
+            mesh=Mesh(vertices="mesh_vertices", triangles="mesh_triangles"),
             track_node_props={"tracklet": "tracklet", "lineage": "lineage"},
             related_objects=[
                 RelatedObject(type="labels", path="segmentation/", node_prop="seg_id"),

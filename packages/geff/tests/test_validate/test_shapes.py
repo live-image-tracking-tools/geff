@@ -5,6 +5,7 @@ import pytest
 
 from geff.validate.shapes import (
     validate_ellipsoid,
+    validate_mesh,
     validate_polygon,
     validate_sphere,
 )
@@ -152,3 +153,108 @@ class Test_validate_polygon:
 
         with pytest.raises(ValueError, match="Polygon must have at least 3 points"):
             validate_polygon(polygon, AXES_2D)
+
+
+class Test_validate_mesh:
+    def _mesh_node(
+        self, n_vertices: int, triangles: list[list[int]]
+    ) -> tuple[np.ndarray, np.ndarray]:
+        verts = np.ones((n_vertices, 3), dtype="float64")
+        tris = np.array(triangles, dtype="int64")
+        return verts, tris
+
+    def _mesh(self, *nodes: tuple[int, list[list[int]]]) -> tuple[np.ndarray, np.ndarray]:
+        verts_list = []
+        tris_list = []
+        for n_vertices, triangles in nodes:
+            v, t = self._mesh_node(n_vertices, triangles)
+            verts_list.append(v)
+            tris_list.append(t)
+        return _object_array(verts_list), _object_array(tris_list)
+
+    def test_not_3_space_axes(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 2]]))
+        with pytest.raises(
+            ValueError, match="Must define exactly 3 space axes in order to have mesh data"
+        ):
+            validate_mesh(vertices, triangles, AXES_2D)
+
+    def test_mismatched_missing_masks(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 2]]), (3, [[0, 1, 2]]))
+        with pytest.raises(ValueError, match="Missing mask for mesh 'triangles' must match"):
+            validate_mesh(
+                vertices,
+                triangles,
+                AXES_3D,
+                vertices_missing=np.array([False, True]),
+                triangles_missing=np.array([False, False]),
+            )
+
+    def test_too_few_vertices(self):
+        vertices, triangles = self._mesh((2, [[0, 1, 0]]))
+        with pytest.raises(ValueError, match="Mesh must have at least 3 vertices"):
+            validate_mesh(vertices, triangles, AXES_3D)
+
+    def test_too_few_triangles(self):
+        vertices = _object_array([np.ones((3, 3))])
+        triangles = _object_array([np.empty((0, 3), dtype="int64")])
+        with pytest.raises(ValueError, match="Mesh must have at least 1 triangle"):
+            validate_mesh(vertices, triangles, AXES_3D)
+
+    def test_non_integer_triangle_dtype(self):
+        vertices = _object_array([np.ones((3, 3))])
+        triangles = _object_array([np.zeros((1, 3), dtype="float64")])
+        with pytest.raises(ValueError, match="Mesh triangle indices must be integers"):
+            validate_mesh(vertices, triangles, AXES_3D)
+
+    def test_triangle_index_out_of_bounds(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 3]]))
+        with pytest.raises(ValueError, match="Mesh triangle indices must be in the range"):
+            validate_mesh(vertices, triangles, AXES_3D)
+
+    def test_degenerate_triangle(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 1]]))
+        with pytest.raises(ValueError, match="Mesh triangles must reference 3 distinct vertices"):
+            validate_mesh(vertices, triangles, AXES_3D)
+
+    def test_vertex_normals_shape_mismatch(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 2]]))
+        vertex_normals = _object_array([np.ones((2, 3))])
+        with pytest.raises(
+            ValueError, match="Mesh vertex normals must have the same shape as vertices"
+        ):
+            validate_mesh(vertices, triangles, AXES_3D, vertex_normals=vertex_normals)
+
+    def test_triangle_normals_shape_mismatch(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 2]]))
+        triangle_normals = _object_array([np.ones((2, 3))])
+        with pytest.raises(ValueError, match=r"Mesh triangle normals must have shape \(1, 3\)"):
+            validate_mesh(vertices, triangles, AXES_3D, triangle_normals=triangle_normals)
+
+    def test_non_finite_vertices(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 2]]))
+        vertices[0][0, 0] = np.nan
+        with pytest.raises(ValueError, match="Mesh vertices must be finite"):
+            validate_mesh(vertices, triangles, AXES_3D)
+
+    def test_valid_mesh(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 2]]), (4, [[0, 1, 2], [1, 2, 3]]))
+        vertex_normals = _object_array([np.ones((3, 3)), np.ones((4, 3))])
+        triangle_normals = _object_array([np.ones((1, 3)), np.ones((2, 3))])
+        validate_mesh(
+            vertices,
+            triangles,
+            AXES_3D,
+            vertex_normals=vertex_normals,
+            triangle_normals=triangle_normals,
+        )
+
+    def test_missing_rows_are_skipped(self):
+        vertices, triangles = self._mesh((3, [[0, 1, 2]]), (2, [[0, 1, 0]]))
+        missing = np.array([False, True])
+        validate_mesh(
+            vertices, triangles, AXES_3D, vertices_missing=missing, triangles_missing=missing
+        )
+
+        with pytest.raises(ValueError, match="Mesh must have at least 3 vertices"):
+            validate_mesh(vertices, triangles, AXES_3D)

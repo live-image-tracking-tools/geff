@@ -17,6 +17,7 @@ from ._schema import GEFF_VERSION, GeffMetadata
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from ._mesh import Mesh
     from ._valid_values import AxisType
 
     T = TypeVar("T")
@@ -341,6 +342,40 @@ def _validate_prop_exists(
         raise ValueError(f"{label} '{prop_name}' not found in node_props_metadata")
 
 
+def _validate_mesh_metadata(
+    mesh: Mesh,
+    node_props_metadata: Mapping[str, PropMetadata],
+    axes: list[Axis] | None,
+) -> None:
+    """Check that a Mesh's property names exist in node_props_metadata, and that any
+    vertex_axes names refer to existing spatial axes.
+
+    Args:
+        mesh (Mesh): The Mesh metadata to validate.
+        node_props_metadata (Mapping[str, PropMetadata]): Metadata for node properties,
+            keyed by property identifier.
+        axes (list[Axis] | None): List of Axis metadata.
+
+    Raises:
+        ValueError: If a mesh property name is not found in node_props_metadata.
+        ValueError: If a vertex_axes name is not found in axes, or is not a spatial axis.
+    """
+    for field_name in ("vertices", "triangles", "vertex_normals", "triangle_normals"):
+        prop_name = getattr(mesh, field_name)
+        if prop_name is not None and prop_name not in node_props_metadata:
+            raise ValueError(
+                f"Mesh '{field_name}' property '{prop_name}' not found in node_props_metadata"
+            )
+
+    if mesh.vertex_axes is not None:
+        ax_by_name = {ax.name: ax for ax in axes} if axes is not None else {}
+        for name in mesh.vertex_axes:
+            if name not in ax_by_name:
+                raise ValueError(f"Mesh vertex_axes name '{name}' not found in axes")
+            if ax_by_name[name].type != "space":
+                raise ValueError(f"Mesh vertex_axes name '{name}' is not a spatial axis")
+
+
 def validate_metadata(metadata: GeffMetadata) -> None:
     """Validate cross references between `GeffMetadata` fields and `node_props_metadata`.
 
@@ -355,8 +390,9 @@ def validate_metadata(metadata: GeffMetadata) -> None:
         metadata (GeffMetadata): The metadata to validate.
 
     Raises:
-        ValueError: If a sphere/ellipsoid/polygon/tracklet/lineage/related-object property
-            name is not found in `node_props_metadata`.
+        ValueError: If a sphere/ellipsoid/polygon/mesh/tracklet/lineage/related-object property
+            name is not found in `node_props_metadata`, or a mesh `vertex_axes` name is not a
+            valid spatial axis.
     """
     if metadata.sphere is not None:
         _validate_prop_exists("Sphere property", metadata.sphere, metadata.node_props_metadata)
@@ -366,6 +402,9 @@ def validate_metadata(metadata: GeffMetadata) -> None:
         )
     if metadata.polygon is not None:
         _validate_prop_exists("Polygon property", metadata.polygon, metadata.node_props_metadata)
+
+    if metadata.mesh is not None:
+        _validate_mesh_metadata(metadata.mesh, metadata.node_props_metadata, metadata.axes)
 
     if metadata.track_node_props is not None:
         for key, prop_name in metadata.track_node_props.items():
