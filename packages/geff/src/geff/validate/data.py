@@ -10,7 +10,6 @@ from geff.validate.graph import (
     validate_nodes_for_edges,
     validate_unique_node_ids,
 )
-from geff.validate.metadata import validate_metadata
 from geff.validate.shapes import (
     validate_ellipsoid,
     validate_polygon,
@@ -20,6 +19,7 @@ from geff.validate.tracks import (
     validate_lineages,
     validate_tracklets,
 )
+from geff_spec.utils import validate_metadata
 
 if TYPE_CHECKING:
     from geff._typing import InMemoryGeff

@@ -17,12 +17,12 @@ from geff.core_io._utils import (
     remove_tilde,
     setup_zarr_group,
 )
-from geff.validate.metadata import validate_metadata
 from geff.validate.structure import validate_structure
 from geff_spec.utils import (
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
     create_props_metadata,
+    validate_metadata,
 )
 
 from ._serialization import serialize_vlen_property_data
