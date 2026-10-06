@@ -6,6 +6,7 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "uninstalled"
 
 from ._axis import Axis
+from ._mesh import Mesh
 from ._prop_metadata import PropMetadata
 from ._schema import DisplayHint, GeffMetadata, GeffSchema, RelatedObject
 from ._valid_values import (
@@ -23,6 +24,7 @@ __all__ = [
     "DisplayHint",
     "GeffMetadata",
     "GeffSchema",
+    "Mesh",
     "PropMetadata",
     "RelatedObject",
     "SpaceUnits",
