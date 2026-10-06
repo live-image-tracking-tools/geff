@@ -366,6 +366,18 @@
           "description": "\n            Name of the `polygon` property.\n\n            A polygon is assumed to be in the same coordinate system as the `space` type\n            properties.\n\n            A polygon for a single node is an array of shape `(n_points, n_dimensions)`. Each\n            point on the polygon is given relative to the position of the node as defined by\n            the `space` axes. Nodes are not required to have polygons with the same number of\n            points. As such, this property is usually encoded as a variable length property (see\n            the \"Variable length properties\" section of the Specification for more information).\n            ",
           "title": "Node property: Detections as polygons"
         },
+        "mesh": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Mesh"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Specification of node properties that encode a triangular mesh"
+        },
         "track_node_props": {
           "anyOf": [
             {
@@ -430,6 +442,69 @@
         "geff_version"
       ],
       "title": "geff_metadata",
+      "type": "object"
+    },
+    "Mesh": {
+      "description": "The `Mesh` schema specifies the node properties that together define a triangular surface\nmesh associated with each node, giving the node a 3D shape. Each field below names a\n`node property` (a key into `node_props_metadata` and the `nodes\\props` group) rather than\nstoring the mesh data itself.\n\nVertex positions are defined relative to the spatial position of the node, in the same way\nas `polygon` points. Nodes are not required to have the same number of vertices or triangles,\nso the `vertices` and `triangles` properties (and `vertex_normals`/`triangle_normals`, if\npresent) are typically written as variable length properties (see the \"Variable length\nproperties\" section of the Specification).\n\nFor a single node:\n\n- `vertices` is a `(V, D)` array, where `V` is the number of vertices for that node's mesh\n  and `D` is the number of spatial dimensions (3 for surface meshes). Row `i` gives the\n  position of vertex `i` relative to the node.\n- `triangles` is a `(T, 3)` integer array, where `T` is the number of triangular faces. Each\n  row holds the indices of three vertices (into that same node's `vertices` array) that form\n  one face. Index values must therefore be valid local indices into `vertices`, i.e. in the\n  range `[0, V)`.\n- `vertex_normals`, if present, is a `(V, D)` array aligned row-for-row with `vertices`,\n  giving a normal vector per vertex.\n- `triangle_normals`, if present, is a `(T, D)` array aligned row-for-row with `triangles`,\n  giving a normal vector per face.\n\nSurface meshes are only used for 3D shapes.",
+      "properties": {
+        "vertices": {
+          "description": "Name of the node property that contains the mesh vertices, as a `(V, D)` array per node where `V` is the number of vertices and `D` is the number of spatial dimensions. Vertex positions are defined relative to the spatial position of the associated node.",
+          "title": "Vertices",
+          "type": "string"
+        },
+        "triangles": {
+          "description": "Name of the node property that contains the mesh triangles, as a `(T, 3)` integer array per node. Each row contains the indices of the three vertices (into the same node's `vertices` array) that make up one triangular face.",
+          "title": "Triangles",
+          "type": "string"
+        },
+        "vertex_normals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional name of the node property that contains the mesh vertex normals, as a `(V, D)` array per node aligned row-for-row with the `vertices` property.",
+          "title": "Vertex Normals"
+        },
+        "triangle_normals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional name of the node property that contains the mesh triangle (face) normals, as a `(T, D)` array per node aligned row-for-row with the `triangles` property.",
+          "title": "Triangle Normals"
+        },
+        "vertex_axes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional list of axis names specifying the order of the spatial dimensions (columns) used in the `vertices` (and, if present, `vertex_normals`) arrays, when that order differs from the default. Names must match `name` values in the `GeffMetadata.axes` list. If not specified, the default is the order of the spatial-type axes as they appear in `GeffMetadata.axes`.",
+          "title": "Vertex Axes"
+        }
+      },
+      "required": [
+        "vertices",
+        "triangles"
+      ],
+      "title": "Mesh",
       "type": "object"
     },
     "PropMetadata": {

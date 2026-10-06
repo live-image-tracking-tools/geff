@@ -12,6 +12,7 @@ from geff.validate.graph import (
 )
 from geff.validate.shapes import (
     validate_ellipsoid,
+    validate_mesh,
     validate_polygon,
     validate_sphere,
 )
@@ -31,6 +32,7 @@ class ValidationConfig(BaseModel):
     sphere: bool = False
     ellipsoid: bool = False
     polygon: bool = False
+    mesh: bool = False
     lineage: bool = False
     tracklet: bool = False
 
@@ -79,6 +81,34 @@ def validate_data(memory_geff: InMemoryGeff, config: ValidationConfig) -> None:
     if config.polygon and meta.polygon is not None:
         polygon_prop = memory_geff["node_props"][meta.polygon]
         validate_polygon(polygon_prop["values"], meta.axes, polygon_prop["missing"])
+
+    if config.mesh and meta.mesh is not None:
+        mesh = meta.mesh
+        vertices_prop = memory_geff["node_props"][mesh.vertices]
+        triangles_prop = memory_geff["node_props"][mesh.triangles]
+        vertex_normals_prop = (
+            memory_geff["node_props"][mesh.vertex_normals]
+            if mesh.vertex_normals is not None
+            else None
+        )
+        triangle_normals_prop = (
+            memory_geff["node_props"][mesh.triangle_normals]
+            if mesh.triangle_normals is not None
+            else None
+        )
+        validate_mesh(
+            vertices_prop["values"],
+            triangles_prop["values"],
+            meta.axes,
+            vertex_normals=vertex_normals_prop["values"] if vertex_normals_prop else None,
+            triangle_normals=triangle_normals_prop["values"] if triangle_normals_prop else None,
+            vertices_missing=vertices_prop["missing"],
+            triangles_missing=triangles_prop["missing"],
+            vertex_normals_missing=vertex_normals_prop["missing"] if vertex_normals_prop else None,
+            triangle_normals_missing=triangle_normals_prop["missing"]
+            if triangle_normals_prop
+            else None,
+        )
 
     if meta.track_node_props is not None:
         if config.tracklet and "tracklet" in meta.track_node_props:

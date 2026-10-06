@@ -1,10 +1,13 @@
 import warnings
+from typing import ClassVar
 
 import numpy as np
 import pytest
 
 from geff_spec import Axis, GeffMetadata, PropMetadata, RelatedObject
+from geff_spec._mesh import Mesh
 from geff_spec.utils import (
+    _validate_mesh_metadata,
     _validate_prop_exists,
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
@@ -397,6 +400,50 @@ class TestValidatePropExists:
             _validate_prop_exists("Sphere property", "nope", node_props_metadata)
 
 
+class TestValidateMeshMetadata:
+    axes: ClassVar[list[Axis]] = [
+        Axis(name="x", type="space"),
+        Axis(name="y", type="space"),
+        Axis(name="z", type="space"),
+        Axis(name="t", type="time"),
+    ]
+    node_props_metadata: ClassVar[dict[str, PropMetadata]] = {
+        "mesh_vertices": PropMetadata(identifier="mesh_vertices", dtype="float32", varlength=True),
+        "mesh_triangles": PropMetadata(identifier="mesh_triangles", dtype="int64", varlength=True),
+    }
+
+    def test_valid_minimal_mesh(self):
+        mesh = Mesh(vertices="mesh_vertices", triangles="mesh_triangles")
+        _validate_mesh_metadata(mesh, self.node_props_metadata, self.axes)
+
+    def test_unknown_vertices_property(self):
+        mesh = Mesh(vertices="missing_prop", triangles="mesh_triangles")
+        with pytest.raises(ValueError, match=r"Mesh 'vertices' property 'missing_prop' not found"):
+            _validate_mesh_metadata(mesh, self.node_props_metadata, self.axes)
+
+    def test_unknown_vertex_normals_property(self):
+        mesh = Mesh(
+            vertices="mesh_vertices", triangles="mesh_triangles", vertex_normals="missing_normals"
+        )
+        with pytest.raises(ValueError, match=r"Mesh 'vertex_normals' property 'missing_normals'"):
+            _validate_mesh_metadata(mesh, self.node_props_metadata, self.axes)
+
+    def test_vertex_axes_name_not_in_axes(self):
+        mesh = Mesh(vertices="mesh_vertices", triangles="mesh_triangles", vertex_axes=["x", "q"])
+        with pytest.raises(ValueError, match=r"Mesh vertex_axes name 'q' not found in axes"):
+            _validate_mesh_metadata(mesh, self.node_props_metadata, self.axes)
+
+    def test_vertex_axes_name_not_spatial(self):
+        mesh = Mesh(vertices="mesh_vertices", triangles="mesh_triangles", vertex_axes=["x", "t"])
+        with pytest.raises(ValueError, match=r"Mesh vertex_axes name 't' is not a spatial axis"):
+            _validate_mesh_metadata(mesh, self.node_props_metadata, self.axes)
+
+    def test_vertex_axes_set_but_no_axes_defined(self):
+        mesh = Mesh(vertices="mesh_vertices", triangles="mesh_triangles", vertex_axes=["x"])
+        with pytest.raises(ValueError, match=r"Mesh vertex_axes name 'x' not found in axes"):
+            _validate_mesh_metadata(mesh, self.node_props_metadata, None)
+
+
 class TestValidateMetadata:
     def _meta(self, **kwargs) -> GeffMetadata:
         base = {
@@ -434,6 +481,11 @@ class TestValidateMetadata:
         with pytest.raises(
             ValueError, match=r"Polygon property 'nope' not found in node_props_metadata"
         ):
+            validate_metadata(meta)
+
+    def test_mesh_not_found(self):
+        meta = self._meta(mesh=Mesh(vertices="nope", triangles="mesh_triangles"))
+        with pytest.raises(ValueError, match=r"Mesh 'vertices' property 'nope' not found"):
             validate_metadata(meta)
 
     def test_track_node_props_not_found(self):
