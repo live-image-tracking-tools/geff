@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, NoReturn
 
 import numpy as np
 import zarr
@@ -198,6 +198,30 @@ def dict_props_to_arr(
     return props_dict
 
 
+def _rollback_invalid_write(
+    geff_store: StoreLike, zarr_format: Literal[2, 3], error: ValueError
+) -> NoReturn:
+    """Delete a geff that failed validation after being written, and re-raise.
+
+    Args:
+        geff_store (StoreLike): The store the partial geff was written to.
+        zarr_format (Literal[2, 3]): The zarr specification used to write the store.
+        error (ValueError): The validation error that triggered the rollback.
+
+    Raises:
+        ValueError: Always, with a note on whether the partial geff was deleted.
+    """
+    message = "\nCannot write invalid geff."
+    try:
+        delete_geff(geff_store, zarr_format=zarr_format)
+    except:  # noqa: E722
+        message = (
+            "\nWritten geff is invalid, but cannot be deleted automatically. "
+            "Please delete manually."
+        )
+    raise ValueError(error.args[0] + message) from error
+
+
 def write_arrays(
     geff_store: StoreLike,
     node_ids: np.ndarray,
@@ -305,29 +329,13 @@ def write_arrays(
         try:
             validate_metadata(metadata)
         except ValueError as e:
-            message = "\nCannot write invalid geff."
-            try:
-                delete_geff(geff_store, zarr_format=zarr_format)
-            except:  # noqa: E722
-                message = (
-                    "\nWritten geff is invalid, but cannot be deleted automatically. "
-                    "Please delete manually."
-                )
-            raise ValueError(e.args[0] + message) from e
+            _rollback_invalid_write(geff_store, zarr_format, e)
 
     if structure_validation:
         try:
             validate_structure(geff_store)
         except ValueError as e:
-            message = "\nCannot write invalid geff."
-            try:
-                delete_geff(geff_store, zarr_format=zarr_format)
-            except:  # noqa: E722
-                message = (
-                    "\nWritten geff is invalid, but cannot be deleted automatically. "
-                    "Please delete manually."
-                )
-            raise ValueError(e.args[0] + message) from e
+            _rollback_invalid_write(geff_store, zarr_format, e)
 
 
 _TARGET_CHUNK_BYTES = 1 << 23  # 8 MiB — power-of-two, close to 10 MB
