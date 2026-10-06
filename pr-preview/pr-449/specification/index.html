@@ -411,6 +411,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variable length properties
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -418,6 +429,56 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-edges-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The edges group
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The edges group">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-ids-array_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ids array
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-props-group-and-edge-property-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The props group and edge property groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-file-structure-and-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example file structure and metadata
+      
+    </span>
+  </a>
   
 </li>
       
@@ -895,6 +956,8 @@
       
         
       
+        
+      
     
     
     
@@ -987,6 +1050,34 @@
     
   
     <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>graph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/geff/validate/metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>metadata
   
 
     
@@ -1329,6 +1420,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#variable-length-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variable length properties
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1336,6 +1438,56 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-edges-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The edges group
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The edges group">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-ids-array_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The ids array
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-props-group-and-edge-property-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The props group and edge property groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-file-structure-and-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example file structure and metadata
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1616,7 +1768,7 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 <p>When writing a graph with missing properties to the geff format, you must fill in a dummy value in the <code>values</code> array for the nodes that are missing the property, in order to keep the indices aligned with the node ids.</p>
 </div>
 <h4 id="shape-properties">Shape properties</h4>
-<p>Geff provides special support for predefined shape properties, although they are not required. These currently include <code>sphere</code>, <code>ellipsoid</code>, <code>polygon</code> and mesh. Values can be marked as <code>missing</code>, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective. </p>
+<p>Geff provides special support for predefined shape properties, although they are not required. These currently include <code>sphere</code>, <code>ellipsoid</code>, <code>polygon</code> and <code>mesh</code>. Values can be marked as <code>missing</code>, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective. </p>
 <ul>
 <li>
 <p><code>sphere</code>: Hypersphere in n spatial dimensions, defined by a scalar radius. </p>
@@ -1628,13 +1780,9 @@ The dictionary can store one or both of 'tracklet' or 'lineage' keys.</p>
 <p><code>polygon</code>: Defined by a series of points matching the dimensionality of the spatial axes. Each point is defined relative to the spatial position of the node itself.</p>
 </li>
 <li>
-<p><code>mesh</code>: Defined by a triangular mesh, with at least a 2D array of vertices and a 2D array of triangle indices.</p>
+<p><code>mesh</code>: Defined by a triangular mesh, with at least a 2D array of vertices and a 2D array of triangle indices. Surface meshes are used to define 3D shapes. Vertex positions are defined relative to the spatial position of the node.</p>
 </li>
 </ul>
-<p>If meshes are to be used, the GEFF metadata must include a <code>meshes</code> field under <code>node_props_metadata</code>, which contains the identifiers for the vertices, triangles, and optionally vertex normals and triangle normals. The keys to these identifies must be respectively <code>vertices</code>, <code>triangles</code>, <code>vertex_normals</code>, and <code>triangle_normals</code>. The values of these keys must be the names of the corresponding node property groups in the <code>nodes\props</code> group. The <code>meshes</code> field can also contain a <code>vertex_axes</code> field, which specifies the axes corresponding to the vertex coordinates. If not specified, the default is <code>["x", "y", "z"]</code>.
-Surfaces meshes are only used for 3D shapes.
-The vertex positions are defined relative to the spatial position of the node itself.</p>
-<h1 id="todo-if-we-want-to-support-level-of-details-meshes-could-be-a-list-of-dictionaries-each-for-one-level-with-a-different-name-and-a-level-field">TODO: If we want to support level of details, <code>meshes</code> could be a list of dictionaries, each for one level, with a different name and a <code>level</code> field.</h1>
 <h4 id="variable-length-properties">Variable length properties</h4>
 <p>While most properties can be represented as normal arrays, where each node has a property of the same shape, the specification also supports properties where each node can have an array property of a variable shape. This is useful for properties such as polygons, meshes, or crops of bounding boxes. </p>
 <p>Variable length properties will have a <code>data</code> array in addition to the <code>values</code> and <code>missing</code> arrays. For variable length properties, the <code>data</code> array will contain a 1D flattened array of the actual values for all the nodes. The <code>values</code> array will contain the offset and shape of the relevant section of data in the <code>data</code> array.</p>
@@ -1682,20 +1830,20 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
                     <span class="n">values</span> <span class="c1"># shape: (N, ndim + 1) dtype: int64, ndim is number of dimensions in each entry array</span>
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
                 <span class="n">mesh_vertices</span><span class="o">/</span>
-                    <span class="n">data</span> <span class="c1"># shape: (V, 3,) dtype: float32, V is the total number of vertices</span>
-                    <span class="n">values</span> <span class="c1"># shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of vertices in the mesh</span>
+                    <span class="n">data</span> <span class="c1"># shape: (L,) dtype: float32, L is the length of all the flattened entries (sum over nodes of n_vertices * 3)</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, 3) dtype: uint64, each row is [offset, n_vertices, 3]</span>
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
                 <span class="n">mesh_triangles</span><span class="o">/</span>
-                    <span class="n">data</span> <span class="c1"># shape: (T, 3,) dtype: int64, T is the total number of triangles</span>
-                    <span class="n">values</span> <span class="c1"># shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of triangles in the mesh</span>
+                    <span class="n">data</span> <span class="c1"># shape: (L,) dtype: int64, L is the length of all the flattened entries (sum over nodes of n_triangles * 3)</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, 3) dtype: uint64, each row is [offset, n_triangles, 3]</span>
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
                 <span class="n">mesh_vertex_normals</span><span class="o">/</span> <span class="c1"># optional</span>
-                    <span class="n">data</span> <span class="c1"># shape: (V, 3,) dtype: float32, V is the total number of vertices</span>
-                    <span class="n">values</span> <span class="c1"># shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of vertices in the mesh</span>
+                    <span class="n">data</span> <span class="c1"># shape: (L,) dtype: float32, L is the length of all the flattened entries (sum over nodes of n_vertices * 3)</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, 3) dtype: uint64, each row is [offset, n_vertices, 3]</span>
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
                 <span class="n">mesh_triangle_normals</span><span class="o">/</span> <span class="c1"># optional</span>
-                    <span class="n">data</span> <span class="c1"># shape: (T, 3,) dtype: float32, T is the total number of triangles</span>
-                    <span class="n">values</span> <span class="c1"># shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of triangles in the mesh</span>
+                    <span class="n">data</span> <span class="c1"># shape: (L,) dtype: float32, L is the length of all the flattened entries (sum over nodes of n_triangles * 3)</span>
+                    <span class="n">values</span> <span class="c1"># shape: (N, 3) dtype: uint64, each row is [offset, n_triangles, 3]</span>
                     <span class="n">missing</span> <span class="c1"># shape: (N,) dtype: bool</span>
 
         <span class="n">edges</span><span class="o">/</span>
@@ -1746,6 +1894,13 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
     // predefined node attributes for storing detections as spheres or ellipsoids
     "sphere": "radius", // optional
     "ellipsoid": "covariance3d", // optional
+    "mesh": { // optional
+      "vertices": "mesh_vertices",
+      "triangles": "mesh_triangles",
+      "vertex_normals": "mesh_vertex_normals", // optional
+      "triangle_normals": "mesh_triangle_normals" // optional
+      // "vertex_axes": ["x", "y", "z"] // optional, defaults to the order of the spatial axes in `axes`
+    },
     "display_hints": {
       "display_horizontal": "x",
       "display_vertical": "y",
@@ -1789,28 +1944,25 @@ Edges should be unique (no multiple edges between the same two nodes) and edges 
         "dtype": "float32",
         "varlength": false
       },
-      "meshes": {
-        "vertices": {
-          "identifier": "mesh_vertices",
-          "dtype": "float32",
-          "varlength": true
-        },
-        "triangles": {
-          "identifier": "mesh_triangles",
-          "dtype": "int64",
-          "varlength": true
-        },
-        "vertex_normals": { # optional
-          "identifier": "mesh_vertex_normals",
-          "dtype": "float32",
-          "varlength": true
-        },
-        "triangle_normals": { # optional
-          "identifier": "mesh_triangle_normals",
-          "dtype": "float32",
-          "varlength": true
-        },
-        "vertex_axes": ["x", "y", "z"], # optional, default is ["x", "y", "z"]
+      "mesh_vertices": {
+        "identifier": "mesh_vertices",
+        "dtype": "float32",
+        "varlength": true
+      },
+      "mesh_triangles": {
+        "identifier": "mesh_triangles",
+        "dtype": "int64",
+        "varlength": true
+      },
+      "mesh_vertex_normals": {
+        "identifier": "mesh_vertex_normals",
+        "dtype": "float32",
+        "varlength": true
+      },
+      "mesh_triangle_normals": {
+        "identifier": "mesh_triangle_normals",
+        "dtype": "float32",
+        "varlength": true
       }
     },
     "edge_props_metadata": {

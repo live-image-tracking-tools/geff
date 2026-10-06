@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/reference/geff/validate/tracks/">
+        <link rel="canonical" href="https://live-image-tracking-tools.github.io/geff/reference/geff/validate/metadata/">
       
       
-        <link rel="prev" href="../structure/">
+        <link rel="prev" href="../graph/">
       
       
-        <link rel="next" href="../../../geff_spec/">
+        <link rel="next" href="../segmentation/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>tracks - geff</title>
+        <title>metadata - geff</title>
       
     
     
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#geff.validate.tracks" class="md-skip">
+        <a href="#geff.validate.metadata" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              tracks
+              metadata
             
           </span>
         </div>
@@ -887,10 +887,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../metadata/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>metadata
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -906,6 +933,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#geff.validate.metadata._validate_mesh_metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;_validate_mesh_metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geff.validate.metadata._validate_prop_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;_validate_prop_exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geff.validate.metadata.validate_metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -999,37 +1079,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>tracks
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../tracks/" class="md-nav__link">
         
   
   
@@ -1045,48 +1098,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#geff.validate.tracks.validate_lineages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_lineages
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#geff.validate.tracks.validate_tracklets" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_tracklets
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1242,10 +1253,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#geff.validate.tracks.validate_lineages" class="md-nav__link">
+  <a href="#geff.validate.metadata._validate_mesh_metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_lineages
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;_validate_mesh_metadata
       
     </span>
   </a>
@@ -1253,10 +1264,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#geff.validate.tracks.validate_tracklets" class="md-nav__link">
+  <a href="#geff.validate.metadata._validate_prop_exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_tracklets
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;_validate_prop_exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geff.validate.metadata.validate_metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_metadata
       
     </span>
   </a>
@@ -1284,8 +1306,8 @@
 
 
 
-<h1 id="geff.validate.tracks" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">geff.validate.tracks</span>
+<h1 id="geff.validate.metadata" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">geff.validate.metadata</span>
 
 
 </h1>
@@ -1315,24 +1337,22 @@
 <div class="doc doc-object doc-function">
 
 
-<h2 id="geff.validate.tracks.validate_lineages" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_lineages</span>
+<h2 id="geff.validate.metadata._validate_mesh_metadata" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">_validate_mesh_metadata</span>
 
 
 </h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_lineages</span><span class="p">(</span>
-    <span class="n">node_ids</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-    <span class="n">edge_ids</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-    <span class="n">lineage_ids</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">_validate_mesh_metadata</span><span class="p">(</span>
+    <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span>
+    <span class="n">node_props_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PropMetadata</span><span class="p">],</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Axis</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Validates if each lineage is a valid, isolated connected component.</p>
-<p>A lineage is considered valid if and only if the set of nodes belonging
-to it is identical to one of the graph's weakly connected components.
-This efficiently ensures both internal connectivity and external isolation.</p>
+        <p>Check that a Mesh's property names exist in node_props_metadata, and that any
+vertex_axes names refer to existing spatial axes.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1348,14 +1368,14 @@ This efficiently ensures both internal connectivity and external isolation.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>node_ids</code>
+                <code>mesh</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.typing.ArrayLike" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike">ArrayLike</a></code>
+                  <code><span title="geff_spec._mesh.Mesh">Mesh</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A sequence of unique node identifiers in the graph.</p>
+                <p>The Mesh metadata to validate.</p>
               </div>
             </td>
             <td>
@@ -1364,15 +1384,15 @@ This efficiently ensures both internal connectivity and external isolation.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>edge_ids</code>
+                <code>node_props_metadata</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.typing.ArrayLike" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike">ArrayLike</a></code>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Mapping" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping">Mapping</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a>, <a class="autorefs autorefs-internal" title="            PropMetadata (geff_spec.PropMetadata)" href="../../../geff_spec/#geff_spec.PropMetadata">PropMetadata</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A sequence of (source, target) pairs representing directed
-edges.</p>
+                <p>Metadata for node properties,
+keyed by property identifier.</p>
               </div>
             </td>
             <td>
@@ -1381,15 +1401,14 @@ edges.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>lineage_ids</code>
+                <code>axes</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.typing.ArrayLike" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike">ArrayLike</a></code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#list">list</a>[<a class="autorefs autorefs-internal" title="            Axis (geff_spec.Axis)" href="../../../geff_spec/#geff_spec.Axis">Axis</a>] | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A sequence of lineage identifiers corresponding to each
-node in <code>node_ids</code>.</p>
+                <p>List of Axis metadata.</p>
               </div>
             </td>
             <td>
@@ -1400,7 +1419,7 @@ node in <code>node_ids</code>.</p>
     </table>
 
 
-    <p><span class="doc-section-title">Returns:</span></p>
+<p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
         <tr>
@@ -1411,15 +1430,21 @@ node in <code>node_ids</code>.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple">tuple</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#bool">bool</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a>]]</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A tuple containing:
-- is_valid (bool): True if all lineages are valid connected
-  components, False otherwise.
-- errors (list[str]): A list of error messages for each invalid
-  lineage.</p>
+                <p>If a mesh property name is not found in node_props_metadata.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a vertex_axes name is not found in axes, or is not a spatial axis.</p>
               </div>
             </td>
           </tr>
@@ -1434,22 +1459,21 @@ node in <code>node_ids</code>.</p>
 <div class="doc doc-object doc-function">
 
 
-<h2 id="geff.validate.tracks.validate_tracklets" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_tracklets</span>
+<h2 id="geff.validate.metadata._validate_prop_exists" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">_validate_prop_exists</span>
 
 
 </h2>
-<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_tracklets</span><span class="p">(</span>
-    <span class="n">node_ids</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-    <span class="n">edge_ids</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-    <span class="n">tracklet_ids</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">_validate_prop_exists</span><span class="p">(</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">node_props_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PropMetadata</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Validates if each tracklet forms a single, cycle-free path using NetworkX
-for improved performance.</p>
+        <p>Check that a property name referenced elsewhere in the metadata is a valid node property.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1465,14 +1489,15 @@ for improved performance.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>node_ids</code>
+                <code>label</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.typing.ArrayLike" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike">ArrayLike</a></code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Sequence of node identifiers.</p>
+                <p>Description of what references <code>prop_name</code>, used verbatim at the start
+of the error message (e.g. "Sphere property", "Related object node_prop").</p>
               </div>
             </td>
             <td>
@@ -1481,15 +1506,14 @@ for improved performance.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>edge_ids</code>
+                <code>prop_name</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.typing.ArrayLike" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike">ArrayLike</a></code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Sequence of edges as (source, target) node ID pairs.
-Edges must be between nodes in <code>node_ids</code>.</p>
+                <p>The node property name being referenced.</p>
               </div>
             </td>
             <td>
@@ -1498,14 +1522,15 @@ Edges must be between nodes in <code>node_ids</code>.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>tracklet_ids</code>
+                <code>node_props_metadata</code>
             </td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.typing.ArrayLike" href="https://numpy.org/doc/stable/reference/typing.html#numpy.typing.ArrayLike">ArrayLike</a></code>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Mapping" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping">Mapping</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a>, <a class="autorefs autorefs-internal" title="            PropMetadata (geff_spec.PropMetadata)" href="../../../geff_spec/#geff_spec.PropMetadata">PropMetadata</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Sequence of tracklet IDs corresponding to each node.</p>
+                <p>Metadata for node properties,
+keyed by property identifier.</p>
               </div>
             </td>
             <td>
@@ -1516,7 +1541,7 @@ Edges must be between nodes in <code>node_ids</code>.</p>
     </table>
 
 
-    <p><span class="doc-section-title">Returns:</span></p>
+<p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
         <tr>
@@ -1527,13 +1552,93 @@ Edges must be between nodes in <code>node_ids</code>.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple">tuple</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#bool">bool</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a>]]</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>tuple[bool, list[str]]:
-- is_valid (bool): True if all tracklets are valid, otherwise False.
-- errors (list[str]): List of error messages for invalid tracklets.</p>
+                <p>If prop_name is not found in node_props_metadata.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="geff.validate.metadata.validate_metadata" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_metadata</span>
+
+
+</h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Validate cross references between <code>GeffMetadata</code> fields and <code>node_props_metadata</code>.</p>
+<p>These checks only need the metadata object itself, not the underlying property arrays.
+They are not enforced eagerly on every <code>GeffMetadata</code> construction/assignment because some
+writers build up <code>node_props_metadata</code> incrementally: an initial, intentionally incomplete
+<code>GeffMetadata</code> is constructed first, and <code>node_props_metadata</code> is filled in afterward from
+the real property data (e.g. <code>write_arrays</code>). Call this explicitly once metadata is
+finalized, such as right before writing or right after reading.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>metadata</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="            GeffMetadata (geff_spec.GeffMetadata)" href="../../../geff_spec/#geff_spec.GeffMetadata">GeffMetadata</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The metadata to validate.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a sphere/ellipsoid/polygon/mesh/tracklet/lineage/related-object property
+name is not found in <code>node_props_metadata</code>, or a mesh <code>vertex_axes</code> name is not a
+valid spatial axis.</p>
               </div>
             </td>
           </tr>
