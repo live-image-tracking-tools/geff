@@ -1246,6 +1246,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#geff_spec.Mesh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;Mesh
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#geff_spec.PropMetadata" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2018,7 +2029,7 @@ the "Variable length properties" section of the Specification for more informati
                 <code>mesh</code>
             </td>
             <td>
-                  <code><span title="geff_spec._mesh.Mesh">Mesh</span> | None</code>
+                  <code><a class="autorefs autorefs-internal" title="            Mesh (geff_spec._mesh.Mesh)" href="#geff_spec.Mesh">Mesh</a> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2298,6 +2309,172 @@ Maintains consistency by preserving ignored attributes with their original value
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="geff_spec.Mesh" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">Mesh</span>
+
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="pydantic.BaseModel">BaseModel</span></code></p>
+
+
+
+        <p>The <code>Mesh</code> schema specifies the node properties that together define a triangular surface
+mesh associated with each node, giving the node a 3D shape. Each field below names a
+<code>node property</code> (a key into <code>node_props_metadata</code> and the <code>nodes\props</code> group) rather than
+storing the mesh data itself.</p>
+<p>Vertex positions are defined relative to the spatial position of the node, in the same way
+as <code>polygon</code> points. Nodes are not required to have the same number of vertices or triangles,
+so the <code>vertices</code> and <code>triangles</code> properties (and <code>vertex_normals</code>/<code>triangle_normals</code>, if
+present) are typically written as variable length properties (see the "Variable length
+properties" section of the Specification).</p>
+<p>For a single node:</p>
+<ul>
+<li><code>vertices</code> is a <code>(V, D)</code> array, where <code>V</code> is the number of vertices for that node's mesh
+  and <code>D</code> is the number of spatial dimensions (3 for surface meshes). Row <code>i</code> gives the
+  position of vertex <code>i</code> relative to the node.</li>
+<li><code>triangles</code> is a <code>(T, 3)</code> integer array, where <code>T</code> is the number of triangular faces. Each
+  row holds the indices of three vertices (into that same node's <code>vertices</code> array) that form
+  one face. Index values must therefore be valid local indices into <code>vertices</code>, i.e. in the
+  range <code>[0, V)</code>.</li>
+<li><code>vertex_normals</code>, if present, is a <code>(V, D)</code> array aligned row-for-row with <code>vertices</code>,
+  giving a normal vector per vertex.</li>
+<li><code>triangle_normals</code>, if present, is a <code>(T, D)</code> array aligned row-for-row with <code>triangles</code>,
+  giving a normal vector per face.</li>
+</ul>
+<p>Surface meshes are only used for 3D shapes.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>vertices</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the node property that contains the mesh vertices, as a <code>(V, D)</code> array per node where <code>V</code> is the number of vertices and <code>D</code> is the number of spatial dimensions. Vertex positions are defined relative to the spatial position of the associated node.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>triangles</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the node property that contains the mesh triangles, as a <code>(T, 3)</code> integer array per node. Each row contains the indices of the three vertices (into the same node's <code>vertices</code> array) that make up one triangular face.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vertex_normals</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional name of the node property that contains the mesh vertex normals, as a <code>(V, D)</code> array per node aligned row-for-row with the <code>vertices</code> property.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>triangle_normals</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional name of the node property that contains the mesh triangle (face) normals, as a <code>(T, D)</code> array per node aligned row-for-row with the <code>triangles</code> property.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>vertex_axes</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#list">list</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional list of axis names specifying the order of the spatial dimensions (columns) used in the <code>vertices</code> (and, if present, <code>vertex_normals</code>) arrays, when that order differs from the default. Names must match <code>name</code> values in the <code>GeffMetadata.axes</code> list. If not specified, the default is the order of the spatial-type axes as they appear in <code>GeffMetadata.axes</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
