@@ -10,7 +10,12 @@ from geff.validate.graph import (
     validate_nodes_for_edges,
     validate_unique_node_ids,
 )
-from geff.validate.shapes import validate_ellipsoid, validate_sphere
+from geff.validate.metadata import validate_metadata
+from geff.validate.shapes import (
+    validate_ellipsoid,
+    validate_polygon,
+    validate_sphere,
+)
 from geff.validate.tracks import (
     validate_lineages,
     validate_tracklets,
@@ -22,8 +27,10 @@ if TYPE_CHECKING:
 
 class ValidationConfig(BaseModel):
     graph: bool = False
+    metadata: bool = False
     sphere: bool = False
     ellipsoid: bool = False
+    polygon: bool = False
     lineage: bool = False
     tracklet: bool = False
 
@@ -37,6 +44,9 @@ def validate_data(memory_geff: InMemoryGeff, config: ValidationConfig) -> None:
         config (ValidationConfig): Configuration for which validation to run
     """
     meta = memory_geff["metadata"]
+
+    if config.metadata:
+        validate_metadata(meta)
 
     if config.graph:
         node_ids = memory_geff["node_ids"]
@@ -59,12 +69,16 @@ def validate_data(memory_geff: InMemoryGeff, config: ValidationConfig) -> None:
             raise ValueError(f"Repeated edges found in data:\n{invalid_edges}")
 
     if config.sphere and meta.sphere is not None:
-        radius = memory_geff["node_props"][meta.sphere]["values"]
-        validate_sphere(radius)
+        sphere_prop = memory_geff["node_props"][meta.sphere]
+        validate_sphere(sphere_prop["values"], sphere_prop["missing"])
 
     if config.ellipsoid and meta.ellipsoid is not None:
-        covariance = memory_geff["node_props"][meta.ellipsoid]["values"]
-        validate_ellipsoid(covariance, memory_geff["metadata"].axes)
+        ellipsoid_prop = memory_geff["node_props"][meta.ellipsoid]
+        validate_ellipsoid(ellipsoid_prop["values"], meta.axes, ellipsoid_prop["missing"])
+
+    if config.polygon and meta.polygon is not None:
+        polygon_prop = memory_geff["node_props"][meta.polygon]
+        validate_polygon(polygon_prop["values"], meta.axes, polygon_prop["missing"])
 
     if meta.track_node_props is not None:
         if config.tracklet and "tracklet" in meta.track_node_props:

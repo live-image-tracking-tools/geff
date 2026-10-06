@@ -857,6 +857,11 @@ def _extract_props_metadata(
             "description": "List of coordinates of the spot ROI relative to the spot center.",
         }
 
+    # TRACK_ID is declared as a TrackFeature, but is written out as a per-node property
+    # (every node in a track shares the same TRACK_ID) to back the geff `lineage` node property.
+    if "TRACK_ID" in lineage_props_metadata:
+        node_props_metadata["TRACK_ID"] = lineage_props_metadata["TRACK_ID"].copy()
+
     return props_metadata
 
 
