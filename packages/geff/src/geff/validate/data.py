@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 class ValidationConfig(BaseModel):
     graph: bool = False
-    metadata: bool = False
+    metadata: bool = True
     sphere: bool = False
     ellipsoid: bool = False
     polygon: bool = False
