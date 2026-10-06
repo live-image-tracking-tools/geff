@@ -770,8 +770,6 @@
       
         
       
-        
-      
     
     
     
@@ -864,34 +862,6 @@
     
   
     <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>graph
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../geff/validate/metadata/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>metadata
   
 
     
@@ -1166,6 +1136,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#geff_spec.utils._validate_prop_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;_validate_prop_exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#geff_spec.utils.add_or_update_props_metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1225,6 +1206,17 @@
     <span class="md-ellipsis">
       
         <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;update_metadata_axes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geff_spec.utils.validate_metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_metadata
       
     </span>
   </a>
@@ -1282,6 +1274,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#geff_spec.utils._validate_prop_exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;_validate_prop_exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#geff_spec.utils.add_or_update_props_metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1347,6 +1350,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#geff_spec.utils.validate_metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;validate_metadata
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1395,6 +1409,118 @@
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="geff_spec.utils._validate_prop_exists" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">_validate_prop_exists</span>
+
+
+</h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">_validate_prop_exists</span><span class="p">(</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">node_props_metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PropMetadata</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Check that a property name referenced elsewhere in the metadata is a valid node property.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>label</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Description of what references <code>prop_name</code>, used verbatim at the start
+of the error message (e.g. "Sphere property", "Related object node_prop").</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>prop_name</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The node property name being referenced.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>node_props_metadata</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="collections.abc.Mapping" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping">Mapping</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/stdtypes.html#str">str</a>, <a class="autorefs autorefs-internal" title="            PropMetadata (geff_spec._prop_metadata.PropMetadata)" href="../#geff_spec.PropMetadata">PropMetadata</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Metadata for node properties,
+keyed by property identifier.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If prop_name is not found in node_props_metadata.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
 
 <div class="doc doc-object doc-function">
 
@@ -2269,6 +2395,87 @@ scaling factor. Defaults to None.</p>
             <td>
               <div class="doc-md-description">
                 <p>A new metadata object with updated axes.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="geff_spec.utils.validate_metadata" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">validate_metadata</span>
+
+
+</h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="nf">validate_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="p">:</span> <span class="n">GeffMetadata</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Validate cross references between <code>GeffMetadata</code> fields and <code>node_props_metadata</code>.</p>
+<p>These checks only need the metadata object itself, not the underlying property arrays.
+They are not enforced eagerly on every <code>GeffMetadata</code> construction/assignment because some
+writers build up <code>node_props_metadata</code> incrementally: an initial, intentionally incomplete
+<code>GeffMetadata</code> is constructed first, and <code>node_props_metadata</code> is filled in afterward from
+the real property data (e.g. <code>write_arrays</code>). Call this explicitly once metadata is
+finalized, such as right before writing or right after reading.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>metadata</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="            GeffMetadata (geff_spec._schema.GeffMetadata)" href="../#geff_spec.GeffMetadata">GeffMetadata</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The metadata to validate.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If a sphere/ellipsoid/polygon/tracklet/lineage/related-object property
+name is not found in <code>node_props_metadata</code>.</p>
               </div>
             </td>
           </tr>
