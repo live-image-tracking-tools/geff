@@ -44,7 +44,7 @@ The `nodes\props` group is optional and will contain one or more `node property`
 
 #### Shape properties 
 
-Geff provides special support for predefined shape properties, although they are not required. These currently include `sphere`, `ellipsoid`, `polygon` and mesh. Values can be marked as `missing`, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective. 
+Geff provides special support for predefined shape properties, although they are not required. These currently include `sphere`, `ellipsoid`, `polygon` and `mesh`. Values can be marked as `missing`, and a geff graph may contain multiple different shape properties. Units of shapes are assumed to be the same as the units on the spatial axes. Otherwise, shape properties are identical to other properties from a storage specification perspective. 
 
 - `sphere`: Hypersphere in n spatial dimensions, defined by a scalar radius. 
 
@@ -52,12 +52,7 @@ Geff provides special support for predefined shape properties, although they are
 
 - `polygon`: Defined by a series of points matching the dimensionality of the spatial axes. Each point is defined relative to the spatial position of the node itself.
 
-- `mesh`: Defined by a triangular mesh, with at least a 2D array of vertices and a 2D array of triangle indices.
-
-If meshes are to be used, the GEFF metadata must include a `meshes` field under `node_props_metadata`, which contains the identifiers for the vertices, triangles, and optionally vertex normals and triangle normals. The keys to these identifies must be respectively `vertices`, `triangles`, `vertex_normals`, and `triangle_normals`. The values of these keys must be the names of the corresponding node property groups in the `nodes\props` group. The `meshes` field can also contain a `vertex_axes` field, which specifies the axes corresponding to the vertex coordinates. If not specified, the default is `["x", "y", "z"]`.
-Surfaces meshes are only used for 3D shapes.
-The vertex positions are defined relative to the spatial position of the node itself.
-# TODO: If we want to support level of details, `meshes` could be a list of dictionaries, each for one level, with a different name and a `level` field.
+- `mesh`: Defined by a triangular mesh, with at least a 2D array of vertices and a 2D array of triangle indices. Surface meshes are used to define 3D shapes. Vertex positions are defined relative to the spatial position of the node.
 
 
 #### Variable length properties
@@ -119,20 +114,20 @@ Here is a schematic of the expected file structure.
                     values # shape: (N, ndim + 1) dtype: int64, ndim is number of dimensions in each entry array
                     missing # shape: (N,) dtype: bool
                 mesh_vertices/
-                    data # shape: (V, 3,) dtype: float32, V is the total number of vertices
-                    values # shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of vertices in the mesh
+                    data # shape: (L,) dtype: float32, L is the length of all the flattened entries (sum over nodes of n_vertices * 3)
+                    values # shape: (N, 3) dtype: uint64, each row is [offset, n_vertices, 3]
                     missing # shape: (N,) dtype: bool
                 mesh_triangles/
-                    data # shape: (T, 3,) dtype: int64, T is the total number of triangles
-                    values # shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of triangles in the mesh
+                    data # shape: (L,) dtype: int64, L is the length of all the flattened entries (sum over nodes of n_triangles * 3)
+                    values # shape: (N, 3) dtype: uint64, each row is [offset, n_triangles, 3]
                     missing # shape: (N,) dtype: bool
                 mesh_vertex_normals/ # optional
-                    data # shape: (V, 3,) dtype: float32, V is the total number of vertices
-                    values # shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of vertices in the mesh
+                    data # shape: (L,) dtype: float32, L is the length of all the flattened entries (sum over nodes of n_vertices * 3)
+                    values # shape: (N, 3) dtype: uint64, each row is [offset, n_vertices, 3]
                     missing # shape: (N,) dtype: bool
                 mesh_triangle_normals/ # optional
-                    data # shape: (T, 3,) dtype: float32, T is the total number of triangles
-                    values # shape: (N, 2) dtype: int64, first column is the offset into the data array, second column is the number of triangles in the mesh
+                    data # shape: (L,) dtype: float32, L is the length of all the flattened entries (sum over nodes of n_triangles * 3)
+                    values # shape: (N, 3) dtype: uint64, each row is [offset, n_triangles, 3]
                     missing # shape: (N,) dtype: bool
 
 	    edges/
@@ -186,6 +181,13 @@ This is a geff metadata zattrs file that matches the above example structure.
     // predefined node attributes for storing detections as spheres or ellipsoids
     "sphere": "radius", // optional
     "ellipsoid": "covariance3d", // optional
+    "mesh": { // optional
+      "vertices": "mesh_vertices",
+      "triangles": "mesh_triangles",
+      "vertex_normals": "mesh_vertex_normals", // optional
+      "triangle_normals": "mesh_triangle_normals" // optional
+      // "vertex_axes": ["x", "y", "z"] // optional, defaults to the order of the spatial axes in `axes`
+    },
     "display_hints": {
       "display_horizontal": "x",
       "display_vertical": "y",
@@ -229,28 +231,25 @@ This is a geff metadata zattrs file that matches the above example structure.
         "dtype": "float32",
         "varlength": false
       },
-      "meshes": {
-        "vertices": {
-          "identifier": "mesh_vertices",
-          "dtype": "float32",
-          "varlength": true
-        },
-        "triangles": {
-          "identifier": "mesh_triangles",
-          "dtype": "int64",
-          "varlength": true
-        },
-        "vertex_normals": { # optional
-          "identifier": "mesh_vertex_normals",
-          "dtype": "float32",
-          "varlength": true
-        },
-        "triangle_normals": { # optional
-          "identifier": "mesh_triangle_normals",
-          "dtype": "float32",
-          "varlength": true
-        },
-        "vertex_axes": ["x", "y", "z"], # optional, default is ["x", "y", "z"]
+      "mesh_vertices": {
+        "identifier": "mesh_vertices",
+        "dtype": "float32",
+        "varlength": true
+      },
+      "mesh_triangles": {
+        "identifier": "mesh_triangles",
+        "dtype": "int64",
+        "varlength": true
+      },
+      "mesh_vertex_normals": {
+        "identifier": "mesh_vertex_normals",
+        "dtype": "float32",
+        "varlength": true
+      },
+      "mesh_triangle_normals": {
+        "identifier": "mesh_triangle_normals",
+        "dtype": "float32",
+        "varlength": true
       }
     },
     "edge_props_metadata": {
