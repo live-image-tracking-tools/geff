@@ -136,7 +136,7 @@ determined automatically based on the tag (using `setuptools-scm`). This workflo
 will only push `geff` not `geff-spec`. 
 
 > [!TIP]
-> If this `geff` release includes an update to `geff-spec` that will change the last two numbers of the version. Remember to change the upper pin on `geff-spec` in the `geff` dependencies.
+> If this `geff` release includes an update to `geff-spec` that will change the last two numbers of the version. Remember to change both the lower and upper pins on `geff-spec` in the `geff` dependencies (e.g. `geff-spec>=1.3,<1.4` for a `vX.Y.Z.1.3` release). The new `geff-spec` must be released to PyPI first, since CI tests the `geff` wheel against the oldest `geff-spec` the pin allows.
 
 ```sh
 git tag -a v1.0.0.1.0 -m v1.0.0.1.0
