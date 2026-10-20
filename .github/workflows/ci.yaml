@@ -112,6 +112,38 @@ jobs:
       - name: Test geff-spec
         run: uv run --with pytest --package geff-spec --no-dev pytest packages/geff-spec
 
+  # Test the built geff wheel against the oldest geff-spec its pin allows, from PyPI.
+  # The other jobs resolve geff-spec to the workspace copy via [tool.uv.sources],
+  # so they can't catch a geff-spec lower bound that is too low.
+  test-min-geff-spec:
+    name: geff wheel with oldest allowed geff-spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # hatch-vcs needs the tags to version the wheel
+
+      - name: Set up Python 3.13
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Build geff wheel
+        run: uv build --package geff --wheel --out-dir dist
+
+      - name: Install wheel with oldest allowed geff-spec
+        run: |
+          uv venv .venv-min-spec
+          # Listing geff-spec as a direct requirement with lowest-direct resolution
+          # selects the oldest geff-spec release that satisfies the wheel's pin.
+          uv pip install --python .venv-min-spec dist/geff-*.whl geff-spec --resolution lowest-direct
+          uv pip install --python .venv-min-spec pytest
+          uv pip list --python .venv-min-spec
+
+      - name: Test
+        run: .venv-min-spec/bin/python -m pytest --color=yes -v packages/geff/tests
+
   benchmark:
     name: Run Benchmarks
     runs-on: ubuntu-latest
