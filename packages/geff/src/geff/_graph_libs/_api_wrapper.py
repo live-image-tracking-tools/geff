@@ -230,6 +230,7 @@ def write(
     axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
     structure_validation: bool = True,
+    metadata_validation: bool = True,
     overwrite: bool = False,
     node_id_dict: dict[int, int] | None = ...,
 ) -> None:
@@ -262,6 +263,10 @@ def write(
             Defaults to 2.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        metadata_validation (bool): If True, validates that metadata cross references
+            (e.g. `sphere`, `track_node_props`, `related_objects`) point to properties
+            that actually exist, and does not write a geff that fails this check.
+            Defaults to True.
         overwrite (bool): If True, deletes any existing geff and writes a new geff.
             Defaults to False.
         node_id_dict (dict[int, int], optional): A dictionary mapping rx node indices to
@@ -283,6 +288,7 @@ def write(
     axis_offset: list[float | None] | None = ...,
     zarr_format: Literal[2, 3] = ...,
     structure_validation: bool = True,
+    metadata_validation: bool = True,
     overwrite: bool = False,
     *args: Any,
     **kwargs: Any,
@@ -299,6 +305,7 @@ def write(
     axis_offset: list[float | None] | None = None,
     zarr_format: Literal[2, 3] = 2,
     structure_validation: bool = True,
+    metadata_validation: bool = True,
     overwrite: bool = False,
     *args: Any,
     **kwargs: Any,
@@ -332,6 +339,10 @@ def write(
             Defaults to 2.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        metadata_validation (bool): If True, validates that metadata cross references
+            (e.g. `sphere`, `track_node_props`, `related_objects`) point to properties
+            that actually exist, and does not write a geff that fails this check.
+            Defaults to True.
         overwrite (bool): If True, deletes any existing geff and writes a new geff.
             Defaults to False.
         *args (Any): Additional args that may be accepted by the backend when writing from a
@@ -365,6 +376,7 @@ def write(
         axis_offset,
         zarr_format,
         structure_validation,
+        metadata_validation,
         *args,
         **kwargs,
     )

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, NoReturn
 
 import numpy as np
 import zarr
@@ -22,6 +22,7 @@ from geff_spec.utils import (
     add_or_update_props_metadata,
     compute_and_add_axis_min_max,
     create_props_metadata,
+    validate_metadata,
 )
 
 from ._serialization import serialize_vlen_property_data
@@ -43,6 +44,7 @@ def write_dicts(
     metadata: GeffMetadata,
     zarr_format: Literal[2, 3] = 2,
     structure_validation: bool = True,
+    metadata_validation: bool = True,
 ) -> None:
     """Write a dict-like graph representation to geff
 
@@ -65,6 +67,10 @@ def write_dicts(
             Defaults to 2.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        metadata_validation (bool): If True, validates that metadata cross references
+            (e.g. `sphere`, `track_node_props`, `related_objects`) point to properties
+            that actually exist, and does not write a geff that fails this check.
+            Defaults to True.
 
     Raises:
         ValueError: If the position prop is given and is not present on all nodes.
@@ -107,6 +113,7 @@ def write_dicts(
         metadata,
         zarr_format=zarr_format,
         structure_validation=structure_validation,
+        metadata_validation=metadata_validation,
     )
 
 
@@ -191,6 +198,30 @@ def dict_props_to_arr(
     return props_dict
 
 
+def _rollback_invalid_write(
+    geff_store: StoreLike, zarr_format: Literal[2, 3], error: ValueError
+) -> NoReturn:
+    """Delete a geff that failed validation after being written, and re-raise.
+
+    Args:
+        geff_store (StoreLike): The store the partial geff was written to.
+        zarr_format (Literal[2, 3]): The zarr specification used to write the store.
+        error (ValueError): The validation error that triggered the rollback.
+
+    Raises:
+        ValueError: Always, with a note on whether the partial geff was deleted.
+    """
+    message = "\nCannot write invalid geff."
+    try:
+        delete_geff(geff_store, zarr_format=zarr_format)
+    except:  # noqa: E722
+        message = (
+            "\nWritten geff is invalid, but cannot be deleted automatically. "
+            "Please delete manually."
+        )
+    raise ValueError(error.args[0] + message) from error
+
+
 def write_arrays(
     geff_store: StoreLike,
     node_ids: np.ndarray,
@@ -202,6 +233,7 @@ def write_arrays(
     edge_props_unsquish: dict[str, list[str]] | None = None,
     zarr_format: Literal[2, 3] = 2,
     structure_validation: bool = True,
+    metadata_validation: bool = True,
     overwrite: bool = False,
 ) -> None:
     """Write a geff file from already constructed arrays of node and edge ids and props
@@ -241,6 +273,10 @@ def write_arrays(
             as three individual properties called "z", "y", and "x".
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
+        metadata_validation (bool): If True, validates that metadata cross references
+            (e.g. `sphere`, `track_node_props`, `related_objects`) point to properties
+            that actually exist, and does not write a geff that fails this check.
+            Defaults to True.
         overwrite (bool): If True, deletes any existing geff and writes a new geff.
             Defaults to False.
 
@@ -289,19 +325,17 @@ def write_arrays(
         metadata = compute_and_add_axis_min_max(metadata, node_props)
     metadata.write(geff_store)
 
+    if metadata_validation:
+        try:
+            validate_metadata(metadata)
+        except ValueError as e:
+            _rollback_invalid_write(geff_store, zarr_format, e)
+
     if structure_validation:
         try:
             validate_structure(geff_store)
         except ValueError as e:
-            message = "\nCannot write invalid geff."
-            try:
-                delete_geff(geff_store, zarr_format=zarr_format)
-            except:  # noqa: E722
-                message = (
-                    "\nWritten geff is invalid, but cannot be deleted automatically. "
-                    "Please delete manually."
-                )
-            raise ValueError(e.args[0] + message) from e
+            _rollback_invalid_write(geff_store, zarr_format, e)
 
 
 _TARGET_CHUNK_BYTES = 1 << 23  # 8 MiB — power-of-two, close to 10 MB

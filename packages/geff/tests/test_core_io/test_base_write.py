@@ -185,6 +185,34 @@ class TestWriteArrays:
         ):
             write_arrays(path, **memory_geff)
 
+    def test_invalid_metadata(self, tmp_path):
+        _, memory_geff = create_simple_2d_geff()
+        path = tmp_path / "test.geff"
+        # Reference a node property that doesn't exist
+        memory_geff["metadata"].sphere = "nonexistent"
+
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "Sphere property 'nonexistent' not found in node_props_metadata"
+                "\nCannot write invalid geff."
+            ),
+        ):
+            write_arrays(path, **memory_geff)
+
+        # The partially written geff must have been cleaned up
+        assert not path.exists()
+
+    def test_metadata_validation_disabled(self, tmp_path):
+        _, memory_geff = create_simple_2d_geff()
+        path = tmp_path / "test.geff"
+        memory_geff["metadata"].sphere = "nonexistent"
+
+        # Does not raise when metadata_validation is disabled, even though the
+        # sphere property doesn't exist.
+        write_arrays(path, **memory_geff, metadata_validation=False)
+        assert path.exists()
+
     def test_existing_geff(self):
         store, memory_geff = create_simple_2d_geff()
         with pytest.raises(
