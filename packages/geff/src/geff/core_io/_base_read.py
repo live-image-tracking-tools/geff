@@ -24,6 +24,18 @@ if TYPE_CHECKING:
     from geff._typing import InMemoryGeff, PropDictNpArray, ZarrPropDict
 
 
+def _to_fixed_length_str(data: NDArray) -> NDArray:
+    """Convert variable-length string data to a fixed-length numpy unicode array.
+
+    Zarr returns variable-length strings as ``StringDType`` (numpy >= 2) or object arrays. numpy
+    cannot cast ``StringDType`` to an unsized unicode dtype, so the width is computed explicitly.
+    """
+    if data.dtype.kind == "T":
+        width = int(np.strings.str_len(data).max()) if data.size > 0 else 1
+        return data.astype(f"<U{max(width, 1)}")
+    return data.astype(str)
+
+
 class GeffReader:
     """File reader class that allows subset reading to an intermediate dict representation.
 
@@ -160,7 +172,11 @@ class GeffReader:
             return np.empty(shape, dtype=dtype or zarr_arr.dtype)
         else:
             data = zarr_arr.oindex[indices]
-        return np.asarray(data, dtype=dtype) if dtype is not None else np.asarray(data)
+        if dtype is None:
+            return np.asarray(data)
+        if dtype.kind == "U":
+            return _to_fixed_length_str(np.asarray(data))
+        return np.asarray(data, dtype=dtype)
 
     def _load_prop_to_memory(
         self,
