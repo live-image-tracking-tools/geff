@@ -49,23 +49,24 @@ jobs:
         if: github.event_name == 'pull_request'
         run: uv run --group docs mkdocs build --strict
 
-      # it's too hard (from a security perspective) to host previews from fork PRs
-      # so we skip unless it's a PR from a branch in the same repository
-      - name: Deploy gh-pages preview # https://github.com/rossjrw/pr-preview-action
-        id: preview-step
-        if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-        uses: rossjrw/pr-preview-action@v1
+      # Upload the built site for docs-preview.yaml, which deploys it from a
+      # privileged `workflow_run` context (PRs from forks get a read-only token here)
+      - name: Upload site for preview
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
         with:
-          source-dir: ./site/
-          comment: false
+          name: site
+          path: ./site/
 
-      # Post the comment manually
-      - name: Post comment with gh-pages preview
-        if: github.event_name == 'pull_request' && github.event.pull_request.state != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-        uses: peter-evans/commit-comment@v4
+      - name: Save PR number for preview
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p pr
+          echo "${{ github.event.number }}" > pr/number
+
+      - name: Upload PR number for preview
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
         with:
-          body: |
-            [PR Preview Action](https://github.com/rossjrw/pr-preview-action) ${{ steps.preview-step.outputs.action-version }}
-            :---:
-            | <p></p> :rocket: View preview at <br> ${{ steps.preview-step.outputs.preview-url }} <br><br>
-            | <h6>Built to branch [`gh-pages`](${{ github.server_url }}/${{ github.repository }}/tree/gh-pages) at ${{ steps.preview-step.outputs.action-start-time }}. <br> Preview will be ready when the [GitHub Pages deployment](${{ github.server_url }}/${{ github.repository }}/deployments) is complete. <br><br> </h6>
+          name: pr-number
+          path: pr/
