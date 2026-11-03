@@ -100,6 +100,9 @@ filterwarnings = [
     "ignore:In the future `np.bool` will be defined as the corresponding NumPy scalar.",
     "ignore:(?s).*Pyarrow will become a required dependency:DeprecationWarning",
     "ignore:invalid value encountered in cast:RuntimeWarning",
+    # older zarr-python 3 releases warn about the vlen-utf8 codec, which is how the geff spec
+    # stores strings, whenever such an array is created or opened
+    "ignore:The codec `vlen-utf8` is currently not part in the Zarr format 3 specification.*:UserWarning",
     # typer imports click.utils.get_binary_stream, which newer click releases
     # (>=8.3) deprecate ahead of removal in Click 9.0; nothing to fix on our end.
     "ignore:'click.utils.get_binary_stream' is deprecated.*:DeprecationWarning",
