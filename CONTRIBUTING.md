@@ -61,17 +61,17 @@ pytest
 >   versions in `pyproject.toml`, to ensure that you've accurately pinned deps.
 > - `uv run -p 3.X`: Test against Python version `3.X`
 >
-> For example, to run tests on python 3.10, using minimum stated deps:
+> For example, to run tests on python 3.11, using minimum stated deps:
 >
 > ```sh
-> uv run -p 3.10 --resolution lowest-direct pytest
+> uv run -p 3.11 --resolution lowest-direct pytest
 > ```
 >
 > and... if you wanted to *further* ensure that no `dev` dependencies are "accidentally"
 > causing your tests to pass by being included, the bare minimum env would be:
 >
 > ```sh
-> uv run -p 3.10 --resolution lowest-direct --no-dev --group test pytest
+> uv run -p 3.11 --resolution lowest-direct --no-dev --group test pytest
 > # where '--group test' could also be '--group test-third-party'
 > ```
 

@@ -17,6 +17,19 @@ if TYPE_CHECKING:
 from geff_spec import GeffMetadata
 
 
+def _matches_metadata_dtype(actual: np.dtype, stated: str) -> bool:
+    """Whether an on-disk array dtype is consistent with the dtype stated in the metadata.
+
+    Strings are stored as variable-length UTF-8, which numpy represents as ``StringDType``
+    (kind ``T``) or object (kind ``O``) arrays. Fixed-length unicode strings, which older
+    versions of geff wrote, are still accepted.
+    """
+    stated_dtype = np.dtype(stated)
+    if np.issubdtype(stated_dtype, np.str_):
+        return np.issubdtype(actual, np.str_) or actual.kind in "TO"
+    return bool(np.issubdtype(actual, stated_dtype))
+
+
 def validate_structure(store: StoreLike) -> None:
     """Ensure that the structure of the zarr conforms to geff specification
 
@@ -119,7 +132,7 @@ def _validate_props_group(
                 )
         else:
             # check value dtype against metadata dtype
-            if not np.issubdtype(val_arr.dtype, np.dtype(prop_metadata.dtype)):
+            if not _matches_metadata_dtype(val_arr.dtype, prop_metadata.dtype):
                 raise ValueError(
                     f"Property {prop_name} has stated dtype {prop_metadata.dtype} but actual "
                     f"dtype {val_arr.dtype}"

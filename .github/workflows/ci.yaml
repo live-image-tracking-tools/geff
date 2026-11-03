@@ -56,22 +56,18 @@ jobs:
             group: test-third-party
           # lowest lowest
           - platform: ubuntu-latest
-            python-version: "3.10"
-            resolution: "highest"
-            group: test-third-party
-          - platform: macos-latest
-            python-version: "3.10"
-            resolution: "highest"
-            group: test-third-party
-          - platform: windows-latest
-            python-version: "3.10"
-            resolution: "highest"
-            group: test-third-party
-          # intermediate pythons just on ubuntu 
-          - platform: ubuntu-latest
             python-version: "3.11"
             resolution: "highest"
             group: test-third-party
+          - platform: macos-latest
+            python-version: "3.11"
+            resolution: "highest"
+            group: test-third-party
+          - platform: windows-latest
+            python-version: "3.11"
+            resolution: "highest"
+            group: test-third-party
+          # intermediate pythons just on ubuntu 
           - platform: ubuntu-latest
             python-version: "3.12"
             resolution: "highest"

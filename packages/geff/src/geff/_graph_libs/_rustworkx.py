@@ -117,7 +117,7 @@ class RxBackend(Backend):
         axis_scales: list[float | None] | None = None,
         scaled_units: list[str | None] | None = None,
         axis_offset: list[float | None] | None = None,
-        zarr_format: Literal[2, 3] = 2,
+        zarr_format: Literal[2, 3] = 3,
         structure_validation: bool = True,
         metadata_validation: bool = True,
         node_id_dict: dict[int, int] | None = None,

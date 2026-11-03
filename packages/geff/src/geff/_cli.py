@@ -80,7 +80,7 @@ def convert_ctc(
         bool,
         typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
-    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 3,
     # because of Typer not supporting Literal types
 ) -> None:
     """
@@ -138,7 +138,7 @@ def convert_trackmate_xml(
         bool,
         typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
-    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 3,
     # because of Typer not supporting Literal types
 ) -> None:
     """
