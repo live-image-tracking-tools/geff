@@ -99,7 +99,6 @@ def convert_ctc(
         segmentation_store=segm_path,
         tczyx=tczyx,
         overwrite=overwrite,
-        zarr_format=cast("Literal[2, 3]", zarr_format),
     )
 
     if input_image_dir is not None:

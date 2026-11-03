@@ -196,7 +196,7 @@ class Test_ctc_to_geff:
         # Check segmentation that was written to zarr
         expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
 
-        segm = zarr.open_array(segm_path, mode="r")[...]
+        segm = zarr.open_array(segm_path / "0", mode="r")[...]
 
         assert segm.shape[0] == expected_segm.shape[0]
 
@@ -248,7 +248,7 @@ class Test_ctc_to_geff:
         )
 
         # Check that v2 data was written
-        segm = zarr.open_array(segm_path, mode="r")[...]
+        segm = zarr.open_array(segm_path / "0", mode="r")[...]
         assert 10 in segm and 9 not in segm
         mem_geff = read_to_memory(geff_path)
         tracklet_ids = mem_geff["node_props"]["tracklet_id"]["values"]
@@ -280,7 +280,7 @@ class Test_ctc_to_geff:
         # Check segmentation that was written to zarr
         expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
 
-        segm = zarr.open_array(segm_path, mode="r")[...]
+        segm = zarr.open_array(segm_path / "0", mode="r")[...]
 
         assert segm.shape[0] == expected_segm.shape[0]
 
@@ -328,7 +328,7 @@ class Test_ctc_to_geff:
         # Check segmentation that was written to zarr
         expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
 
-        segm = zarr.open_array(segm_path, mode="r")[...]
+        segm = zarr.open_array(segm_path / "0", mode="r")[...]
 
         assert segm.shape[0] == expected_segm.shape[0]
 
@@ -352,16 +352,13 @@ class Test_ctc_to_geff:
         is_3d: bool,
         tczyx: bool,
     ):
-        # Finding the relative path won't work with a memory store and should issue a warning
+        # A memory store has no local path, so it can't hold an OME-Zarr label image
 
         ctc_path = create_mock_data(tmp_path, is_gt, is_3d=is_3d)
         geff_path = tmp_path / "little.geff"
         store = zarr.storage.MemoryStore()
 
-        with pytest.raises(
-            UserWarning,
-            match="Cannot determine path to segmentation_store for related objects metadata",
-        ):
+        with pytest.raises(TypeError, match="requires a path or a store backed by a local"):
             from_ctc_to_geff(
                 ctc_path=ctc_path,
                 geff_path=geff_path,
@@ -369,27 +366,7 @@ class Test_ctc_to_geff:
                 tczyx=tczyx,
             )
 
-            assert geff_path.exists()
-
-            # Check graph that was written to geff
-            _graph, metadata = NxBackend.read(geff_path)
-
-            # Check segmentation that was written to zarr
-            expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
-
-            segm = zarr.open_array(store, mode="r")[...]
-
-            assert segm.shape[0] == expected_segm.shape[0]
-
-            if tczyx:
-                assert segm.ndim == 5
-
-            segm = np.squeeze(segm)
-            np.testing.assert_array_equal(segm, expected_segm)
-
-            # Check metadata
-            assert metadata.track_node_props == {"tracklet": "tracklet_id"}
-            assert metadata.related_objects is None
+        assert not geff_path.exists()
 
 
 @pytest.mark.parametrize("ctzyx", [True, False])
