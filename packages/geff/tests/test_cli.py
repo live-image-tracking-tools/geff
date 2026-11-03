@@ -88,8 +88,9 @@ def test_convert_ctc_with_images(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("extra_args", "message"),
     [
-        (["--image-dir", "images", "--segm-path", "segm.zarr"], "not allowed with --image-dir"),
-        (["--label-name", "cells"], "only applies with --image-dir"),
+        # (match text without option names: CI's colored Rich output styles `--option` separately)
+        (["--image-dir", "images", "--segm-path", "segm.zarr"], "not allowed with"),
+        (["--label-name", "cells"], "only applies with"),
         (["--pixel-unit", "furlong"], "not a valid space unit"),
     ],
 )
