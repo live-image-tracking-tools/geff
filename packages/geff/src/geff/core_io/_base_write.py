@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Literal, NoReturn
 
 import numpy as np
@@ -26,7 +27,7 @@ from geff_spec.utils import (
 from ._serialization import serialize_vlen_property_data
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable, Iterator, Sequence
 
     import zarr
     from zarr.storage import StoreLike
@@ -351,6 +352,20 @@ def _compute_first_dim_chunk(shape: tuple[int, ...], itemsize: int) -> int:
     return max(1, min(first_dim, n_rows))
 
 
+@contextmanager
+def _ignore_unstable_string_dtype_warning(data: np.ndarray) -> Iterator[None]:
+    """Silence zarr's warning that fixed-length strings have no stable zarr v3 spec.
+
+    Fixed-length strings (numpy ``<U``) are what geff currently stores string properties as.
+    Whether to change that is a spec decision that has been deferred, so for now the warning
+    is hidden when writing them.
+    """
+    with warnings.catch_warnings():
+        if data.dtype.kind == "U":
+            warnings.filterwarnings("ignore", message=r".*does not have a Zarr V3 specification.*")
+        yield
+
+
 def _write_zarr_array(
     group: zarr.Group,
     path: str,
@@ -370,23 +385,26 @@ def _write_zarr_array(
         path: The path within the group.
         data: The numpy array to write.
     """
-    if data.shape[0] == 0:
-        group[path] = data
-        return
+    with _ignore_unstable_string_dtype_warning(data):
+        if data.shape[0] == 0:
+            group[path] = data
+            return
 
-    first_dim = _compute_first_dim_chunk(data.shape, data.dtype.itemsize)
-    chunks = (first_dim, *data.shape[1:])
+        first_dim = _compute_first_dim_chunk(data.shape, data.dtype.itemsize)
+        chunks = (first_dim, *data.shape[1:])
 
-    if group.metadata.zarr_format >= 3:
-        # Shard spans entire array → one file per array.
-        # Must be a multiple of the inner chunk size.
-        shard_first = ((data.shape[0] + first_dim - 1) // first_dim) * first_dim
-        shards: tuple[int, ...] | None = (shard_first, *data.shape[1:])
-    else:
-        # zarr spec v2 does not support sharding
-        shards = None
-    arr = group.create_array(path, shape=data.shape, dtype=data.dtype, chunks=chunks, shards=shards)
-    arr[:] = data
+        if group.metadata.zarr_format >= 3:
+            # Shard spans entire array → one file per array.
+            # Must be a multiple of the inner chunk size.
+            shard_first = ((data.shape[0] + first_dim - 1) // first_dim) * first_dim
+            shards: tuple[int, ...] | None = (shard_first, *data.shape[1:])
+        else:
+            # zarr spec v2 does not support sharding
+            shards = None
+        arr = group.create_array(
+            path, shape=data.shape, dtype=data.dtype, chunks=chunks, shards=shards
+        )
+        arr[:] = data
 
 
 def write_id_arrays(
