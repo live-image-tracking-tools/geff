@@ -24,7 +24,7 @@ dependencies = [
     "numpy>=1.26; python_version >= '3.12'",
     "numpy>=2.1; python_version >= '3.13'",
     "annotated-types",
-    "zarr>=2.18,<4"
+    "zarr>=3,<4"
 ]
 
 [project.urls]

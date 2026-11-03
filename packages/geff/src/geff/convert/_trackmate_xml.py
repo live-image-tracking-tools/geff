@@ -47,7 +47,7 @@ _DIMENSION_UNIT_TEMPLATES: dict[str, Callable[[str, str], str]] = {
 
 
 def _preliminary_checks(
-    xml_path: Path, geff_path: Path, overwrite: bool, zarr_format: Literal[2, 3] = 2
+    xml_path: Path, geff_path: Path, overwrite: bool, zarr_format: Literal[2, 3] = 3
 ) -> None:
     """Check the validity of input paths and clean up the output path if needed.
 
@@ -55,7 +55,7 @@ def _preliminary_checks(
         xml_path (Path): The path to the TrackMate XML file.
         geff_path (Path): The path to the GEFF file.
         overwrite (bool): Whether to overwrite the GEFF file if it already exists.
-        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 3.
 
     Raises:
         FileNotFoundError: If the XML file does not exist.
@@ -67,7 +67,7 @@ def _preliminary_checks(
     # Check for an existing geff
     if check_for_geff(geff_path):
         if overwrite:
-            delete_geff(geff_path, zarr_format=zarr_format)
+            delete_geff(geff_path)
         else:
             raise FileExistsError(
                 "Found an existing geff present in `geff_store`. "
@@ -993,7 +993,7 @@ def from_trackmate_xml_to_geff(
     discard_filtered_spots: bool = False,
     discard_filtered_tracks: bool = False,
     overwrite: bool = False,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
 ) -> None:
     """
     Convert a TrackMate XML file to a GEFF file.
@@ -1006,7 +1006,7 @@ def from_trackmate_xml_to_geff(
         discard_filtered_tracks (bool, optional): True to discard the tracks
             filtered out in TrackMate, False otherwise. False by default.
         overwrite (bool, optional): Whether to overwrite the GEFF file if it already exists.
-        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 2.
+        zarr_format (Literal[2, 3], optional): The version of zarr to write. Defaults to 3.
 
     Warns:
         UserWarning: If the XML file does not contain specific metadata tags or if there are issues
