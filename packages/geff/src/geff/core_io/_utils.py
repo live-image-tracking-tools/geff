@@ -78,18 +78,6 @@ def open_storelike(store: StoreLike) -> zarr.Group:
         if not is_remote_url(str(store_path)) and not store_path.exists():
             raise FileNotFoundError(f"Path does not exist: {store}")
 
-    # Check for zarr spec v3 files being opened with zarr python v2 and warn if so
-    if zarr.__version__.startswith("2"):
-        spec_version = _detect_zarr_spec_version(store)
-        if spec_version == 3:
-            warnings.warn(
-                "Attempting to open a zarr spec v3 file with zarr-python v2. "
-                "This may cause compatibility issues. Consider upgrading to zarr-python v3 "
-                "or recreating the file with zarr spec v2.",
-                UserWarning,
-                stacklevel=2,
-            )
-
     # Open the zarr group from the store
     try:
         graph_group = zarr.open_group(store, mode="r")
@@ -120,67 +108,17 @@ def expect_group(parent: zarr.Group, key: str, parent_name: str = "graph") -> za
     return grp
 
 
-def _detect_zarr_spec_version(store: StoreLike) -> int | None:
-    """Detect the zarr specification version of an existing zarr store.
-
-    Args:
-        store: The zarr store path or object
-
-    Returns:
-        int | None: The zarr spec version (2 or 3) if detectable, None if unknown
-    """
-    try:
-        if isinstance(store, str | Path):
-            store_path = Path(store)
-            # Check for zarr v3 indicator: zarr.json instead of .zarray/.zgroup
-            if (store_path / "zarr.json").exists():
-                return 3
-            # Check for zarr v2 indicators
-            elif (store_path / ".zgroup").exists() or (store_path / ".zarray").exists():
-                return 2
-        else:
-            # For store objects, try to detect based on metadata
-            group = zarr.open_group(store, mode="r")
-            # In zarr v3, metadata is stored differently
-            if group.metadata.zarr_format == 3:  # pyright: ignore
-                return 3
-            elif group.metadata.zarr_format == 2:  # pyright: ignore
-                return 2
-    except Exception:  # noqa: BLE001, S110
-        # If we can't detect, return None
-        pass
-
-    return None
-
-
-def setup_zarr_group(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> zarr.Group:
+def setup_zarr_group(store: StoreLike, zarr_format: Literal[2, 3] = 3) -> zarr.Group:
     """Set up and return a zarr group for writing.
 
     Args:
         store: The zarr store path or object
-        zarr_format: The zarr format version to use
+        zarr_format: The zarr format version to use. Defaults to 3.
 
     Returns:
         The opened zarr group
     """
-    store = remove_tilde(store)
-
-    # Check for trying to write zarr spec v3 with zarr python v2 and warn if so
-    if zarr_format == 3 and zarr.__version__.startswith("2"):
-        warnings.warn(
-            "Requesting zarr spec v3 with zarr-python v2. "
-            "zarr-python v2 does not support spec v3. "
-            "Ignoring zarr_format=3 and writing zarr spec v2 instead. "
-            "Consider upgrading to zarr-python v3 to write zarr spec v3 files.",
-            UserWarning,
-            stacklevel=2,
-        )
-
-    # open/create zarr container
-    if zarr.__version__.startswith("3"):
-        return zarr.open_group(store, mode="a", zarr_format=zarr_format)
-    else:
-        return zarr.open_group(store, mode="a")
+    return zarr.open_group(remove_tilde(store), mode="a", zarr_format=zarr_format)
 
 
 def _get_common_type_dims(arr_seq: Sequence[ArrayLike | None]) -> tuple[np.dtype, int]:
@@ -381,7 +319,7 @@ def construct_var_len_props(arr_seq: Sequence[ArrayLike | None]) -> PropDictNpAr
     return {"values": values_arr, "missing": missing_arr if missing_arr.any() else None}
 
 
-def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
+def delete_geff(store: StoreLike) -> None:
     """Delete a geff after writing
 
     Tries to handle multiple StoreLike inputs and avoids deleting non-geff contents
@@ -389,9 +327,8 @@ def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
 
     Args:
         store (StoreLike): StoreLike geff that should be deleted
-        zarr_format (Literal[2, 3], optional): Zarr format used to write input store. Defaults to 2.
     """
-    root = setup_zarr_group(store, zarr_format=zarr_format)
+    root = zarr.open_group(remove_tilde(store), mode="a")
 
     # Delete node and edge groups
     del root[_path.NODES]
@@ -405,7 +342,7 @@ def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
         else:
             # Try to get a valid path from the store
             try:
-                path = store.path  # type: ignore
+                path = store.root  # type: ignore
                 if os.path.exists(path):
                     shutil.rmtree(path)
             except AttributeError:
@@ -422,12 +359,11 @@ def delete_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> None:
         del root.attrs["geff"]
 
 
-def check_for_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> bool:
+def check_for_geff(store: StoreLike) -> bool:
     """Check a StoreLike for an existing geff and return True if already present
 
     Args:
         store (StoreLike): StoreLike to check for a geff
-        zarr_format (Literal[2, 3], optional): Defaults to 2.
 
     Returns:
         bool: True if a geff already exists
@@ -438,7 +374,7 @@ def check_for_geff(store: StoreLike, zarr_format: Literal[2, 3] = 2) -> bool:
         exists = os.path.exists(store)
     # If store is already open, check for geff key in metadata
     else:
-        root = setup_zarr_group(store, zarr_format=zarr_format)
+        root = zarr.open_group(remove_tilde(store), mode="a")
         exists = "geff" in root.attrs
 
     return exists

@@ -309,10 +309,7 @@ class Test_ctc_to_geff:
         geff_path = tmp_path / "little.geff"
         segm_path = tmp_path / "segm.zarr"
 
-        if zarr.__version__.startswith("2"):
-            store = zarr.storage.DirectoryStore(segm_path)
-        else:
-            store = zarr.storage.LocalStore(segm_path)
+        store = zarr.storage.LocalStore(segm_path)
 
         from_ctc_to_geff(
             ctc_path=ctc_path,

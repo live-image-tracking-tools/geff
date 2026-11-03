@@ -1,5 +1,6 @@
 import json
 import os
+import warnings
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -213,7 +214,7 @@ def from_ctc_to_geff(
     # Check for existing geff
     if check_for_geff(geff_path):
         if overwrite:
-            delete_geff(geff_path, zarr_format=3)
+            delete_geff(geff_path)
         else:
             raise FileExistsError(
                 "Found an existing geff present in `geff_path`. "
@@ -336,8 +337,21 @@ def from_ctc_to_geff(
     rel_objs = None
     if seg_path is not None:
         # Record related object metadata for segmentation
-        rel_path = os.path.relpath(seg_path, geff_path)
-        rel_objs = [RelatedObject(type="labels", path=rel_path, node_prop="tracklet_id")]
+        seg_path = None
+        if isinstance(segmentation_store, (Path, str)):
+            seg_path = segmentation_store  # type: ignore
+        else:
+            try:
+                seg_path = segmentation_store.root  # type: ignore
+            except AttributeError:
+                warnings.warn(
+                    "Cannot determine path to segmentation_store for related objects metadata",
+                    stacklevel=2,
+                )
+
+        if seg_path is not None:
+            rel_path = os.path.relpath(seg_path, geff_path)
+            rel_objs = [RelatedObject(type="labels", path=rel_path, node_prop="tracklet_id")]
 
     write_arrays(
         geff_store=geff_path,

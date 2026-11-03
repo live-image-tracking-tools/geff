@@ -114,7 +114,7 @@ def convert_ctc(
     Convert a CTC data directory to a GEFF file, or with --image-dir to an OME-Zarr containing
     the image, the segmentation and the tracks (as tracks.geff).
     """
-    from geff.convert import convert_ctc as _convert_ctc  # noqa: I001 import at call time to avoid optional dependency issues
+    from geff.convert import convert_ctc as _convert_ctc
     from geff.convert import from_ctc_to_geff
 
     if image_dir is not None and segm_path is not None:
@@ -192,7 +192,7 @@ def convert_trackmate_xml(
         bool,
         typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
-    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
+    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 3,
     # because of Typer not supporting Literal types
 ) -> None:
     """

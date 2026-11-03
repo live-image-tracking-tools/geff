@@ -63,7 +63,7 @@ from geff import write, read
 write(
     graph,
     "simple.geff",
-    zarr_format=2,  # 2 or 3
+    zarr_format=3,  # 2 or 3, defaults to 3
 )
 
 read_graph = read(
