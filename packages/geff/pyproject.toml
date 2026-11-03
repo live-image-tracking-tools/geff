@@ -60,7 +60,7 @@ ctc = [
     "scikit-image>=0.23.2",
     "scikit-image>=0.25; python_version >= '3.13'",
     "tifffile>=2024.10",
-    "yaozarrs>=0.4.0,<0.5"
+    "yaozarrs>=0.4.1,<0.5"
 ]
 rx = ["rustworkx>=0.16.0"]
 pandas = ["pandas>=2","pandas>=2.3; python_version >= '3.12'"]
