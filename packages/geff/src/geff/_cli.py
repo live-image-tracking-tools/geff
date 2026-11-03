@@ -42,35 +42,42 @@ def convert_ctc(
     ctc_path: Annotated[
         Path,
         typer.Argument(
-            help="The path to the directory containing ctc tracks (man_track.txt or res_track.txt),"
-            " e.g. data/01_GT/TRA or data/01_RES",
+            help="The path to the directory containing ctc tracks (man_track.txt or res_track.txt)"
+            " and segmentation, e.g. data/01_GT/TRA or data/01_RES",
             show_default=False,
         ),
     ],
-    geff_path: Annotated[
+    output_path: Annotated[
         Path,
         typer.Argument(
-            help="Path to save the output geff, including the geff directory name "
-            "(eg. ~/folder/folder/data.zarr/tracks.geff)",
+            help="Without --image-dir: path to save the output geff, including the geff directory "
+            "name (eg. ~/folder/folder/data.zarr/tracks.geff). With --image-dir: path of the "
+            "OME-Zarr to write, which will contain the image, the segmentation in its labels "
+            "group and the geff as tracks.geff (eg. data.ome.zarr).",
             show_default=False,
         ),
     ],
+    image_dir: Annotated[
+        Path | None,
+        typer.Option(
+            help="The path to the directory containing the raw image tiffs, e.g. data/01. If "
+            "provided, the images, segmentation and geff are all written into one OME-Zarr at "
+            "OUTPUT_PATH. If not provided, only the geff (and optionally --segm-path) is written."
+        ),
+    ] = None,
     segm_path: Annotated[
         Path | None,
         typer.Option(
-            help="The path to export the segmentation file, if not provided, it won't be exported."
+            help="Without --image-dir: the path to export the segmentation to, if not provided, "
+            "it won't be exported. Not allowed with --image-dir, where the segmentation is "
+            "always written inside the OME-Zarr."
         ),
     ] = None,
-    input_image_dir: Annotated[
-        Path | None,
+    label_name: Annotated[
+        str | None,
         typer.Option(
-            help="The path to the input image directory. If not provided, it won't be exported."
-        ),
-    ] = None,
-    output_image_path: Annotated[
-        Path | None,
-        typer.Option(
-            help="The path to export the image file, if not provided, it won't be exported."
+            help="With --image-dir: the name of the segmentation inside the OME-Zarr labels "
+            "group. Defaults to 'segmentation'."
         ),
     ] = None,
     tczyx: Annotated[
@@ -81,7 +88,7 @@ def convert_ctc(
     ] = False,
     overwrite: Annotated[
         bool,
-        typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
+        typer.Option(help="Whether to overwrite the output (GEFF or OME-Zarr) if it exists."),
     ] = False,
     pixel_size: Annotated[
         list[float] | None,
@@ -104,14 +111,19 @@ def convert_ctc(
     ] = None,
 ) -> None:
     """
-    Convert a CTC data directory to a GEFF file.
+    Convert a CTC data directory to a GEFF file, or with --image-dir to an OME-Zarr containing
+    the image, the segmentation and the tracks (as tracks.geff).
     """
-    from geff.convert import from_ctc_to_geff, ctc_tiffs_to_zarr  # noqa: I001 import at call time to avoid optional dependency issues
+    from geff.convert import convert_ctc as _convert_ctc  # noqa: I001 import at call time to avoid optional dependency issues
+    from geff.convert import from_ctc_to_geff
 
-    if (input_image_dir is not None and output_image_path is None) or (
-        input_image_dir is None and output_image_path is not None
-    ):
-        raise ValueError("'input_image_dir' and 'output_image_path' must be provided together")
+    if image_dir is not None and segm_path is not None:
+        raise typer.BadParameter(
+            "not allowed with --image-dir, use --label-name",
+            param_hint="--segm-path",
+        )
+    if image_dir is None and label_name is not None:
+        raise typer.BadParameter("only applies with --image-dir", param_hint="--label-name")
 
     # because of Typer not supporting Literal types
     if pixel_unit is not None and pixel_unit not in VALID_SPACE_UNITS:
@@ -127,23 +139,25 @@ def convert_ctc(
     space_unit = cast("SpaceUnits | None", pixel_unit)
     temporal_unit = cast("TimeUnits | None", time_unit)
 
-    from_ctc_to_geff(
-        ctc_path=ctc_path,
-        geff_path=geff_path,
-        segmentation_store=segm_path,
-        tczyx=tczyx,
-        overwrite=overwrite,
-        pixel_size=pixel_size,
-        pixel_unit=space_unit,
-        time_scale=time_scale,
-        time_unit=temporal_unit,
-    )
-
-    if input_image_dir is not None:
-        ctc_tiffs_to_zarr(
-            ctc_path=input_image_dir,
-            output_store=output_image_path,
-            ctzyx=tczyx,
+    if image_dir is None:
+        from_ctc_to_geff(
+            ctc_path=ctc_path,
+            geff_path=output_path,
+            segmentation_store=segm_path,
+            tczyx=tczyx,
+            overwrite=overwrite,
+            pixel_size=pixel_size,
+            pixel_unit=space_unit,
+            time_scale=time_scale,
+            time_unit=temporal_unit,
+        )
+    else:
+        _convert_ctc(
+            ctc_path=ctc_path,
+            image_dir=image_dir,
+            zarr_path=output_path,
+            label_name=label_name or "segmentation",
+            tczyx=tczyx,
             overwrite=overwrite,
             pixel_size=pixel_size,
             pixel_unit=space_unit,

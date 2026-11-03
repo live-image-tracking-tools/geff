@@ -8,7 +8,7 @@ from geff_spec import GeffMetadata, RelatedObject
 try:
     import tifffile
 
-    from geff.convert import ctc_tiffs_to_zarr, from_ctc_to_geff
+    from geff.convert import convert_ctc, ctc_tiffs_to_zarr, from_ctc_to_geff
 except ImportError:
     pytest.skip("geff[ctc] not installed", allow_module_level=True)
 
@@ -452,6 +452,24 @@ class Test_from_ctc_to_geff:
                 pixel_size=[0.5, 0.5],
             )
 
+    @pytest.mark.parametrize("label_source", [None, "../source_image"])
+    def test_label_source_is_written(self, tmp_path: Path, label_source: str | None) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=True)
+        segm_path = tmp_path / "segm.zarr"
+
+        from_ctc_to_geff(
+            ctc_path,
+            tmp_path / "little.geff",
+            segmentation_store=segm_path,
+            label_source=label_source,
+        )
+
+        ome = json.loads((segm_path / "zarr.json").read_text())["attributes"]["ome"]
+        if label_source is None:
+            assert "source" not in ome["image-label"]
+        else:
+            assert ome["image-label"]["source"] == {"image": label_source}
+
     def test_non_integer_segmentation_raises(self, tmp_path: Path) -> None:
         ctc_path = create_mock_data(tmp_path, is_gt=True)
         for path in ctc_path.glob("*.tif"):
@@ -494,3 +512,77 @@ class Test_ctc_tiffs_to_zarr:
 
         with pytest.raises(TypeError, match="requires a path or a store backed by a local"):
             ctc_tiffs_to_zarr(ctc_path, zarr.storage.MemoryStore())
+
+
+def _create_ctc_and_image_dirs(tmp_path: Path) -> tuple[Path, Path]:
+    """Mock CTC tracks + segmentation directory, and a separate raw image directory."""
+    ctc_path, image_dir = tmp_path / "ctc", tmp_path / "images"
+    ctc_path.mkdir()
+    image_dir.mkdir()
+    return create_mock_data(ctc_path, is_gt=True), create_mock_data(image_dir, is_gt=False)
+
+
+class Test_convert_ctc:
+    def test_layout_follows_ome_zarr_labels_convention(self, tmp_path: Path) -> None:
+        ctc_path, image_dir = _create_ctc_and_image_dirs(tmp_path)
+        zarr_path = tmp_path / "root.zarr"
+
+        convert_ctc(ctc_path, image_dir, zarr_path, label_name="cells", **SCALING_KWARGS)
+
+        labels_ome = json.loads((zarr_path / "labels" / "zarr.json").read_text())["attributes"]
+        assert labels_ome["ome"]["labels"] == ["cells"]
+
+        label_path = zarr_path / "labels" / "cells"
+        label_ome = json.loads((label_path / "zarr.json").read_text())["attributes"]["ome"]
+        source = label_ome["image-label"]["source"]
+        assert source == {"image": "../../"}
+        assert (label_path / source["image"]).resolve() == zarr_path.resolve()
+
+        # image and label share axes and scales
+        _assert_ome_axes_and_scales(zarr_path, ["t", "y", "x"], [2.0, 0.5, 0.25])
+        _assert_ome_axes_and_scales(label_path, ["t", "y", "x"], [2.0, 0.5, 0.25])
+
+        expected_image = np.stack([tifffile.imread(p) for p in sorted(image_dir.glob("*.tif"))])
+        expected_segm = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
+        np.testing.assert_array_equal(
+            zarr.open_array(zarr_path / "0", mode="r")[...], expected_image
+        )
+        np.testing.assert_array_equal(
+            zarr.open_array(label_path / "0", mode="r")[...], expected_segm
+        )
+
+        metadata = GeffMetadata.read(zarr_path / "tracks.geff")
+        assert metadata.related_objects == [
+            RelatedObject(
+                type="labels",
+                path=os.path.join("..", "labels", "cells"),
+                node_prop="tracklet_id",
+            )
+        ]
+
+    def test_output_is_valid_ome_zarr(self, tmp_path: Path) -> None:
+        import yaozarrs
+
+        ctc_path, image_dir = _create_ctc_and_image_dirs(tmp_path)
+        zarr_path = tmp_path / "root.zarr"
+
+        convert_ctc(ctc_path, image_dir, zarr_path, tczyx=True)
+
+        yaozarrs.validate_zarr_store(zarr_path)
+
+    def test_existing_output_requires_overwrite(self, tmp_path: Path) -> None:
+        ctc_path, image_dir = _create_ctc_and_image_dirs(tmp_path)
+        zarr_path = tmp_path / "root.zarr"
+        convert_ctc(ctc_path, image_dir, zarr_path)
+
+        with pytest.raises(FileExistsError, match="already exists"):
+            convert_ctc(ctc_path, image_dir, zarr_path)
+
+        convert_ctc(ctc_path, image_dir, zarr_path, overwrite=True)
+        labels = json.loads((zarr_path / "labels" / "zarr.json").read_text())
+        assert labels["attributes"]["ome"]["labels"] == ["segmentation"]
+
+    @pytest.mark.parametrize("label_name", ["", "a/b", "..", "."])
+    def test_label_name_must_be_a_plain_name(self, tmp_path: Path, label_name: str) -> None:
+        with pytest.raises(ValueError, match="`label_name` must be a plain name"):
+            convert_ctc(tmp_path, tmp_path, tmp_path / "root.zarr", label_name=label_name)

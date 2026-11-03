@@ -45,8 +45,8 @@ def test_main_invalid_command() -> None:
 @pytest.mark.parametrize("tczyx", [True, False])
 def test_convert_ctc(tmp_path: Path, is_gt: bool, tczyx: bool) -> None:
     ctc_path = create_mock_data(tmp_path, is_gt)
-    geff_path = ctc_path / "little.geff"
-    segm_path = ctc_path / "segm.zarr"
+    geff_path = tmp_path / "little.geff"
+    segm_path = tmp_path / "segm.zarr"
 
     cmd_args = [
         "convert-ctc",
@@ -54,14 +54,8 @@ def test_convert_ctc(tmp_path: Path, is_gt: bool, tczyx: bool) -> None:
         str(geff_path),
         "--segm-path",
         str(segm_path),
-        "--input-image-dir",
-        str(ctc_path),
-        "--output-image-path",
-        str(tmp_path / "output_image.zarr"),
         "--pixel-size", "0.5", "--pixel-size", "0.5",
         "--pixel-unit", "micrometer",
-        "--time-scale", "2.0",
-        "--time-unit", "second",
     ]  # fmt: skip
     if tczyx:
         cmd_args.append("--tczyx")
@@ -69,15 +63,41 @@ def test_convert_ctc(tmp_path: Path, is_gt: bool, tczyx: bool) -> None:
     assert result.exit_code == 0, (
         f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
     )
+    assert geff_path.exists()
+    assert (segm_path / "zarr.json").exists()
 
 
-def test_convert_ctc_invalid_pixel_unit(tmp_path: Path) -> None:
+def test_convert_ctc_with_images(tmp_path: Path) -> None:
     ctc_path = create_mock_data(tmp_path, is_gt=True)
-    result = runner.invoke(
-        app, ["convert-ctc", str(ctc_path), str(tmp_path / "x.geff"), "--pixel-unit", "furlong"]
+    zarr_path = tmp_path / "root.zarr"
+
+    cmd_args = [
+        "convert-ctc", str(ctc_path), str(zarr_path),
+        "--image-dir", str(ctc_path),
+        "--label-name", "cells",
+        "--time-scale", "2.0", "--time-unit", "second",
+    ]  # fmt: skip
+    result = CliRunner().invoke(app, cmd_args)
+    assert result.exit_code == 0, (
+        f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
     )
+    assert (zarr_path / "labels" / "cells" / "zarr.json").exists()
+    assert (zarr_path / "tracks.geff").exists()
+
+
+@pytest.mark.parametrize(
+    ("extra_args", "message"),
+    [
+        (["--image-dir", "images", "--segm-path", "segm.zarr"], "not allowed with --image-dir"),
+        (["--label-name", "cells"], "only applies with --image-dir"),
+        (["--pixel-unit", "furlong"], "not a valid space unit"),
+    ],
+)
+def test_convert_ctc_invalid_options(tmp_path: Path, extra_args: list[str], message: str) -> None:
+    ctc_path = create_mock_data(tmp_path, is_gt=True)
+    result = runner.invoke(app, ["convert-ctc", str(ctc_path), str(tmp_path / "out"), *extra_args])
     assert result.exit_code != 0
-    assert "not a valid space unit" in result.output
+    assert message in result.output
 
 
 @pytest.mark.parametrize(

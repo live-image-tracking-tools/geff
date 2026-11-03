@@ -1,9 +1,10 @@
+import json
 import os
 from pathlib import Path
 from typing import Any, Literal, cast
 
 from yaozarrs import DimSpec
-from yaozarrs.v06 import Image, ImageLabel, LabelImage, Multiscale
+from yaozarrs.v06 import Image, ImageLabel, LabelImage, LabelsGroup, LabelSource, Multiscale
 from yaozarrs.write.v06 import prepare_image
 
 from geff.core_io._utils import check_for_geff, delete_geff
@@ -160,6 +161,7 @@ def from_ctc_to_geff(
     pixel_unit: SpaceUnits | None = None,
     time_scale: float | None = None,
     time_unit: TimeUnits | None = None,
+    label_source: str | None = None,
 ) -> None:
     """
     Convert a CTC file to a GEFF file.
@@ -180,6 +182,9 @@ def from_ctc_to_geff(
         pixel_unit: Unit of `pixel_size`.
         time_scale: Physical time between frames. Defaults to 1.0.
         time_unit: Unit of `time_scale`.
+        label_source: Path of the source image group, relative to the segmentation label image,
+            stored as `image-label.source.image` (e.g. "../../" for a label in the `labels/`
+            group of the image). If not provided, no source is recorded.
     """
     ctc_path = Path(ctc_path)
     geff_path = Path(geff_path).with_suffix(".geff")
@@ -247,12 +252,12 @@ def from_ctc_to_geff(
                 raise ValueError(f"Label images must have an integer data type, got {frame.dtype}.")
             # Construct metadata model for ome zarr
             dims = _ome_dims(frame.ndim, tczyx, pixel_size, pixel_unit, time_scale, time_unit)
+            image_label = ImageLabel(
+                source=LabelSource(image=label_source) if label_source is not None else None
+            )
             # (validated from a dict because the model's field is aliased to "image-label")
             label_image = LabelImage.model_validate(
-                {
-                    "multiscales": [Multiscale.from_dims(dims)],
-                    "image-label": ImageLabel(),  # Add in source later if we write the raw images
-                }
+                {"multiscales": [Multiscale.from_dims(dims)], "image-label": image_label}
             )
 
             _, arrays = prepare_image(
@@ -342,3 +347,92 @@ def from_ctc_to_geff(
         ),
         zarr_format=3,
     )
+
+
+def _register_label(image_path: Path, label_name: str) -> None:
+    """Add `label_name` to the OME-Zarr `labels/` group of the image at `image_path`."""
+    zarr_json_path = image_path / "labels" / "zarr.json"
+    zarr_json: dict[str, Any] = {"zarr_format": 3, "node_type": "group"}
+    labels: list[str] = []
+    if zarr_json_path.exists():
+        zarr_json = json.loads(zarr_json_path.read_text())
+        labels = zarr_json.get("attributes", {}).get("ome", {}).get("labels", [])
+    if label_name not in labels:
+        labels.append(label_name)
+    attributes = zarr_json.setdefault("attributes", {})
+    attributes["ome"] = LabelsGroup(labels=labels).model_dump(mode="json", exclude_none=True)
+    zarr_json_path.write_text(json.dumps(zarr_json, indent=2))
+
+
+def convert_ctc(
+    ctc_path: Path,
+    image_dir: Path,
+    zarr_path: StoreLike,
+    label_name: str = "segmentation",
+    tczyx: bool = False,
+    overwrite: bool = False,
+    pixel_size: list[float] | None = None,
+    pixel_unit: SpaceUnits | None = None,
+    time_scale: float | None = None,
+    time_unit: TimeUnits | None = None,
+) -> None:
+    """
+    Convert a CTC dataset (raw images, segmentation and tracks) to an OME-Zarr and a GEFF.
+
+    The raw images are written to the OME-Zarr image at `zarr_path`, and the segmentation
+    is written inside it as a label image following the OME-Zarr labels convention::
+
+        zarr_path
+        ├── zarr.json          # image metadata
+        ├── 0/                 # image array
+        ├── labels/
+        │   ├── zarr.json      # lists the label images
+        │   └── <label_name>/  # segmentation, with `image-label.source` pointing at the image
+        └── tracks.geff        # the tracks, whose related objects point at the segmentation
+
+    Args:
+        ctc_path: The path to the CTC directory with the tracks file and segmentation tiffs.
+        image_dir: The path to the directory with the raw image tiffs.
+        zarr_path: The path or local store of the OME-Zarr image to write. Stores without a
+            local path (e.g. in-memory) are not supported.
+        label_name: The name of the segmentation inside the OME-Zarr `labels/` group.
+        tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
+        overwrite: Whether to overwrite existing output (the OME-Zarr and the GEFF).
+        pixel_size: Physical size of a pixel along each spatial dimension (z, y, x or y, x).
+            Defaults to 1.0.
+        pixel_unit: Unit of `pixel_size`.
+        time_scale: Physical time between frames. Defaults to 1.0.
+        time_unit: Unit of `time_scale`.
+    """
+    if not label_name or Path(label_name).name != label_name or label_name in (".", ".."):
+        raise ValueError(f"`label_name` must be a plain name, not a path, got {label_name!r}.")
+    image_path = _store_to_local_path(zarr_path)
+    label_path = image_path / "labels" / label_name
+    geff_path = image_path / "tracks.geff"
+
+    # The image goes first: overwriting it removes everything nested inside, e.g. `labels/`
+    ctc_tiffs_to_zarr(
+        image_dir,
+        image_path,
+        ctzyx=tczyx,
+        overwrite=overwrite,
+        pixel_size=pixel_size,
+        pixel_unit=pixel_unit,
+        time_scale=time_scale,
+        time_unit=time_unit,
+    )
+    from_ctc_to_geff(
+        ctc_path,
+        geff_path,
+        segmentation_store=label_path,
+        tczyx=tczyx,
+        overwrite=overwrite,
+        pixel_size=pixel_size,
+        pixel_unit=pixel_unit,
+        time_scale=time_scale,
+        time_unit=time_unit,
+        # `labels/<label_name>` -> `../../` is the image, per the OME-Zarr labels convention
+        label_source="../../",
+    )
+
+    _register_label(image_path, label_name)
