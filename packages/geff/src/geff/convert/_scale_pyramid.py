@@ -118,8 +118,21 @@ def plan_pyramid(
 # --------------------------------------------------------------------------- #
 
 
+def _vote(flat: np.ndarray) -> np.ndarray:
+    """Most frequent value along the last axis; ties go to nonzero values, then the lowest."""
+    flat = np.sort(flat, axis=-1)
+    counts = (flat[..., :, None] == flat[..., None, :]).sum(axis=-1)
+    score = counts * 2 + (flat != 0)
+    best = np.argmax(score, axis=-1)  # first max -> lowest value on equal scores
+    return np.take_along_axis(flat, best[..., None], axis=-1)[..., 0]
+
+
 def _block_mode(block: np.ndarray, axis: int | tuple[int, ...] | None = None) -> np.ndarray:
-    """Most frequent value over ``axis``; ties go to nonzero values, then the lowest value."""
+    """Most frequent value over ``axis``; ties go to nonzero values, then the lowest value.
+
+    Blocks with a single value (most of a label image is background) skip the vote, which
+    compares every pair of values in a block and is much more expensive.
+    """
     if axis is None:
         axes = tuple(range(block.ndim))
     else:
@@ -131,11 +144,12 @@ def _block_mode(block: np.ndarray, axis: int | tuple[int, ...] | None = None) ->
         return np.empty(kept_shape, dtype=block.dtype)
 
     flat = np.transpose(block, kept + list(axes)).reshape(*kept_shape, -1)
-    flat = np.sort(flat, axis=-1)
-    counts = (flat[..., :, None] == flat[..., None, :]).sum(axis=-1)
-    score = counts * 2 + (flat != 0)
-    best = np.argmax(score, axis=-1)  # first max -> lowest value on equal scores
-    return np.take_along_axis(flat, best[..., None], axis=-1)[..., 0]
+    result = np.asarray(flat.min(axis=-1))
+    mixed = result != flat.max(axis=-1)
+    if mixed.any():
+        result = result.copy()  # own the data, and keep 0-d results indexable
+        result[mixed] = _vote(flat[mixed])
+    return result
 
 
 def _pad_to_multiple(data: np.ndarray | da.Array, factors: Sequence[int]) -> np.ndarray | da.Array:
@@ -148,6 +162,12 @@ def _pad_to_multiple(data: np.ndarray | da.Array, factors: Sequence[int]) -> np.
     return np.pad(data, pad_width, mode="edge")
 
 
+def _block_mean(block: np.ndarray, axis: int | tuple[int, ...] | None = None) -> np.ndarray:
+    """Mean over ``axis``, rounded to the nearest integer (half to even) for integer dtypes."""
+    mean = np.asarray(np.mean(block, axis=axis))
+    return np.rint(mean) if np.issubdtype(block.dtype, np.integer) else mean
+
+
 def downsample(
     data: np.ndarray | da.Array,
     factors: Sequence[int],
@@ -155,12 +175,13 @@ def downsample(
 ) -> np.ndarray | da.Array:
     """Downsample by per-axis factors, with output shape ``ceil(s / f)``.
 
-    Uses block mean for images and block mode (majority vote, preferring
-    nonzero ids on ties) for labels. Both are centered on the block, so they
-    share the same translation shift. Accepts numpy or dask arrays.
+    Uses block mean for images (rounded for integer dtypes, so values are not biased
+    low by truncation) and block mode (majority vote, preferring nonzero ids on ties)
+    for labels. Both are centered on the block, so they share the same translation
+    shift. Accepts numpy or dask arrays.
     """
     original_dtype = data.dtype
-    reducer = _block_mode if is_label else np.mean
+    reducer = _block_mode if is_label else _block_mean
     data = _pad_to_multiple(data, factors)
 
     if isinstance(data, da.Array):

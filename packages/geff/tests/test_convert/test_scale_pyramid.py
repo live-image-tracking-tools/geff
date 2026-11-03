@@ -20,6 +20,7 @@ from geff.convert._scale_pyramid import (
     _read_multiscale,
     _shard_shape,
     _spatial_axes,
+    _vote,
     _write_level,
     _write_multiscale,
     compute_downsample_factors,
@@ -185,6 +186,39 @@ def test_downsample_factor_one_axes_untouched():
     data = np.arange(12, dtype=np.uint16).reshape(3, 4)
     out = downsample(data, (1, 2), is_label=False)
     assert out.shape == (3, 2)
+
+
+@pytest.mark.parametrize("use_dask", [False, True])
+def test_downsample_mean_rounds_integers_instead_of_truncating(use_dask):
+    # block means: 0.75 -> 1, 0.25 -> 0, 2.75 -> 3 (truncation would give 0, 0, 2)
+    base = np.array([[0, 1, 0, 0], [1, 1, 0, 1], [2, 3, 3, 3], [3, 3, 3, 3]], dtype=np.uint16)
+    data = da.from_array(base, chunks=2) if use_dask else base
+    out = np.asarray(downsample(data, (2, 2), is_label=False))
+    np.testing.assert_array_equal(out, [[1, 0], [3, 3]])
+    assert out.dtype == np.uint16
+
+
+def test_downsample_mean_does_not_round_floats():
+    data = np.array([[0.0, 1.0], [1.0, 1.0]], dtype=np.float32)
+    out = downsample(data, (2, 2), is_label=False)
+    np.testing.assert_allclose(out, [[0.75]])
+    assert out.dtype == np.float32
+
+
+def test_block_mode_fast_path_matches_full_vote():
+    rng = np.random.default_rng(3)
+    blocks = rng.integers(0, 3, (500, 8)).astype(np.uint16)
+    blocks[::3] = blocks[::3, :1]  # make every third block uniform
+    expected = _vote(blocks)
+    np.testing.assert_array_equal(
+        _block_mode(blocks.reshape(500, 2, 2, 2), axis=(1, 2, 3)), expected
+    )
+
+
+def test_block_mode_all_uniform_blocks_skip_the_vote(monkeypatch):
+    monkeypatch.setattr("geff.convert._scale_pyramid._vote", lambda _: pytest.fail("vote called"))
+    block = np.full((3, 2, 2), 7, dtype=np.uint16)
+    np.testing.assert_array_equal(_block_mode(block, axis=(1, 2)), [7, 7, 7])
 
 
 def test_downsample_labels_only_emit_existing_ids():
