@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1485,7 +1485,7 @@
 <p>The graph exchange file format is <code>zarr</code> based. A graph is stored in a zarr group, which can have any name. However the name of the group can include the <code>.geff</code> suffix to indicate that the group contains <code>geff</code> data. This allows storing multiple <code>geff</code> graphs inside the same zarr root directory. A <code>geff</code> group is identified by the presence of a <code>geff</code> key in the <code>.zattrs</code>. Other <code>geff</code> metadata is also stored in the <code>.zattrs</code> file of the <code>geff</code> group, nested under the <code>geff</code> key. The <code>geff</code> group must contain a <code>nodes</code> group and an <code>edges</code> group (albeit both can be empty). <code>geff</code> graphs have the option to provide properties for <code>nodes</code> and <code>edges</code>.</p>
 <p><code>geff</code> graphs have the option to provide time and spatial dimensions as special attributes. These attributes are specified in the <code>axes</code> section of the metadata, inspired by the OME-zarr <code>axes</code> specification.</p>
 <h2 id="zarr-specification">Zarr specification</h2>
-<p>Currently, <code>geff</code> supports zarr specifications <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html">2</a> and <a href="https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html">3</a>. However, <code>geff</code> will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.</p>
+<p>Currently, <code>geff</code> supports zarr specifications <a href="https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html">2</a> and <a href="https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html">3</a>, and requires <code>zarr-python</code> version 3 or later. <code>geff</code> defaults to writing specification 3, but can write specification 2 (e.g. <code>zarr_format=2</code>) for compatibility with applications that cannot yet read zarr v3 data.</p>
 
 
 <div class="doc doc-object doc-class">
@@ -1969,10 +1969,10 @@ well as empty <code>node_props_metadata</code> and <code>edge_props_metadata</co
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.indexes"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../javascripts/mathjax.js"></script>
       

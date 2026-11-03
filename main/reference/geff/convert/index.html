@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.57a0d79d.min.css">
       
       
 
@@ -1618,7 +1618,7 @@ missing the edge_source_col or edge_target_col columns.</p>
     <span class="n">node_id_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"id"</span><span class="p">,</span>
     <span class="n">edge_source_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"source"</span><span class="p">,</span>
     <span class="n">edge_target_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"target"</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1768,11 +1768,11 @@ Defaults to "target".</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The zarr specification to use when writing. Defaults to 2.</p>
+                <p>The zarr specification to use when writing. Defaults to 3.</p>
               </div>
             </td>
             <td>
-                  <code>2</code>
+                  <code>3</code>
             </td>
           </tr>
       </tbody>
@@ -1819,7 +1819,7 @@ Defaults to "target".</p>
     <span class="n">output_store</span><span class="p">:</span> <span class="n">StoreLike</span><span class="p">,</span>
     <span class="n">ctzyx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1915,11 +1915,11 @@ Defaults to False.</p>
             <td>
               <div class="doc-md-description">
                 <p>The zarr specification to use when writing the zarr.
-Defaults to 2.</p>
+Defaults to 3.</p>
               </div>
             </td>
             <td>
-                  <code>2</code>
+                  <code>3</code>
             </td>
           </tr>
       </tbody>
@@ -1946,7 +1946,7 @@ Defaults to 2.</p>
     <span class="n">node_id_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"id"</span><span class="p">,</span>
     <span class="n">edge_source_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"source"</span><span class="p">,</span>
     <span class="n">edge_target_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"target"</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -2094,11 +2094,11 @@ ID columns and any number of property columns.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The zarr specification to use when writing. Defaults to 2.</p>
+                <p>The zarr specification to use when writing. Defaults to 3.</p>
               </div>
             </td>
             <td>
-                  <code>2</code>
+                  <code>3</code>
             </td>
           </tr>
       </tbody>
@@ -2123,7 +2123,7 @@ ID columns and any number of property columns.</p>
     <span class="n">segmentation_store</span><span class="p">:</span> <span class="n">StoreLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">tczyx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -2234,11 +2234,11 @@ ID columns and any number of property columns.</p>
             <td>
               <div class="doc-md-description">
                 <p>The zarr specification to use when writing the zarr.
-Defaults to 2.</p>
+Defaults to 3.</p>
               </div>
             </td>
             <td>
-                  <code>2</code>
+                  <code>3</code>
             </td>
           </tr>
       </tbody>
@@ -2263,7 +2263,7 @@ Defaults to 2.</p>
     <span class="n">discard_filtered_spots</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">discard_filtered_tracks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">zarr_format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -2374,11 +2374,11 @@ filtered out in TrackMate, False otherwise. False by default.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The version of zarr to write. Defaults to 2.</p>
+                <p>The version of zarr to write. Defaults to 3.</p>
               </div>
             </td>
             <td>
-                  <code>2</code>
+                  <code>3</code>
             </td>
           </tr>
       </tbody>
@@ -2642,10 +2642,10 @@ into separate columns with the name "{prop_name}_{dim_index}"</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes"], "search": "../../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.c21346df.min.js"></script>
       
         <script src="../../../javascripts/mathjax.js"></script>
       
