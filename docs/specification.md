@@ -6,7 +6,7 @@ The graph exchange file format is `zarr` based. A graph is stored in a zarr grou
 
 ## Zarr specification
 
-Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html). However, `geff` will default to writing specification 2 because graphs written to the zarr v3 spec will not be compatible with all applications. When zarr 3 is more fully adopted by other libraries and tools, we will move to a zarr spec 3 default.
+Currently, `geff` supports zarr specifications [2](https://zarr-specs.readthedocs.io/en/latest/v2/v2.0.html) and [3](https://zarr-specs.readthedocs.io/en/latest/v3/core/index.html), and requires `zarr-python` version 3 or later. `geff` defaults to writing specification 3, but can write specification 2 (e.g. `zarr_format=2`) for compatibility with applications that cannot yet read zarr v3 data.
 
 ::: geff_spec.GeffMetadata
     options:

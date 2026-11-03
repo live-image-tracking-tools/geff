@@ -1,5 +1,5 @@
+import json
 import re
-import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -59,22 +59,15 @@ class TestWriteArrays:
         edge_ids = np.array([[1, 2], [2, 3]], dtype=np.uint32)
         metadata = _tmp_metadata()
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                category=UserWarning,
-                message="Requesting zarr spec v3 with zarr-python v2.*",
-            )
-            # Call write_arrays
-            write_arrays(
-                geff_store=geff_path,
-                node_ids=node_ids,
-                node_props={},
-                edge_ids=edge_ids,
-                edge_props={},
-                metadata=metadata,
-                zarr_format=zarr_format,
-            )
+        write_arrays(
+            geff_store=geff_path,
+            node_ids=node_ids,
+            node_props={},
+            edge_ids=edge_ids,
+            edge_props={},
+            metadata=metadata,
+            zarr_format=zarr_format,
+        )
 
         # Verify the zarr group was created
         assert geff_path.exists()
@@ -161,14 +154,8 @@ class TestWriteArrays:
         memory_geff: InMemoryGeff
         store, memory_geff = data_func()
         path = tmp_path / "test.geff"
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                category=UserWarning,
-                message="Requesting zarr spec v3 with zarr-python v2.*",
-            )
-            write_arrays(path, **memory_geff, zarr_format=zarr_format)
-            check_equiv_geff(store, path)
+        write_arrays(path, **memory_geff, zarr_format=zarr_format)
+        check_equiv_geff(store, path)
 
     def test_invalid_geff(self, tmp_path):
         _, memory_geff = create_simple_2d_geff()
@@ -572,3 +559,71 @@ class TestWritePropsArrays:
             expected_missing,
             expected_data,
         )
+
+
+class TestStringStorage:
+    """String properties are stored as variable-length UTF-8, as required by the geff spec."""
+
+    @staticmethod
+    def _write_label_geff(path: Path, zarr_format: Literal[2, 3]) -> np.ndarray:
+        _, memory_geff = create_simple_2d_geff()
+        n_nodes = len(memory_geff["node_ids"])
+        labels = np.array([f"cell-{'x' * i}" for i in range(n_nodes)])
+        memory_geff["node_props"]["label"] = {"values": labels, "missing": None}
+        write_arrays(path, **memory_geff, zarr_format=zarr_format)
+        return labels
+
+    @pytest.mark.parametrize("zarr_format", [2, 3])
+    def test_on_disk_dtype_is_variable_length_utf8(
+        self, tmp_path: Path, zarr_format: Literal[2, 3]
+    ) -> None:
+        path = tmp_path / "test.geff"
+        self._write_label_geff(path, zarr_format)
+
+        values_dir = path / "nodes" / "props" / "label" / "values"
+        if zarr_format == 3:
+            metadata = json.loads((values_dir / "zarr.json").read_text())
+            assert metadata["data_type"] == "string"
+            # nested inside the sharding codec
+            assert "vlen-utf8" in json.dumps(metadata["codecs"])
+        else:
+            metadata = json.loads((values_dir / ".zarray").read_text())
+            assert metadata["dtype"] == "|O"
+            assert "vlen-utf8" in [f["id"] for f in metadata["filters"]]
+
+    @pytest.mark.parametrize("zarr_format", [2, 3])
+    def test_roundtrip_gives_fixed_length_numpy_strings(
+        self, tmp_path: Path, zarr_format: Literal[2, 3]
+    ) -> None:
+        path = tmp_path / "test.geff"
+        labels = self._write_label_geff(path, zarr_format)
+
+        validate_structure(path)
+        values = read_to_memory(path)["node_props"]["label"]["values"]
+        assert values.dtype.kind == "U"
+        np.testing.assert_array_equal(values, labels)
+
+    def test_fixed_length_strings_from_older_geffs_still_read(self, tmp_path: Path) -> None:
+        path = tmp_path / "test.geff"
+        labels = self._write_label_geff(path, zarr_format=2)
+
+        # replace the values with fixed-length unicode, as older versions of geff wrote them
+        label_group = zarr.open_group(path, mode="a")["nodes/props/label"]
+        assert isinstance(label_group, zarr.Group)
+        del label_group["values"]
+        label_group.create_array("values", shape=labels.shape, dtype=labels.dtype)[:] = labels
+        assert zarr.open_array(path / "nodes/props/label/values", mode="r").dtype.kind == "U"
+
+        validate_structure(path)
+        values = read_to_memory(path)["node_props"]["label"]["values"]
+        assert values.dtype.kind == "U"
+        np.testing.assert_array_equal(values, labels)
+
+    @pytest.mark.parametrize("zarr_format", [2, 3])
+    def test_empty_string_array(self, tmp_path: Path, zarr_format: Literal[2, 3]) -> None:
+        path = tmp_path / "test.geff"
+        prop: PropDictNpArray = {"values": np.array([], dtype="U1"), "missing": None}
+        write_props_arrays(path, "nodes", {"label": prop}, zarr_format=zarr_format)
+
+        values = zarr.open_array(path / "nodes" / "props" / "label" / "values", mode="r")
+        assert values.shape == (0,)

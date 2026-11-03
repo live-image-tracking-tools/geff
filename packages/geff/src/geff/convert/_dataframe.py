@@ -238,7 +238,7 @@ def dataframes_to_geff(
     node_id_col: str = "id",
     edge_source_col: str = "source",
     edge_target_col: str = "target",
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
 ) -> None:
     """Convert node and edge pandas DataFrames to a geff store.
 
@@ -258,7 +258,7 @@ def dataframes_to_geff(
         node_id_col (str): Name of the node ID column in node_df. Defaults to "id".
         edge_source_col (str): Name of the source node column in edge_df. Defaults to "source".
         edge_target_col (str): Name of the target node column in edge_df. Defaults to "target".
-        zarr_format (Literal[2, 3]): The zarr specification to use when writing. Defaults to 2.
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing. Defaults to 3.
     """
     in_memory_geff = _dataframes_to_memory_geff(
         node_df,
@@ -279,7 +279,7 @@ def csv_to_geff(
     node_id_col: str = "id",
     edge_source_col: str = "source",
     edge_target_col: str = "target",
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
 ) -> None:
     """Convert node and edge CSV files to a geff store.
 
@@ -301,7 +301,7 @@ def csv_to_geff(
             Defaults to "source".
         edge_target_col (str): Name of the target node column in the edge CSV.
             Defaults to "target".
-        zarr_format (Literal[2, 3]): The zarr specification to use when writing. Defaults to 2.
+        zarr_format (Literal[2, 3]): The zarr specification to use when writing. Defaults to 3.
 
     Raises:
         ValueError: If required columns are missing from the CSVs.

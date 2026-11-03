@@ -4,12 +4,10 @@ import warnings
 from typing import TYPE_CHECKING, Any, Literal, NoReturn
 
 import numpy as np
-import zarr
 
 from geff import _path
 from geff._typing import PropDictNpArray
 from geff.core_io._utils import (
-    _detect_zarr_spec_version,
     check_for_geff,
     construct_var_len_props,
     default_for_value,
@@ -30,6 +28,7 @@ from ._serialization import serialize_vlen_property_data
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
+    import zarr
     from zarr.storage import StoreLike
 
     from geff_spec import GeffMetadata, PropMetadata
@@ -42,7 +41,7 @@ def write_dicts(
     node_prop_names: Sequence[str],
     edge_prop_names: Sequence[str],
     metadata: GeffMetadata,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
     structure_validation: bool = True,
     metadata_validation: bool = True,
 ) -> None:
@@ -64,7 +63,7 @@ def write_dicts(
         metadata (GeffMetadata): The core metadata to write. Node/edge properties and
             axis min and maxes will be overwritten.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
-            Defaults to 2.
+            Defaults to 3.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
         metadata_validation (bool): If True, validates that metadata cross references
@@ -198,14 +197,11 @@ def dict_props_to_arr(
     return props_dict
 
 
-def _rollback_invalid_write(
-    geff_store: StoreLike, zarr_format: Literal[2, 3], error: ValueError
-) -> NoReturn:
+def _rollback_invalid_write(geff_store: StoreLike, error: ValueError) -> NoReturn:
     """Delete a geff that failed validation after being written, and re-raise.
 
     Args:
         geff_store (StoreLike): The store the partial geff was written to.
-        zarr_format (Literal[2, 3]): The zarr specification used to write the store.
         error (ValueError): The validation error that triggered the rollback.
 
     Raises:
@@ -213,7 +209,7 @@ def _rollback_invalid_write(
     """
     message = "\nCannot write invalid geff."
     try:
-        delete_geff(geff_store, zarr_format=zarr_format)
+        delete_geff(geff_store)
     except:  # noqa: E722
         message = (
             "\nWritten geff is invalid, but cannot be deleted automatically. "
@@ -231,7 +227,7 @@ def write_arrays(
     metadata: GeffMetadata,
     node_props_unsquish: dict[str, list[str]] | None = None,
     edge_props_unsquish: dict[str, list[str]] | None = None,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
     structure_validation: bool = True,
     metadata_validation: bool = True,
     overwrite: bool = False,
@@ -262,7 +258,7 @@ def write_arrays(
             length as edge_ids.
         metadata (GeffMetadata): The metadata of the graph.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
-            Defaults to 2.
+            Defaults to 3.
         node_props_unsquish (dict[str, list[str]] | None): a dictionary
             indicication how to "unsquish" a property into individual scalars
             (e.g.: `{"pos": ["z", "y", "x"]}` will store the position property
@@ -288,7 +284,7 @@ def write_arrays(
     # Check for an existing geff
     if check_for_geff(geff_store):
         if overwrite:
-            delete_geff(geff_store, zarr_format=zarr_format)
+            delete_geff(geff_store)
         else:
             raise FileExistsError(
                 "Found an existing geff present in `geff_store`. "
@@ -329,13 +325,13 @@ def write_arrays(
         try:
             validate_metadata(metadata)
         except ValueError as e:
-            _rollback_invalid_write(geff_store, zarr_format, e)
+            _rollback_invalid_write(geff_store, e)
 
     if structure_validation:
         try:
             validate_structure(geff_store)
         except ValueError as e:
-            _rollback_invalid_write(geff_store, zarr_format, e)
+            _rollback_invalid_write(geff_store, e)
 
 
 _TARGET_CHUNK_BYTES = 1 << 23  # 8 MiB — power-of-two, close to 10 MB
@@ -365,48 +361,45 @@ def _write_zarr_array(
     Chunks only along the first dimension (trailing dimensions are kept whole)
     with a power-of-two first-dimension size targeting ~8 MiB per chunk.
 
-    On zarr v3 sharding is used so every array becomes a single file: the shard
+    With zarr spec v3 sharding is used so every array becomes a single file: the shard
     (outer chunk) spans the entire first dimension while inner sub-chunks are
     ~8 MiB each.
+
+    String arrays are written as variable-length UTF-8 strings.
 
     Args:
         group: The zarr group to write into.
         path: The path within the group.
         data: The numpy array to write.
     """
-    if data.shape[0] == 0:
+    is_str = data.dtype.kind == "U"
+    if data.shape[0] == 0 and not is_str:
         group[path] = data
         return
 
     first_dim = _compute_first_dim_chunk(data.shape, data.dtype.itemsize)
     chunks = (first_dim, *data.shape[1:])
 
-    zarr_version = _detect_zarr_spec_version(group)
-    use_sharding = bool(zarr_version is not None and zarr_version >= 3)
-
-    if use_sharding:
+    shards: tuple[int, ...] | None = None
+    if group.metadata.zarr_format >= 3 and data.shape[0] > 0:
         # Shard spans entire array → one file per array.
         # Must be a multiple of the inner chunk size.
         shard_first = ((data.shape[0] + first_dim - 1) // first_dim) * first_dim
         shards = (shard_first, *data.shape[1:])
-        arr = group.create_array(
-            path, shape=data.shape, dtype=data.dtype, chunks=chunks, shards=shards
-        )
-        arr[:] = data
-    # this is more an API thing than a zarr spec version
-    elif zarr.__version__.startswith("2"):
-        group.create_dataset(path, data=data, chunks=chunks)  # type: ignore[attr-defined, unused-ignore]  # pyright: ignore[reportAttributeAccessIssue]
-    else:
-        # zarr v3 library with zarr_format=2 — no sharding
-        arr = group.create_array(path, shape=data.shape, dtype=data.dtype, chunks=chunks)
-        arr[:] = data
+
+    # Strings are stored as variable-length UTF-8, as required by the geff spec, instead of
+    # the fixed-length UTF-32 that numpy infers from a `<U` array (and that zarr-python
+    # versions have stored differently).
+    dtype = str if is_str else data.dtype
+    arr = group.create_array(path, shape=data.shape, dtype=dtype, chunks=chunks, shards=shards)
+    arr[:] = data
 
 
 def write_id_arrays(
     geff_store: StoreLike,
     node_ids: np.ndarray,
     edge_ids: np.ndarray,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
 ) -> None:
     """Writes a set of node ids and edge ids to a geff group.
 
@@ -416,7 +409,7 @@ def write_id_arrays(
         node_ids (np.ndarray): an array of strings or ints with shape (N,)
         edge_ids (np.ndarray): an array with same type as node_ds and shape (N, 2)
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
-            Defaults to 2.
+            Defaults to 3.
     Raises:
         TypeError if node_ids and edge_ids have different types, or if either are float
     """
@@ -441,7 +434,7 @@ def write_props_arrays(
     group: Literal["nodes", "edges"],
     props: dict[str, PropDictNpArray],
     props_unsquish: dict[str, list[str]] | None = None,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
 ) -> Sequence[PropMetadata]:
     """Writes a set of properties to a geff nodes or edges group.
 
@@ -458,7 +451,7 @@ def write_props_arrays(
             `{"pos": ["z", "y", "x"]}` will store the position property as
             three individual properties called "z", "y", and "x".
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
-            Defaults to 2.
+            Defaults to 3.
 
     Returns:
         PropMetadata: The property metadata for each of the property arrays

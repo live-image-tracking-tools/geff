@@ -32,7 +32,7 @@ def ctc_tiffs_to_zarr(
     output_store: StoreLike,
     ctzyx: bool = False,
     overwrite: bool = False,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
 ) -> None:
     """
     Convert a CTC file to a Zarr file.
@@ -45,7 +45,7 @@ def ctc_tiffs_to_zarr(
         overwrite (optional, bool): Whether to overwrite the Zarr file if it already exists.
             Defaults to False.
         zarr_format (optional, Literal[2, 3]): The zarr specification to use when writing the zarr.
-            Defaults to 2.
+            Defaults to 3.
     """
     array = imread(str(ctc_path / "*.tif"))
     if ctzyx:
@@ -57,9 +57,6 @@ def ctc_tiffs_to_zarr(
     # zarr_array_kwargs/zarr_read_kwargs parameters. When the deprecated API is removed,
     # we'll need to update to use the new parameters and handle version compatibility.
     with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore", message=r".*ignoring keyword argument.*zarr_format.*", category=UserWarning
-        )
         warnings.filterwarnings(
             "ignore",
             message=r".*Passing storage-related arguments via \*\*kwargs is deprecated.*",
@@ -74,7 +71,7 @@ def from_ctc_to_geff(
     segmentation_store: StoreLike | None = None,
     tczyx: bool = False,
     overwrite: bool = False,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
 ) -> None:
     """
     Convert a CTC file to a GEFF file.
@@ -87,7 +84,7 @@ def from_ctc_to_geff(
         tczyx: Expand data to make it (T, C, Z, Y, X) otherwise it's (T,) + Frame shape.
         overwrite: Whether to overwrite the GEFF file if it already exists.
         zarr_format (Literal[2, 3]): The zarr specification to use when writing the zarr.
-            Defaults to 2.
+            Defaults to 3.
     """
     ctc_path = Path(ctc_path)
     geff_path = Path(geff_path).with_suffix(".geff")
@@ -107,7 +104,7 @@ def from_ctc_to_geff(
     # Check for existing geff
     if check_for_geff(geff_path):
         if overwrite:
-            delete_geff(geff_path, zarr_format=zarr_format)
+            delete_geff(geff_path)
         else:
             raise FileExistsError(
                 "Found an existing geff present in `geff_path`. "
@@ -144,21 +141,14 @@ def from_ctc_to_geff(
                 n_1_padding = (1,) * (5 - frame.ndim - 1)  # forcing data to be (T, C, Z, Y, X)
                 expand_dims = (np.newaxis,) * len(n_1_padding)
 
-            # Warning is triggered when the zarr_format argument is ignored by zarr 2
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore",
-                    message=r".*ignoring keyword argument.*zarr_format.*",
-                    category=UserWarning,
-                )
-                segm_array = zarr.open_array(
-                    segmentation_store,
-                    shape=(len(sorted_files), *n_1_padding, *frame.shape),
-                    chunks=(1, *n_1_padding, *frame.shape),
-                    dtype=frame.dtype,
-                    mode="w" if overwrite else "w-",
-                    zarr_format=zarr_format,
-                )
+            segm_array = zarr.open_array(
+                segmentation_store,
+                shape=(len(sorted_files), *n_1_padding, *frame.shape),
+                chunks=(1, *n_1_padding, *frame.shape),
+                dtype=frame.dtype,
+                mode="w" if overwrite else "w-",
+                zarr_format=zarr_format,
+            )
 
         if segm_array is not None:
             segm_array[t] = frame[expand_dims]
@@ -218,10 +208,7 @@ def from_ctc_to_geff(
             seg_path = segmentation_store
         else:
             try:
-                if zarr.__version__.startswith("2"):
-                    seg_path = segmentation_store.path  # type: ignore
-                else:
-                    seg_path = segmentation_store.root  # type: ignore
+                seg_path = segmentation_store.root  # type: ignore
             except AttributeError:
                 warnings.warn(
                     "Cannot determine path to segmentation_store for related objects metadata",

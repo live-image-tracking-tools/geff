@@ -260,7 +260,7 @@ def write(
         axis_offset (list[float | None] | None): Amount to offset an axis after applying
             scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
-            Defaults to 2.
+            Defaults to 3.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
         metadata_validation (bool): If True, validates that metadata cross references
@@ -303,7 +303,7 @@ def write(
     axis_scales: list[float | None] | None = None,
     scaled_units: list[str | None] | None = None,
     axis_offset: list[float | None] | None = None,
-    zarr_format: Literal[2, 3] = 2,
+    zarr_format: Literal[2, 3] = 3,
     structure_validation: bool = True,
     metadata_validation: bool = True,
     overwrite: bool = False,
@@ -336,7 +336,7 @@ def write(
         axis_offset (list[float | None] | None): Amount to offset an axis after applying
             scaling factor. Defaults to None.
         zarr_format (Literal[2, 3], optional): The version of zarr to write.
-            Defaults to 2.
+            Defaults to 3.
         structure_validation (bool): If True, runs structural validation and does not write
             a geff that is invalid. Defaults to True.
         metadata_validation (bool): If True, validates that metadata cross references
@@ -355,7 +355,7 @@ def write(
     # Check for existing geff
     if check_for_geff(store):
         if overwrite:
-            delete_geff(store, zarr_format=zarr_format)
+            delete_geff(store)
         else:
             raise FileExistsError(
                 "Found an existing geff present in `store`. "
