@@ -7,7 +7,7 @@ of the finest spatial axis. Non-spatial axes are never downsampled.
 
 import logging
 from collections.abc import Sequence
-from typing import NamedTuple
+from typing import Any, NamedTuple, cast
 
 import dask.array as da
 import numpy as np
@@ -191,7 +191,7 @@ def _read_multiscale(group: zarr.Group) -> v06.Multiscale:
 
 def _write_multiscale(group: zarr.Group, multiscale: v06.Multiscale) -> None:
     """Replace the first multiscale of a group, preserving all other attributes."""
-    ome = dict(group.attrs["ome"])  # type: ignore[arg-type]
+    ome = cast("dict[str, Any]", dict(group.attrs["ome"]))  # type: ignore[arg-type]
     dumped = multiscale.model_dump(mode="json", exclude_none=True)
     ome["multiscales"] = [dumped, *ome["multiscales"][1:]]
     group.attrs["ome"] = ome
@@ -311,7 +311,7 @@ def _write_level(
         shards=shards,
         dtype=like.dtype,
         fill_value=like.fill_value,
-        dimension_names=like.metadata.dimension_names,
+        dimension_names=getattr(like.metadata, "dimension_names", None),
     )
     # Rechunk to whole shards so no two dask tasks write to the same shard.
     da.store(data.rechunk(shards), array, lock=False)
@@ -352,7 +352,7 @@ def generate_scale_pyramid(
     base_dataset = multiscale.datasets[0]
     base = zarr_group[base_dataset.path]
     if not isinstance(base, zarr.Array):
-        raise ValueError(f"Expected {base_dataset.path!r} to be an array")
+        raise TypeError(f"Expected {base_dataset.path!r} to be an array")
 
     base_scale, base_translation = _base_scale_and_translation(base_dataset, base.ndim)
     plan = plan_pyramid(
