@@ -1,0 +1,76 @@
+# Deploys PR doc previews (including from forks) to gh-pages/pr-preview/pr-N.
+# Runs in the context of the base repo, so it has a write token, but it never
+# checks out or executes PR code: it only copies the static site built by `gh-pages.yaml`.
+name: Docs preview
+
+on:
+  workflow_run:
+    workflows: [Docs] # `name:` of gh-pages.yaml
+    types: [completed]
+  pull_request_target:
+    types: [closed]
+
+# one at a time per PR (keyed on head repo + branch, the PR number isn't available here)
+concurrency:
+  group: preview-${{ github.event.workflow_run.head_repository.full_name || github.event.pull_request.head.repo.full_name }}-${{ github.event.workflow_run.head_branch || github.event.pull_request.head.ref }}
+
+permissions:
+  actions: read # download artifacts from the triggering run
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy:
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7 # default branch; required by the deploy action
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: pr-number
+          path: ${{ runner.temp }}/pr
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - id: pr
+        run: |
+          number=$(cat "$RUNNER_TEMP/pr/number")
+          [[ "$number" =~ ^[0-9]+$ ]] || { echo "invalid PR number: $number"; exit 1; }
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: _site
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - id: preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: _site
+          action: deploy
+          pr-number: ${{ steps.pr.outputs.number }}
+          comment: false # built-in comment only works on pull_request events
+
+      - uses: marocchino/sticky-pull-request-comment@v3.0.5
+        with:
+          header: pr-preview
+          number_force: ${{ steps.pr.outputs.number }}
+          message: |
+            :rocket: Docs preview: ${{ steps.preview.outputs.preview-url }}
+            <sub>Built from ${{ github.event.workflow_run.head_sha }}. May take a minute for GitHub Pages to update.</sub>
+
+  remove:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7 # base branch, not PR code
+      - uses: rossjrw/pr-preview-action@v1
+        with:
+          action: remove
+          pr-number: ${{ github.event.pull_request.number }}
+          qr-code: false
