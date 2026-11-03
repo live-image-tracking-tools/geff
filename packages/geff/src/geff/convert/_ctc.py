@@ -7,7 +7,7 @@ from yaozarrs import DimSpec
 from yaozarrs.v06 import Image, ImageLabel, LabelImage, LabelsGroup, LabelSource, Multiscale
 from yaozarrs.write.v06 import prepare_image
 
-from geff.convert._scale_pyramid import generate_scale_pyramid
+from geff.convert._scale_pyramid import default_chunks_and_shards, generate_scale_pyramid
 from geff.core_io._utils import check_for_geff, delete_geff
 from geff_spec._valid_values import SpaceUnits, TimeUnits
 
@@ -102,6 +102,14 @@ def _ome_dims(
     return dims
 
 
+def _chunks_and_shards(
+    shape: tuple[int, ...], tczyx: bool
+) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    """Chunks and shards for a (T, ...) array, whose spatial axes are the trailing ones."""
+    n_spatial = 3 if tczyx else len(shape) - 1
+    return default_chunks_and_shards(shape, range(len(shape) - n_spatial, len(shape)))
+
+
 def ctc_tiffs_to_zarr(
     ctc_path: Path,
     output_store: StoreLike,
@@ -133,19 +141,19 @@ def ctc_tiffs_to_zarr(
     array = imread(str(ctc_path / "*.tif"))
     frame_shape = array.shape[1:]
     dims = _ome_dims(len(frame_shape), ctzyx, pixel_size, pixel_unit, time_scale, time_unit)
-    n_1_padding: tuple[int, ...] = ()
     if ctzyx:
         n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
-        n_1_padding = (1,) * n_missing_dims
 
     image = Image(multiscales=[Multiscale.from_dims(dims)])
+    chunks, shards = _chunks_and_shards(array.shape, ctzyx)
     _, arrays = prepare_image(
         out_path,
         image,
         (array.shape, array.dtype),
-        chunks=(1, *n_1_padding, *frame_shape),
+        chunks=chunks,
+        shards=shards,
         writer="zarr",
         overwrite=overwrite,
     )
@@ -261,11 +269,14 @@ def from_ctc_to_geff(
                 {"multiscales": [Multiscale.from_dims(dims)], "image-label": image_label}
             )
 
+            segm_shape = (len(sorted_files), *n_1_padding, *frame.shape)
+            chunks, shards = _chunks_and_shards(segm_shape, tczyx)
             _, arrays = prepare_image(
                 seg_path,
                 label_image,
-                ((len(sorted_files), *n_1_padding, *frame.shape), frame.dtype),
-                chunks=(1, *n_1_padding, *frame.shape),
+                (segm_shape, frame.dtype),
+                chunks=chunks,
+                shards=shards,
                 writer="zarr",
                 overwrite=overwrite,
             )

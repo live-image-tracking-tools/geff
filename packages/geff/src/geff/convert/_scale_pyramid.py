@@ -213,9 +213,7 @@ def _spatial_axes(coordinate_system: v06.CoordinateSystem) -> list[int]:
     return [i for i, ax in enumerate(coordinate_system.axes) if ax.type == "space"]
 
 
-def _base_scale_and_translation(
-    dataset: v06.Dataset, ndim: int
-) -> tuple[list[float], list[float]]:
+def _base_scale_and_translation(dataset: v06.Dataset, ndim: int) -> tuple[list[float], list[float]]:
     """Scale and translation of a dataset, defaulting to 1s and 0s if absent.
 
     Handles a lone ``scale``, ``identity``, or a ``sequence`` of scale/translation.
@@ -256,9 +254,11 @@ def _make_dataset(path: str, level_plan: LevelPlan, coordinate_system: str) -> v
 # --------------------------------------------------------------------------- #
 
 
-def _level_chunks(base_chunks: Sequence[int], level_shape: Sequence[int]) -> tuple[int, ...]:
-    """Base chunk shape clipped to the level shape."""
-    return tuple(min(c, s) for c, s in zip(base_chunks, level_shape, strict=True))
+def _level_chunks(
+    shape: Sequence[int], spatial_axes: Sequence[int], chunk_size: int
+) -> tuple[int, ...]:
+    """Chunks of ``chunk_size`` along spatial axes (clipped to the shape), 1 elsewhere."""
+    return tuple(min(chunk_size, s) if i in spatial_axes else 1 for i, s in enumerate(shape))
 
 
 def _shard_shape(
@@ -275,6 +275,21 @@ def _shard_shape(
     )
 
 
+def default_chunks_and_shards(
+    shape: Sequence[int],
+    spatial_axes: Sequence[int],
+    chunk_size: int = DEFAULT_SPATIAL_CHUNK_SIZE,
+) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    """Chunk and shard shapes used for every pyramid level, including scale 0.
+
+    Spatial chunks are ``chunk_size`` (clipped to the shape) and all other axes
+    have chunk size 1. There is one shard per non-spatial index, so each frame
+    (or channel of a frame) is a single shard.
+    """
+    chunks = _level_chunks(shape, spatial_axes, chunk_size)
+    return chunks, _shard_shape(shape, chunks, spatial_axes)
+
+
 def _write_level(
     group: zarr.Group,
     name: str,
@@ -282,13 +297,13 @@ def _write_level(
     like: zarr.Array,
     level_plan: LevelPlan,
     spatial_axes: Sequence[int],
+    chunk_size: int,
 ) -> zarr.Array:
     """Create a sharded array for a level, write ``data`` into it, and return it.
 
-    dtype, fill value, dimension names and chunking are derived from ``like``.
+    dtype, fill value and dimension names are taken from ``like``.
     """
-    chunks = _level_chunks(like.chunks, level_plan.shape)
-    shards = _shard_shape(level_plan.shape, chunks, spatial_axes)
+    chunks, shards = default_chunks_and_shards(level_plan.shape, spatial_axes, chunk_size)
     array = group.create_array(
         name,
         shape=level_plan.shape,
@@ -325,7 +340,9 @@ def generate_scale_pyramid(
         zarr_group: Group with a valid single-scale OME-Zarr layout.
         num_levels: Total number of levels including the base. If None, chosen
             so the coarsest level fits in a single ``chunk_size`` spatial chunk.
-        chunk_size: Target spatial chunk size used when auto-computing levels.
+        chunk_size: Spatial chunk size of the new levels, also used when auto-computing
+            the number of levels. Scale 0 is left as written, so it should have been
+            written with :func:`default_chunks_and_shards` to match.
         is_label: Downsample by block mode (majority vote) instead of block mean.
     """
     multiscale = _read_multiscale(zarr_group)
@@ -347,7 +364,9 @@ def generate_scale_pyramid(
     for level, level_plan in enumerate(plan[1:], start=1):
         logger.debug("Level %d: shape=%s factors=%s", level, level_plan.shape, level_plan.factors)
         level_data = downsample(level_data, level_plan.factors, is_label)
-        array = _write_level(zarr_group, str(level), level_data, base, level_plan, spatial_axes)
+        array = _write_level(
+            zarr_group, str(level), level_data, base, level_plan, spatial_axes, chunk_size
+        )
         # Re-read so the next level's graph starts from disk, not from level 0.
         level_data = da.from_zarr(array)
         datasets.append(_make_dataset(str(level), level_plan, coordinate_system.name))

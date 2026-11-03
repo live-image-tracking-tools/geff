@@ -24,6 +24,7 @@ from geff.convert._scale_pyramid import (
     _write_multiscale,
     compute_downsample_factors,
     compute_num_levels,
+    default_chunks_and_shards,
     downsample,
     downsampled_shape,
     generate_scale_pyramid,
@@ -283,9 +284,16 @@ def test_read_multiscale_missing_raises():
 # ----------------------------------------------------------------------------
 
 
-def test_level_chunks_clipped_to_shape():
-    assert _level_chunks((1, 40, 128, 128), (2, 20, 75, 76)) == (1, 20, 75, 76)
-    assert _level_chunks((1, 40, 128, 128), (2, 40, 300, 301)) == (1, 40, 128, 128)
+def test_level_chunks_spatial_chunk_size_clipped_and_others_one():
+    assert _level_chunks((2, 20, 75, 76), SPATIAL, 128) == (1, 20, 75, 76)
+    assert _level_chunks((2, 40, 300, 301), SPATIAL, 128) == (1, 40, 128, 128)
+    assert _level_chunks((2, 3, 300, 301), [2, 3], 64) == (1, 1, 64, 64)
+
+
+def test_default_chunks_and_shards():
+    chunks, shards = default_chunks_and_shards((3, 1, 1, 300, 200), [2, 3, 4])
+    assert chunks == (1, 1, 1, 128, 128)
+    assert shards == (1, 1, 1, 384, 256)
 
 
 def test_shard_shape_rounds_spatial_up_to_chunks_and_keeps_others():
@@ -299,7 +307,7 @@ def test_write_level_creates_sharded_array_with_data():
     plan = LevelPlan((2, 40, 150, 151), (1.0, 3.0, 2.0, 2.0), (0, 0, 0.5, 0.5), (1, 1, 2, 2))
     data = downsample(da.from_array(base_data, chunks=(1, 40, 64, 64)), plan.factors, False)
 
-    array = _write_level(group, "1", data, base, plan, SPATIAL)
+    array = _write_level(group, "1", data, base, plan, SPATIAL, 128)
 
     assert array.shape == plan.shape
     assert array.chunks == (1, 40, 128, 128)
@@ -364,6 +372,21 @@ def test_generate_scale_pyramid_small_image_needs_no_levels():
     group, _ = make_group(shape=(2, 10, 64, 64), chunks=(1, 10, 64, 64))
     generate_scale_pyramid(group)
     assert len(_read_multiscale(group).datasets) == 1
+
+
+def test_generate_scale_pyramid_rechunks_levels_from_whole_frame_base():
+    group, _ = make_group(chunks=(1, 40, 300, 301))
+    generate_scale_pyramid(group)
+    assert group["0"].chunks == (1, 40, 300, 301)  # scale 0 is left as written
+    assert group["1"].chunks == (1, 40, 128, 128)
+    assert group["1"].shards == (1, 40, 256, 256)
+
+
+def test_generate_scale_pyramid_chunk_size_sets_new_level_chunks():
+    group, _ = make_group()
+    generate_scale_pyramid(group, chunk_size=64)
+    assert group["1"].chunks == (1, 40, 64, 64)
+    assert group["1"].shards == (1, 40, 192, 192)
 
 
 def test_generate_scale_pyramid_with_channel_axis():
