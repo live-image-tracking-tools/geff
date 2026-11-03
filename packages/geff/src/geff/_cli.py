@@ -4,11 +4,14 @@ from typing import TYPE_CHECKING, Annotated, cast
 import typer
 
 from geff_spec import GeffMetadata
+from geff_spec._valid_values import VALID_SPACE_UNITS, VALID_TIME_UNITS
 
 from . import validate_structure
 
 if TYPE_CHECKING:
     from typing import Literal
+
+    from geff_spec._valid_values import SpaceUnits, TimeUnits
 
 app = typer.Typer(help="GEFF Command Line Interface")
 
@@ -80,8 +83,25 @@ def convert_ctc(
         bool,
         typer.Option(help="Whether to overwrite the GEFF file if it already exists."),
     ] = False,
-    zarr_format: Annotated[int, typer.Option(help="The version of zarr to write.")] = 2,
-    # because of Typer not supporting Literal types
+    pixel_size: Annotated[
+        list[float] | None,
+        typer.Option(
+            help="Physical size of a pixel along each spatial dimension, given once per "
+            "dimension in (z,) y, x order, e.g. --pixel-size 0.5 --pixel-size 0.5. Defaults to 1.0."
+        ),
+    ] = None,
+    pixel_unit: Annotated[
+        str | None,
+        typer.Option(help=f"Unit of --pixel-size, one of {', '.join(VALID_SPACE_UNITS)}."),
+    ] = None,
+    time_scale: Annotated[
+        float | None,
+        typer.Option(help="Physical time between frames. Defaults to 1.0."),
+    ] = None,
+    time_unit: Annotated[
+        str | None,
+        typer.Option(help=f"Unit of --time-scale, one of {', '.join(VALID_TIME_UNITS)}."),
+    ] = None,
 ) -> None:
     """
     Convert a CTC data directory to a GEFF file.
@@ -93,12 +113,30 @@ def convert_ctc(
     ):
         raise ValueError("'input_image_dir' and 'output_image_path' must be provided together")
 
+    # because of Typer not supporting Literal types
+    if pixel_unit is not None and pixel_unit not in VALID_SPACE_UNITS:
+        raise typer.BadParameter(
+            f"'{pixel_unit}' is not a valid space unit, expected one of {VALID_SPACE_UNITS}",
+            param_hint="--pixel-unit",
+        )
+    if time_unit is not None and time_unit not in VALID_TIME_UNITS:
+        raise typer.BadParameter(
+            f"'{time_unit}' is not a valid time unit, expected one of {VALID_TIME_UNITS}",
+            param_hint="--time-unit",
+        )
+    space_unit = cast("SpaceUnits | None", pixel_unit)
+    temporal_unit = cast("TimeUnits | None", time_unit)
+
     from_ctc_to_geff(
         ctc_path=ctc_path,
         geff_path=geff_path,
         segmentation_store=segm_path,
         tczyx=tczyx,
         overwrite=overwrite,
+        pixel_size=pixel_size,
+        pixel_unit=space_unit,
+        time_scale=time_scale,
+        time_unit=temporal_unit,
     )
 
     if input_image_dir is not None:
@@ -107,7 +145,10 @@ def convert_ctc(
             output_store=output_image_path,
             ctzyx=tczyx,
             overwrite=overwrite,
-            zarr_format=cast("Literal[2, 3]", zarr_format),
+            pixel_size=pixel_size,
+            pixel_unit=space_unit,
+            time_scale=time_scale,
+            time_unit=temporal_unit,
         )
 
 

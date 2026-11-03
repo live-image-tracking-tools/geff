@@ -1,8 +1,9 @@
+import json
 import os
 
 import pytest
 
-from geff_spec import RelatedObject
+from geff_spec import GeffMetadata, RelatedObject
 
 try:
     import tifffile
@@ -377,10 +378,119 @@ def test_ctc_image_to_zarr(tmp_path: Path, ctzyx: bool) -> None:
     ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=ctzyx)
 
     expected_arr = np.stack([tifffile.imread(p) for p in sorted(ctc_path.glob("*.tif"))])
-    copied_arr = zarr.open_array(zarr_path, mode="r")
+    copied_arr = zarr.open_array(zarr_path / "0", mode="r")
 
     if ctzyx:
         assert copied_arr.ndim == 5
 
     copied_arr = np.squeeze(copied_arr)
     np.testing.assert_array_equal(copied_arr, expected_arr)
+
+
+SCALING_KWARGS = {
+    "pixel_size": [0.5, 0.25],
+    "pixel_unit": "micrometer",
+    "time_scale": 2.0,
+    "time_unit": "second",
+}
+
+
+def _assert_ome_axes_and_scales(
+    zarr_path: Path, names: list[str], scales: list[float]
+) -> list[dict]:
+    ome = json.loads((zarr_path / "zarr.json").read_text())["attributes"]["ome"]
+    multiscale = ome["multiscales"][0]
+    axes = multiscale["coordinateSystems"][0]["axes"]
+    assert [a["name"] for a in axes] == names
+    assert multiscale["datasets"][0]["coordinateTransformations"][0]["scale"] == scales
+    return axes
+
+
+class Test_from_ctc_to_geff:
+    def test_scales_and_units_are_written(self, tmp_path: Path) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=True)
+        geff_path = tmp_path / "little.geff"
+        segm_path = tmp_path / "segm.zarr"
+
+        from_ctc_to_geff(ctc_path, geff_path, segmentation_store=segm_path, **SCALING_KWARGS)
+
+        axes = _assert_ome_axes_and_scales(segm_path, ["t", "y", "x"], [2.0, 0.5, 0.25])
+        assert [a.get("unit") for a in axes] == ["second", "micrometer", "micrometer"]
+
+        metadata = GeffMetadata.read(geff_path)
+        assert [(a.unit, a.scale, a.scaled_unit) for a in metadata.axes] == [
+            ("frame", 2.0, "second"),
+            ("pixel", 0.5, "micrometer"),
+            ("pixel", 0.25, "micrometer"),
+        ]
+
+    def test_unit_without_scale_defaults_to_one(self, tmp_path: Path) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=True)
+        geff_path = tmp_path / "little.geff"
+
+        from_ctc_to_geff(ctc_path, geff_path, pixel_unit="micrometer")
+
+        metadata = GeffMetadata.read(geff_path)
+        assert [(a.scale, a.scaled_unit) for a in metadata.axes] == [
+            (None, None),
+            (1.0, "micrometer"),
+            (1.0, "micrometer"),
+        ]
+
+    @pytest.mark.parametrize("with_segmentation", [True, False])
+    def test_wrong_number_of_pixel_sizes_raises(
+        self, tmp_path: Path, with_segmentation: bool
+    ) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=True, is_3d=True)
+        segm_path = tmp_path / "segm.zarr" if with_segmentation else None
+
+        with pytest.raises(ValueError, match="one entry per spatial dimension"):
+            from_ctc_to_geff(
+                ctc_path,
+                tmp_path / "little.geff",
+                segmentation_store=segm_path,
+                pixel_size=[0.5, 0.5],
+            )
+
+    def test_non_integer_segmentation_raises(self, tmp_path: Path) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=True)
+        for path in ctc_path.glob("*.tif"):
+            tifffile.imwrite(path, tifffile.imread(path).astype("float32"))
+
+        with pytest.raises(ValueError, match="must have an integer data type"):
+            from_ctc_to_geff(
+                ctc_path, tmp_path / "little.geff", segmentation_store=tmp_path / "segm.zarr"
+            )
+
+
+class Test_ctc_tiffs_to_zarr:
+    def test_scales_and_units_are_written(self, tmp_path: Path) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=False)
+        zarr_path = tmp_path / "image.zarr"
+
+        ctc_tiffs_to_zarr(ctc_path, zarr_path, **SCALING_KWARGS)
+
+        axes = _assert_ome_axes_and_scales(zarr_path, ["t", "y", "x"], [2.0, 0.5, 0.25])
+        assert [a.get("unit") for a in axes] == ["second", "micrometer", "micrometer"]
+
+    def test_ctzyx_axes_and_scales(self, tmp_path: Path) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=False)
+        zarr_path = tmp_path / "image.zarr"
+
+        ctc_tiffs_to_zarr(ctc_path, zarr_path, ctzyx=True, **SCALING_KWARGS)
+
+        _assert_ome_axes_and_scales(
+            zarr_path, ["t", "c", "z", "y", "x"], [2.0, 1.0, 1.0, 0.5, 0.25]
+        )
+
+    def test_wrong_number_of_pixel_sizes_raises(self, tmp_path: Path) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=False)
+
+        with pytest.raises(ValueError, match="one entry per spatial dimension"):
+            ctc_tiffs_to_zarr(ctc_path, tmp_path / "image.zarr", pixel_size=[0.5])
+
+    def test_store_without_local_path_raises(self, tmp_path: Path) -> None:
+        ctc_path = create_mock_data(tmp_path, is_gt=False)
+
+        with pytest.raises(TypeError, match="requires a path or a store backed by a local"):
+            ctc_tiffs_to_zarr(ctc_path, zarr.storage.MemoryStore())

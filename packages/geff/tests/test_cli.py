@@ -58,13 +58,26 @@ def test_convert_ctc(tmp_path: Path, is_gt: bool, tczyx: bool) -> None:
         str(ctc_path),
         "--output-image-path",
         str(tmp_path / "output_image.zarr"),
-    ]
+        "--pixel-size", "0.5", "--pixel-size", "0.5",
+        "--pixel-unit", "micrometer",
+        "--time-scale", "2.0",
+        "--time-unit", "second",
+    ]  # fmt: skip
     if tczyx:
         cmd_args.append("--tczyx")
     result = CliRunner().invoke(app, cmd_args)
     assert result.exit_code == 0, (
         f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
     )
+
+
+def test_convert_ctc_invalid_pixel_unit(tmp_path: Path) -> None:
+    ctc_path = create_mock_data(tmp_path, is_gt=True)
+    result = runner.invoke(
+        app, ["convert-ctc", str(ctc_path), str(tmp_path / "x.geff"), "--pixel-unit", "furlong"]
+    )
+    assert result.exit_code != 0
+    assert "not a valid space unit" in result.output
 
 
 @pytest.mark.parametrize(

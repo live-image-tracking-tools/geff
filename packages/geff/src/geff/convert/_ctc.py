@@ -1,27 +1,26 @@
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal, cast
 
 from yaozarrs import DimSpec
-from yaozarrs.v06 import ImageLabel, LabelImage, Multiscale
+from yaozarrs.v06 import Image, ImageLabel, LabelImage, Multiscale
 from yaozarrs.write.v06 import prepare_image
 
 from geff.core_io._utils import check_for_geff, delete_geff
 from geff_spec._valid_values import SpaceUnits, TimeUnits
 
 try:
-    import tifffile
-
     # TODO: would be nice to remove dask dependency just to create Zarr from Tiff
     # tifffile directly supports creating Zarr stores from sequences of Tiff files
     # The only convenience added is the ability to easily expand the data to (T, C, Z, Y, X)
     # in the case of images that cannot fit into memory.
+    import dask.array as da
+    import tifffile
     from dask.array.image import imread
     from skimage.measure import regionprops
 except ImportError as e:
     raise ImportError("Please install with geff[ctc] to use this module.") from e
 
-import warnings
 
 import numpy as np
 import zarr
@@ -32,11 +31,23 @@ from geff.core_io import write_arrays
 from geff_spec import Axis, GeffMetadata, RelatedObject
 
 
-def _scaling_kwargs(scale: float | None, unit: str | None) -> dict[str, float | str | None]:
-    """Axis kwargs converting pixel/frame values to physical `scale` and `unit`."""
-    if scale is None and unit is None:
-        return {}
-    return {"scale": 1.0 if scale is None else scale, "scaled_unit": unit}
+def _scaled_axis(
+    name: str,
+    axis_type: Literal["space", "time"],
+    unit: str,
+    scale: float | None,
+    scaled_unit: str | None,
+) -> Axis:
+    """Axis for values in pixels / frames, with `scale` converting to physical `scaled_unit`."""
+    if scale is None and scaled_unit is None:
+        return Axis(name=name, type=axis_type, unit=unit)
+    return Axis(
+        name=name,
+        type=axis_type,
+        unit=unit,
+        scale=1.0 if scale is None else scale,
+        scaled_unit=scaled_unit,
+    )
 
 
 def _store_to_local_path(store: StoreLike) -> Path:
@@ -55,10 +66,38 @@ def _store_to_local_path(store: StoreLike) -> Path:
         path = None
     if path is None:
         raise TypeError(
-            "Writing the segmentation as an OME-Zarr label image requires a path or a store "
-            f"backed by a local directory, got {type(store).__name__}."
+            "Writing an OME-Zarr requires a path or a store backed by a local directory, "
+            f"got {type(store).__name__}."
         )
     return Path(path)
+
+
+def _ome_dims(
+    frame_ndim: int,
+    tczyx: bool,
+    pixel_size: list[float] | None,
+    pixel_unit: SpaceUnits | None,
+    time_scale: float | None,
+    time_unit: TimeUnits | None,
+) -> list[DimSpec]:
+    """OME-Zarr dimensions for a (T,) + frame, or (T, C, Z, Y, X) if `tczyx`, array."""
+    if pixel_size is not None and len(pixel_size) != frame_ndim:
+        raise ValueError(
+            f"`pixel_size` must have one entry per spatial dimension ({frame_ndim}), "
+            f"got {len(pixel_size)}."
+        )
+    spatial_names = ("z", "y", "x")[-frame_ndim:]
+    spatial_scales = pixel_size if pixel_size is not None else (1.0,) * frame_ndim
+    dims = [DimSpec(name="t", scale=time_scale or 1.0, unit=time_unit)]
+    if tczyx:
+        dims.append(DimSpec(name="c"))
+        if frame_ndim == 2:
+            dims.append(DimSpec(name="z"))
+    dims.extend(
+        DimSpec(name=name, scale=scale, unit=pixel_unit)
+        for name, scale in zip(spatial_names, spatial_scales, strict=True)
+    )
+    return dims
 
 
 def ctc_tiffs_to_zarr(
@@ -66,40 +105,49 @@ def ctc_tiffs_to_zarr(
     output_store: StoreLike,
     ctzyx: bool = False,
     overwrite: bool = False,
-    zarr_format: Literal[2, 3] = 2,
+    pixel_size: list[float] | None = None,
+    pixel_unit: SpaceUnits | None = None,
+    time_scale: float | None = None,
+    time_unit: TimeUnits | None = None,
 ) -> None:
     """
-    Convert a CTC file to a Zarr file.
+    Convert a CTC file to an OME-Zarr image.
 
     Args:
         ctc_path (Path): The path to the CTC file.
-        output_store (StoreLike): The path to the Zarr file.
+        output_store (StoreLike): The path or local store to write the OME-Zarr image to.
+            Stores without a local path (e.g. in-memory) are not supported.
         ctzyx (optional, bool): Expand data to make it (T, C, Z, Y, X)
             otherwise it's (T,) + Frame shape. Defaults to False.
         overwrite (optional, bool): Whether to overwrite the Zarr file if it already exists.
             Defaults to False.
-        zarr_format (optional, Literal[2, 3]): The zarr specification to use when writing the zarr.
-            Defaults to 2.
+        pixel_size (optional, list[float]): Physical size of a pixel along each spatial
+            dimension (z, y, x or y, x). Defaults to 1.0.
+        pixel_unit (optional): Unit of `pixel_size`.
+        time_scale (optional, float): Physical time between frames. Defaults to 1.0.
+        time_unit (optional): Unit of `time_scale`.
     """
+    out_path = _store_to_local_path(output_store)
     array = imread(str(ctc_path / "*.tif"))
+    frame_shape = array.shape[1:]
+    dims = _ome_dims(len(frame_shape), ctzyx, pixel_size, pixel_unit, time_scale, time_unit)
+    n_1_padding: tuple[int, ...] = ()
     if ctzyx:
         n_missing_dims = 5 - array.ndim  # (T, C, Z, Y, X)
         expand_dims = (slice(None),) + (np.newaxis,) * n_missing_dims
         array = array[expand_dims]
-    # Suppress warnings from dask/zarr compatibility layer
-    # Note: dask 2025.12.0+ deprecated passing storage args via **kwargs in favor of
-    # zarr_array_kwargs/zarr_read_kwargs parameters. When the deprecated API is removed,
-    # we'll need to update to use the new parameters and handle version compatibility.
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore", message=r".*ignoring keyword argument.*zarr_format.*", category=UserWarning
-        )
-        warnings.filterwarnings(
-            "ignore",
-            message=r".*Passing storage-related arguments via \*\*kwargs is deprecated.*",
-            category=FutureWarning,
-        )
-        array.to_zarr(url=output_store, overwrite=overwrite, zarr_format=zarr_format)
+        n_1_padding = (1,) * n_missing_dims
+
+    image = Image(multiscales=[Multiscale.from_dims(dims)])
+    _, arrays = prepare_image(
+        out_path,
+        image,
+        (array.shape, array.dtype),
+        chunks=(1, *n_1_padding, *frame_shape),
+        writer="zarr",
+        overwrite=overwrite,
+    )
+    da.store(array, cast("Any", arrays["0"]), lock=False)
 
 
 def from_ctc_to_geff(
@@ -198,20 +246,13 @@ def from_ctc_to_geff(
             if frame.dtype.kind not in "iu":
                 raise ValueError(f"Label images must have an integer data type, got {frame.dtype}.")
             # Construct metadata model for ome zarr
-            spatial_names = ("z", "y", "x")[-frame.ndim :]
-            spatial_scales = pixel_size if pixel_size is not None else (1.0,) * frame.ndim
-            dims = [DimSpec(name="t", scale=time_scale or 1.0, unit=time_unit)]
-            if tczyx:
-                dims.append(DimSpec(name="c"))
-                if frame.ndim == 2:
-                    dims.append(DimSpec(name="z"))
-            dims.extend(
-                DimSpec(name=name, scale=scale, unit=pixel_unit)
-                for name, scale in zip(spatial_names, spatial_scales, strict=True)
-            )
-            label_image = LabelImage(
-                multiscales=[Multiscale.from_dims(dims)],
-                image_label=ImageLabel(),  # Add in source later if we write the raw images
+            dims = _ome_dims(frame.ndim, tczyx, pixel_size, pixel_unit, time_scale, time_unit)
+            # (validated from a dict because the model's field is aliased to "image-label")
+            label_image = LabelImage.model_validate(
+                {
+                    "multiscales": [Multiscale.from_dims(dims)],
+                    "image-label": ImageLabel(),  # Add in source later if we write the raw images
+                }
             )
 
             _, arrays = prepare_image(
@@ -265,13 +306,11 @@ def from_ctc_to_geff(
         edges.append((parent_node_id, child_node_id))
 
     # Node coordinates are in pixels / frames; `scale` converts them to physical units
-    axis_names = [
-        Axis(name="t", type="time", unit="frame", **_scaling_kwargs(time_scale, time_unit))
-    ]
+    axis_names = [_scaled_axis("t", "time", "frame", time_scale, time_unit)]
     spatial_names = ("z", "y", "x") if "z" in node_props else ("y", "x")
     spatial_sizes = pixel_size if pixel_size is not None else (None,) * len(spatial_names)
     axis_names.extend(
-        Axis(name=name, type="space", unit="pixel", **_scaling_kwargs(size, pixel_unit))
+        _scaled_axis(name, "space", "pixel", size, pixel_unit)
         for name, size in zip(spatial_names, spatial_sizes, strict=True)
     )
 
