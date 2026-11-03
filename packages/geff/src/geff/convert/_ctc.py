@@ -7,6 +7,7 @@ from yaozarrs import DimSpec
 from yaozarrs.v06 import Image, ImageLabel, LabelImage, LabelsGroup, LabelSource, Multiscale
 from yaozarrs.write.v06 import prepare_image
 
+from geff.convert._scale_pyramid import generate_scale_pyramid
 from geff.core_io._utils import check_for_geff, delete_geff
 from geff_spec._valid_values import SpaceUnits, TimeUnits
 
@@ -390,6 +391,9 @@ def convert_ctc(
         │   └── <label_name>/  # segmentation, with `image-label.source` pointing at the image
         └── tracks.geff        # the tracks, whose related objects point at the segmentation
 
+    Lower-resolution scales (``1/``, ``2/``, ...) are generated for the image (block mean) and
+    the segmentation (block mode) until each spatial dimension fits in a single chunk.
+
     Args:
         ctc_path: The path to the CTC directory with the tracks file and segmentation tiffs.
         image_dir: The path to the directory with the raw image tiffs.
@@ -436,3 +440,6 @@ def convert_ctc(
     )
 
     _register_label(image_path, label_name)
+
+    generate_scale_pyramid(zarr.open_group(image_path, mode="r+"))
+    generate_scale_pyramid(zarr.open_group(label_path, mode="r+"), is_label=True)
