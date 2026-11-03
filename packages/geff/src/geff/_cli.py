@@ -11,7 +11,6 @@ from . import validate_structure
 if TYPE_CHECKING:
     from typing import Literal
 
-    from geff_spec._valid_values import SpaceUnits, TimeUnits
 
 app = typer.Typer(help="GEFF Command Line Interface")
 
@@ -136,8 +135,6 @@ def convert_ctc(
             f"'{time_unit}' is not a valid time unit, expected one of {VALID_TIME_UNITS}",
             param_hint="--time-unit",
         )
-    space_unit = cast("SpaceUnits | None", pixel_unit)
-    temporal_unit = cast("TimeUnits | None", time_unit)
 
     if image_dir is None:
         from_ctc_to_geff(
@@ -147,9 +144,9 @@ def convert_ctc(
             tczyx=tczyx,
             overwrite=overwrite,
             pixel_size=pixel_size,
-            pixel_unit=space_unit,
+            pixel_unit=pixel_unit,
             time_scale=time_scale,
-            time_unit=temporal_unit,
+            time_unit=time_unit,
         )
     else:
         _convert_ctc(
@@ -160,9 +157,9 @@ def convert_ctc(
             tczyx=tczyx,
             overwrite=overwrite,
             pixel_size=pixel_size,
-            pixel_unit=space_unit,
+            pixel_unit=pixel_unit,
             time_scale=time_scale,
-            time_unit=temporal_unit,
+            time_unit=time_unit,
         )
 
 
