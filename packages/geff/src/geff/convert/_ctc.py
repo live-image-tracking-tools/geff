@@ -52,7 +52,7 @@ def _scaled_axis(
         name=name,
         type=axis_type,
         unit=unit,
-        scale=1.0 if scale is None else scale,
+        scale=scale,
         scaled_unit=scaled_unit,
     )
 
@@ -67,8 +67,7 @@ def _store_to_local_path(store: StoreLike) -> Path:
     if isinstance(store, (str, os.PathLike)):
         return Path(store)
     try:
-        # zarr 2 stores expose `path`, zarr 3 local stores expose `root`
-        path = store.path if zarr.__version__.startswith("2") else store.root  # type: ignore
+        path = store.root  # type: ignore
     except AttributeError:
         path = None
     if path is None:
@@ -175,7 +174,7 @@ def from_ctc_to_geff(
     pixel_unit: SpaceUnits | None = None,
     time_scale: float | None = None,
     time_unit: TimeUnits | None = None,
-    label_source: str | None = None,
+    raw_image_path: str | None = None,
 ) -> None:
     """
     Convert a CTC file to a GEFF file.
@@ -196,7 +195,7 @@ def from_ctc_to_geff(
         pixel_unit: Unit of `pixel_size`.
         time_scale: Physical time between frames. Defaults to 1.0.
         time_unit: Unit of `time_scale`.
-        label_source: Path of the source image group, relative to the segmentation label image,
+        raw_image_path: Path of the source image group, relative to the segmentation label image,
             stored as `image-label.source.image` (e.g. "../../" for a label in the `labels/`
             group of the image). If not provided, no source is recorded.
     """
@@ -267,7 +266,7 @@ def from_ctc_to_geff(
             # Construct metadata model for ome zarr
             dims = _ome_dims(frame.ndim, tczyx, pixel_size, pixel_unit, time_scale, time_unit)
             image_label = ImageLabel(
-                source=LabelSource(image=label_source) if label_source is not None else None
+                source=LabelSource(image=raw_image_path) if raw_image_path is not None else None
             )
             # (validated from a dict because the model's field is aliased to "image-label")
             label_image = LabelImage.model_validate(
@@ -472,7 +471,7 @@ def convert_ctc(
         time_scale=time_scale,
         time_unit=time_unit,
         # `labels/<label_name>` -> `../../` is the image, per the OME-Zarr labels convention
-        label_source="../../",
+        raw_image_path="../../",
     )
 
     _register_label(image_path, label_name)

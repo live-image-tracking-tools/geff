@@ -458,7 +458,7 @@ class Test_from_ctc_to_geff:
             ctc_path,
             tmp_path / "little.geff",
             segmentation_store=segm_path,
-            label_source=label_source,
+            raw_image_path=label_source,
         )
 
         ome = json.loads((segm_path / "zarr.json").read_text())["attributes"]["ome"]
