@@ -140,11 +140,12 @@ def _block_mode(block: np.ndarray, axis: int | tuple[int, ...] | None = None) ->
 
 def _pad_to_multiple(data: np.ndarray | da.Array, factors: Sequence[int]) -> np.ndarray | da.Array:
     """Edge-pad the end of each axis so its length is divisible by its factor."""
-    pad_width = [(0, (-s) % f) for s, f in zip(data.shape, factors, strict=True)]
+    pad_width = [(0, int(-s % f)) for s, f in zip(data.shape, factors, strict=True)]
     if not any(after for _, after in pad_width):
         return data
-    pad_fn = da.pad if isinstance(data, da.Array) else np.pad
-    return pad_fn(data, pad_width, mode="edge")
+    if isinstance(data, da.Array):
+        return da.pad(data, pad_width, mode="edge")
+    return np.pad(data, pad_width, mode="edge")
 
 
 def downsample(
@@ -184,7 +185,7 @@ def _read_multiscale(group: zarr.Group) -> v06.Multiscale:
     """Read the first OME-Zarr 0.6 multiscale from ``attrs["ome"]``."""
     ome = group.attrs.get("ome")
     multiscales = ome.get("multiscales") if isinstance(ome, dict) else None
-    if not multiscales:
+    if not isinstance(multiscales, list) or not multiscales:
         raise ValueError(f"No multiscales metadata found in group {group.path!r}")
     return v06.Multiscale.model_validate(multiscales[0])
 
@@ -314,7 +315,7 @@ def _write_level(
         dimension_names=getattr(like.metadata, "dimension_names", None),
     )
     # Rechunk to whole shards so no two dask tasks write to the same shard.
-    da.store(data.rechunk(shards), array, lock=False)
+    da.store(data.rechunk(cast("Any", shards)), array, lock=False)
     return array
 
 
@@ -363,7 +364,7 @@ def generate_scale_pyramid(
     level_data = da.from_zarr(base)
     for level, level_plan in enumerate(plan[1:], start=1):
         logger.debug("Level %d: shape=%s factors=%s", level, level_plan.shape, level_plan.factors)
-        level_data = downsample(level_data, level_plan.factors, is_label)
+        level_data = cast("da.Array", downsample(level_data, level_plan.factors, is_label))
         array = _write_level(
             zarr_group, str(level), level_data, base, level_plan, spatial_axes, chunk_size
         )
