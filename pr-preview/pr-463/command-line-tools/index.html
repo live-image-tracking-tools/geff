@@ -1447,6 +1447,14 @@ the image, the segmentation and the tracks (as tracks.geff).</p>
                                 millisecond, minute, nanosecond, petasecond,
                                 picosecond, second, terasecond, yoctosecond,
                                 yottasecond, zeptosecond, zettasecond, frame.
+  --num-scale-levels INTEGER    With --image-dir: total number of scale levels
+                                including the base. If not provided, chosen so
+                                the coarsest level fits in a single --min-
+                                chunk-size chunk.
+  --min-chunk-size INTEGER      With --image-dir: spatial chunk size of the
+                                generated scale levels, also used when auto-
+                                computing the number of levels. Defaults to
+                                128.
 </code></pre></div>
 <h3 id="convert-to-csv">convert-to-csv</h3>
 <p>Usage:</p>

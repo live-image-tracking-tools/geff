@@ -1643,6 +1643,8 @@ missing the edge_source_col or edge_target_col columns.</p>
     <span class="n">pixel_unit</span><span class="p">:</span> <span class="n">SpaceUnits</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">time_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">time_unit</span><span class="p">:</span> <span class="n">TimeUnits</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">num_scale_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_SPATIAL_CHUNK_SIZE</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -1834,6 +1836,41 @@ Defaults to 1.0.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>num_scale_levels</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#int">int</a> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Total number of levels including the base. If None, chosen
+so the coarsest level fits in a single <code>chunk_size</code> spatial chunk.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>min_chunk_size</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#int">int</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Spatial chunk size of the new levels, also used when auto-computing
+the number of levels. Scale 0 is left as written, so it should have been
+written with :func:<code>default_chunks_and_shards</code> to match.</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="geff.convert._scale_pyramid.DEFAULT_SPATIAL_CHUNK_SIZE">DEFAULT_SPATIAL_CHUNK_SIZE</span></code>
             </td>
           </tr>
       </tbody>
