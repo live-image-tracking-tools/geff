@@ -45,38 +45,17 @@ def test_main_invalid_command() -> None:
 @pytest.mark.parametrize("tczyx", [True, False])
 def test_convert_ctc(tmp_path: Path, is_gt: bool, tczyx: bool) -> None:
     ctc_path = create_mock_data(tmp_path, is_gt)
-    geff_path = tmp_path / "little.geff"
-    segm_path = tmp_path / "segm.zarr"
-
-    cmd_args = [
-        "convert-ctc",
-        str(ctc_path),
-        str(geff_path),
-        "--segm-path",
-        str(segm_path),
-        "--pixel-size", "0.5", "--pixel-size", "0.5",
-        "--pixel-unit", "micrometer",
-    ]  # fmt: skip
-    if tczyx:
-        cmd_args.append("--tczyx")
-    result = CliRunner().invoke(app, cmd_args)
-    assert result.exit_code == 0, (
-        f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
-    )
-    assert geff_path.exists()
-    assert (segm_path / "zarr.json").exists()
-
-
-def test_convert_ctc_with_images(tmp_path: Path) -> None:
-    ctc_path = create_mock_data(tmp_path, is_gt=True)
     zarr_path = tmp_path / "root.zarr"
 
     cmd_args = [
-        "convert-ctc", str(ctc_path), str(zarr_path),
-        "--image-dir", str(ctc_path),
+        "convert-ctc", str(ctc_path), str(ctc_path), str(zarr_path),
         "--label-name", "cells",
+        "--pixel-size", "0.5", "--pixel-size", "0.5",
+        "--pixel-unit", "micrometer",
         "--time-scale", "2.0", "--time-unit", "second",
     ]  # fmt: skip
+    if tczyx:
+        cmd_args.append("--tczyx")
     result = CliRunner().invoke(app, cmd_args)
     assert result.exit_code == 0, (
         f"{cmd_args} failed with exit code {result.exit_code} and message:\n{result.stdout}"
@@ -86,19 +65,20 @@ def test_convert_ctc_with_images(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    ("extra_args", "message"),
+    ("args", "message"),
     [
-        # (match text without option names: CI's colored Rich output styles `--option` separately)
-        (["--image-dir", "images", "--segm-path", "segm.zarr"], "not allowed with"),
-        (["--label-name", "cells"], "only applies with"),
-        (["--pixel-unit", "furlong"], "not a valid space unit"),
+        # (case-insensitive: Typer versions differ in how they name missing arguments)
+        (["CTC"], "missing argument 'image_dir'"),
+        (["CTC", "CTC"], "missing argument 'output_path'"),
+        (["CTC", "CTC", "OUT", "--pixel-unit", "furlong"], "not a valid space unit"),
     ],
 )
-def test_convert_ctc_invalid_options(tmp_path: Path, extra_args: list[str], message: str) -> None:
+def test_convert_ctc_invalid_options(tmp_path: Path, args: list[str], message: str) -> None:
     ctc_path = create_mock_data(tmp_path, is_gt=True)
-    result = runner.invoke(app, ["convert-ctc", str(ctc_path), str(tmp_path / "out"), *extra_args])
+    subs = {"CTC": str(ctc_path), "OUT": str(tmp_path / "out")}
+    result = runner.invoke(app, ["convert-ctc", *(subs.get(a, a) for a in args)])
     assert result.exit_code != 0
-    assert message in result.output
+    assert message in result.output.lower()
 
 
 @pytest.mark.parametrize(

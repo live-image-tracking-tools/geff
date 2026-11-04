@@ -41,41 +41,30 @@ def convert_ctc(
     ctc_path: Annotated[
         Path,
         typer.Argument(
-            help="The path to the directory containing ctc tracks (man_track.txt or res_track.txt)"
-            " and segmentation, e.g. data/01_GT/TRA or data/01_RES",
+            help="The path to the directory containing ctc tracks (man_track.txt or "
+            "res_track.txt) and segmentation, e.g. data/01_GT/TRA or data/01_RES",
+            show_default=False,
+        ),
+    ],
+    image_dir: Annotated[
+        Path,
+        typer.Argument(
+            help="The path to the directory containing the raw image tiffs, e.g. data/01.",
             show_default=False,
         ),
     ],
     output_path: Annotated[
         Path,
         typer.Argument(
-            help="Without --image-dir: path to save the output geff, including the geff directory "
-            "name (eg. ~/folder/folder/data.zarr/tracks.geff). With --image-dir: path of the "
-            "OME-Zarr to write, which will contain the image, the segmentation in its labels "
-            "group and the geff as tracks.geff (eg. data.ome.zarr).",
+            help="Path of the OME-Zarr to write, which will contain the image, the segmentation "
+            "in its labels group and the geff as tracks.geff (eg. data.ome.zarr).",
             show_default=False,
         ),
     ],
-    image_dir: Annotated[
-        Path | None,
-        typer.Option(
-            help="The path to the directory containing the raw image tiffs, e.g. data/01. If "
-            "provided, the images, segmentation and geff are all written into one OME-Zarr at "
-            "OUTPUT_PATH. If not provided, only the geff (and optionally --segm-path) is written."
-        ),
-    ] = None,
-    segm_path: Annotated[
-        Path | None,
-        typer.Option(
-            help="Without --image-dir: the path to export the segmentation to, if not provided, "
-            "it won't be exported. Not allowed with --image-dir, where the segmentation is "
-            "always written inside the OME-Zarr."
-        ),
-    ] = None,
     label_name: Annotated[
         str | None,
         typer.Option(
-            help="With --image-dir: the name of the segmentation inside the OME-Zarr labels "
+            help="The name of the segmentation inside the OME-Zarr labels "
             "group. Defaults to 'segmentation'."
         ),
     ] = None,
@@ -87,7 +76,7 @@ def convert_ctc(
     ] = False,
     overwrite: Annotated[
         bool,
-        typer.Option(help="Whether to overwrite the output (GEFF or OME-Zarr) if it exists."),
+        typer.Option(help="Whether to overwrite the output OME-Zarr if it exists."),
     ] = False,
     pixel_size: Annotated[
         list[float] | None,
@@ -111,36 +100,23 @@ def convert_ctc(
     num_scale_levels: Annotated[
         int | None,
         typer.Option(
-            help="With --image-dir: total number of scale levels including the base. If not "
+            help="Total number of scale levels including the base. If not "
             "provided, chosen so the coarsest level fits in a single --min-chunk-size chunk."
         ),
     ] = None,
     min_chunk_size: Annotated[
         int | None,
         typer.Option(
-            help="With --image-dir: spatial chunk size of the generated scale levels, also used "
+            help="Spatial chunk size of the generated scale levels, also used "
             "when auto-computing the number of levels. Defaults to 128."
         ),
     ] = None,
 ) -> None:
     """
-    Convert a CTC data directory to a GEFF file, or with --image-dir to an OME-Zarr containing
-    the image, the segmentation and the tracks (as tracks.geff).
+    Convert a CTC data directory to an OME-Zarr containing the image, the
+    segmentation and the tracks (as tracks.geff).
     """
     from geff.convert import convert_ctc as _convert_ctc
-    from geff.convert import from_ctc_to_geff
-
-    if image_dir is not None and segm_path is not None:
-        raise typer.BadParameter(
-            "not allowed with --image-dir, use --label-name",
-            param_hint="--segm-path",
-        )
-    if image_dir is None and label_name is not None:
-        raise typer.BadParameter("only applies with --image-dir", param_hint="--label-name")
-    if image_dir is None and num_scale_levels is not None:
-        raise typer.BadParameter("only applies with --image-dir", param_hint="--num-scale-levels")
-    if image_dir is None and min_chunk_size is not None:
-        raise typer.BadParameter("only applies with --image-dir", param_hint="--min-chunk-size")
 
     # because of Typer not supporting Literal types
     if pixel_unit is not None and pixel_unit not in VALID_SPACE_UNITS:
@@ -154,35 +130,22 @@ def convert_ctc(
             param_hint="--time-unit",
         )
 
-    if image_dir is None:
-        from_ctc_to_geff(
-            ctc_path=ctc_path,
-            geff_path=output_path,
-            segmentation_store=segm_path,
-            tczyx=tczyx,
-            overwrite=overwrite,
-            pixel_size=pixel_size,
-            pixel_unit=pixel_unit,
-            time_scale=time_scale,
-            time_unit=time_unit,
-        )
-    else:
-        from geff.convert._scale_pyramid import DEFAULT_SPATIAL_CHUNK_SIZE
+    from geff.convert._scale_pyramid import DEFAULT_SPATIAL_CHUNK_SIZE
 
-        _convert_ctc(
-            ctc_path=ctc_path,
-            image_dir=image_dir,
-            zarr_path=output_path,
-            label_name=label_name or "segmentation",
-            tczyx=tczyx,
-            overwrite=overwrite,
-            pixel_size=pixel_size,
-            pixel_unit=pixel_unit,
-            time_scale=time_scale,
-            time_unit=time_unit,
-            num_scale_levels=num_scale_levels,
-            min_chunk_size=min_chunk_size or DEFAULT_SPATIAL_CHUNK_SIZE,
-        )
+    _convert_ctc(
+        ctc_path=ctc_path,
+        image_dir=image_dir,
+        zarr_path=output_path,
+        label_name=label_name or "segmentation",
+        tczyx=tczyx,
+        overwrite=overwrite,
+        pixel_size=pixel_size,
+        pixel_unit=pixel_unit,
+        time_scale=time_scale,
+        time_unit=time_unit,
+        num_scale_levels=num_scale_levels,
+        min_chunk_size=min_chunk_size or DEFAULT_SPATIAL_CHUNK_SIZE,
+    )
 
 
 @app.command()
