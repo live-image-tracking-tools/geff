@@ -2,6 +2,7 @@ import json
 import os
 
 import pytest
+from pydantic import ValidationError
 
 from geff_spec import GeffMetadata, RelatedObject
 
@@ -425,14 +426,8 @@ class Test_from_ctc_to_geff:
         ctc_path = create_mock_data(tmp_path, is_gt=True)
         geff_path = tmp_path / "little.geff"
 
-        from_ctc_to_geff(ctc_path, geff_path, pixel_unit="micrometer")
-
-        metadata = GeffMetadata.read(geff_path)
-        assert [(a.scale, a.scaled_unit) for a in metadata.axes] == [
-            (None, None),
-            (1.0, "micrometer"),
-            (1.0, "micrometer"),
-        ]
+        with pytest.raises(ValidationError, match="1 validation error for Axis"):
+            from_ctc_to_geff(ctc_path, geff_path, pixel_unit="micrometer")
 
     @pytest.mark.parametrize("with_segmentation", [True, False])
     def test_wrong_number_of_pixel_sizes_raises(
