@@ -1,8 +1,7 @@
 """Generate lower-resolution scales for an existing single-scale OME-Zarr.
 
-Ported from ``sgro_lab_utils/pyramid.py``. Downsampling is anisotropy-aware:
-a spatial axis is only downsampled (factor 2) if its voxel size is within 2x
-of the finest spatial axis. Non-spatial axes are never downsampled.
+Downsampling is anisotropy-aware: a spatial axis is only downsampled (factor 2) if its voxel size is
+within 2x of the finest spatial axis. Non-spatial axes are never downsampled.
 """
 
 import logging
@@ -26,12 +25,12 @@ DEFAULT_SPATIAL_CHUNK_SIZE = 128
 # --------------------------------------------------------------------------- #
 
 
-def downsampled_shape(shape: Sequence[int], factors: Sequence[int]) -> tuple[int, ...]:
+def _downsampled_shape(shape: Sequence[int], factors: Sequence[int]) -> tuple[int, ...]:
     """Shape after downsampling: ``ceil(s / f)`` per dimension."""
     return tuple((s + f - 1) // f for s, f in zip(shape, factors, strict=True))
 
 
-def compute_downsample_factors(
+def _compute_downsample_factors(
     voxel_size: Sequence[float], spatial_axes: Sequence[int]
 ) -> tuple[int, ...]:
     """Anisotropy-aware downsample factors (1 or 2 per axis).
@@ -57,13 +56,31 @@ def compute_num_levels(
     spatial_axes: Sequence[int],
     chunk_size: int = DEFAULT_SPATIAL_CHUNK_SIZE,
 ) -> int:
-    """Number of levels (including the base) until every spatial dim fits in one chunk."""
+    """Compute how many pyramid levels are needed for the coarsest level to fit in one chunk.
+
+    Simulates the downsampling that `plan_pyramid` performs, level by level, until every
+    spatial axis is at most `chunk_size` voxels long. Because downsampling is anisotropy-aware,
+    an axis with much coarser voxels (e.g. z) is skipped until the finer axes catch up, so it
+    can take more levels than ``ceil(log2(max(shape) / chunk_size))``.
+
+    Args:
+        shape: Shape of the full resolution array, with one entry per axis.
+        voxel_size: Voxel size (scale) of the full resolution array, with one entry per axis.
+        spatial_axes: Indices of the spatial axes. Other axes are never downsampled and do not
+            count towards the chunk size limit.
+        chunk_size: Maximum length of a spatial axis in the coarsest level. Defaults to
+            `DEFAULT_SPATIAL_CHUNK_SIZE`.
+
+    Returns:
+        The number of levels, including the full resolution level. This is 1 if every spatial
+        axis already fits in one chunk.
+    """
     shape = list(shape)
     voxel = list(voxel_size)
     levels = 1
     while any(shape[i] > chunk_size for i in spatial_axes):
-        factors = compute_downsample_factors(voxel, spatial_axes)
-        shape = list(downsampled_shape(shape, factors))
+        factors = _compute_downsample_factors(voxel, spatial_axes)
+        shape = list(_downsampled_shape(shape, factors))
         voxel = [v * f for v, f in zip(voxel, factors, strict=True)]
         levels += 1
     return levels
@@ -84,11 +101,31 @@ def plan_pyramid(
     num_levels: int | None = None,
     chunk_size: int = DEFAULT_SPATIAL_CHUNK_SIZE,
 ) -> list[LevelPlan]:
-    """Compute shape, scale, translation and factors for every level.
+    """Plan the levels of a scale pyramid without reading or writing any data.
 
-    Block downsampling by factor ``f`` places each output voxel center at the
-    middle of ``f`` input voxels, shifting the origin by ``(f - 1) / 2`` input
-    voxels.
+    Each level is downsampled from the previous one, using the factors from the
+    anisotropy-aware rule: a spatial axis is only halved if its voxel size is within 2x of the
+    finest spatial axis, and non-spatial axes are never downsampled. See `LevelPlan` for what is
+    planned per level.
+
+    Block downsampling by factor ``f`` places each output voxel center at the middle of ``f``
+    input voxels, so the origin shifts by ``(f - 1) / 2`` voxels of the previous level. These
+    shifts accumulate in the translation, so each level stays aligned with the full resolution
+    one.
+
+    Args:
+        shape: Shape of the full resolution array, with one entry per axis.
+        scale: Voxel size of the full resolution array, with one entry per axis.
+        translation: Offset of the full resolution array, with one entry per axis.
+        spatial_axes: Indices of the spatial axes.
+        num_levels: Total number of levels, including the full resolution one. If None, it is
+            computed with `compute_num_levels` so the coarsest level fits in one chunk.
+        chunk_size: Maximum spatial axis length of the coarsest level, used when `num_levels`
+            is None. Defaults to `DEFAULT_SPATIAL_CHUNK_SIZE`.
+
+    Returns:
+        One `LevelPlan` per level, ordered from full resolution (level 0, with factors of all
+        1s) to the coarsest level.
     """
     if num_levels is None:
         num_levels = compute_num_levels(shape, scale, spatial_axes, chunk_size)
@@ -101,10 +138,10 @@ def plan_pyramid(
     )
     plan = [current]
     for _ in range(1, num_levels):
-        factors = compute_downsample_factors(current.scale, spatial_axes)
+        factors = _compute_downsample_factors(current.scale, spatial_axes)
         shift = [(f - 1) / 2 * s for f, s in zip(factors, current.scale, strict=True)]
         current = LevelPlan(
-            downsampled_shape(current.shape, factors),
+            _downsampled_shape(current.shape, factors),
             tuple(s * f for s, f in zip(current.scale, factors, strict=True)),
             tuple(t + d for t, d in zip(current.translation, shift, strict=True)),
             factors,
