@@ -13,6 +13,8 @@ from geff.convert._scale_pyramid import (
     LevelPlan,
     _base_scale_and_translation,
     _block_mode,
+    _compute_downsample_factors,
+    _downsampled_shape,
     _level_chunks,
     _make_dataset,
     _output_coordinate_system,
@@ -23,11 +25,9 @@ from geff.convert._scale_pyramid import (
     _vote,
     _write_level,
     _write_multiscale,
-    compute_downsample_factors,
     compute_num_levels,
     default_chunks_and_shards,
     downsample,
-    downsampled_shape,
     generate_scale_pyramid,
     plan_pyramid,
 )
@@ -67,21 +67,21 @@ def make_group(
 # ----------------------------------------------------------------------------
 
 
-def test_downsampled_shape_uses_ceil():
-    assert downsampled_shape((5, 7, 8), (2, 2, 1)) == (3, 4, 8)
+def test__downsampled_shape_uses_ceil():
+    assert _downsampled_shape((5, 7, 8), (2, 2, 1)) == (3, 4, 8)
 
 
 def test_downsample_factors_isotropic():
-    assert compute_downsample_factors([1, 1, 1, 1], SPATIAL) == (1, 2, 2, 2)
+    assert _compute_downsample_factors([1, 1, 1, 1], SPATIAL) == (1, 2, 2, 2)
 
 
 def test_downsample_factors_skip_coarse_axis():
-    assert compute_downsample_factors([1, 4, 1, 1], SPATIAL) == (1, 1, 2, 2)
+    assert _compute_downsample_factors([1, 4, 1, 1], SPATIAL) == (1, 1, 2, 2)
 
 
 def test_downsample_factors_ignore_non_spatial_axis_voxel_size():
     # A tiny time scale must not be treated as the "finest" axis.
-    assert compute_downsample_factors([0.01, 1, 1, 1], SPATIAL) == (1, 2, 2, 2)
+    assert _compute_downsample_factors([0.01, 1, 1, 1], SPATIAL) == (1, 2, 2, 2)
 
 
 def test_compute_num_levels():
