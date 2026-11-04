@@ -1403,90 +1403,103 @@
                         customize the installation.
 </code></pre></div>
 <h3 id="convert-ctc">convert-ctc</h3>
-<p>Convert a CTC data directory to a GEFF file, or with --image-dir to an OME-Zarr containing
-the image, the segmentation and the tracks (as tracks.geff).</p>
+<p>Convert a CTC data directory to an OME-Zarr containing the image, the
+segmentation and the tracks (as tracks.geff).</p>
 <p>Usage:</p>
-<div class="highlight"><pre><span></span><code> convert-ctc [OPTIONS] CTC_PATH OUTPUT_PATH
+<div class="highlight"><pre><span></span><code> convert-ctc [OPTIONS] {ctc_path} {image_dir} {output_path}
 </code></pre></div>
 <p>Options:</p>
-<div class="highlight"><pre><span></span><code>  --image-dir PATH              The path to the directory containing the raw
-                                image tiffs, e.g. data/01. If provided, the
-                                images, segmentation and geff are all written
-                                into one OME-Zarr at OUTPUT_PATH. If not
-                                provided, only the geff (and optionally
-                                --segm-path) is written.
-  --segm-path PATH              Without --image-dir: the path to export the
-                                segmentation to, if not provided, it won't be
-                                exported. Not allowed with --image-dir, where
-                                the segmentation is always written inside the
-                                OME-Zarr.
-  --label-name TEXT             With --image-dir: the name of the segmentation
-                                inside the OME-Zarr labels group. Defaults to
-                                'segmentation'.
+<div class="highlight"><pre><span></span><code>  ctc_path                      The path to the directory containing ctc
+                                tracks (man_track.txt or res_track.txt) and
+                                segmentation, e.g. data/01_GT/TRA or
+                                data/01_RES  [required]
+  image_dir                     The path to the directory containing the raw
+                                image tiffs, e.g. data/01.  [required]
+  output_path                   Path of the OME-Zarr to write, which will
+                                contain the image, the segmentation in its
+                                labels group and the geff as tracks.geff (eg.
+                                data.ome.zarr).  [required]
+  --label-name &lt;str&gt;            The name of the segmentation inside the OME-
+                                Zarr labels group. Defaults to 'segmentation'.
   --tczyx / --no-tczyx          Expand data to make it (T, C, Z, Y, X)
-                                otherwise it's (T,) + Frame shape.  \[default:
+                                otherwise it's (T,) + Frame shape.  [default:
                                 no-tczyx]
-  --overwrite / --no-overwrite  Whether to overwrite the output (GEFF or OME-
-                                Zarr) if it exists.  \[default: no-overwrite]
-  --pixel-size FLOAT            Physical size of a pixel along each spatial
+  --overwrite / --no-overwrite  Whether to overwrite the output OME-Zarr if it
+                                exists.  [default: no-overwrite]
+  --pixel-size &lt;float&gt;          Physical size of a pixel along each spatial
                                 dimension, given once per dimension in (z,) y,
                                 x order, e.g. --pixel-size 0.5 --pixel-size
                                 0.5. Defaults to 1.0.
-  --pixel-unit TEXT             Unit of --pixel-size, one of angstrom,
+  --pixel-unit &lt;str&gt;            Unit of --pixel-size, one of angstrom,
                                 attometer, centimeter, decimeter, exameter,
                                 femtometer, foot, gigameter, hectometer, inch,
                                 kilometer, megameter, meter, micrometer, mile,
                                 millimeter, nanometer, parsec, petameter,
                                 picometer, terameter, yard, yoctometer,
                                 yottameter, zeptometer, zettameter, pixel.
-  --time-scale FLOAT            Physical time between frames. Defaults to 1.0.
-  --time-unit TEXT              Unit of --time-scale, one of attosecond,
+  --time-scale &lt;float&gt;          Physical time between frames. Defaults to 1.0.
+  --time-unit &lt;str&gt;             Unit of --time-scale, one of attosecond,
                                 centisecond, day, decisecond, exasecond,
                                 femtosecond, gigasecond, hectosecond, hour,
                                 kilosecond, megasecond, microsecond,
                                 millisecond, minute, nanosecond, petasecond,
                                 picosecond, second, terasecond, yoctosecond,
                                 yottasecond, zeptosecond, zettasecond, frame.
-  --num-scale-levels INTEGER    With --image-dir: total number of scale levels
-                                including the base. If not provided, chosen so
-                                the coarsest level fits in a single --min-
-                                chunk-size chunk.
-  --min-chunk-size INTEGER      With --image-dir: spatial chunk size of the
-                                generated scale levels, also used when auto-
-                                computing the number of levels. Defaults to
-                                128.
+  --num-scale-levels &lt;int&gt;      Total number of scale levels including the
+                                base. If not provided, chosen so the coarsest
+                                level fits in a single --min-chunk-size chunk.
+  --min-chunk-size &lt;int&gt;        Spatial chunk size of the generated scale
+                                levels, also used when auto-computing the
+                                number of levels. Defaults to 128.
 </code></pre></div>
 <h3 id="convert-to-csv">convert-to-csv</h3>
 <p>Usage:</p>
-<div class="highlight"><pre><span></span><code> convert-to-csv [OPTIONS] STORE OUTPATH
+<div class="highlight"><pre><span></span><code> convert-to-csv [OPTIONS] {store} {outpath}
+</code></pre></div>
+<p>Options:</p>
+<div class="highlight"><pre><span></span><code>  store    Path to geff group to convert  [required]
+  outpath  Path to save output csvs. Any file extension will be stripped and
+           replaced with '-nodes.csv' and '-edges.csv'  [required]
 </code></pre></div>
 <h3 id="convert-trackmate-xml">convert-trackmate-xml</h3>
 <p>Convert a TrackMate XML file to a GEFF file.</p>
 <p>Usage:</p>
-<div class="highlight"><pre><span></span><code> convert-trackmate-xml [OPTIONS] XML_PATH GEFF_PATH
+<div class="highlight"><pre><span></span><code> convert-trackmate-xml [OPTIONS] {xml_path} {geff_path}
 </code></pre></div>
 <p>Options:</p>
-<div class="highlight"><pre><span></span><code>  --discard-filtered-spots / --no-discard-filtered-spots
+<div class="highlight"><pre><span></span><code>  xml_path                        The path to the TrackMate XML file
+                                  [required]
+  geff_path                       Path to save the output geff, including the
+                                  geff directory name (eg.
+                                  ~/folder/folder/data.zarr/tracks.geff)
+                                  [required]
+  --discard-filtered-spots / --no-discard-filtered-spots
                                   True to discard the spots filtered out in
-                                  TrackMate, False otherwise.  \[default: no-
+                                  TrackMate, False otherwise.  [default: no-
                                   discard-filtered-spots]
   --discard-filtered-tracks / --no-discard-filtered-tracks
                                   True to discard the tracks filtered out in
-                                  TrackMate, False otherwise.  \[default: no-
+                                  TrackMate, False otherwise.  [default: no-
                                   discard-filtered-tracks]
   --overwrite / --no-overwrite    Whether to overwrite the GEFF file if it
-                                  already exists.  \[default: no-overwrite]
-  --zarr-format INTEGER           The version of zarr to write.  \[default: 3]
+                                  already exists.  [default: no-overwrite]
+  --zarr-format &lt;int&gt;             The version of zarr to write.  [default: 3]
 </code></pre></div>
 <h3 id="info">info</h3>
 <p>Display information about a GEFF file.</p>
 <p>Usage:</p>
-<div class="highlight"><pre><span></span><code> info [OPTIONS] INPUT_PATH
+<div class="highlight"><pre><span></span><code> info [OPTIONS] {input_path}
+</code></pre></div>
+<p>Options:</p>
+<div class="highlight"><pre><span></span><code>  input_path  Path to the GEFF folder, e.g. data.zarr/tracks.geff  [required]
 </code></pre></div>
 <h3 id="validate">validate</h3>
 <p>Validate a GEFF file.</p>
 <p>Usage:</p>
-<div class="highlight"><pre><span></span><code> validate [OPTIONS] INPUT_PATH
+<div class="highlight"><pre><span></span><code> validate [OPTIONS] {input_path}
+</code></pre></div>
+<p>Options:</p>
+<div class="highlight"><pre><span></span><code>  input_path  Path to the GEFF folder, e.g. data.zarr/tracks.geff  [required]
 </code></pre></div>
 <h2 id="running-command-line-tools">Running command line tools</h2>
 <p>Without pip-installing <code>geff</code>, you can run the tools as 
