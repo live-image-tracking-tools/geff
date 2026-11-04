@@ -108,6 +108,20 @@ def convert_ctc(
         str | None,
         typer.Option(help=f"Unit of --time-scale, one of {', '.join(VALID_TIME_UNITS)}."),
     ] = None,
+    num_scale_levels: Annotated[
+        int | None,
+        typer.Option(
+            help="With --image-dir: total number of scale levels including the base. If not "
+            "provided, chosen so the coarsest level fits in a single --min-chunk-size chunk."
+        ),
+    ] = None,
+    min_chunk_size: Annotated[
+        int | None,
+        typer.Option(
+            help="With --image-dir: spatial chunk size of the generated scale levels, also used "
+            "when auto-computing the number of levels. Defaults to 128."
+        ),
+    ] = None,
 ) -> None:
     """
     Convert a CTC data directory to a GEFF file, or with --image-dir to an OME-Zarr containing
@@ -123,6 +137,10 @@ def convert_ctc(
         )
     if image_dir is None and label_name is not None:
         raise typer.BadParameter("only applies with --image-dir", param_hint="--label-name")
+    if image_dir is None and num_scale_levels is not None:
+        raise typer.BadParameter("only applies with --image-dir", param_hint="--num-scale-levels")
+    if image_dir is None and min_chunk_size is not None:
+        raise typer.BadParameter("only applies with --image-dir", param_hint="--min-chunk-size")
 
     # because of Typer not supporting Literal types
     if pixel_unit is not None and pixel_unit not in VALID_SPACE_UNITS:
@@ -149,6 +167,8 @@ def convert_ctc(
             time_unit=time_unit,
         )
     else:
+        from geff.convert._scale_pyramid import DEFAULT_SPATIAL_CHUNK_SIZE
+
         _convert_ctc(
             ctc_path=ctc_path,
             image_dir=image_dir,
@@ -160,6 +180,8 @@ def convert_ctc(
             pixel_unit=pixel_unit,
             time_scale=time_scale,
             time_unit=time_unit,
+            num_scale_levels=num_scale_levels,
+            min_chunk_size=min_chunk_size or DEFAULT_SPATIAL_CHUNK_SIZE,
         )
 
 

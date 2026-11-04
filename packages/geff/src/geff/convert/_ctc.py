@@ -8,7 +8,11 @@ from yaozarrs import DimSpec
 from yaozarrs.v06 import Image, ImageLabel, LabelImage, LabelsGroup, LabelSource, Multiscale
 from yaozarrs.write.v06 import prepare_image
 
-from geff.convert._scale_pyramid import default_chunks_and_shards, generate_scale_pyramid
+from geff.convert._scale_pyramid import (
+    DEFAULT_SPATIAL_CHUNK_SIZE,
+    default_chunks_and_shards,
+    generate_scale_pyramid,
+)
 from geff.core_io._utils import check_for_geff, delete_geff
 from geff_spec._valid_values import SpaceUnits, TimeUnits
 
@@ -401,6 +405,8 @@ def convert_ctc(
     pixel_unit: SpaceUnits | None = None,
     time_scale: float | None = None,
     time_unit: TimeUnits | None = None,
+    num_scale_levels: int | None = None,
+    min_chunk_size: int = DEFAULT_SPATIAL_CHUNK_SIZE,
 ) -> None:
     """
     Convert a CTC dataset (raw images, segmentation and tracks) to an OME-Zarr and a GEFF.
@@ -432,6 +438,11 @@ def convert_ctc(
         pixel_unit: Unit of `pixel_size`.
         time_scale: Physical time between frames. Defaults to 1.0.
         time_unit: Unit of `time_scale`.
+        num_scale_levels: Total number of levels including the base. If None, chosen
+            so the coarsest level fits in a single ``chunk_size`` spatial chunk.
+        min_chunk_size: Spatial chunk size of the new levels, also used when auto-computing
+            the number of levels. Scale 0 is left as written, so it should have been
+            written with :func:`default_chunks_and_shards` to match.
     """
     if not label_name or Path(label_name).name != label_name or label_name in (".", ".."):
         raise ValueError(f"`label_name` must be a plain name, not a path, got {label_name!r}.")
@@ -466,5 +477,14 @@ def convert_ctc(
 
     _register_label(image_path, label_name)
 
-    generate_scale_pyramid(zarr.open_group(image_path, mode="r+"))
-    generate_scale_pyramid(zarr.open_group(label_path, mode="r+"), is_label=True)
+    generate_scale_pyramid(
+        zarr.open_group(image_path, mode="r+"),
+        num_levels=num_scale_levels,
+        chunk_size=min_chunk_size,
+    )
+    generate_scale_pyramid(
+        zarr.open_group(label_path, mode="r+"),
+        num_levels=num_scale_levels,
+        chunk_size=min_chunk_size,
+        is_label=True,
+    )
