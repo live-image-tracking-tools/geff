@@ -26,7 +26,7 @@ from geff_spec.utils import (
 from ._serialization import serialize_vlen_property_data
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable, Mapping, Sequence
 
     import zarr
     from zarr.storage import StoreLike
@@ -218,6 +218,26 @@ def _rollback_invalid_write(geff_store: StoreLike, error: ValueError) -> NoRetur
     raise ValueError(error.args[0] + message) from error
 
 
+def _add_empty_declared_props(
+    props: dict[str, PropDictNpArray] | None,
+    props_metadata: Mapping[str, PropMetadata],
+) -> dict[str, PropDictNpArray] | None:
+    """Add an empty array for each declared property that has no array, so that the geff of
+    an empty graph matches its metadata.
+
+    Variable length properties are skipped, as their dtype cannot be recovered from an empty
+    array. Trailing dimensions are not recorded in the metadata, so the arrays are 1D.
+    """
+    empty_props = {
+        name: PropDictNpArray(values=np.empty(shape=(0,), dtype=prop_md.dtype), missing=None)
+        for name, prop_md in props_metadata.items()
+        if not prop_md.varlength and (props is None or name not in props)
+    }
+    if not empty_props:
+        return props
+    return {**(props or {}), **empty_props}
+
+
 def write_arrays(
     geff_store: StoreLike,
     node_ids: np.ndarray,
@@ -238,10 +258,10 @@ def write_arrays(
     as an optional flag.
     Adds the PropMetadata for the nodes and edges, if not provided.
 
-    If an axis is specified in the metadata, but the graph is empty, creates an empty array
-    for that property so that the geff passes validation. Empty arrays are not created for
-    non-axis properties that are specified in the metadata and would instead trigger a
-    validation error.
+    If a property (including an axis) is declared in the metadata, but the graph has no nodes
+    (or no edges), creates an empty array for that property so that the geff passes validation.
+    Declared variable length properties are the exception, and still trigger a validation
+    error.
 
     Args:
         geff_store (str | Path | zarr store): The path/str to the geff zarr, or the store
@@ -301,6 +321,12 @@ def write_arrays(
                 node_props[ax.name] = PropDictNpArray(
                     values=np.empty(shape=(0), dtype="float64"), missing=None
                 )
+
+    # Create empty arrays for the other properties declared in the metadata
+    if len(node_ids) == 0:
+        node_props = _add_empty_declared_props(node_props, metadata.node_props_metadata)
+    if len(edge_ids) == 0:
+        edge_props = _add_empty_declared_props(edge_props, metadata.edge_props_metadata)
 
     if node_props is not None:
         node_meta = write_props_arrays(
