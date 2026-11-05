@@ -218,38 +218,17 @@ def _write_multiscale(group: zarr.Group, multiscale: v06.Multiscale) -> None:
     group.attrs["ome"] = ome
 
 
-def _output_coordinate_system(multiscale: v06.Multiscale) -> v06.CoordinateSystem:
-    """The coordinate system that the datasets' transformations map into."""
-    output = multiscale.datasets[0].coordinateTransformations[0].output
-    systems = multiscale.coordinateSystems
-    if output is None or output.name is None:
-        if len(systems) != 1:
-            raise ValueError("Cannot tell which coordinate system the datasets map into")
-        return systems[0]
-    return next(cs for cs in systems if cs.name == output.name)
-
-
 def _spatial_axes(coordinate_system: v06.CoordinateSystem) -> list[int]:
     """Indices of the spatial axes."""
     return [i for i, ax in enumerate(coordinate_system.axes) if ax.type == "space"]
 
 
 def _base_scale_and_translation(dataset: v06.Dataset, ndim: int) -> tuple[list[float], list[float]]:
-    """Scale and translation of a dataset, defaulting to 1s and 0s if absent.
-
-    Handles a lone ``scale``, ``identity``, or a ``sequence`` of scale/translation.
-    """
-    (transform,) = dataset.coordinateTransformations
-    steps = transform.transformations if transform.type == "sequence" else [transform]
-    scale = [1.0] * ndim
-    translation = [0.0] * ndim
-    for step in steps:
-        if step.type == "scale":
-            scale = list(step.scale)
-        elif step.type == "translation":
-            translation = list(step.translation)
-        elif step.type != "identity":
-            raise ValueError(f"Unsupported dataset transformation type {step.type!r}")
+    """Scale and translation of a dataset, defaulting to 1s and 0s if absent."""
+    scale_transform = dataset.scale_transform
+    translation_transform = dataset.translation_transform
+    scale = list(scale_transform.scale) if scale_transform else [1.0] * ndim
+    translation = list(translation_transform.translation) if translation_transform else [0.0] * ndim
     return scale, translation
 
 
@@ -365,7 +344,7 @@ def generate_scale_pyramid(
             written with :func:`default_chunks_and_shards` to match.
     """
     multiscale = _read_multiscale(zarr_group)
-    coordinate_system = _output_coordinate_system(multiscale)
+    coordinate_system = multiscale.intrinsic_coordinate_system
     spatial_axes = _spatial_axes(coordinate_system)
 
     base_dataset = multiscale.datasets[0]

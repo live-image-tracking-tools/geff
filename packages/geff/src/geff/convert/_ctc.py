@@ -1,4 +1,3 @@
-import json
 import os
 import warnings
 from pathlib import Path
@@ -380,17 +379,12 @@ def from_ctc_to_geff(
 
 def _register_label(image_path: Path, label_name: str) -> None:
     """Add `label_name` to the OME-Zarr `labels/` group of the image at `image_path`."""
-    zarr_json_path = image_path / "labels" / "zarr.json"
-    zarr_json: dict[str, Any] = {"zarr_format": 3, "node_type": "group"}
-    labels: list[str] = []
-    if zarr_json_path.exists():
-        zarr_json = json.loads(zarr_json_path.read_text())
-        labels = zarr_json.get("attributes", {}).get("ome", {}).get("labels", [])
+    group = zarr.open_group(image_path / "labels", mode="a", zarr_format=3)
+    ome = cast("dict[str, Any]", group.attrs.get("ome", {}))
+    labels = ome.get("labels", [])
     if label_name not in labels:
-        labels.append(label_name)
-    attributes = zarr_json.setdefault("attributes", {})
-    attributes["ome"] = LabelsGroup(labels=labels).model_dump(mode="json", exclude_none=True)
-    zarr_json_path.write_text(json.dumps(zarr_json, indent=2))
+        labels_group = LabelsGroup(labels=[*labels, label_name])
+        group.attrs["ome"] = labels_group.model_dump(mode="json", exclude_none=True)
 
 
 def convert_ctc(

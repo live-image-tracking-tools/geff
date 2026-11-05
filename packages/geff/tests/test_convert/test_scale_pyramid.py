@@ -16,7 +16,6 @@ from geff.convert._scale_pyramid import (
     _downsampled_shape,
     _level_chunks,
     _make_dataset,
-    _output_coordinate_system,
     _pad_to_multiple,
     _read_multiscale,
     _shard_shape,
@@ -175,7 +174,7 @@ def test_downsample_mean_does_not_round_floats():
 
 def test_spatial_axes():
     group, _ = make_group()
-    cs = _output_coordinate_system(_read_multiscale(group))
+    cs = _read_multiscale(group).intrinsic_coordinate_system
     assert _spatial_axes(cs) == SPATIAL
 
 
@@ -184,14 +183,8 @@ def test_spatial_axes_other_layout():
         shape=(2, 3, 300, 301), scale=(1.0, 1.0, 1.0, 1.0), chunks=(1, 1, 128, 128),
         names=("t", "c", "y", "x"),
     )  # fmt: skip
-    cs = _output_coordinate_system(_read_multiscale(group))
+    cs = _read_multiscale(group).intrinsic_coordinate_system
     assert _spatial_axes(cs) == [2, 3]
-
-
-def test_output_coordinate_system_follows_dataset_output_name():
-    group, _ = make_group()
-    multiscale = _read_multiscale(group)
-    assert _output_coordinate_system(multiscale).name == "intrinsic"
 
 
 @pytest.mark.parametrize("translation", [None, (0.0, 1.0, 2.0, 3.0)])
