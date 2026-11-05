@@ -20,9 +20,13 @@ from typing import TYPE_CHECKING, Any, get_args
 
 import networkx as nx
 import numpy as np
+import tifffile
+import zarr
 
 import geff
 from geff._graph_libs._api_wrapper import SupportedBackend, get_backend
+from geff.convert import convert_ctc, ctc_tiffs_to_zarr
+from geff.convert._scale_pyramid import generate_scale_pyramid
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -87,6 +91,36 @@ def graph_file_path(num_nodes: int) -> Path:
     return Path(tmp_dir)
 
 
+@cache
+def ctc_dataset_paths(n_frames: int, size: int, n_tracks: int = 10) -> tuple[Path, Path]:
+    """Synthetic 2D CTC dataset: (segmentation + tracks dir, raw image dir).
+
+    Each track is a small square that stays in place for every frame, so `size` > 128 gives the
+    image a multi-level scale pyramid.
+    """
+    root = Path(tempfile.mkdtemp(suffix=".ctc"))
+    atexit.register(shutil.rmtree, root, ignore_errors=True)
+    ctc_dir, image_dir = root / "seg", root / "img"
+    ctc_dir.mkdir()
+    image_dir.mkdir()
+
+    rng = np.random.default_rng(42)
+    corners = rng.integers(0, size - 4, size=(n_tracks, 2))
+    for t in range(n_frames):
+        labels = np.zeros((size, size), dtype=np.uint16)
+        for track_id, (y, x) in enumerate(corners, start=1):
+            labels[y : y + 3, x : x + 3] = track_id
+        tifffile.imwrite(ctc_dir / f"man_seg{t:03d}.tif", labels)
+        tifffile.imwrite(
+            image_dir / f"t{t:03d}.tif", rng.integers(0, 4096, (size, size), dtype=np.uint16)
+        )
+
+    # track_id, start, end, parent_id
+    tracks_table = [[i, 0, n_frames - 1, 0] for i in range(1, n_tracks + 1)]
+    np.savetxt(ctc_dir / "man_track.txt", tracks_table, fmt="%d")
+    return ctc_dir, image_dir
+
+
 # ###########################   TESTS   ##################################
 
 # to keep consistency before api refac
@@ -144,3 +178,35 @@ def test_bench_read(backend: SupportedBackend, benchmark: BenchmarkFixture, node
     read_func = get_backend(backend).read
     graph_path = graph_file_path(nodes)
     benchmark(read_func, graph_path, structure_validation=False)
+
+
+@pytest.mark.parametrize("frames", [5])
+def test_bench_convert_ctc(benchmark: BenchmarkFixture, tmp_path: Path, frames: int) -> None:
+    ctc_dir, image_dir = ctc_dataset_paths(frames, 300)
+    out_path = tmp_path / "test_convert_ctc.ome.zarr"
+    benchmark.pedantic(
+        convert_ctc,
+        kwargs={
+            "ctc_path": ctc_dir,
+            "image_dir": image_dir,
+            "zarr_path": out_path,
+            "overwrite": True,
+        },
+        setup=lambda **__: shutil.rmtree(out_path, ignore_errors=True),  # delete previous output
+    )
+
+
+@pytest.mark.parametrize("frames", [5])
+def test_bench_generate_scale_pyramid(
+    benchmark: BenchmarkFixture, tmp_path: Path, frames: int
+) -> None:
+    _, image_dir = ctc_dataset_paths(frames, 300)
+    out_path = tmp_path / "test_scale_pyramid.ome.zarr"
+
+    def setup() -> tuple[tuple[zarr.Group], dict[str, Any]]:
+        # fresh single-scale image each round, since the pyramid is written in place
+        shutil.rmtree(out_path, ignore_errors=True)
+        ctc_tiffs_to_zarr(image_dir, out_path)
+        return (zarr.open_group(out_path, mode="r+"),), {}
+
+    benchmark.pedantic(generate_scale_pyramid, setup=setup)

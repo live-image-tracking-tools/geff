@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 from geff.convert._trackmate_xml import from_trackmate_xml_to_geff
 
 if TYPE_CHECKING:
-    from ._ctc import ctc_tiffs_to_zarr, from_ctc_to_geff
+    from ._ctc import convert_ctc, ctc_tiffs_to_zarr, from_ctc_to_geff
     from ._dataframe import (
         _dataframes_to_memory_geff,
         csv_to_geff,
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "_dataframes_to_memory_geff",
+    "convert_ctc",
     "csv_to_geff",
     "ctc_tiffs_to_zarr",
     "dataframes_to_geff",
@@ -25,6 +26,10 @@ __all__ = [
 
 
 def __getattr__(name: str) -> Any:
+    if name == "convert_ctc":
+        from geff.convert._ctc import convert_ctc
+
+        return convert_ctc
     if name == "ctc_tiffs_to_zarr":
         from geff.convert._ctc import ctc_tiffs_to_zarr
 
