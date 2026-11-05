@@ -1661,8 +1661,9 @@ is written inside it as a label image following the OME-Zarr labels convention::
 │   └── &lt;label_name&gt;/  # segmentation, with `image-label.source` pointing at the image
 └── tracks.geff        # the tracks, whose related objects point at the segmentation
 </code></pre>
-<p>Lower-resolution scales (<code>1/</code>, <code>2/</code>, ...) are generated for the image (block mean) and
-the segmentation (block mode) until each spatial dimension fits in a single chunk.</p>
+<p>Lower-resolution scales (<code>1/</code>, <code>2/</code>, ...) are generated for the image (block mean)
+until each spatial dimension fits in a single chunk. The segmentation is deliberately
+kept single-scale so that only the original, unaltered labels are distributed.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -1847,7 +1848,7 @@ Defaults to 1.0.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Total number of levels including the base. If None, chosen
+                <p>Total number of image levels including the base. If None, chosen
 so the coarsest level fits in a single <code>chunk_size</code> spatial chunk.</p>
               </div>
             </td>
@@ -1864,7 +1865,7 @@ so the coarsest level fits in a single <code>chunk_size</code> spatial chunk.</p
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Spatial chunk size of the new levels, also used when auto-computing
+                <p>Spatial chunk size of the new image levels, also used when auto-computing
 the number of levels. Scale 0 is left as written, so it should have been
 written with :func:<code>default_chunks_and_shards</code> to match.</p>
               </div>
