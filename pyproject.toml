@@ -31,7 +31,7 @@ docs = [
 bench = [
     { include-group = "test" },
     "pytest-codspeed>=4.0.0",
-    "geff[rx, spatial-graph]",
+    "geff[rx, spatial-graph, ctc]",
 ]
 
 [tool.uv]
