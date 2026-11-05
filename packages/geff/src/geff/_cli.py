@@ -100,7 +100,8 @@ def convert_ctc(
     num_scale_levels: Annotated[
         int | None,
         typer.Option(
-            help="Total number of scale levels including the base. If not "
+            help="With --image-dir: total number of image scale levels including the base "
+            "(labels are always single-scale). If not "
             "provided, chosen so the coarsest level fits in a single --min-chunk-size chunk."
         ),
     ] = None,

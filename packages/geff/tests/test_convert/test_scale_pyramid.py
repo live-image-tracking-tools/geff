@@ -12,7 +12,6 @@ from yaozarrs import DimSpec, v06
 from geff.convert._scale_pyramid import (
     LevelPlan,
     _base_scale_and_translation,
-    _block_mode,
     _compute_downsample_factors,
     _downsampled_shape,
     _level_chunks,
@@ -22,7 +21,6 @@ from geff.convert._scale_pyramid import (
     _read_multiscale,
     _shard_shape,
     _spatial_axes,
-    _vote,
     _write_level,
     _write_multiscale,
     compute_num_levels,
@@ -40,13 +38,12 @@ def make_group(
     scale: tuple[float, ...] = (1.0, 3.0, 1.0, 1.0),
     translation: tuple[float, ...] | None = None,
     chunks: tuple[int, ...] = (1, 40, 128, 128),
-    is_label: bool = False,
     names: tuple[str, ...] = ("t", "z", "y", "x"),
 ) -> tuple[zarr.Group, np.ndarray]:
     """Single-scale OME-Zarr 0.6 image in an in-memory zarr v3 group."""
     group = zarr.open_group(zarr.storage.MemoryStore(), mode="w", zarr_format=3)
     rng = np.random.default_rng(0)
-    data = rng.integers(0, 6 if is_label else 255, shape).astype(np.uint16)
+    data = rng.integers(0, 255, shape).astype(np.uint16)
     group.create_array("0", data=data, chunks=chunks, dimension_names=list(names))
 
     translations = translation or (0.0,) * len(names)
@@ -67,7 +64,7 @@ def make_group(
 # ----------------------------------------------------------------------------
 
 
-def test__downsampled_shape_uses_ceil():
+def test_downsampled_shape_uses_ceil():
     assert _downsampled_shape((5, 7, 8), (2, 2, 1)) == (3, 4, 8)
 
 
@@ -115,39 +112,6 @@ def test_plan_pyramid_explicit_num_levels():
 # ----------------------------------------------------------------------------
 
 
-def test_block_mode_majority():
-    block = np.array([[[3, 3], [3, 7]], [[7, 3], [0, 3]]])  # 3 appears 5x
-    assert _block_mode(block, axis=(0, 1, 2)) == 3
-
-
-def test_block_mode_majority_zero_beats_minority_nonzero():
-    block = np.array([[[0, 0], [0, 0]], [[0, 5], [5, 0]]])
-    assert _block_mode(block, axis=(0, 1, 2)) == 0
-
-
-def test_block_mode_tie_prefers_nonzero_over_background():
-    block = np.array([[[0, 0], [0, 0]], [[5, 5], [5, 5]]])
-    assert _block_mode(block, axis=(0, 1, 2)) == 5
-
-
-def test_block_mode_tie_between_nonzero_picks_lowest():
-    block = np.array([[[4, 4], [3, 3]], [[2, 2], [1, 1]]])
-    assert _block_mode(block, axis=(0, 1, 2)) == 1
-
-
-def test_block_mode_axis_none_reduces_everything():
-    assert _block_mode(np.array([[1, 2], [2, 2]])).shape == ()
-
-
-def test_block_mode_partial_axes_keeps_other_dims():
-    block = np.array([[1, 1, 2, 2], [3, 4, 4, 4]])  # reduce axis 1
-    np.testing.assert_array_equal(_block_mode(block, axis=1), [1, 4])
-
-
-def test_block_mode_empty():
-    assert _block_mode(np.empty((0, 2), dtype=np.uint8), axis=(1,)).shape == (0,)
-
-
 @pytest.mark.parametrize("use_dask", [False, True])
 def test_pad_to_multiple_edge_pads_end(use_dask):
     data = np.arange(15).reshape(3, 5)
@@ -167,24 +131,23 @@ def test_pad_to_multiple_noop_when_divisible():
 def test_downsample_mean_hand_computed(use_dask):
     base = np.kron(np.array([[1, 2], [3, 4]]), np.ones((2, 2))).astype(np.uint16)
     data = da.from_array(base, chunks=2) if use_dask else base
-    out = np.asarray(downsample(data, (2, 2), is_label=False))
+    out = np.asarray(downsample(data, (2, 2)))
     np.testing.assert_array_equal(out, [[1, 2], [3, 4]])
     assert out.dtype == np.uint16
 
 
-@pytest.mark.parametrize("is_label", [False, True])
-def test_downsample_numpy_matches_dask_and_shape(is_label):
+def test_downsample_numpy_matches_dask_and_shape():
     rng = np.random.default_rng(1)
     data = rng.integers(0, 4, (5, 7, 9)).astype(np.uint16)
-    expected = downsample(data, (2, 2, 2), is_label)
-    actual = downsample(da.from_array(data, chunks=(2, 4, 4)), (2, 2, 2), is_label).compute()
+    expected = downsample(data, (2, 2, 2))
+    actual = downsample(da.from_array(data, chunks=(2, 4, 4)), (2, 2, 2)).compute()
     assert expected.shape == (3, 4, 5)
     np.testing.assert_array_equal(expected, actual)
 
 
 def test_downsample_factor_one_axes_untouched():
     data = np.arange(12, dtype=np.uint16).reshape(3, 4)
-    out = downsample(data, (1, 2), is_label=False)
+    out = downsample(data, (1, 2))
     assert out.shape == (3, 2)
 
 
@@ -193,38 +156,16 @@ def test_downsample_mean_rounds_integers_instead_of_truncating(use_dask):
     # block means: 0.75 -> 1, 0.25 -> 0, 2.75 -> 3 (truncation would give 0, 0, 2)
     base = np.array([[0, 1, 0, 0], [1, 1, 0, 1], [2, 3, 3, 3], [3, 3, 3, 3]], dtype=np.uint16)
     data = da.from_array(base, chunks=2) if use_dask else base
-    out = np.asarray(downsample(data, (2, 2), is_label=False))
+    out = np.asarray(downsample(data, (2, 2)))
     np.testing.assert_array_equal(out, [[1, 0], [3, 3]])
     assert out.dtype == np.uint16
 
 
 def test_downsample_mean_does_not_round_floats():
     data = np.array([[0.0, 1.0], [1.0, 1.0]], dtype=np.float32)
-    out = downsample(data, (2, 2), is_label=False)
+    out = downsample(data, (2, 2))
     np.testing.assert_allclose(out, [[0.75]])
     assert out.dtype == np.float32
-
-
-def test_block_mode_fast_path_matches_full_vote():
-    rng = np.random.default_rng(3)
-    blocks = rng.integers(0, 3, (500, 8)).astype(np.uint16)
-    blocks[::3] = blocks[::3, :1]  # make every third block uniform
-    expected = _vote(blocks)
-    np.testing.assert_array_equal(
-        _block_mode(blocks.reshape(500, 2, 2, 2), axis=(1, 2, 3)), expected
-    )
-
-
-def test_block_mode_all_uniform_blocks_skip_the_vote(monkeypatch):
-    monkeypatch.setattr("geff.convert._scale_pyramid._vote", lambda _: pytest.fail("vote called"))
-    block = np.full((3, 2, 2), 7, dtype=np.uint16)
-    np.testing.assert_array_equal(_block_mode(block, axis=(1, 2)), [7, 7, 7])
-
-
-def test_downsample_labels_only_emit_existing_ids():
-    rng = np.random.default_rng(2)
-    data = rng.integers(0, 100, (8, 8)).astype(np.uint16)
-    assert set(np.unique(downsample(data, (2, 2), True))) <= set(np.unique(data))
 
 
 # ----------------------------------------------------------------------------
@@ -339,7 +280,7 @@ def test_write_level_creates_sharded_array_with_data():
     group, base_data = make_group()
     base = group["0"]
     plan = LevelPlan((2, 40, 150, 151), (1.0, 3.0, 2.0, 2.0), (0, 0, 0.5, 0.5), (1, 1, 2, 2))
-    data = downsample(da.from_array(base_data, chunks=(1, 40, 64, 64)), plan.factors, False)
+    data = downsample(da.from_array(base_data, chunks=(1, 40, 64, 64)), plan.factors)
 
     array = _write_level(group, "1", data, base, plan, SPATIAL, 128)
 
@@ -356,10 +297,9 @@ def test_write_level_creates_sharded_array_with_data():
 # ----------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("is_label", [False, True])
-def test_generate_scale_pyramid(is_label):
-    group, base_data = make_group(is_label=is_label)
-    generate_scale_pyramid(group, is_label=is_label)
+def test_generate_scale_pyramid():
+    group, base_data = make_group()
+    generate_scale_pyramid(group)
 
     multiscale = _read_multiscale(group)
     assert [d.path for d in multiscale.datasets] == ["0", "1", "2"]
@@ -375,15 +315,9 @@ def test_generate_scale_pyramid(is_label):
 
     # scale 0 untouched, level 1 equals one downsampling step of scale 0
     np.testing.assert_array_equal(group["0"][:], base_data)
-    np.testing.assert_array_equal(group["1"][:], downsample(base_data, (1, 1, 2, 2), is_label))
-    np.testing.assert_array_equal(group["2"][:], downsample(group["1"][:], (1, 2, 2, 2), is_label))
+    np.testing.assert_array_equal(group["1"][:], downsample(base_data, (1, 1, 2, 2)))
+    np.testing.assert_array_equal(group["2"][:], downsample(group["1"][:], (1, 2, 2, 2)))
     assert group["2"].shards == (1, 20, 75, 76)
-
-
-def test_generate_scale_pyramid_labels_keep_existing_ids():
-    group, base_data = make_group(is_label=True)
-    generate_scale_pyramid(group, is_label=True)
-    assert set(np.unique(group["2"][:])) <= set(np.unique(base_data))
 
 
 def test_generate_scale_pyramid_respects_base_translation():
@@ -432,9 +366,7 @@ def test_generate_scale_pyramid_with_channel_axis():
 
     assert group["1"].shape == (2, 3, 20, 150, 151)
     assert group["1"].shards == (1, 1, 20, 256, 256)
-    np.testing.assert_array_equal(
-        group["1"][:], downsample(base_data, (1, 1, 1, 2, 2), is_label=False)
-    )
+    np.testing.assert_array_equal(group["1"][:], downsample(base_data, (1, 1, 1, 2, 2)))
     scale, translation = _base_scale_and_translation(_read_multiscale(group).datasets[1], 5)
     assert scale == [1.0, 1.0, 2.0, 2.0, 2.0]
     assert translation == [0.0, 0.0, 0.0, 0.5, 0.5]

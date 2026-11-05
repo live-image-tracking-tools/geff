@@ -421,8 +421,9 @@ def convert_ctc(
         │   └── <label_name>/  # segmentation, with `image-label.source` pointing at the image
         └── tracks.geff        # the tracks, whose related objects point at the segmentation
 
-    Lower-resolution scales (``1/``, ``2/``, ...) are generated for the image (block mean) and
-    the segmentation (block mode) until each spatial dimension fits in a single chunk.
+    Lower-resolution scales (``1/``, ``2/``, ...) are generated for the image (block mean)
+    until each spatial dimension fits in a single chunk. The segmentation is deliberately
+    kept single-scale so that only the original, unaltered labels are distributed.
 
     Args:
         ctc_path: The path to the CTC directory with the tracks file and segmentation tiffs.
@@ -437,9 +438,9 @@ def convert_ctc(
         pixel_unit: Unit of `pixel_size`.
         time_scale: Physical time between frames. Defaults to 1.0.
         time_unit: Unit of `time_scale`.
-        num_scale_levels: Total number of levels including the base. If None, chosen
+        num_scale_levels: Total number of image levels including the base. If None, chosen
             so the coarsest level fits in a single ``chunk_size`` spatial chunk.
-        min_chunk_size: Spatial chunk size of the new levels, also used when auto-computing
+        min_chunk_size: Spatial chunk size of the new image levels, also used when auto-computing
             the number of levels. Scale 0 is left as written, so it should have been
             written with :func:`default_chunks_and_shards` to match.
     """
@@ -480,10 +481,4 @@ def convert_ctc(
         zarr.open_group(image_path, mode="r+"),
         num_levels=num_scale_levels,
         chunk_size=min_chunk_size,
-    )
-    generate_scale_pyramid(
-        zarr.open_group(label_path, mode="r+"),
-        num_levels=num_scale_levels,
-        chunk_size=min_chunk_size,
-        is_label=True,
     )

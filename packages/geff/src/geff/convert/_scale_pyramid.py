@@ -155,40 +155,6 @@ def plan_pyramid(
 # --------------------------------------------------------------------------- #
 
 
-def _vote(flat: np.ndarray) -> np.ndarray:
-    """Most frequent value along the last axis; ties go to nonzero values, then the lowest."""
-    flat = np.sort(flat, axis=-1)
-    counts = (flat[..., :, None] == flat[..., None, :]).sum(axis=-1)
-    score = counts * 2 + (flat != 0)
-    best = np.argmax(score, axis=-1)  # first max -> lowest value on equal scores
-    return np.take_along_axis(flat, best[..., None], axis=-1)[..., 0]
-
-
-def _block_mode(block: np.ndarray, axis: int | tuple[int, ...] | None = None) -> np.ndarray:
-    """Most frequent value over ``axis``; ties go to nonzero values, then the lowest value.
-
-    Blocks with a single value (most of a label image is background) skip the vote, which
-    compares every pair of values in a block and is much more expensive.
-    """
-    if axis is None:
-        axes = tuple(range(block.ndim))
-    else:
-        axes = (axis,) if isinstance(axis, int) else tuple(axis)
-    axes = tuple(a % block.ndim for a in axes)
-    kept = [i for i in range(block.ndim) if i not in axes]
-    kept_shape = tuple(block.shape[i] for i in kept)
-    if block.size == 0:
-        return np.empty(kept_shape, dtype=block.dtype)
-
-    flat = np.transpose(block, kept + list(axes)).reshape(*kept_shape, -1)
-    result = np.asarray(flat.min(axis=-1))
-    mixed = result != flat.max(axis=-1)
-    if mixed.any():
-        result = result.copy()  # own the data, and keep 0-d results indexable
-        result[mixed] = _vote(flat[mixed])
-    return result
-
-
 def _pad_to_multiple(data: np.ndarray | da.Array, factors: Sequence[int]) -> np.ndarray | da.Array:
     """Edge-pad the end of each axis so its length is divisible by its factor."""
     pad_width = [(0, int(-s % f)) for s, f in zip(data.shape, factors, strict=True)]
@@ -208,21 +174,17 @@ def _block_mean(block: np.ndarray, axis: int | tuple[int, ...] | None = None) ->
 def downsample(
     data: np.ndarray | da.Array,
     factors: Sequence[int],
-    is_label: bool,
 ) -> np.ndarray | da.Array:
     """Downsample by per-axis factors, with output shape ``ceil(s / f)``.
 
-    Uses block mean for images (rounded for integer dtypes, so values are not biased
-    low by truncation) and block mode (majority vote, preferring nonzero ids on ties)
-    for labels. Both are centered on the block, so they share the same translation
-    shift. Accepts numpy or dask arrays.
+    Uses block mean, rounded for integer dtypes so values are not biased low by
+    truncation. Accepts numpy or dask arrays.
     """
     original_dtype = data.dtype
-    reducer = _block_mode if is_label else _block_mean
     data = _pad_to_multiple(data, factors)
 
     if isinstance(data, da.Array):
-        return da.coarsen(reducer, data, dict(enumerate(factors)), trim_excess=False).astype(
+        return da.coarsen(_block_mean, data, dict(enumerate(factors)), trim_excess=False).astype(
             original_dtype
         )
 
@@ -231,7 +193,7 @@ def downsample(
     for i, (s, f) in enumerate(zip(data.shape, factors, strict=True)):
         new_shape.extend([s // f, f])
         axes_to_reduce.append(2 * i + 1)
-    return reducer(data.reshape(new_shape), axis=tuple(axes_to_reduce)).astype(original_dtype)
+    return _block_mean(data.reshape(new_shape), axis=tuple(axes_to_reduce)).astype(original_dtype)
 
 
 # --------------------------------------------------------------------------- #
@@ -386,7 +348,6 @@ def generate_scale_pyramid(
     zarr_group: zarr.Group,
     num_levels: int | None = None,
     chunk_size: int = DEFAULT_SPATIAL_CHUNK_SIZE,
-    is_label: bool = False,
 ) -> None:
     """Generate lower-resolution scales for a single-scale OME-Zarr, in place.
 
@@ -402,7 +363,6 @@ def generate_scale_pyramid(
         chunk_size: Spatial chunk size of the new levels, also used when auto-computing
             the number of levels. Scale 0 is left as written, so it should have been
             written with :func:`default_chunks_and_shards` to match.
-        is_label: Downsample by block mode (majority vote) instead of block mean.
     """
     multiscale = _read_multiscale(zarr_group)
     coordinate_system = _output_coordinate_system(multiscale)
@@ -422,7 +382,7 @@ def generate_scale_pyramid(
     level_data = da.from_zarr(base)
     for level, level_plan in enumerate(plan[1:], start=1):
         logger.debug("Level %d: shape=%s factors=%s", level, level_plan.shape, level_plan.factors)
-        level_data = cast("da.Array", downsample(level_data, level_plan.factors, is_label))
+        level_data = cast("da.Array", downsample(level_data, level_plan.factors))
         array = _write_level(
             zarr_group, str(level), level_data, base, level_plan, spatial_axes, chunk_size
         )
