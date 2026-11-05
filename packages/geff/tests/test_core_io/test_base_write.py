@@ -3,11 +3,13 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+import networkx as nx
 import numpy as np
 import pytest
 import zarr
 import zarr.storage
 
+import geff
 from geff import _path
 from geff.core_io import construct_var_len_props, write_arrays
 from geff.core_io._base_read import read_to_memory
@@ -271,6 +273,59 @@ class TestWriteArrays:
         assert len(out_geff["metadata"].axes) == 2
         assert out_geff["node_props"]["x"]["values"].shape == (0,)
         assert out_geff["node_props"]["y"]["values"].shape == (0,)
+
+    def test_write_empty_with_declared_props(self):
+        _, mem_geff = create_empty_geff()
+        mem_geff["metadata"].node_props_metadata = {
+            "score": PropMetadata(identifier="score", dtype="float32"),
+            "name": PropMetadata(identifier="name", dtype="str"),
+        }
+        mem_geff["metadata"].edge_props_metadata = {
+            "weight": PropMetadata(identifier="weight", dtype="uint16"),
+        }
+
+        store = zarr.storage.MemoryStore()
+        write_arrays(store, **mem_geff)
+
+        out_geff = read_to_memory(store)
+        for group, name in [
+            ("node_props", "score"),
+            ("node_props", "name"),
+            ("edge_props", "weight"),
+        ]:
+            assert out_geff[group][name]["values"].shape == (0,)
+        assert out_geff["metadata"].node_props_metadata["score"].dtype == "float32"
+        assert out_geff["metadata"].node_props_metadata["name"].dtype == "str"
+        assert out_geff["metadata"].edge_props_metadata["weight"].dtype == "uint16"
+
+    def test_write_empty_does_not_overwrite_given_props(self):
+        _, mem_geff = create_empty_geff()
+        mem_geff["metadata"].node_props_metadata = {
+            "score": PropMetadata(identifier="score", dtype="float32"),
+        }
+        mem_geff["node_props"] = {
+            "score": {"values": np.empty((0,), dtype="float64"), "missing": None}
+        }
+
+        store = zarr.storage.MemoryStore()
+        write_arrays(store, **mem_geff)
+
+        # the array that was passed in wins over the declared dtype
+        assert read_to_memory(store)["metadata"].node_props_metadata["score"].dtype == "float64"
+
+    def test_write_empty_graph_with_track_node_props(self, tmp_path: Path):
+        metadata = GeffMetadata(
+            directed=True,
+            node_props_metadata={"track_id": PropMetadata(identifier="track_id", dtype="uint32")},
+            edge_props_metadata={},
+            track_node_props={"tracklet": "track_id"},
+        )
+        geff.write(nx.DiGraph(), tmp_path / "empty.geff", metadata=metadata)
+
+        validate_structure(tmp_path / "empty.geff")
+        graph, out_metadata = geff.read(tmp_path / "empty.geff", backend="networkx")
+        assert graph.number_of_nodes() == 0
+        assert out_metadata.track_node_props == {"tracklet": "track_id"}
 
 
 @pytest.mark.parametrize(
