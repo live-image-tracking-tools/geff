@@ -50,7 +50,7 @@ def _compute_downsample_factors(
     return tuple(factors)
 
 
-def compute_num_levels(
+def _compute_num_levels(
     shape: Sequence[int],
     voxel_size: Sequence[float],
     spatial_axes: Sequence[int],
@@ -58,7 +58,7 @@ def compute_num_levels(
 ) -> int:
     """Compute how many pyramid levels are needed for the coarsest level to fit in one chunk.
 
-    Simulates the downsampling that `plan_pyramid` performs, level by level, until every
+    Simulates the downsampling that `_plan_pyramid` performs, level by level, until every
     spatial axis is at most `chunk_size` voxels long. Because downsampling is anisotropy-aware,
     an axis with much coarser voxels (e.g. z) is skipped until the finer axes catch up, so it
     can take more levels than ``ceil(log2(max(shape) / chunk_size))``.
@@ -86,26 +86,26 @@ def compute_num_levels(
     return levels
 
 
-class LevelPlan(NamedTuple):
+class _LevelPlan(NamedTuple):
     shape: tuple[int, ...]
     scale: tuple[float, ...]
     translation: tuple[float, ...]
     factors: tuple[int, ...]  # relative to the previous level; all 1s for level 0
 
 
-def plan_pyramid(
+def _plan_pyramid(
     shape: Sequence[int],
     scale: Sequence[float],
     translation: Sequence[float],
     spatial_axes: Sequence[int],
     num_levels: int | None = None,
     chunk_size: int = DEFAULT_SPATIAL_CHUNK_SIZE,
-) -> list[LevelPlan]:
+) -> list[_LevelPlan]:
     """Plan the levels of a scale pyramid without reading or writing any data.
 
     Each level is downsampled from the previous one, using the factors from the
     anisotropy-aware rule: a spatial axis is only halved if its voxel size is within 2x of the
-    finest spatial axis, and non-spatial axes are never downsampled. See `LevelPlan` for what is
+    finest spatial axis, and non-spatial axes are never downsampled. See `_LevelPlan` for what is
     planned per level.
 
     Block downsampling by factor ``f`` places each output voxel center at the middle of ``f``
@@ -119,18 +119,18 @@ def plan_pyramid(
         translation: Offset of the full resolution array, with one entry per axis.
         spatial_axes: Indices of the spatial axes.
         num_levels: Total number of levels, including the full resolution one. If None, it is
-            computed with `compute_num_levels` so the coarsest level fits in one chunk.
+            computed with `_compute_num_levels` so the coarsest level fits in one chunk.
         chunk_size: Maximum spatial axis length of the coarsest level, used when `num_levels`
             is None. Defaults to `DEFAULT_SPATIAL_CHUNK_SIZE`.
 
     Returns:
-        One `LevelPlan` per level, ordered from full resolution (level 0, with factors of all
+        One `_LevelPlan` per level, ordered from full resolution (level 0, with factors of all
         1s) to the coarsest level.
     """
     if num_levels is None:
-        num_levels = compute_num_levels(shape, scale, spatial_axes, chunk_size)
+        num_levels = _compute_num_levels(shape, scale, spatial_axes, chunk_size)
 
-    current = LevelPlan(
+    current = _LevelPlan(
         tuple(shape),
         tuple(float(s) for s in scale),
         tuple(float(t) for t in translation),
@@ -140,7 +140,7 @@ def plan_pyramid(
     for _ in range(1, num_levels):
         factors = _compute_downsample_factors(current.scale, spatial_axes)
         shift = [(f - 1) / 2 * s for f, s in zip(factors, current.scale, strict=True)]
-        current = LevelPlan(
+        current = _LevelPlan(
             _downsampled_shape(current.shape, factors),
             tuple(s * f for s, f in zip(current.scale, factors, strict=True)),
             tuple(t + d for t, d in zip(current.translation, shift, strict=True)),
@@ -171,7 +171,7 @@ def _block_mean(block: np.ndarray, axis: int | tuple[int, ...] | None = None) ->
     return np.rint(mean) if np.issubdtype(block.dtype, np.integer) else mean
 
 
-def downsample(
+def _downsample(
     data: np.ndarray | da.Array,
     factors: Sequence[int],
 ) -> np.ndarray | da.Array:
@@ -232,7 +232,7 @@ def _base_scale_and_translation(dataset: v06.Dataset, ndim: int) -> tuple[list[f
     return scale, translation
 
 
-def _make_dataset(path: str, level_plan: LevelPlan, coordinate_system: str) -> v06.Dataset:
+def _make_dataset(path: str, level_plan: _LevelPlan, coordinate_system: str) -> v06.Dataset:
     """Dataset entry for a level. A translation is only included if nonzero."""
     transform: dict = {"type": "scale", "scale": list(level_plan.scale)}
     if any(level_plan.translation):
@@ -295,7 +295,7 @@ def _write_level(
     name: str,
     data: da.Array,
     like: zarr.Array,
-    level_plan: LevelPlan,
+    level_plan: _LevelPlan,
     spatial_axes: Sequence[int],
     chunk_size: int,
 ) -> zarr.Array:
@@ -342,8 +342,16 @@ def generate_scale_pyramid(
         chunk_size: Spatial chunk size of the new levels, also used when auto-computing
             the number of levels. Scale 0 is left as written, so it should have been
             written with :func:`default_chunks_and_shards` to match.
+
+    Raises:
+        ValueError: If the group already has more than one scale.
     """
     multiscale = _read_multiscale(zarr_group)
+    if len(multiscale.datasets) != 1:
+        raise ValueError(
+            f"Expected a single-scale OME-Zarr but found {len(multiscale.datasets)} scales: "
+            "a scale pyramid already exists."
+        )
     coordinate_system = multiscale.intrinsic_coordinate_system
     spatial_axes = _spatial_axes(coordinate_system)
 
@@ -353,7 +361,7 @@ def generate_scale_pyramid(
         raise TypeError(f"Expected {base_dataset.path!r} to be an array")
 
     base_scale, base_translation = _base_scale_and_translation(base_dataset, base.ndim)
-    plan = plan_pyramid(
+    plan = _plan_pyramid(
         base.shape, base_scale, base_translation, spatial_axes, num_levels, chunk_size
     )
 
@@ -361,7 +369,7 @@ def generate_scale_pyramid(
     level_data = da.from_zarr(base)
     for level, level_plan in enumerate(plan[1:], start=1):
         logger.debug("Level %d: shape=%s factors=%s", level, level_plan.shape, level_plan.factors)
-        level_data = cast("da.Array", downsample(level_data, level_plan.factors))
+        level_data = cast("da.Array", _downsample(level_data, level_plan.factors))
         array = _write_level(
             zarr_group, str(level), level_data, base, level_plan, spatial_axes, chunk_size
         )

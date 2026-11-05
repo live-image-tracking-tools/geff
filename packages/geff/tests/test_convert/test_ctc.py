@@ -2,7 +2,6 @@ import json
 import os
 
 import pytest
-from pydantic import ValidationError
 
 from geff_spec import GeffMetadata, RelatedObject
 
@@ -422,12 +421,28 @@ class Test_from_ctc_to_geff:
             ("pixel", 0.25, "micrometer"),
         ]
 
-    def test_unit_without_scale_defaults_to_one(self, tmp_path: Path) -> None:
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"pixel_unit": "micrometer", "time_unit": "second"},
+            {"pixel_size": [0.5, 0.25], "time_scale": 2.0},
+        ],
+        ids=["unit_without_scale", "scale_without_unit"],
+    )
+    def test_geff_scale_and_scaled_unit_are_both_or_neither(
+        self, tmp_path: Path, kwargs: dict
+    ) -> None:
         ctc_path = create_mock_data(tmp_path, is_gt=True)
         geff_path = tmp_path / "little.geff"
 
-        with pytest.raises(ValidationError, match="1 validation error for Axis"):
-            from_ctc_to_geff(ctc_path, geff_path, pixel_unit="micrometer")
+        from_ctc_to_geff(ctc_path, geff_path, **kwargs)
+
+        metadata = GeffMetadata.read(geff_path)
+        assert [(a.unit, a.scale, a.scaled_unit) for a in metadata.axes] == [
+            ("frame", None, None),
+            ("pixel", None, None),
+            ("pixel", None, None),
+        ]
 
     @pytest.mark.parametrize("with_segmentation", [True, False])
     def test_wrong_number_of_pixel_sizes_raises(

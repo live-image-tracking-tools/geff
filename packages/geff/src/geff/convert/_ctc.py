@@ -1,5 +1,4 @@
 import os
-import warnings
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -44,8 +43,11 @@ def _scaled_axis(
     scale: float | None,
     scaled_unit: str | None,
 ) -> Axis:
-    """Axis for values in pixels / frames, with `scale` converting to physical `scaled_unit`."""
-    if scale is None and scaled_unit is None:
+    """Axis for values in pixels / frames, with `scale` converting to physical `scaled_unit`.
+
+    The scale and scaled unit are written together, or not at all.
+    """
+    if scale is None or scaled_unit is None:
         return Axis(name=name, type=axis_type, unit=unit)
     return Axis(
         name=name,
@@ -338,22 +340,8 @@ def from_ctc_to_geff(
 
     rel_objs = None
     if seg_path is not None:
-        # Record related object metadata for segmentation
-        seg_path = None
-        if isinstance(segmentation_store, (Path, str)):
-            seg_path = segmentation_store  # type: ignore
-        else:
-            try:
-                seg_path = segmentation_store.root  # type: ignore
-            except AttributeError:
-                warnings.warn(
-                    "Cannot determine path to segmentation_store for related objects metadata",
-                    stacklevel=2,
-                )
-
-        if seg_path is not None:
-            rel_path = os.path.relpath(seg_path, geff_path)
-            rel_objs = [RelatedObject(type="labels", path=rel_path, node_prop="tracklet_id")]
+        rel_path = os.path.relpath(seg_path, geff_path)
+        rel_objs = [RelatedObject(type="labels", path=rel_path, node_prop="tracklet_id")]
 
     write_arrays(
         geff_store=geff_path,

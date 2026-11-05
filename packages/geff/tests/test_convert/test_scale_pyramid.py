@@ -10,23 +10,23 @@ import zarr.storage
 from yaozarrs import DimSpec, v06
 
 from geff.convert._scale_pyramid import (
-    LevelPlan,
     _base_scale_and_translation,
     _compute_downsample_factors,
+    _compute_num_levels,
+    _downsample,
     _downsampled_shape,
     _level_chunks,
+    _LevelPlan,
     _make_dataset,
     _pad_to_multiple,
+    _plan_pyramid,
     _read_multiscale,
     _shard_shape,
     _spatial_axes,
     _write_level,
     _write_multiscale,
-    compute_num_levels,
     default_chunks_and_shards,
-    downsample,
     generate_scale_pyramid,
-    plan_pyramid,
 )
 
 SPATIAL = [1, 2, 3]
@@ -81,12 +81,12 @@ def test_downsample_factors_ignore_non_spatial_axis_voxel_size():
 
 
 def test_compute_num_levels():
-    assert compute_num_levels((40, 100, 100), [1, 1, 1], [0, 1, 2], chunk_size=128) == 1
-    assert compute_num_levels((40, 300, 301), [3, 1, 1], [0, 1, 2], chunk_size=128) == 3
+    assert _compute_num_levels((40, 100, 100), [1, 1, 1], [0, 1, 2], chunk_size=128) == 1
+    assert _compute_num_levels((40, 300, 301), [3, 1, 1], [0, 1, 2], chunk_size=128) == 3
 
 
 def test_plan_pyramid_shapes_scales_translations():
-    plan = plan_pyramid((2, 40, 300, 301), (1, 3, 1, 1), (0, 0, 0, 0), SPATIAL, chunk_size=128)
+    plan = _plan_pyramid((2, 40, 300, 301), (1, 3, 1, 1), (0, 0, 0, 0), SPATIAL, chunk_size=128)
     assert [p.shape for p in plan] == [(2, 40, 300, 301), (2, 40, 150, 151), (2, 20, 75, 76)]
     assert [p.scale for p in plan] == [(1, 3, 1, 1), (1, 3, 2, 2), (1, 6, 4, 4)]
     assert [p.factors for p in plan] == [(1, 1, 1, 1), (1, 1, 2, 2), (1, 2, 2, 2)]
@@ -97,13 +97,13 @@ def test_plan_pyramid_shapes_scales_translations():
 
 
 def test_plan_pyramid_keeps_base_translation():
-    plan = plan_pyramid((10, 10), (1, 1), (5.0, -2.0), [0, 1], num_levels=2)
+    plan = _plan_pyramid((10, 10), (1, 1), (5.0, -2.0), [0, 1], num_levels=2)
     assert plan[1].translation == (5.5, -1.5)
 
 
 def test_plan_pyramid_explicit_num_levels():
-    assert len(plan_pyramid((300, 300), (1, 1), (0, 0), [0, 1], num_levels=2)) == 2
-    assert len(plan_pyramid((300, 300), (1, 1), (0, 0), [0, 1], num_levels=1)) == 1
+    assert len(_plan_pyramid((300, 300), (1, 1), (0, 0), [0, 1], num_levels=2)) == 2
+    assert len(_plan_pyramid((300, 300), (1, 1), (0, 0), [0, 1], num_levels=1)) == 1
 
 
 # ----------------------------------------------------------------------------
@@ -130,7 +130,7 @@ def test_pad_to_multiple_noop_when_divisible():
 def test_downsample_mean_hand_computed(use_dask):
     base = np.kron(np.array([[1, 2], [3, 4]]), np.ones((2, 2))).astype(np.uint16)
     data = da.from_array(base, chunks=2) if use_dask else base
-    out = np.asarray(downsample(data, (2, 2)))
+    out = np.asarray(_downsample(data, (2, 2)))
     np.testing.assert_array_equal(out, [[1, 2], [3, 4]])
     assert out.dtype == np.uint16
 
@@ -138,15 +138,15 @@ def test_downsample_mean_hand_computed(use_dask):
 def test_downsample_numpy_matches_dask_and_shape():
     rng = np.random.default_rng(1)
     data = rng.integers(0, 4, (5, 7, 9)).astype(np.uint16)
-    expected = downsample(data, (2, 2, 2))
-    actual = downsample(da.from_array(data, chunks=(2, 4, 4)), (2, 2, 2)).compute()
+    expected = _downsample(data, (2, 2, 2))
+    actual = _downsample(da.from_array(data, chunks=(2, 4, 4)), (2, 2, 2)).compute()
     assert expected.shape == (3, 4, 5)
     np.testing.assert_array_equal(expected, actual)
 
 
 def test_downsample_factor_one_axes_untouched():
     data = np.arange(12, dtype=np.uint16).reshape(3, 4)
-    out = downsample(data, (1, 2))
+    out = _downsample(data, (1, 2))
     assert out.shape == (3, 2)
 
 
@@ -155,14 +155,14 @@ def test_downsample_mean_rounds_integers_instead_of_truncating(use_dask):
     # block means: 0.75 -> 1, 0.25 -> 0, 2.75 -> 3 (truncation would give 0, 0, 2)
     base = np.array([[0, 1, 0, 0], [1, 1, 0, 1], [2, 3, 3, 3], [3, 3, 3, 3]], dtype=np.uint16)
     data = da.from_array(base, chunks=2) if use_dask else base
-    out = np.asarray(downsample(data, (2, 2)))
+    out = np.asarray(_downsample(data, (2, 2)))
     np.testing.assert_array_equal(out, [[1, 0], [3, 3]])
     assert out.dtype == np.uint16
 
 
 def test_downsample_mean_does_not_round_floats():
     data = np.array([[0.0, 1.0], [1.0, 1.0]], dtype=np.float32)
-    out = downsample(data, (2, 2))
+    out = _downsample(data, (2, 2))
     np.testing.assert_allclose(out, [[0.75]])
     assert out.dtype == np.float32
 
@@ -197,7 +197,7 @@ def test_base_scale_and_translation(translation):
 
 
 def test_make_dataset_omits_zero_translation():
-    plan = LevelPlan((1, 2), (1.0, 2.0), (0.0, 0.0), (1, 1))
+    plan = _LevelPlan((1, 2), (1.0, 2.0), (0.0, 0.0), (1, 1))
     ds = _make_dataset("3", plan, "intrinsic")
     assert ds.path == "3"
     (transform,) = ds.coordinateTransformations
@@ -207,7 +207,7 @@ def test_make_dataset_omits_zero_translation():
 
 
 def test_make_dataset_nonzero_translation_is_scale_then_translation_sequence():
-    plan = LevelPlan((1, 2), (1.0, 2.0), (0.0, 0.5), (1, 1))
+    plan = _LevelPlan((1, 2), (1.0, 2.0), (0.0, 0.5), (1, 1))
     ds = _make_dataset("1", plan, "intrinsic")
     (transform,) = ds.coordinateTransformations
     assert transform.type == "sequence"
@@ -228,7 +228,7 @@ def test_read_write_multiscale_roundtrip_preserves_other_attrs():
     multiscale.datasets.append(
         _make_dataset(
             "1",
-            LevelPlan((2, 40, 150, 151), (1, 3, 2, 2), (0, 0, 0.5, 0.5), (1, 1, 2, 2)),
+            _LevelPlan((2, 40, 150, 151), (1, 3, 2, 2), (0, 0, 0.5, 0.5), (1, 1, 2, 2)),
             "intrinsic",
         )
     )
@@ -272,8 +272,8 @@ def test_shard_shape_rounds_spatial_up_to_chunks_and_keeps_others():
 def test_write_level_creates_sharded_array_with_data():
     group, base_data = make_group()
     base = group["0"]
-    plan = LevelPlan((2, 40, 150, 151), (1.0, 3.0, 2.0, 2.0), (0, 0, 0.5, 0.5), (1, 1, 2, 2))
-    data = downsample(da.from_array(base_data, chunks=(1, 40, 64, 64)), plan.factors)
+    plan = _LevelPlan((2, 40, 150, 151), (1.0, 3.0, 2.0, 2.0), (0, 0, 0.5, 0.5), (1, 1, 2, 2))
+    data = _downsample(da.from_array(base_data, chunks=(1, 40, 64, 64)), plan.factors)
 
     array = _write_level(group, "1", data, base, plan, SPATIAL, 128)
 
@@ -308,8 +308,8 @@ def test_generate_scale_pyramid():
 
     # scale 0 untouched, level 1 equals one downsampling step of scale 0
     np.testing.assert_array_equal(group["0"][:], base_data)
-    np.testing.assert_array_equal(group["1"][:], downsample(base_data, (1, 1, 2, 2)))
-    np.testing.assert_array_equal(group["2"][:], downsample(group["1"][:], (1, 2, 2, 2)))
+    np.testing.assert_array_equal(group["1"][:], _downsample(base_data, (1, 1, 2, 2)))
+    np.testing.assert_array_equal(group["2"][:], _downsample(group["1"][:], (1, 2, 2, 2)))
     assert group["2"].shards == (1, 20, 75, 76)
 
 
@@ -327,6 +327,13 @@ def test_generate_scale_pyramid_single_level_is_noop():
     multiscale = _read_multiscale(group)
     assert [d.path for d in multiscale.datasets] == ["0"]
     assert "1" not in group
+
+
+def test_generate_scale_pyramid_existing_pyramid_raises():
+    group, _ = make_group()
+    generate_scale_pyramid(group)
+    with pytest.raises(ValueError, match="already exists"):
+        generate_scale_pyramid(group)
 
 
 def test_generate_scale_pyramid_small_image_needs_no_levels():
@@ -359,7 +366,7 @@ def test_generate_scale_pyramid_with_channel_axis():
 
     assert group["1"].shape == (2, 3, 20, 150, 151)
     assert group["1"].shards == (1, 1, 20, 256, 256)
-    np.testing.assert_array_equal(group["1"][:], downsample(base_data, (1, 1, 1, 2, 2)))
+    np.testing.assert_array_equal(group["1"][:], _downsample(base_data, (1, 1, 1, 2, 2)))
     scale, translation = _base_scale_and_translation(_read_multiscale(group).datasets[1], 5)
     assert scale == [1.0, 1.0, 2.0, 2.0, 2.0]
     assert translation == [0.0, 0.0, 0.0, 0.5, 0.5]
