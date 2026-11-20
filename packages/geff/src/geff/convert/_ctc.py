@@ -315,6 +315,8 @@ def from_ctc_to_geff(
             edges.append((_node_ids[i], _node_ids[i + 1]))
 
     tracks_table = np.loadtxt(tracks_file_path, dtype=int)
+    if len(tracks_table.shape) == 1:
+        tracks_table = tracks_table[np.newaxis]
 
     # removing orphan tracklets
     tracks_table = tracks_table[tracks_table[:, -1] > 0]
